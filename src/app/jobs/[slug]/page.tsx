@@ -81,8 +81,8 @@ export default async function JobDetailPage({ params }: Props) {
 
                 {/* Meta pills */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  {metaItems.map(m => (
-                    <span key={m.label} className="tag tag-outline" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  {metaItems.map((m, i) => (
+                    <span key={i} className="tag tag-outline" style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       {m.icon} {m.label}
                     </span>
                   ))}
