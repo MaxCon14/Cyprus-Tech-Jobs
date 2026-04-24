@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// TAXONOMY
+// ─────────────────────────────────────────────
+
+model Category {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  jobs Job[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  jobs JobTag[]
+
+  @@map("tags")
+}
+
+model JobTag {
+  jobId String
+  tagId String
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  tag Tag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, tagId])
+  @@map("job_tags")
+}
+
+// ─────────────────────────────────────────────
+// COMPANIES
+// ─────────────────────────────────────────────
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logoUrl     String?
+  description String?
+  website     String?
+  city        String?
+  verified    Boolean  @default(false)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobs      Job[]
+  employers Employer[]
+
+  @@map("companies")
+}
+
+// ─────────────────────────────────────────────
+// JOBS
+// ─────────────────────────────────────────────
+
+enum RemoteType {
+  REMOTE
+  HYBRID
+  ON_SITE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  FREELANCE
+}
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+  CLOSED
+}
+
+model Job {
+  id              String          @id @default(cuid())
+  slug            String          @unique
+  title           String
+  description     String
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String          @default("EUR")
+  city            String?
+  remoteType      RemoteType      @default(ON_SITE)
+  employmentType  EmploymentType  @default(FULL_TIME)
+  experienceLevel ExperienceLevel @default(MID)
+  applyUrl        String?
+  applyEmail      String?
+  featured        Boolean         @default(false)
+  status          JobStatus       @default(DRAFT)
+  postedAt        DateTime?
+  expiresAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  companyId  String
+  categoryId String
+
+  company  Company  @relation(fields: [companyId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+  tags     JobTag[]
+
+  @@index([status, postedAt])
+  @@index([categoryId])
+  @@index([remoteType])
+  @@map("jobs")
+}
+
+// ─────────────────────────────────────────────
+// EMPLOYERS (authenticated users who post jobs)
+// ─────────────────────────────────────────────
+
+enum EmployerPlan {
+  FREE
+  STARTER
+  FEATURED
+}
+
+model Employer {
+  id               String       @id @default(cuid())
+  email            String       @unique
+  name             String?
+  plan             EmployerPlan @default(FREE)
+  stripeCustomerId String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@map("employers")
+}
+
+// ─────────────────────────────────────────────
+// JOB ALERTS (candidates subscribe, no account needed)
+// ─────────────────────────────────────────────
+
+model JobAlert {
+  id         String      @id @default(cuid())
+  email      String
+  categoryId String?
+  remoteType RemoteType?
+  city       String?
+  confirmed  Boolean     @default(false)
+  token      String      @unique @default(cuid())
+  createdAt  DateTime    @default(now())
+
+  @@unique([email, categoryId, remoteType])
+  @@map("job_alerts")
+}
