@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { JOBS } from "@/lib/placeholder-data";
 import { Plus, Eye, Edit2, Pause, Trash2, BarChart2, Users, Briefcase, TrendingUp } from "lucide-react";
@@ -23,7 +25,10 @@ const STATS = [
   { label: "Avg. time to fill", value: "8 days", icon: <TrendingUp size={18} />, delta: null },
 ];
 
-export default function EmployerDashboard() {
+export default async function EmployerDashboard() {
+  const session = await auth();
+  if (!session) redirect("/employers/login?callbackUrl=/employers/dashboard");
+
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
 
