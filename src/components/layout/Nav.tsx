@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { useSession, signOut } from "next-auth/react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 
 const navLinks = [
   { href: "/jobs",         label: "Browse jobs" },
@@ -12,6 +13,8 @@ const navLinks = [
 
 export function Nav() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const loading = status === "loading";
 
   return (
     <header
@@ -95,10 +98,41 @@ export function Nav() {
           ))}
         </nav>
 
-        {/* CTA */}
-        <Link href="/post-a-job" className="btn btn-primary btn-sm">
-          Post a job
-        </Link>
+        {/* Auth area */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {!loading && session ? (
+            <>
+              <Link
+                href="/employers/dashboard"
+                className="btn btn-ghost btn-sm"
+                style={{ display: "flex", alignItems: "center", gap: 6 }}
+              >
+                <LayoutDashboard size={13} />
+                Dashboard
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="btn btn-ghost btn-sm"
+                title="Sign out"
+                style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-muted)" }}
+              >
+                <LogOut size={13} />
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              {!loading && (
+                <Link href="/employers/login" className="btn btn-ghost btn-sm">
+                  Sign in
+                </Link>
+              )}
+              <Link href="/post-a-job" className="btn btn-primary btn-sm">
+                Post a job
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

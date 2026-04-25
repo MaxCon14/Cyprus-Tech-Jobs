@@ -21,6 +21,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(new URL("/employers/onboarding/verify?error=expired", req.url));
     }
 
+    // Generate a one-time login token so the employer is signed in immediately
+    const loginToken = crypto.randomUUID();
+    const loginTokenExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+
     await prisma.employer.update({
       where: { id: employer.id },
       data: {
@@ -28,10 +32,15 @@ export async function GET(req: NextRequest) {
         verifyToken: null,
         verifyTokenExpiry: null,
         onboardingCompleted: true,
+        loginToken,
+        loginTokenExpiry,
       },
     });
 
-    return NextResponse.redirect(new URL("/employers/onboarding/verify?success=1", req.url));
+    // Login page consumes the token, creates a session, and redirects to dashboard
+    return NextResponse.redirect(
+      new URL(`/employers/login?token=${loginToken}`, req.url)
+    );
   } catch (err) {
     console.error("[employers/verify]", err);
     return NextResponse.redirect(new URL("/employers/onboarding/verify?error=server", req.url));

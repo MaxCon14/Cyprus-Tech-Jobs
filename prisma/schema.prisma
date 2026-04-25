@@ -152,9 +152,11 @@ model Employer {
   emailVerified       Boolean      @default(false)
   verifyToken         String?      @unique
   verifyTokenExpiry   DateTime?
-  onboardingCompleted Boolean      @default(false)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  onboardingCompleted  Boolean      @default(false)
+  loginToken           String?      @unique
+  loginTokenExpiry     DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
