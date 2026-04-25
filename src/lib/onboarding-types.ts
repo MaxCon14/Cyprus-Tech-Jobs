@@ -147,10 +147,11 @@ export interface CandidateWizardState {
   step: CandidateWizardStep;
   direction: WizardDirection;
   submitting: boolean;
+  candidateId: string | null;
   errors: Record<string, string>;
   touched: Record<string, boolean>;
   // Step 1
-  categories: string[];   // slugs
+  categories: string[];
   remoteType: "REMOTE" | "HYBRID" | "ON_SITE" | "";
   // Step 2
   city: string;
@@ -159,19 +160,23 @@ export interface CandidateWizardState {
   salaryMin: string;
   // Step 4
   alertFrequency: "DAILY" | "WEEKLY";
-  // Step 5
+  // Step 5 — profile
   firstName: string;
+  lastName: string;
   email: string;
-  consent: boolean;
+  githubUrl: string;
+  linkedinUrl: string;
+  portfolioUrl: string;
 }
 
 export type CandidateWizardAction =
-  | { type: "SET_FIELD"; field: string; value: string | string[] | boolean }
+  | { type: "SET_FIELD"; field: string; value: string | string[] }
   | { type: "TOGGLE_CATEGORY"; slug: string }
   | { type: "BLUR_FIELD"; field: string }
   | { type: "NEXT_STEP" }
   | { type: "PREV_STEP" }
   | { type: "SET_SUBMITTING"; value: boolean }
+  | { type: "SET_CANDIDATE_ID"; id: string }
   | { type: "RESET" };
 
 export function initialCandidateState(): CandidateWizardState {
@@ -179,6 +184,7 @@ export function initialCandidateState(): CandidateWizardState {
     step: 1,
     direction: "forward",
     submitting: false,
+    candidateId: null,
     errors: {},
     touched: {},
     categories: [],
@@ -188,8 +194,11 @@ export function initialCandidateState(): CandidateWizardState {
     salaryMin: "",
     alertFrequency: "WEEKLY",
     firstName: "",
+    lastName: "",
     email: "",
-    consent: false,
+    githubUrl: "",
+    linkedinUrl: "",
+    portfolioUrl: "",
   };
 }
 
@@ -199,13 +208,11 @@ export function validateCandidateStep(
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   if (step === 5) {
+    if (!state.firstName.trim()) errors.firstName = "First name is required.";
     if (!state.email.trim()) {
       errors.email = "Email address is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
       errors.email = "Enter a valid email address.";
-    }
-    if (!state.consent) {
-      errors.consent = "You must agree to receive alerts.";
     }
   }
   return errors;
@@ -257,6 +264,9 @@ export function candidateReducer(
 
     case "SET_SUBMITTING":
       return { ...state, submitting: action.value };
+
+    case "SET_CANDIDATE_ID":
+      return { ...state, candidateId: action.id };
 
     case "RESET":
       return initialCandidateState();
@@ -337,7 +347,7 @@ export function computeProfileScore(data: ProfileData): {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const EMPLOYER_STEPS = ["Account", "Company", "Profile", "Verify email", "Done"];
-export const CANDIDATE_STEPS = ["Work type", "Location", "Your level", "Alerts", "Email", "Done"];
+export const CANDIDATE_STEPS = ["Work type", "Location", "Your level", "Alerts", "Your profile", "Done"];
 
 export const COMPANY_SIZES = [
   { value: "startup",    label: "Startup",    description: "1–50 people" },
