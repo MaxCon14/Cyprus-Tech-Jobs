@@ -53,6 +53,8 @@ model Company {
   description String?
   website     String?
   city        String?
+  size        String?
+  techStack   String[]
   verified    Boolean  @default(false)
   featured    Boolean  @default(false)
   createdAt   DateTime @default(now())
@@ -142,13 +144,17 @@ enum EmployerPlan {
 }
 
 model Employer {
-  id               String       @id @default(cuid())
-  email            String       @unique
-  name             String?
-  plan             EmployerPlan @default(FREE)
-  stripeCustomerId String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id                  String       @id @default(cuid())
+  email               String       @unique
+  name                String?
+  plan                EmployerPlan @default(FREE)
+  stripeCustomerId    String?
+  emailVerified       Boolean      @default(false)
+  verifyToken         String?      @unique
+  verifyTokenExpiry   DateTime?
+  onboardingCompleted Boolean      @default(false)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
@@ -161,14 +167,18 @@ model Employer {
 // ─────────────────────────────────────────────
 
 model JobAlert {
-  id         String      @id @default(cuid())
-  email      String
-  categoryId String?
-  remoteType RemoteType?
-  city       String?
-  confirmed  Boolean     @default(false)
-  token      String      @unique @default(cuid())
-  createdAt  DateTime    @default(now())
+  id              String           @id @default(cuid())
+  email           String
+  firstName       String?
+  categoryId      String?
+  remoteType      RemoteType?
+  city            String?
+  experienceLevel ExperienceLevel?
+  salaryMin       Int?
+  alertFrequency  String           @default("WEEKLY")
+  confirmed       Boolean          @default(false)
+  token           String           @unique @default(cuid())
+  createdAt       DateTime         @default(now())
 
   @@unique([email, categoryId, remoteType])
   @@map("job_alerts")
