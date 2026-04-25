@@ -125,8 +125,8 @@ export function Nav() {
               <Link href="/employers/login" className="btn btn-ghost btn-sm">
                 Sign in
               </Link>
-              <Link href="/post-a-job" className="btn btn-primary btn-sm">
-                Post a job
+              <Link href="/get-started" className="btn btn-primary btn-sm">
+                Get started
               </Link>
             </>
           )}
