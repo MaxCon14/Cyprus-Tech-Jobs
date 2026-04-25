@@ -5,8 +5,11 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL ?? "";
-  const ssl = process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false;
-  const adapter = new PrismaPg({ connectionString, ssl });
+  const adapter = new PrismaPg({
+    connectionString,
+    ssl: { rejectUnauthorized: false },
+    max: 1,
+  });
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
