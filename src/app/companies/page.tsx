@@ -1,5 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
-import { COMPANIES } from "@/lib/placeholder-data";
+import { getCompanies } from "@/lib/queries";
 import { Search, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -8,18 +10,17 @@ export const metadata: Metadata = {
   description: "Browse tech companies hiring in Cyprus. See open roles, company profiles, and culture.",
 };
 
-export default function CompaniesPage() {
-  const featured = COMPANIES.filter(c => c.featured);
-  const all = COMPANIES;
+export default async function CompaniesPage() {
+  const companies  = await getCompanies();
+  const featured   = companies.filter(c => c.featured);
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
 
-      {/* Header */}
       <div style={{ marginBottom: 40 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-          {all.length} COMPANIES · CYPRUS TECH
+          {companies.length} COMPANIES · CYPRUS TECH
         </div>
         <h1 className="display-m" style={{ marginBottom: 8 }}>Companies hiring in Cyprus</h1>
         <p className="body" style={{ color: "var(--text-muted)", maxWidth: 560 }}>
@@ -27,34 +28,37 @@ export default function CompaniesPage() {
         </p>
       </div>
 
-      {/* Search */}
       <div style={{ position: "relative", maxWidth: 480, marginBottom: 48 }}>
         <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
         <input className="input" type="text" placeholder="Search companies…" style={{ paddingLeft: 36 }} />
       </div>
 
       {/* Featured */}
-      <div style={{ marginBottom: 56 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-          <div>
-            <h2 className="h2">Featured companies</h2>
-            <p className="body-s" style={{ color: "var(--text-muted)", marginTop: 4 }}>Actively hiring this week</p>
+      {featured.length > 0 && (
+        <div style={{ marginBottom: 56 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+            <div>
+              <h2 className="h2">Featured companies</h2>
+              <p className="body-s" style={{ color: "var(--text-muted)", marginTop: 4 }}>Actively hiring this week</p>
+            </div>
+            <span className="tag tag-pulse tag-success">Live now</span>
           </div>
-          <span className="tag tag-pulse tag-success">Live now</span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            {featured.map(co => (
+              <CompanyCard key={co.slug} company={co} large />
+            ))}
+          </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-          {featured.map(co => <CompanyCard key={co.slug} company={co} large />)}
-        </div>
-      </div>
+      )}
 
-      {/* All companies */}
+      {/* All */}
       <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 16, borderBottom: "1px solid var(--border)", marginBottom: 24 }}>
           <h2 className="h2">All companies</h2>
-          <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{all.length} TOTAL</span>
+          <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{companies.length} TOTAL</span>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-          {all.map(co => <CompanyCard key={co.slug} company={co} />)}
+          {companies.map(co => <CompanyCard key={co.slug} company={co} />)}
         </div>
       </div>
 
@@ -70,21 +74,18 @@ export default function CompaniesPage() {
   );
 }
 
-function CompanyCard({ company: co, large = false }: { company: typeof COMPANIES[0]; large?: boolean }) {
+type Company = Awaited<ReturnType<typeof getCompanies>>[0];
+
+function CompanyCard({ company: co, large = false }: { company: Company; large?: boolean }) {
+  const openRoles = co._count.jobs;
   return (
     <Link
       href={`/companies/${co.slug}`}
-      style={{
-        display: "block", textDecoration: "none",
-        border: "1px solid var(--border)", borderRadius: 10,
-        padding: large ? 24 : 20,
-        background: "var(--surface)",
-        transition: "all 200ms cubic-bezier(0.16,1,0.3,1)",
-      }}
+      style={{ display: "block", textDecoration: "none", border: "1px solid var(--border)", borderRadius: 10, padding: large ? 24 : 20, background: "var(--surface)", transition: "all 200ms cubic-bezier(0.16,1,0.3,1)" }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: large ? 16 : 12 }}>
-        <div style={{ width: large ? 52 : 44, height: large ? 52 : 44, borderRadius: 8, background: co.bg, color: co.fg, display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: large ? 18 : 15, flexShrink: 0 }}>
-          {co.initial}
+        <div style={{ width: large ? 52 : 44, height: large ? 52 : 44, borderRadius: 8, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: large ? 18 : 15, flexShrink: 0 }}>
+          {co.name.charAt(0)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
@@ -94,27 +95,23 @@ function CompanyCard({ company: co, large = false }: { company: typeof COMPANIES
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{co.city}</span>
             <span style={{ width: 3, height: 3, borderRadius: "50%", background: "var(--border-strong)", display: "inline-block" }} />
-            <span className="mono-s" style={{ color: "var(--accent)" }}>{co.openRoles} open roles</span>
+            <span className="mono-s" style={{ color: "var(--accent)" }}>{openRoles} open roles</span>
           </div>
         </div>
       </div>
 
-      {large && (
+      {large && co.description && (
         <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {co.description}
         </p>
       )}
 
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-        {co.tags.map(t => <span key={t} className="tag">{t}</span>)}
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{co.size}</span>
-        <span style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
-          <ExternalLink size={10} /> {co.website}
-        </span>
-      </div>
+      {co.website && (
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 8 }}>
+          <ExternalLink size={10} style={{ color: "var(--text-subtle)" }} />
+          <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{co.website}</span>
+        </div>
+      )}
     </Link>
   );
 }

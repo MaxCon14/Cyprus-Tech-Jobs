@@ -1,6 +1,9 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { JOBS } from "@/lib/placeholder-data";
+import { getJobBySlug, getSimilarJobs } from "@/lib/queries";
+import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft, Check } from "lucide-react";
@@ -10,7 +13,7 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const job = JOBS.find(j => j.slug === slug);
+  const job = await getJobBySlug(slug);
   if (!job) return {};
   return {
     title: `${job.title} at ${job.company.name}`,
@@ -20,18 +23,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function JobDetailPage({ params }: Props) {
   const { slug } = await params;
-  const job = JOBS.find(j => j.slug === slug);
+  const job = await getJobBySlug(slug);
   if (!job) notFound();
 
-  const salary = formatSalary(job.salaryMin, job.salaryMax);
-  const similar = JOBS.filter(j => j.id !== job.id && j.category === job.category).slice(0, 3);
+  const similarRaw = await getSimilarJobs(job.id, job.categoryId, 3);
+  const similar    = similarRaw.map(serialiseJob);
+  const salary     = formatSalary(job.salaryMin, job.salaryMax);
 
   const metaItems = [
-    { icon: <MapPin size={14} />, label: job.city ?? "Cyprus" },
-    { icon: <Briefcase size={14} />, label: remoteLabel(job.remoteType) },
-    { icon: <Clock size={14} />, label: job.employmentType.replace("_", " ") },
-    { icon: <Building2 size={14} />, label: job.company.city ?? "Cyprus" },
+    { icon: <MapPin size={14} />,     label: job.city ?? "Cyprus" },
+    { icon: <Briefcase size={14} />,  label: remoteLabel(job.remoteType) },
+    { icon: <Clock size={14} />,      label: job.employmentType.replace("_", " ") },
+    { icon: <Building2 size={14} />,  label: job.company.city ?? "Cyprus" },
   ];
+
+  const descBlocks = job.description.split("\n\n");
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
@@ -47,39 +53,23 @@ export default async function JobDetailPage({ params }: Props) {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 48, alignItems: "start" }}>
 
-        {/* ── LEFT — Job content ── */}
+        {/* Left */}
         <div>
-          {/* Job header */}
+          {/* Header card */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
             <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-              {/* Logo */}
-              <div
-                style={{
-                  width: 64, height: 64, borderRadius: 10, flexShrink: 0,
-                  background: job.company.bg, color: job.company.fg,
-                  display: "grid", placeItems: "center",
-                  fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22,
-                  border: "1px solid var(--border)",
-                }}
-              >
-                {job.company.initial}
+              <div style={{ width: 64, height: 64, borderRadius: 10, flexShrink: 0, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, border: "1px solid var(--border)" }}>
+                {job.company.name.charAt(0)}
               </div>
-
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
                   <Link href={`/companies/${job.company.slug}`} style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
                     {job.company.name}
                   </Link>
-                  {job.company.verified && (
-                    <span className="tag tag-success" style={{ fontSize: 10 }}>✓ Verified</span>
-                  )}
-                  {job.postedAt && (
-                    <span className="mono-s" style={{ color: "var(--text-subtle)" }}>· {timeAgo(job.postedAt)}</span>
-                  )}
+                  {job.company.verified && <span className="tag tag-success" style={{ fontSize: 10 }}>✓ Verified</span>}
+                  {job.postedAt && <span className="mono-s" style={{ color: "var(--text-subtle)" }}>· {timeAgo(job.postedAt)}</span>}
                 </div>
                 <h1 className="h1" style={{ marginBottom: 14 }}>{job.title}</h1>
-
-                {/* Meta pills */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {metaItems.map((m, i) => (
                     <span key={i} className="tag tag-outline" style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -87,7 +77,7 @@ export default async function JobDetailPage({ params }: Props) {
                     </span>
                   ))}
                   {job.tags.map(t => (
-                    <span key={t.name} className="tag">{t.name}</span>
+                    <span key={t.tag.name} className="tag">{t.tag.name}</span>
                   ))}
                 </div>
               </div>
@@ -98,7 +88,7 @@ export default async function JobDetailPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
             <h2 className="h2" style={{ marginBottom: 20 }}>About the role</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {job.description.split("\n\n").map((block, i) => {
+              {descBlocks.map((block, i) => {
                 if (block.startsWith("**") && block.endsWith("**")) {
                   return <h3 key={i} className="h3" style={{ marginTop: 8 }}>{block.replace(/\*\*/g, "")}</h3>;
                 }
@@ -119,35 +109,20 @@ export default async function JobDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Requirements */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
+          {/* Skills */}
+          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, background: "var(--surface)" }}>
             <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {job.requirements.map(r => (
-                <span key={r} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "var(--bg-muted)", borderRadius: 6, fontFamily: "var(--font-mono)", fontSize: 12 }}>
-                  <Check size={11} style={{ color: "var(--success)" }} /> {r}
+              {job.tags.map(t => (
+                <span key={t.tag.name} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "var(--bg-muted)", borderRadius: 6, fontFamily: "var(--font-mono)", fontSize: 12 }}>
+                  <Check size={11} style={{ color: "var(--success)" }} /> {t.tag.name}
                 </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Benefits */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, background: "var(--surface)" }}>
-            <h2 className="h2" style={{ marginBottom: 16 }}>Benefits</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              {job.benefits.map(b => (
-                <div key={b} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--success-bg)", display: "grid", placeItems: "center", flexShrink: 0 }}>
-                    <Check size={11} style={{ color: "var(--success)" }} />
-                  </span>
-                  <span className="body-s">{b}</span>
-                </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── RIGHT — Sticky sidebar ── */}
+        {/* Right sidebar */}
         <aside style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 80 }}>
 
           {/* Apply card */}
@@ -182,21 +157,23 @@ export default async function JobDetailPage({ params }: Props) {
                 <span className="mono-s" style={{ color: "var(--text)" }}>{value}</span>
               </div>
             ))}
-            <a href={`https://${job.company.website}`} target="_blank" rel="noopener noreferrer"
-              style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 14, color: "var(--accent)", fontSize: 12, fontFamily: "var(--font-mono)", textDecoration: "none" }}>
-              <ExternalLink size={11} /> {job.company.website}
-            </a>
+            {job.company.website && (
+              <a href={`https://${job.company.website}`} target="_blank" rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 14, color: "var(--accent)", fontSize: 12, fontFamily: "var(--font-mono)", textDecoration: "none" }}>
+                <ExternalLink size={11} /> {job.company.website}
+              </a>
+            )}
           </div>
 
           {/* Company snippet */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 6, background: job.company.bg, color: job.company.fg, display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
-                {job.company.initial}
+              <div style={{ width: 36, height: 36, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                {job.company.name.charAt(0)}
               </div>
               <div>
                 <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{job.company.name}</div>
-                <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{job.company.openRoles} OPEN ROLES</div>
+                <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{job.category.name}</div>
               </div>
             </div>
             <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14 }}>
