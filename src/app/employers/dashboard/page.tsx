@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { DashboardGuard } from "./DashboardGuard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { JOBS } from "@/lib/placeholder-data";
@@ -27,8 +27,9 @@ const STATS = [
 ];
 
 export default async function EmployerDashboard() {
-  const session = await auth();
-  if (!session) redirect("/employers/login?callbackUrl=/employers/dashboard");
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/employers/login?callbackUrl=/employers/dashboard");
 
   return (
     <DashboardGuard>

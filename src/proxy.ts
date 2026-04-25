@@ -1,25 +1,36 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/employers/dashboard"];
+export async function proxy(req: NextRequest) {
+  let res = NextResponse.next({ request: req });
 
-export function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const isProtected = protectedRoutes.some((r) => pathname.startsWith(r));
-
-  if (isProtected) {
-    // Optimistic check using the cookie next-auth v5 sets (no DB, edge-safe)
-    const hasSession =
-      req.cookies.has("authjs.session-token") ||
-      req.cookies.has("__Secure-authjs.session-token");
-
-    if (!hasSession) {
-      const loginUrl = new URL("/employers/login", req.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return req.cookies.getAll(); },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          res = NextResponse.next({ request: req });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            res.cookies.set(name, value, options)
+          );
+        },
+      },
     }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { pathname } = req.nextUrl;
+  if (pathname.startsWith("/employers/dashboard") && !user) {
+    const loginUrl = new URL("/employers/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  return res;
 }
 
 export const config = {

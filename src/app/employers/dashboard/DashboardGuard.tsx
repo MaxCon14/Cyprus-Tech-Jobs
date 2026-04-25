@@ -1,22 +1,25 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+const supabase = createSupabaseBrowserClient();
 
 export function DashboardGuard({ children }: { children: React.ReactNode }) {
-  const { status } = useSession();
   const router = useRouter();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/employers/login?callbackUrl=/employers/dashboard");
-    }
-  }, [status, router]);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.replace("/employers/login?callbackUrl=/employers/dashboard");
+      } else {
+        setReady(true);
+      }
+    });
+  }, [router]);
 
-  if (status === "loading" || status === "unauthenticated") {
-    return null;
-  }
-
+  if (!ready) return null;
   return <>{children}</>;
 }

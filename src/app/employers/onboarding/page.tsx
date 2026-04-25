@@ -1,6 +1,9 @@
 "use client";
 
-import { useReducer, useEffect, useRef, useTransition } from "react";
+import { useReducer, useEffect, useRef, useTransition, useState } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const supabase = createSupabaseBrowserClient();
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Building2, Mail, Briefcase, CheckCircle2 } from "lucide-react";
 import {
@@ -298,7 +301,16 @@ function Step4Verify({
   state: EmployerWizardState;
   dispatch: React.Dispatch<EmployerWizardAction>;
 }) {
-  const [resent, setResent] = [false, () => {}]; // placeholder for resend
+  const [resent, setResent] = useState(false);
+
+  const handleResend = async () => {
+    await supabase.auth.signInWithOtp({
+      email: state.email,
+      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+    });
+    setResent(true);
+    setTimeout(() => setResent(false), 5000);
+  };
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -394,9 +406,9 @@ function Step4Verify({
           <button
             type="button"
             style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontFamily: "inherit", fontSize: "inherit", padding: 0, textDecoration: "underline" }}
-            onClick={() => {/* resend logic */}}
+            onClick={handleResend}
           >
-            resend the email
+            {resent ? "sent!" : "resend the email"}
           </button>
           .
         </p>
@@ -559,6 +571,12 @@ export default function EmployerOnboardingPage() {
         dispatch({ type: "SET_SUBMITTING", value: false });
         return;
       }
+
+      // Send magic link via Supabase (handles both verification + sign-in)
+      await supabase.auth.signInWithOtp({
+        email: formData.email,
+        options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+      });
 
       dispatch({ type: "SET_EMPLOYER_ID", id: data.employerId });
       dispatch({ type: "SET_SUBMITTING", value: false });
