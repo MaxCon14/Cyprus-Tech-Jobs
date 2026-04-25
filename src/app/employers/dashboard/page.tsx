@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { DashboardGuard } from "./DashboardGuard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { JOBS } from "@/lib/placeholder-data";
 import { Plus, Eye, Edit2, Pause, Trash2, BarChart2, Users, Briefcase, TrendingUp } from "lucide-react";
@@ -30,6 +31,7 @@ export default async function EmployerDashboard() {
   if (!session) redirect("/employers/login?callbackUrl=/employers/dashboard");
 
   return (
+    <DashboardGuard>
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
 
       {/* Header */}
@@ -201,5 +203,6 @@ export default async function EmployerDashboard() {
         <Link href="/post-a-job#pricing" className="btn btn-accent">Upgrade listing →</Link>
       </div>
     </div>
+    </DashboardGuard>
   );
 }
