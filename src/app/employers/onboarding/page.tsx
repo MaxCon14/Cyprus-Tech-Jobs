@@ -37,11 +37,11 @@ function Field({ label, required, tip, children }: { label: string; required?: b
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <label style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: "var(--text)" }}>
+        <label className="body-s" style={{ fontWeight: 500, color: "var(--text)" }}>
           {label}{required && <span style={{ color: "var(--error)", marginLeft: 3 }}>*</span>}
         </label>
         {tip && (
-          <span className="body-s" style={{ color: "var(--accent)", display: "flex", alignItems: "center", gap: 3 }}>
+          <span className="mono-s" style={{ color: "var(--accent)", display: "flex", alignItems: "center", gap: 3 }}>
             <Info size={10} /> {tip}
           </span>
         )}
@@ -141,7 +141,7 @@ function Step2Company({ state, dispatch }: { state: EmployerWizardState; dispatc
         {/* Logo + company name row */}
         <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
           <div>
-            <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: "var(--text)", marginBottom: 6 }}>
+            <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 6 }}>
               Logo
             </div>
             <LogoUpload
@@ -208,7 +208,7 @@ function Step2Company({ state, dispatch }: { state: EmployerWizardState; dispatc
                   onClick={() => dispatch({ type: "SET_FIELD", field: "size", value: s.value })}
                   style={{ padding: "12px 16px", borderRadius: "var(--radius-md)", border: `1.5px solid ${active ? "var(--accent)" : "var(--border-strong)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", textAlign: "left", transition: "all 150ms ease" }}
                 >
-                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: active ? "var(--accent)" : "var(--text)", marginBottom: 2 }}>{s.label}</div>
+                  <div className="body-s" style={{ fontWeight: 600, color: active ? "var(--accent)" : "var(--text)", marginBottom: 2 }}>{s.label}</div>
                   <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{s.description}</div>
                 </button>
               );
