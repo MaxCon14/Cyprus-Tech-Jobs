@@ -7,6 +7,9 @@ import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft, Check } from "lucide-react";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { CvReviewPanel } from "./CvReviewPanel";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -29,6 +32,21 @@ export default async function JobDetailPage({ params }: Props) {
   const similarRaw = await getSimilarJobs(job.id, job.categoryId, 3);
   const similar    = similarRaw.map(serialiseJob);
   const salary     = formatSalary(job.salaryMin, job.salaryMax);
+
+  // Check if the visitor is a logged-in candidate with a saved CV
+  let savedCvUrl: string | null = null;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data } = await supabaseAdmin
+        .from("candidates")
+        .select("cvUrl")
+        .eq("email", user.email)
+        .single();
+      savedCvUrl = data?.cvUrl ?? null;
+    }
+  } catch { /* non-critical — continue without saved CV */ }
 
   const metaItems = [
     { icon: <MapPin size={14} />,     label: job.city ?? "Cyprus" },
@@ -136,7 +154,8 @@ export default async function JobDetailPage({ params }: Props) {
             <a href={job.applyUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
               Apply for this role →
             </a>
-            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
+            <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
+            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
               APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
             </p>
           </div>
