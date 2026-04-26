@@ -14,7 +14,7 @@ export default async function CandidateLoginPage() {
   if (user) redirect("/candidates/dashboard");
 
   return (
-    <div style={{ minHeight: "calc(100vh - 60px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+    <div style={{ minHeight: "calc(100vh - 60px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 5vw, 40px) var(--page-padding-x)" }}>
       <div style={{ width: "100%", maxWidth: 420 }}>
 
         <div style={{ textAlign: "center", marginBottom: 36 }}>

@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const { error } = await searchParams;
 
   return (
-    <div style={{ minHeight: "calc(100vh - 60px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+    <div style={{ minHeight: "calc(100vh - 60px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(24px, 5vw, 40px) var(--page-padding-x)" }}>
       <div style={{ width: "100%", maxWidth: 420 }}>
 
         {/* Header */}

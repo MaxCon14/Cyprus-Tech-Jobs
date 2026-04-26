@@ -586,3 +586,23 @@ body {
 @media (max-width: 768px) {
   .nav-links-desktop { display: none; }
 }
+
+/* =====================================================
+   ONBOARDING WIZARD RESPONSIVE
+   ===================================================== */
+.wizard-layout {
+  display: flex;
+  flex: 1;
+}
+
+.wizard-side-panel {
+  width: 420px;
+  flex-shrink: 0;
+  background: var(--neutral-50);
+  border-left: 1px solid var(--border);
+  padding: 40px 32px 100px;
+}
+
+@media (max-width: 900px) {
+  .wizard-side-panel { display: none; }
+}

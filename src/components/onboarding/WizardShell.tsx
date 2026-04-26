@@ -15,28 +15,22 @@ export function WizardShell({ steps, currentStep, children, sidePanel }: Props) 
       <StepIndicator steps={steps} currentStep={currentStep} />
 
       {sidePanel ? (
-        <div style={{ display: "flex", flex: 1 }}>
+        <div className="wizard-layout">
           {/* Form panel */}
           <div style={{ flex: 1, minWidth: 0, overflowX: "hidden" }}>
-            <div style={{ maxWidth: 540, margin: "0 auto", padding: "52px 40px 100px" }}>
+            <div style={{ maxWidth: 540, margin: "0 auto", padding: "clamp(32px, 5vw, 52px) var(--page-padding-x) 100px" }}>
               {children}
             </div>
           </div>
 
-          {/* Preview panel */}
-          <div style={{
-            width: 420,
-            flexShrink: 0,
-            background: "var(--neutral-50)",
-            borderLeft: "1px solid var(--border)",
-            padding: "40px 32px 100px",
-          }}>
+          {/* Preview panel — hidden on mobile */}
+          <div className="wizard-side-panel">
             {sidePanel}
           </div>
         </div>
       ) : (
         <div style={{ flex: 1, display: "flex" }}>
-          <div style={{ maxWidth: 600, width: "100%", margin: "0 auto", padding: "52px 24px 100px", overflowX: "hidden" }}>
+          <div style={{ maxWidth: 600, width: "100%", margin: "0 auto", padding: "clamp(32px, 5vw, 52px) var(--page-padding-x) 100px", overflowX: "hidden" }}>
             {children}
           </div>
         </div>
