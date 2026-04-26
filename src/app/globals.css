@@ -581,11 +581,217 @@ body {
    NAV RESPONSIVE
    ===================================================== */
 .nav-links-desktop { display: flex; }
-.nav-links-mobile  { display: none; }
+.nav-hamburger     { display: none; }
 
 @media (max-width: 768px) {
   .nav-links-desktop { display: none; }
+  .nav-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+  }
+  .nav-hamburger:hover { background: var(--bg-muted); }
 }
+
+/* ─── Desktop nav link style ─────────────────────────────── */
+.nav-link {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
+  transition: all 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-muted);
+  background: transparent;
+  white-space: nowrap;
+}
+.nav-link:hover    { color: var(--text); background: var(--bg-muted); }
+.nav-link-active   { color: var(--text); background: var(--bg-muted); }
+.nav-link-btn {
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─── Chevron rotation ───────────────────────────────────── */
+.nav-chevron {
+  transition: transform 200ms var(--ease-out);
+  flex-shrink: 0;
+}
+.nav-chevron.open { transform: rotate(180deg); }
+
+/* ─── Jobs mega dropdown ─────────────────────────────────── */
+.nav-dropdown-wrapper {
+  position: relative;
+}
+
+.nav-mega-container {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -12px;
+  z-index: 200;
+  padding-top: 4px; /* hover bridge gap */
+}
+
+.nav-mega-menu {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: menuSlideIn 160ms var(--ease-out) both;
+}
+
+@keyframes menuSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-mega-inner {
+  display: grid;
+  grid-template-columns: 180px 150px 1fr;
+  gap: 0;
+  min-width: 520px;
+}
+
+.nav-mega-inner > div {
+  padding: 20px 20px;
+  border-right: 1px solid var(--border);
+}
+.nav-mega-inner > div:last-child {
+  border-right: none;
+  padding-left: 20px;
+}
+
+.nav-dropdown-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  margin-bottom: 10px;
+}
+
+.nav-dropdown-item {
+  display: block;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 100ms ease;
+  white-space: nowrap;
+}
+.nav-dropdown-item:hover {
+  color: var(--text);
+  background: var(--bg-muted);
+}
+
+.nav-dropdown-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--accent-soft);
+  border-radius: 6px;
+  width: 100%;
+  justify-content: center;
+  transition: background 120ms ease;
+}
+.nav-dropdown-cta:hover { background: var(--pink-100); }
+
+/* ─── Mobile menu overlay ────────────────────────────────── */
+.mobile-menu {
+  position: fixed;
+  inset: 60px 0 0 0;
+  background: var(--surface);
+  z-index: 49;
+  overflow-y: auto;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition:
+    transform 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity   200ms ease;
+  pointer-events: none;
+}
+.mobile-menu.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+.mobile-menu-section-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mobile-menu-sub {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 280ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.mobile-menu-sub.open { max-height: 600px; }
+
+.mobile-menu-subheading {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  padding: 4px 0 6px;
+}
+
+.mobile-menu-link {
+  display: block;
+  padding: 9px 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.mobile-menu-link:hover { color: var(--accent); }
+
+.mobile-menu-top-link {
+  display: block;
+  padding: 16px 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.mobile-menu-top-link:hover { color: var(--accent); }
 
 /* =====================================================
    ONBOARDING WIZARD RESPONSIVE
@@ -605,4 +811,50 @@ body {
 
 @media (max-width: 900px) {
   .wizard-side-panel { display: none; }
+}
+
+/* =====================================================
+   FAQ ACCORDION
+   ===================================================== */
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  cursor: pointer;
+  list-style: none;
+  gap: 16px;
+}
+
+.faq-summary::-webkit-details-marker { display: none; }
+
+.faq-body {
+  padding: 0 0 20px;
+}
+
+.faq-chevron {
+  flex-shrink: 0;
+  transition: transform 200ms var(--ease-out);
+  color: var(--text-muted);
+}
+
+details[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+
+/* =====================================================
+   CATEGORY CARDS (home browse section)
+   ===================================================== */
+.category-card {
+  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.category-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
