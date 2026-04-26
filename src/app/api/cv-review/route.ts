@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { DocumentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages";
 import { getJobBySlug } from "@/lib/queries";
 
-const anthropic = new Anthropic();
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(req: NextRequest) {
@@ -69,10 +67,7 @@ Guidelines:
 - Keep each item concise (one sentence each)`;
 
   try {
-    const docBlock: DocumentBlockParam = {
-      type: "document",
-      source: { type: "base64", media_type: "application/pdf", data: base64 },
-    };
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
@@ -80,7 +75,10 @@ Guidelines:
       messages: [
         {
           role: "user",
-          content: [docBlock, { type: "text", text: prompt }],
+          content: [
+            { type: "document", source: { type: "base64", media_type: "application/pdf" as const, data: base64 } },
+            { type: "text", text: prompt },
+          ],
         },
       ],
     });
