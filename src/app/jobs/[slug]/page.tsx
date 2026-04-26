@@ -58,7 +58,7 @@ export default async function JobDetailPage({ params }: Props) {
   const descBlocks = job.description.split("\n\n");
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Breadcrumb */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28 }}>
@@ -69,7 +69,7 @@ export default async function JobDetailPage({ params }: Props) {
         <span className="body-s" style={{ color: "var(--text-subtle)" }}>{job.title}</span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 48, alignItems: "start" }}>
+      <div className="layout-sidebar-right">
 
         {/* Left */}
         <div>

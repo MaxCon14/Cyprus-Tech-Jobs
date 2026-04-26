@@ -4,6 +4,10 @@
    DESIGN TOKENS — CyprusTech.Jobs
    ===================================================== */
 :root {
+  /* Responsive spacing */
+  --page-padding-x: clamp(16px, 5vw, 24px);
+  --page-max-w: 1200px;
+
   /* Brand */
   --pink-50:   #FFF4F8;
   --pink-100:  #FFE8F0;
@@ -458,6 +462,79 @@ body {
 .alert-warning { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
 .alert-error   { background: var(--error-bg);   border-color: var(--error);   color: var(--error); }
 
+/* =====================================================
+   LAYOUT UTILITIES
+   ===================================================== */
+
+/* Page wrapper — consistent max-width + fluid padding */
+.page-container {
+  max-width: var(--page-max-w);
+  margin-inline: auto;
+  padding-inline: var(--page-padding-x);
+  width: 100%;
+}
+
+/* Content + right sidebar (1fr | fixed) */
+.layout-sidebar-right {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Left sidebar + content (fixed | 1fr) */
+.layout-sidebar-left {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* Hero main + small sidebar (1fr | 320px) */
+.layout-sidebar-sm {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 48px;
+  align-items: start;
+}
+
+/* Equal-column grids */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* Stats grid (4 cols → 2 → 1) */
+.grid-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Fluid typography overrides */
+.display-xl { font-size: clamp(32px, 5vw, 56px); line-height: 1.1; }
+.display-l  { font-size: clamp(28px, 4vw, 44px); line-height: 1.1; }
+.display-m  { font-size: clamp(24px, 3.5vw, 32px); line-height: 1.2; }
+
+/* =====================================================
+   RESPONSIVE BREAKPOINTS
+   ===================================================== */
+
+/* ── 1024px: collapse wide sidebars ── */
+@media (max-width: 1024px) {
+  .layout-sidebar-right {
+    grid-template-columns: 1fr 300px;
+    gap: 32px;
+  }
+  .layout-sidebar-sm {
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+  }
+  .grid-4, .grid-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── 900px: job card tweak ── */
 @media (max-width: 900px) {
   .job-card { grid-template-columns: 48px 1fr; }
   .job-card-right {
@@ -466,4 +543,46 @@ body {
     align-items: center;
     justify-content: space-between;
   }
+}
+
+/* ── 768px: stack sidebars, collapse to 1 or 2 cols ── */
+@media (max-width: 768px) {
+  .layout-sidebar-right,
+  .layout-sidebar-left,
+  .layout-sidebar-sm {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .layout-sidebar-right > aside,
+  .layout-sidebar-sm > aside {
+    position: static !important;
+  }
+
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── 640px: single column, mobile-first ── */
+@media (max-width: 640px) {
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .grid-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .layout-sidebar-left > aside {
+    position: static !important;
+  }
+}
+
+/* =====================================================
+   NAV RESPONSIVE
+   ===================================================== */
+.nav-links-desktop { display: flex; }
+.nav-links-mobile  { display: none; }
+
+@media (max-width: 768px) {
+  .nav-links-desktop { display: none; }
 }

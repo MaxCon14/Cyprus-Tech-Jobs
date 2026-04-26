@@ -61,7 +61,7 @@ export default function PostAJobPage() {
   return (
     <div>
       {/* Hero */}
-      <div style={{ borderBottom: "1px solid var(--border)", padding: "64px 24px 56px", background: "var(--bg-alt)" }}>
+      <div style={{ borderBottom: "1px solid var(--border)", padding: "clamp(40px, 6vw, 64px) var(--page-padding-x) clamp(36px, 5vw, 56px)", background: "var(--bg-alt)" }}>
         <div style={{ maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
           <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
             <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
@@ -89,7 +89,7 @@ export default function PostAJobPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "64px 24px" }}>
+      <div className="page-container" style={{ paddingBlock: "clamp(40px, 6vw, 64px)" }}>
 
         {/* Pricing */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
@@ -97,7 +97,7 @@ export default function PostAJobPage() {
           <p className="body" style={{ color: "var(--text-muted)" }}>No subscriptions. Pay per listing. Cancel anytime.</p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20, marginBottom: 80 }}>
+        <div className="grid-3" style={{ marginBottom: 80 }}>
           {PLANS.map(plan => (
             <div
               key={plan.name}
@@ -145,7 +145,7 @@ export default function PostAJobPage() {
         </div>
 
         {/* Job posting form */}
-        <div id="form" style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 48, alignItems: "start" }}>
+        <div id="form" className="layout-sidebar-right">
 
           {/* Form */}
           <div>

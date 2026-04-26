@@ -35,7 +35,7 @@ export default async function JobsPage() {
   const totalJobs      = categories[0]?.count ?? 0;
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       <div style={{ marginBottom: 32 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
@@ -49,19 +49,19 @@ export default async function JobsPage() {
       </div>
 
       {/* Search */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 32, maxWidth: 680 }}>
-        <div style={{ position: "relative", flex: 1 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 32, maxWidth: 680, flexWrap: "wrap" }}>
+        <div style={{ position: "relative", flex: "1 1 180px" }}>
           <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
           <input className="input" type="text" placeholder="Job title, company, skill…" style={{ paddingLeft: 36 }} />
         </div>
-        <select className="select" style={{ width: 170 }}>
+        <select className="select" style={{ flex: "0 0 150px" }}>
           <option value="">All locations</option>
           {CITIES.map(c => <option key={c} value={c.toLowerCase()}>{c}</option>)}
         </select>
         <button className="btn btn-accent">Search</button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, alignItems: "start" }}>
+      <div className="layout-sidebar-left">
 
         {/* Filters sidebar */}
         <aside>

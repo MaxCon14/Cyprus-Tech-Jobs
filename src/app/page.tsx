@@ -18,8 +18,8 @@ export default async function HomePage() {
   return (
     <>
       {/* ── HERO ── */}
-      <section style={{ borderBottom: "1px solid var(--border)", padding: "80px 24px 64px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <section style={{ borderBottom: "1px solid var(--border)", padding: "clamp(48px, 8vw, 80px) var(--page-padding-x) clamp(40px, 6vw, 64px)" }}>
+        <div className="page-container">
           <div className="mono-s" style={{ color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 24, height: 1, background: "var(--accent)", display: "inline-block" }} />
             CYPRUSTECHJOBS · THE HOME FOR TECH JOBS IN CYPRUS
@@ -36,12 +36,12 @@ export default async function HomePage() {
           </p>
 
           {/* Search */}
-          <div style={{ display: "flex", gap: 8, maxWidth: 640, marginBottom: 40 }}>
-            <div style={{ position: "relative", flex: 1 }}>
+          <div style={{ display: "flex", gap: 8, maxWidth: 640, marginBottom: 40, flexWrap: "wrap" }}>
+            <div style={{ position: "relative", flex: "1 1 200px" }}>
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
               <input className="input" type="text" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
             </div>
-            <div style={{ position: "relative", width: 180 }}>
+            <div style={{ position: "relative", flex: "0 0 160px" }}>
               <MapPin size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", zIndex: 1 }} />
               <select className="select" style={{ paddingLeft: 38 }}>
                 <option value="">All locations</option>
@@ -72,8 +72,8 @@ export default async function HomePage() {
       </section>
 
       {/* ── COMPANIES HIRING THIS WEEK ── */}
-      <section style={{ borderBottom: "1px solid var(--border)", padding: "28px 24px", background: "var(--bg-alt)", overflowX: "auto" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <section style={{ borderBottom: "1px solid var(--border)", padding: "28px var(--page-padding-x)", background: "var(--bg-alt)", overflowX: "auto" }}>
+        <div className="page-container">
           <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: "max-content" }}>
             <span className="mono-s" style={{ color: "var(--text-subtle)", whiteSpace: "nowrap" }}>HIRING THIS WEEK</span>
             <span style={{ width: 1, height: 20, background: "var(--border-strong)", display: "inline-block" }} />
@@ -97,9 +97,9 @@ export default async function HomePage() {
       </section>
 
       {/* ── MAIN ── */}
-      <section style={{ padding: "48px 24px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 48, alignItems: "start" }}>
+      <section style={{ padding: "clamp(32px, 5vw, 48px) var(--page-padding-x)" }}>
+        <div className="page-container">
+          <div className="layout-sidebar-sm">
 
             {/* Job listings */}
             <div>

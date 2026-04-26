@@ -36,7 +36,7 @@ export default async function CandidateDashboardPage() {
   const pos = (positions ?? []) as PositionRow[];
 
   return (
-    <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px 100px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(32px, 5vw, 48px) 100px", maxWidth: 720 }}>
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 40, gap: 16, flexWrap: "wrap" }}>

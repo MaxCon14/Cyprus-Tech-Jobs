@@ -43,7 +43,7 @@ export function Nav() {
 
   return (
     <header style={{ borderBottom: "1px solid var(--border)", background: "var(--surface)", position: "sticky", top: 0, zIndex: 40 }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24 }}>
+      <div style={{ maxWidth: "var(--page-max-w)", margin: "0 auto", padding: "0 var(--page-padding-x)", width: "100%", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24 }}>
 
         {/* Logo */}
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
@@ -55,8 +55,8 @@ export function Nav() {
           </span>
         </Link>
 
-        {/* Nav links */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        {/* Nav links — hidden on mobile */}
+        <nav className="nav-links-desktop" style={{ alignItems: "center", gap: 4 }}>
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} style={{ padding: "6px 12px", borderRadius: 6, fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, textDecoration: "none", transition: "all 120ms cubic-bezier(0.16, 1, 0.3, 1)", color: pathname.startsWith(link.href) ? "var(--text)" : "var(--text-muted)", background: pathname.startsWith(link.href) ? "var(--bg-muted)" : "transparent" }}>
               {link.label}
@@ -68,7 +68,7 @@ export function Nav() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {!loading && user ? (
             <>
-              <Link href="/employers/dashboard" className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Link href="/dashboard" className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <LayoutDashboard size={13} /> Dashboard
               </Link>
               <button onClick={handleSignOut} className="btn btn-ghost btn-sm" title="Sign out" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-muted)" }}>
@@ -77,7 +77,7 @@ export function Nav() {
             </>
           ) : (
             <>
-              <Link href="/employers/login" className="btn btn-ghost btn-sm">Sign in</Link>
+              <Link href="/login" className="btn btn-ghost btn-sm">Sign in</Link>
               <Link href="/get-started" className="btn btn-primary btn-sm">Get started</Link>
             </>
           )}

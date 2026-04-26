@@ -33,7 +33,7 @@ export default async function EmployerDashboard() {
 
   return (
     <DashboardGuard>
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 36, flexWrap: "wrap", gap: 16 }}>
@@ -47,7 +47,7 @@ export default async function EmployerDashboard() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }}>
+      <div className="grid-stats" style={{ marginBottom: 40 }}>
         {STATS.map(stat => (
           <div key={stat.label} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 20, background: "var(--surface)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -64,7 +64,7 @@ export default async function EmployerDashboard() {
       <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden", marginBottom: 32 }}>
 
         {/* Table header */}
-        <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
           <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>Listings</span>
           <div style={{ display: "flex", gap: 8 }}>
             <span className="chip chip-active" style={{ padding: "4px 10px" }}>All</span>
@@ -73,6 +73,8 @@ export default async function EmployerDashboard() {
           </div>
         </div>
 
+        <div style={{ overflowX: "auto" }}>
+        <div style={{ minWidth: 640 }}>
         {/* Table head row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 110px 120px 130px", gap: 16, padding: "10px 20px", borderBottom: "1px solid var(--border)" }}>
           {["Job", "Views", "Applies", "Status", "Expires", "Actions"].map(h => (
@@ -144,10 +146,12 @@ export default async function EmployerDashboard() {
             </div>
           </div>
         ))}
+        </div>
+        </div>
       </div>
 
       {/* Analytics teaser */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div className="grid-2" style={{ gap: 20 }}>
 
         {/* Views chart placeholder */}
         <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
