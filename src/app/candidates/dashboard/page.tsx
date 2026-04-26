@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
-import { ProfileSection, LinksSection, ExperienceSection } from "./ProfileEditor";
+import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -14,7 +14,7 @@ import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import type { Metadata } from "next";
 import {
   MapPin, Briefcase, CheckCircle2, Circle, AlertCircle,
-  ExternalLink, ChevronRight, Bell, Sliders,
+  ExternalLink, ChevronRight,
 } from "lucide-react";
 
 export const metadata: Metadata = { title: "My dashboard — CyprusTech.Jobs" };
@@ -204,8 +204,8 @@ export default async function CandidateDashboardPage() {
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <LinksSection candidate={c} />
-            <PreferencesCard candidate={c} />
-            <AlertCard candidate={c} />
+            <PreferencesSection candidate={c} />
+            <AlertSection candidate={c} />
             {matchingJobs.length > 0 && <MatchingJobsCard jobs={matchingJobs} />}
           </div>
         </div>
@@ -214,85 +214,21 @@ export default async function CandidateDashboardPage() {
   );
 }
 
-// ─── Sidebar cards ────────────────────────────────────────────────────────────
+// ─── Matching jobs card ───────────────────────────────────────────────────────
 
-function SidebarCard({ title, icon, children, action }: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}) {
+function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> }) {
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid var(--border)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: "var(--accent)", display: "flex" }}>{icon}</span>
-          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>{title}</p>
+          <span style={{ color: "var(--accent)", display: "flex" }}><Briefcase size={14} /></span>
+          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>Jobs for you</p>
         </div>
-        {action}
-      </div>
-      <div style={{ padding: "16px 18px" }}>{children}</div>
-    </div>
-  );
-}
-
-function PreferencesCard({ candidate: c }: { candidate: CandidateRow }) {
-  const rows: [string, string][] = [
-    ["Job type",     c.categories.length > 0 ? c.categories.join(", ") : "All categories"],
-    ["Work setup",   c.remoteType ?? "Any"],
-    ["Location",     c.city ?? "Any city"],
-    ["Level",        c.experienceLevel ?? "Any level"],
-    ["Min salary",   c.salaryMin ? `€${c.salaryMin.toLocaleString()}` : "Not set"],
-  ];
-
-  return (
-    <SidebarCard
-      title="Job preferences"
-      icon={<Sliders size={14} />}
-      action={
-        <Link href="/candidates/onboarding" className="btn btn-ghost btn-sm">Update</Link>
-      }
-    >
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {rows.map(([label, value]) => (
-          <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-            <span className="body-s" style={{ color: "var(--text-muted)", flexShrink: 0 }}>{label}</span>
-            <span className="mono-s" style={{ color: "var(--text)", textAlign: "right" }}>{value}</span>
-          </div>
-        ))}
-      </div>
-    </SidebarCard>
-  );
-}
-
-function AlertCard({ candidate: c }: { candidate: CandidateRow }) {
-  return (
-    <SidebarCard
-      title="Job alerts"
-      icon={<Bell size={14} />}
-      action={
-        <Link href="/candidates/onboarding" className="btn btn-ghost btn-sm">Edit</Link>
-      }
-    >
-      <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
-        {c.alertFrequency === "DAILY" ? "Daily digest" : "Weekly roundup"} sent to{" "}
-        <span style={{ color: "var(--text)", fontWeight: 500 }}>{c.email}</span>
-      </p>
-    </SidebarCard>
-  );
-}
-
-function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> }) {
-  return (
-    <SidebarCard
-      title="Jobs for you"
-      icon={<Briefcase size={14} />}
-      action={
         <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 4 }}>
           All <ChevronRight size={11} />
         </Link>
-      }
-    >
+      </div>
+      <div style={{ padding: "4px 18px" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {jobs.map((job, i) => (
           <Link
@@ -319,6 +255,7 @@ function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> 
           </Link>
         ))}
       </div>
-    </SidebarCard>
+      </div>
+    </div>
   );
 }

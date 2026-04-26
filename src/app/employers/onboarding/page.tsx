@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Building2, Mail, Briefcase, CheckCircle2, CheckCircle, Info } from "lucide-react";
 import {
@@ -395,34 +396,61 @@ function Step5Done({ state }: { state: EmployerWizardState }) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 export default function EmployerOnboardingPage() {
+  const router = useRouter();
   const [state, dispatch] = useReducer(employerReducer, initialEmployerState());
   const [, startTransition] = useTransition();
   const hydrated = useRef(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
+  // Security guard: redirect already-registered employers to their dashboard.
   useEffect(() => {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Partial<EmployerWizardState>;
-        const fields: Array<keyof EmployerWizardState> = ["name", "email", "companyName", "website", "city", "size", "description", "techStack"];
-        for (const field of fields) {
-          if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user?.email) {
+        const res = await fetch("/api/employers/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email }),
+        });
+        const { exists } = await res.json();
+        if (exists) {
+          router.replace("/employers/dashboard");
+          return;
         }
-        if (parsed.employerId) {
-          dispatch({ type: "SET_EMPLOYER_ID", id: parsed.employerId });
-          dispatch({ type: "NEXT_STEP" });
-          dispatch({ type: "NEXT_STEP" });
-          dispatch({ type: "NEXT_STEP" });
-        }
-      } catch { /* ignore malformed draft */ }
-    }
-    hydrated.current = true;
+        // Scope the draft to this email
+        const scopedKey = `${LS_KEY}:${user.email}`;
+        const raw = localStorage.getItem(scopedKey) ?? localStorage.getItem(LS_KEY);
+        restoreDraft(raw);
+      } else {
+        restoreDraft(localStorage.getItem(LS_KEY));
+      }
+      hydrated.current = true;
+      setAuthChecked(true);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function restoreDraft(saved: string | null) {
+    if (!saved) return;
+    try {
+      const parsed = JSON.parse(saved) as Partial<EmployerWizardState>;
+      const fields: Array<keyof EmployerWizardState> = ["name", "email", "companyName", "website", "city", "size", "description", "techStack"];
+      for (const field of fields) {
+        if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
+      }
+      if (parsed.employerId) {
+        dispatch({ type: "SET_EMPLOYER_ID", id: parsed.employerId });
+        dispatch({ type: "NEXT_STEP" });
+        dispatch({ type: "NEXT_STEP" });
+        dispatch({ type: "NEXT_STEP" });
+      }
+    } catch { /* ignore malformed draft */ }
+  }
 
   useEffect(() => {
     if (!hydrated.current) return;
     const { errors, touched, submitting, direction, logoUrl, ...persistable } = state;
-    localStorage.setItem(LS_KEY, JSON.stringify(persistable));
+    const key = state.email ? `${LS_KEY}:${state.email}` : LS_KEY;
+    localStorage.setItem(key, JSON.stringify(persistable));
   }, [state]);
 
   const handleNext = () => {
@@ -494,6 +522,8 @@ export default function EmployerOnboardingPage() {
       nextTip={nextTip}
     />
   ) : undefined;
+
+  if (!authChecked) return null;
 
   return (
     <WizardShell steps={EMPLOYER_STEPS} currentStep={state.step - 1} sidePanel={sidePanel}>

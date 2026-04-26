@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink } from "lucide-react";
+import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
+import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS } from "@/lib/onboarding-types";
+import { CITIES } from "@/lib/placeholder-data";
 
 // ─── Profile section ─────────────────────────────────────────────────────────
 
@@ -273,9 +275,10 @@ export function ExperienceSection({ candidateId, initialPositions }: { candidate
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
 function Section({
-  title, children, onEdit, onSave, onCancel, saving, editLabel,
+  title, icon, children, onEdit, onSave, onCancel, saving, editLabel,
 }: {
   title: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
   onEdit?: () => void;
   onSave?: () => void;
@@ -286,7 +289,10 @@ function Section({
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
-        <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>{title}</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {icon && <span style={{ color: "var(--accent)", display: "flex" }}>{icon}</span>}
+          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>{title}</p>
+        </div>
         <div style={{ display: "flex", gap: 8 }}>
           {onSave && (
             <>
@@ -319,5 +325,199 @@ function InputField({
       </label>
       <input className="input" type={type} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled} />
     </div>
+  );
+}
+
+// ─── Preferences section ──────────────────────────────────────────────────────
+
+const REMOTE_OPTIONS = [
+  { value: "REMOTE",  label: "Remote",   desc: "Work from anywhere" },
+  { value: "HYBRID",  label: "Hybrid",   desc: "Mix of home & office" },
+  { value: "ON_SITE", label: "On-site",  desc: "In the office" },
+] as const;
+
+export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [form, setForm] = useState({
+    categories:      candidate.categories ?? [],
+    remoteType:      candidate.remoteType  ?? "",
+    city:            candidate.city        ?? "",
+    experienceLevel: candidate.experienceLevel ?? "",
+    salaryMin:       candidate.salaryMin?.toString() ?? "",
+  });
+
+  function toggleCat(slug: string) {
+    setForm(f => ({
+      ...f,
+      categories: f.categories.includes(slug)
+        ? f.categories.filter(c => c !== slug)
+        : [...f.categories, slug],
+    }));
+  }
+
+  async function save() {
+    setSaving(true);
+    await fetch("/api/candidates/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        categories:      form.categories,
+        remoteType:      form.remoteType      || null,
+        city:            form.city.trim()     || null,
+        experienceLevel: form.experienceLevel || null,
+        salaryMin:       form.salaryMin ? parseInt(form.salaryMin, 10) : null,
+      }),
+    });
+    setSaving(false);
+    setEditing(false);
+    window.location.reload();
+  }
+
+  if (!editing) {
+    const rows: [string, string][] = [
+      ["Categories",  candidate.categories.length > 0 ? candidate.categories.join(", ") : "All"],
+      ["Work setup",  candidate.remoteType ?? "Any"],
+      ["Location",    candidate.city ?? "Any city"],
+      ["Level",       candidate.experienceLevel ?? "Any level"],
+      ["Min salary",  candidate.salaryMin ? `€${candidate.salaryMin.toLocaleString()}` : "Not set"],
+    ];
+    return (
+      <Section title="Job preferences" icon={<Sliders size={14} />} onEdit={() => setEditing(true)}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {rows.map(([label, value]) => (
+            <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+              <span className="body-s" style={{ color: "var(--text-muted)" }}>{label}</span>
+              <span className="mono-s" style={{ color: "var(--text)", textAlign: "right" }}>{value}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+    );
+  }
+
+  return (
+    <Section title="Job preferences" icon={<Sliders size={14} />} saving={saving} onSave={save} onCancel={() => setEditing(false)}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+        {/* Categories */}
+        <div>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Job categories</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {CATEGORY_OPTIONS.map(cat => {
+              const active = form.categories.includes(cat.slug);
+              return (
+                <button key={cat.slug} type="button" onClick={() => toggleCat(cat.slug)}
+                  style={{ padding: "7px 14px", borderRadius: 8, border: `1.5px solid ${active ? "var(--accent)" : "var(--border)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: active ? "var(--accent)" : "var(--text)", transition: "all 150ms ease" }}>
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Work arrangement */}
+        <div>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Work arrangement</p>
+          <div style={{ display: "flex", gap: 8 }}>
+            {REMOTE_OPTIONS.map(opt => {
+              const active = form.remoteType === opt.value;
+              return (
+                <button key={opt.value} type="button"
+                  onClick={() => setForm(f => ({ ...f, remoteType: active ? "" : opt.value }))}
+                  style={{ flex: 1, padding: "10px 8px", borderRadius: 8, border: `1.5px solid ${active ? "var(--accent)" : "var(--border)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", textAlign: "center", transition: "all 150ms ease" }}>
+                  <div className="body-s" style={{ fontWeight: 600, color: active ? "var(--accent)" : "var(--text)", marginBottom: 2 }}>{opt.label}</div>
+                  <div className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>{opt.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* City */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <label className="body-s" style={{ fontWeight: 500, color: "var(--text)" }}>City</label>
+          <select className="input" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
+            <option value="">Any city</option>
+            {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+
+        {/* Experience level */}
+        <div>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Experience level</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {EXPERIENCE_LEVEL_OPTIONS.map(opt => {
+              const active = form.experienceLevel === opt.value;
+              return (
+                <button key={opt.value} type="button"
+                  onClick={() => setForm(f => ({ ...f, experienceLevel: active ? "" : opt.value }))}
+                  style={{ padding: "7px 14px", borderRadius: 8, border: `1.5px solid ${active ? "var(--accent)" : "var(--border)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: active ? "var(--accent)" : "var(--text)", transition: "all 150ms ease" }}>
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Min salary */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <label className="body-s" style={{ fontWeight: 500, color: "var(--text)" }}>Minimum salary (EUR / year)</label>
+          <input className="input" type="number" min={0} step={1000}
+            value={form.salaryMin}
+            onChange={e => setForm(f => ({ ...f, salaryMin: e.target.value }))}
+            placeholder="e.g. 40000" />
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+// ─── Alert section ────────────────────────────────────────────────────────────
+
+export function AlertSection({ candidate }: { candidate: CandidateRow }) {
+  const [editing, setEditing] = useState(false);
+  const [saving,  setSaving]  = useState(false);
+  const [freq, setFreq] = useState<"DAILY" | "WEEKLY">(candidate.alertFrequency as "DAILY" | "WEEKLY" ?? "WEEKLY");
+
+  async function save() {
+    setSaving(true);
+    await fetch("/api/candidates/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ alertFrequency: freq }),
+    });
+    setSaving(false);
+    setEditing(false);
+    window.location.reload();
+  }
+
+  if (!editing) {
+    return (
+      <Section title="Job alerts" icon={<Bell size={14} />} onEdit={() => setEditing(true)}>
+        <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
+          {candidate.alertFrequency === "DAILY" ? "Daily digest" : "Weekly roundup"} sent to{" "}
+          <span style={{ color: "var(--text)", fontWeight: 500 }}>{candidate.email}</span>
+        </p>
+      </Section>
+    );
+  }
+
+  return (
+    <Section title="Job alerts" icon={<Bell size={14} />} saving={saving} onSave={save} onCancel={() => setEditing(false)}>
+      <div style={{ display: "flex", gap: 10 }}>
+        {(["WEEKLY", "DAILY"] as const).map(f => (
+          <button key={f} type="button" onClick={() => setFreq(f)}
+            style={{ flex: 1, padding: "12px", borderRadius: 8, border: `1.5px solid ${freq === f ? "var(--accent)" : "var(--border)"}`, background: freq === f ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", textAlign: "center", transition: "all 150ms ease" }}>
+            <div className="body-s" style={{ fontWeight: 600, color: freq === f ? "var(--accent)" : "var(--text)", marginBottom: 2 }}>
+              {f === "DAILY" ? "Daily" : "Weekly"}
+            </div>
+            <div className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>
+              {f === "DAILY" ? "Every morning" : "Every Monday"}
+            </div>
+          </button>
+        ))}
+      </div>
+    </Section>
   );
 }
