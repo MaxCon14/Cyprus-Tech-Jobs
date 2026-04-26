@@ -2,7 +2,8 @@ import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
-import { Search, MapPin, Bell, UserPlus, Zap, Target, ChevronDown } from "lucide-react";
+import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
+import { FaqAccordion } from "@/components/home/FaqAccordion";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -363,19 +364,7 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {FAQS.map((faq, i) => (
-                <details key={i} className="faq-item">
-                  <summary className="faq-summary">
-                    <span>{faq.q}</span>
-                    <ChevronDown size={16} className="faq-chevron" />
-                  </summary>
-                  <div className="faq-body">
-                    <p className="body" style={{ color: "var(--text-muted)", lineHeight: 1.7 }}>{faq.a}</p>
-                  </div>
-                </details>
-              ))}
-            </div>
+            <FaqAccordion faqs={FAQS} />
           </div>
         </div>
       </section>

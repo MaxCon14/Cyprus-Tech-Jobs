@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
-  LogOut, LayoutDashboard, ChevronDown, Menu, X,
+  LogOut, LayoutDashboard, ChevronDown, ChevronRight, Menu, X,
   Briefcase, MapPin, Clock, ArrowRight,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
@@ -39,85 +39,63 @@ const staticLinks = [
   { href: "/salary-guide", label: "Salary guide" },
 ];
 
-/* ── Jobs Dropdown ────────────────────────────────────────────────────────── */
+/* ── Jobs Dropdown (flyout) ───────────────────────────────────────────────── */
+
+type FlyoutSection = "category" | "type" | "city";
+
+const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNode }[] = [
+  { key: "category", label: "By Category", icon: <Briefcase size={13} /> },
+  { key: "type",     label: "Job Type",    icon: <Clock size={13} /> },
+  { key: "city",     label: "City",        icon: <MapPin size={13} /> },
+];
+
+const FLYOUT_ITEMS: Record<FlyoutSection, { label: string; href: string }[]> = {
+  category: CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
+  type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?type=${t.value}` })),
+  city:     CITIES.map(c =>    ({ label: c,         href: `/jobs?city=${c}` })),
+};
 
 function JobsDropdown({ onClose }: { onClose: () => void }) {
+  const [active, setActive] = useState<FlyoutSection>("category");
+
   return (
     <div className="nav-mega-menu">
-      <div className="nav-mega-inner">
+      <div className="nav-flyout-layout">
 
-        {/* By Category */}
-        <div>
-          <div className="nav-dropdown-heading">
-            <Briefcase size={12} /> By Category
-          </div>
-          {CATEGORIES.map(cat => (
-            <Link
-              key={cat.slug}
-              href={`/jobs?category=${cat.slug}`}
-              className="nav-dropdown-item"
-              onClick={onClose}
+        {/* Left: primary items */}
+        <div className="nav-flyout-primary">
+          {FLYOUT_SECTIONS.map(s => (
+            <div
+              key={s.key}
+              className={`nav-flyout-item${active === s.key ? " active" : ""}`}
+              onMouseEnter={() => setActive(s.key)}
             >
-              {cat.label}
+              <span className="nav-flyout-item-icon">{s.icon}</span>
+              <span className="nav-flyout-item-label">{s.label}</span>
+              <ChevronRight size={11} className="nav-flyout-item-arrow" />
+            </div>
+          ))}
+
+          <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+            <Link href="/jobs" className="nav-dropdown-cta" onClick={onClose}>
+              Browse all jobs <ArrowRight size={13} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: sub-items for active section */}
+        <div className="nav-flyout-secondary">
+          <div className="nav-dropdown-heading" style={{ marginBottom: 6 }}>
+            {FLYOUT_SECTIONS.find(s => s.key === active)?.icon}
+            {FLYOUT_SECTIONS.find(s => s.key === active)?.label}
+          </div>
+          {FLYOUT_ITEMS[active].map(item => (
+            <Link key={item.href} href={item.href} className="nav-dropdown-item" onClick={onClose}>
+              {item.label}
             </Link>
           ))}
         </div>
 
-        {/* By Job Type */}
-        <div>
-          <div className="nav-dropdown-heading">
-            <Clock size={12} /> Job Type
-          </div>
-          {JOB_TYPES.map(t => (
-            <Link
-              key={t.value}
-              href={`/jobs?type=${t.value}`}
-              className="nav-dropdown-item"
-              onClick={onClose}
-            >
-              {t.label}
-            </Link>
-          ))}
-
-          <div className="nav-dropdown-heading" style={{ marginTop: 20 }}>
-            <MapPin size={12} /> City
-          </div>
-          {CITIES.map(city => (
-            <Link
-              key={city}
-              href={`/jobs?city=${city}`}
-              className="nav-dropdown-item"
-              onClick={onClose}
-            >
-              {city}
-            </Link>
-          ))}
-        </div>
-
-        {/* View all */}
-        <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: 20, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div>
-            <div className="nav-dropdown-heading" style={{ marginBottom: 8 }}>Quick links</div>
-            {[
-              ["All jobs",         "/jobs"],
-              ["Remote jobs",      "/jobs?city=Remote"],
-              ["Limassol jobs",    "/jobs?city=Limassol"],
-              ["Senior roles",     "/jobs?level=SENIOR"],
-              ["Salary guide",     "/salary-guide"],
-            ].map(([label, href]) => (
-              <Link key={href} href={href} className="nav-dropdown-item" onClick={onClose}>
-                {label}
-              </Link>
-            ))}
-          </div>
-          <Link
-            href="/jobs"
-            className="nav-dropdown-cta"
-            onClick={onClose}
-          >
-            View all jobs <ArrowRight size={13} />
-          </Link>
-        </div>
       </div>
     </div>
   );
