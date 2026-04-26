@@ -68,7 +68,7 @@ export function Nav() {
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           {!loading && user ? (
             <>
-              <Link href="/employers/dashboard" className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Link href="/dashboard" className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <LayoutDashboard size={13} /> Dashboard
               </Link>
               <button onClick={handleSignOut} className="btn btn-ghost btn-sm" title="Sign out" style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-muted)" }}>
@@ -77,7 +77,7 @@ export function Nav() {
             </>
           ) : (
             <>
-              <Link href="/employers/login" className="btn btn-ghost btn-sm">Sign in</Link>
+              <Link href="/login" className="btn btn-ghost btn-sm">Sign in</Link>
               <Link href="/get-started" className="btn btn-primary btn-sm">Get started</Link>
             </>
           )}
