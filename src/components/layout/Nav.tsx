@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
-  LogOut, LayoutDashboard, ChevronDown, ChevronRight, Menu, X,
+  LogOut, LayoutDashboard, ChevronDown, Menu, X,
   Briefcase, MapPin, Clock, ArrowRight,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
@@ -15,15 +15,15 @@ const supabase = createSupabaseBrowserClient();
 /* ── Data ─────────────────────────────────────────────────────────────────── */
 
 const CATEGORIES = [
-  { label: "Frontend",        slug: "frontend" },
-  { label: "Backend",         slug: "backend" },
-  { label: "DevOps & Cloud",  slug: "devops" },
-  { label: "UI/UX Design",    slug: "design" },
-  { label: "Data & Analytics",slug: "data" },
-  { label: "Mobile",          slug: "mobile" },
-  { label: "Product",         slug: "product" },
-  { label: "Security",        slug: "security" },
-  { label: "QA & Testing",    slug: "qa" },
+  { label: "Frontend",         slug: "frontend" },
+  { label: "Backend",          slug: "backend" },
+  { label: "DevOps & Cloud",   slug: "devops" },
+  { label: "UI/UX Design",     slug: "design" },
+  { label: "Data & Analytics", slug: "data" },
+  { label: "Mobile",           slug: "mobile" },
+  { label: "Product",          slug: "product" },
+  { label: "Security",         slug: "security" },
+  { label: "QA & Testing",     slug: "qa" },
 ];
 
 const JOB_TYPES = [
@@ -39,61 +39,80 @@ const staticLinks = [
   { href: "/salary-guide", label: "Salary guide" },
 ];
 
-/* ── Jobs Dropdown (flyout) ───────────────────────────────────────────────── */
+/* ── Reusable accordion section ───────────────────────────────────────────── */
 
-type FlyoutSection = "category" | "type" | "city";
-
-const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNode }[] = [
-  { key: "category", label: "By Category", icon: <Briefcase size={13} /> },
-  { key: "type",     label: "Job Type",    icon: <Clock size={13} /> },
-  { key: "city",     label: "City",        icon: <MapPin size={13} /> },
-];
-
-const FLYOUT_ITEMS: Record<FlyoutSection, { label: string; href: string }[]> = {
-  category: CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
-  type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?type=${t.value}` })),
-  city:     CITIES.map(c =>    ({ label: c,         href: `/jobs?city=${c}` })),
-};
-
-function JobsDropdown({ onClose }: { onClose: () => void }) {
-  const [active, setActive] = useState<FlyoutSection>("category");
+function NavSection({
+  icon, title, children, defaultOpen = false,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const innerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="nav-mega-menu">
-      <div className="nav-flyout-layout">
+    <div className="nav-section">
+      <button
+        className={`nav-section-toggle${open ? " open" : ""}`}
+        onClick={() => setOpen(v => !v)}
+      >
+        <span className="nav-section-icon">{icon}</span>
+        <span className="nav-section-label">{title}</span>
+        <ChevronDown size={12} className={`nav-chevron nav-section-chevron${open ? " open" : ""}`} />
+      </button>
 
-        {/* Left: primary items */}
-        <div className="nav-flyout-primary">
-          {FLYOUT_SECTIONS.map(s => (
-            <div
-              key={s.key}
-              className={`nav-flyout-item${active === s.key ? " active" : ""}`}
-              onMouseEnter={() => setActive(s.key)}
-            >
-              <span className="nav-flyout-item-icon">{s.icon}</span>
-              <span className="nav-flyout-item-label">{s.label}</span>
-              <ChevronRight size={11} className="nav-flyout-item-arrow" />
-            </div>
-          ))}
-
-          <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid var(--border)" }}>
-            <Link href="/jobs" className="nav-dropdown-cta" onClick={onClose}>
-              Browse all jobs <ArrowRight size={13} />
-            </Link>
-          </div>
+      <div
+        style={{
+          maxHeight: open ? `${innerRef.current?.scrollHeight ?? 500}px` : "0px",
+          overflow: "hidden",
+          transition: "max-height 280ms cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <div ref={innerRef} style={{ padding: "4px 0 8px 28px" }}>
+          {children}
         </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Right: sub-items for active section */}
-        <div className="nav-flyout-secondary">
-          <div className="nav-dropdown-heading" style={{ marginBottom: 6 }}>
-            {FLYOUT_SECTIONS.find(s => s.key === active)?.icon}
-            {FLYOUT_SECTIONS.find(s => s.key === active)?.label}
-          </div>
-          {FLYOUT_ITEMS[active].map(item => (
-            <Link key={item.href} href={item.href} className="nav-dropdown-item" onClick={onClose}>
-              {item.label}
+/* ── Jobs Dropdown ────────────────────────────────────────────────────────── */
+
+function JobsDropdown({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="nav-mega-menu">
+      <div style={{ padding: "12px" }}>
+
+        <NavSection icon={<Briefcase size={13} />} title="By Category" defaultOpen>
+          {CATEGORIES.map(cat => (
+            <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="nav-dropdown-item" onClick={onClose}>
+              {cat.label}
             </Link>
           ))}
+        </NavSection>
+
+        <NavSection icon={<Clock size={13} />} title="Job Type">
+          {JOB_TYPES.map(t => (
+            <Link key={t.value} href={`/jobs?type=${t.value}`} className="nav-dropdown-item" onClick={onClose}>
+              {t.label}
+            </Link>
+          ))}
+        </NavSection>
+
+        <NavSection icon={<MapPin size={13} />} title="City">
+          {CITIES.map(city => (
+            <Link key={city} href={`/jobs?city=${city}`} className="nav-dropdown-item" onClick={onClose}>
+              {city}
+            </Link>
+          ))}
+        </NavSection>
+
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 10, marginTop: 6 }}>
+          <Link href="/jobs" className="nav-dropdown-cta" onClick={onClose}>
+            Browse all jobs <ArrowRight size={13} />
+          </Link>
         </div>
 
       </div>
@@ -108,9 +127,12 @@ export function Nav() {
   const router   = useRouter();
   const [user,    setUser]    = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [jobsOpen,    setJobsOpen]    = useState(false);
-  const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [jobsOpen,       setJobsOpen]       = useState(false);
+  const [mobileOpen,     setMobileOpen]     = useState(false);
   const [mobileJobsOpen, setMobileJobsOpen] = useState(false);
+  const [mobileCatOpen,  setMobileCatOpen]  = useState(false);
+  const [mobileTypeOpen, setMobileTypeOpen] = useState(false);
+  const [mobileCityOpen, setMobileCityOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Auth */
@@ -126,13 +148,13 @@ export function Nav() {
     return () => subscription.unsubscribe();
   }, []);
 
-  /* Close mobile menu on route change */
+  /* Close menus on route change */
   useEffect(() => {
     setMobileOpen(false);
     setJobsOpen(false);
   }, [pathname]);
 
-  /* Prevent body scroll when mobile menu open */
+  /* Body scroll lock when mobile menu open */
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -144,7 +166,6 @@ export function Nav() {
     router.refresh();
   };
 
-  /* Hover handlers with delay so fast mouse-moves don't flicker */
   const openJobs  = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setJobsOpen(true); };
   const closeJobs = () => { closeTimer.current = setTimeout(() => setJobsOpen(false), 150); };
 
@@ -169,7 +190,6 @@ export function Nav() {
           {/* Desktop nav */}
           <nav className="nav-links-desktop" style={{ alignItems: "center", gap: 2, flex: 1 }}>
 
-            {/* Jobs dropdown trigger */}
             <div
               className="nav-dropdown-wrapper"
               onMouseEnter={openJobs}
@@ -224,7 +244,7 @@ export function Nav() {
             )}
           </div>
 
-          {/* Hamburger (mobile only) */}
+          {/* Hamburger */}
           <button
             className="nav-hamburger"
             onClick={() => setMobileOpen(v => !v)}
@@ -235,11 +255,11 @@ export function Nav() {
         </div>
       </header>
 
-      {/* ── Mobile menu overlay ── */}
+      {/* ── Mobile menu ── */}
       <div className={`mobile-menu${mobileOpen ? " open" : ""}`}>
         <div style={{ padding: "16px var(--page-padding-x) 40px", display: "flex", flexDirection: "column", gap: 0 }}>
 
-          {/* Jobs section */}
+          {/* Jobs top-level toggle */}
           <div>
             <button
               className="mobile-menu-section-btn"
@@ -252,28 +272,68 @@ export function Nav() {
             </button>
 
             <div className={`mobile-menu-sub${mobileJobsOpen ? " open" : ""}`}>
-              <div style={{ padding: "8px 0 16px" }}>
+              <div style={{ padding: "4px 0 12px" }}>
 
-                <div className="mobile-menu-subheading">By Category</div>
-                {CATEGORIES.map(cat => (
-                  <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="mobile-menu-link">
-                    {cat.label}
-                  </Link>
-                ))}
+                {/* Category sub-section */}
+                <button
+                  className="mobile-sub-section-btn"
+                  onClick={() => setMobileCatOpen(v => !v)}
+                >
+                  <Briefcase size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                  <span>By Category</span>
+                  <ChevronDown size={13} className={`nav-chevron${mobileCatOpen ? " open" : ""}`} style={{ color: "var(--text-muted)", marginLeft: "auto" }} />
+                </button>
+                <div className={`mobile-menu-sub${mobileCatOpen ? " open" : ""}`}>
+                  <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
+                    {CATEGORIES.map(cat => (
+                      <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="mobile-menu-link">
+                        {cat.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
 
-                <div className="mobile-menu-subheading" style={{ marginTop: 16 }}>Job Type</div>
-                {JOB_TYPES.map(t => (
-                  <Link key={t.value} href={`/jobs?type=${t.value}`} className="mobile-menu-link">
-                    {t.label}
-                  </Link>
-                ))}
+                {/* Job Type sub-section */}
+                <button
+                  className="mobile-sub-section-btn"
+                  onClick={() => setMobileTypeOpen(v => !v)}
+                >
+                  <Clock size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                  <span>Job Type</span>
+                  <ChevronDown size={13} className={`nav-chevron${mobileTypeOpen ? " open" : ""}`} style={{ color: "var(--text-muted)", marginLeft: "auto" }} />
+                </button>
+                <div className={`mobile-menu-sub${mobileTypeOpen ? " open" : ""}`}>
+                  <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
+                    {JOB_TYPES.map(t => (
+                      <Link key={t.value} href={`/jobs?type=${t.value}`} className="mobile-menu-link">
+                        {t.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
 
-                <div className="mobile-menu-subheading" style={{ marginTop: 16 }}>City</div>
-                {CITIES.map(city => (
-                  <Link key={city} href={`/jobs?city=${city}`} className="mobile-menu-link">
-                    {city}
-                  </Link>
-                ))}
+                {/* City sub-section */}
+                <button
+                  className="mobile-sub-section-btn"
+                  onClick={() => setMobileCityOpen(v => !v)}
+                >
+                  <MapPin size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                  <span>City</span>
+                  <ChevronDown size={13} className={`nav-chevron${mobileCityOpen ? " open" : ""}`} style={{ color: "var(--text-muted)", marginLeft: "auto" }} />
+                </button>
+                <div className={`mobile-menu-sub${mobileCityOpen ? " open" : ""}`}>
+                  <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
+                    {CITIES.map(city => (
+                      <Link key={city} href={`/jobs?city=${city}`} className="mobile-menu-link">
+                        {city}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <Link href="/jobs" className="mobile-menu-link" style={{ fontWeight: 500, color: "var(--accent)", marginTop: 4, display: "block" }}>
+                  Browse all jobs →
+                </Link>
               </div>
             </div>
           </div>
@@ -288,7 +348,6 @@ export function Nav() {
 
           <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
 
-          {/* Auth */}
           <div style={{ paddingTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
             {!loading && user ? (
               <>

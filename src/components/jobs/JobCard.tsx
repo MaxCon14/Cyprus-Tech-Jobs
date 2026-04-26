@@ -25,10 +25,13 @@ function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: strin
   const [imgFailed, setImgFailed] = useState(false);
   const initial = name.charAt(0).toUpperCase();
 
+  const domain = website
+    ? website.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0]
+    : null;
   const src = logoUrl
     ? logoUrl
-    : website
-      ? `https://logo.clearbit.com/${website.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0]}`
+    : domain
+      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256`
       : null;
 
   if (src && !imgFailed) {
