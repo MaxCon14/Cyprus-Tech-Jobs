@@ -621,6 +621,58 @@ body {
 }
 
 /* =====================================================
+   JOBS PAGE — MOBILE COLLAPSIBLE FILTERS
+   ===================================================== */
+
+/* Toggle button: hidden on desktop, shown on mobile */
+.filters-mobile-toggle {
+  display: none;
+}
+
+/* Filter body: always visible on desktop */
+.filters-panel-body {
+  /* no constraint on desktop */
+}
+
+@media (max-width: 768px) {
+  .filters-mobile-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    margin-bottom: 0;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .filters-mobile-toggle:hover {
+    background: var(--bg-muted);
+    border-color: var(--border-strong);
+  }
+
+  /* Collapsed by default on mobile */
+  .filters-panel-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 340ms cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 0;
+  }
+
+  /* Expanded */
+  .filters-panel-body.open {
+    max-height: 1400px;
+    margin-top: 10px;
+  }
+}
+
+/* =====================================================
    NAV RESPONSIVE
    ===================================================== */
 .nav-links-desktop { display: flex; }

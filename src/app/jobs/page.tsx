@@ -3,7 +3,8 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
-import { SlidersHorizontal, Search, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
+import { FiltersPanel } from "./FiltersPanel";
 import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
@@ -128,8 +129,8 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
       <div className="layout-sidebar-left">
 
-        {/* Filters sidebar */}
-        <aside>
+        {/* Filters sidebar — collapsible on mobile */}
+        <FiltersPanel activeCount={activeFilters.length}>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
               <SlidersHorizontal size={14} style={{ color: "var(--text-muted)" }} />
@@ -184,7 +185,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
           <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10, textDecoration: "none" }}>
             Clear all filters
           </Link>
-        </aside>
+        </FiltersPanel>
 
         {/* Job list */}
         <div>
