@@ -161,9 +161,8 @@ export function Nav() {
 
           {/* Logo */}
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-            <span style={{ width: 30, height: 30, background: "var(--accent)", borderRadius: 6, display: "grid", placeItems: "center", color: "var(--white)", fontWeight: 700, fontSize: 15, fontFamily: "var(--font-sans)", letterSpacing: "-0.02em", flexShrink: 0 }}>
-              C
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="CyprusTech.Jobs logo" style={{ width: 32, height: 32, flexShrink: 0 }} />
             <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 15, letterSpacing: "-0.02em", color: "var(--text)" }}>
               CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
             </span>
