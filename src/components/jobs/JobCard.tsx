@@ -4,22 +4,67 @@ import Link from "next/link";
 import { useState } from "react";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 
-type JobCardProps = {
-  id: string;
-  slug: string;
-  title: string;
-  company: { name: string; logoUrl?: string | null; slug: string; website?: string | null };
-  city?: string | null;
-  remoteType: string;
-  employmentType: string;
-  experienceLevel: string;
-  salaryMin?: number | null;
-  salaryMax?: number | null;
-  salaryCurrency?: string;
-  featured?: boolean;
-  postedAt?: Date | string | null;
-  tags?: { name: string }[];
+/* Map display name → Simple Icons slug (cdn.simpleicons.org/{slug}) */
+const SKILL_ICONS: Record<string, string> = {
+  "React":          "react",
+  "React Native":   "react",
+  "TypeScript":     "typescript",
+  "JavaScript":     "javascript",
+  "Next.js":        "nextdotjs",
+  "Node.js":        "nodedotjs",
+  "Python":         "python",
+  "PostgreSQL":     "postgresql",
+  "Docker":         "docker",
+  "Kubernetes":     "kubernetes",
+  "AWS":            "amazonaws",
+  "Azure":          "microsoftazure",
+  "GCP":            "googlecloud",
+  "MongoDB":        "mongodb",
+  "Redis":          "redis",
+  "GraphQL":        "graphql",
+  "Go":             "go",
+  "Rust":           "rust",
+  "Terraform":      "terraform",
+  "Figma":          "figma",
+  "Flutter":        "flutter",
+  "Kotlin":         "kotlin",
+  "Swift":          "swift",
+  "Angular":        "angular",
+  "Svelte":         "svelte",
+  "MySQL":          "mysql",
+  "Elasticsearch":  "elasticsearch",
+  "Kafka":          "apachekafka",
+  "Spark":          "apachespark",
+  "Airflow":        "apacheairflow",
+  "Snowflake":      "snowflake",
+  "BigQuery":       "googlebigquery",
+  "Ansible":        "ansible",
+  "Java":           "java",
+  "C++":            "cplusplus",
+  "Android":        "android",
+  "RabbitMQ":       "rabbitmq",
+  "OWASP":          "owasp",
 };
+
+function SkillTag({ name }: { name: string }) {
+  const [iconFailed, setIconFailed] = useState(false);
+  const slug = SKILL_ICONS[name];
+
+  return (
+    <span className="tag tag-skill">
+      {slug && !iconFailed && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`https://cdn.simpleicons.org/${slug}`}
+          alt=""
+          className="skill-tag-icon"
+          onError={() => setIconFailed(true)}
+        />
+      )}
+      {name}
+    </span>
+  );
+}
 
 function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: string | null; website?: string | null }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -38,22 +83,30 @@ function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: strin
     return (
       <div className="job-card-logo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={name}
-          className="job-card-logo-img"
-          onError={() => setImgFailed(true)}
-        />
+        <img src={src} alt={name} className="job-card-logo-img" onError={() => setImgFailed(true)} />
       </div>
     );
   }
 
-  return (
-    <div className="job-card-logo job-card-logo-fallback">
-      {initial}
-    </div>
-  );
+  return <div className="job-card-logo job-card-logo-fallback">{initial}</div>;
 }
+
+type JobCardProps = {
+  id: string;
+  slug: string;
+  title: string;
+  company: { name: string; logoUrl?: string | null; slug: string; website?: string | null };
+  city?: string | null;
+  remoteType: string;
+  employmentType: string;
+  experienceLevel: string;
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  salaryCurrency?: string;
+  featured?: boolean;
+  postedAt?: Date | string | null;
+  tags?: { name: string }[];
+};
 
 export function JobCard({
   slug,
@@ -90,16 +143,22 @@ export function JobCard({
       {/* Title */}
       <h3 className="job-card-title">{title}</h3>
 
-      {/* Tags */}
+      {/* Meta: location, work type, employment, level */}
       <div className="job-card-meta">
         {city && <span className="tag">{city}</span>}
         <span className="tag tag-outline">{remoteLabel(remoteType)}</span>
         <span className="tag tag-outline">{empLabel}</span>
         <span className="tag tag-outline">{expLabel}</span>
-        {tags.slice(0, 3).map((t) => (
-          <span key={t.name} className="tag tag-outline">{t.name}</span>
-        ))}
       </div>
+
+      {/* Skills — separate row with tech logos */}
+      {tags.length > 0 && (
+        <div className="job-card-skills">
+          {tags.slice(0, 5).map((t) => (
+            <SkillTag key={t.name} name={t.name} />
+          ))}
+        </div>
+      )}
 
       {/* Footer: salary + apply */}
       <div className="job-card-footer">
