@@ -374,11 +374,12 @@ export default function CandidateOnboardingPage() {
       }
 
       // Send magic link for auth
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       await supabase.auth.signInWithOtp({
         email: state.email,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/candidates/dashboard`,
+          emailRedirectTo: `${appUrl}/api/auth/callback?next=/candidates/dashboard`,
         },
       });
 

@@ -42,7 +42,7 @@ export function LoginForm() {
       email: targetEmail,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/candidates/dashboard`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback?next=/candidates/dashboard`,
       },
     });
 
