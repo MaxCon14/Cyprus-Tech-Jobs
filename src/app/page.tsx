@@ -67,7 +67,7 @@ export default async function HomePage() {
   return (
     <>
       {/* ── HERO ── */}
-      <section style={{ borderBottom: "1px solid var(--border)", padding: "clamp(48px, 8vw, 80px) var(--page-padding-x) clamp(40px, 6vw, 64px)" }}>
+      <section style={{ borderBottom: "1px solid var(--border)", padding: "clamp(48px, 8vw, 80px) 0 clamp(40px, 6vw, 64px)" }}>
         <div className="page-container">
           <div className="mono-s" style={{ color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 24, height: 1, background: "var(--accent)", display: "inline-block" }} />
@@ -121,7 +121,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── COMPANIES TICKER ── */}
-      <section style={{ borderBottom: "1px solid var(--border)", padding: "28px var(--page-padding-x)", background: "var(--bg-alt)", overflowX: "auto" }}>
+      <section style={{ borderBottom: "1px solid var(--border)", padding: "28px 0", background: "var(--bg-alt)", overflowX: "auto" }}>
         <div className="page-container">
           <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: "max-content" }}>
             <span className="mono-s" style={{ color: "var(--text-subtle)", whiteSpace: "nowrap" }}>HIRING THIS WEEK</span>
@@ -146,7 +146,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section style={{ padding: "clamp(48px, 7vw, 80px) var(--page-padding-x)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
+      <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
         <div className="page-container">
           <div style={{ textAlign: "center", marginBottom: "clamp(32px, 5vw, 48px)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>HOW IT WORKS</div>
@@ -192,7 +192,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── MAIN: Jobs + Sidebar ── */}
-      <section style={{ padding: "clamp(32px, 5vw, 48px) var(--page-padding-x)" }}>
+      <section style={{ padding: "clamp(32px, 5vw, 48px) 0" }}>
         <div className="page-container">
           <div className="layout-sidebar-sm">
 
@@ -280,7 +280,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── BROWSE BY CATEGORY ── */}
-      <section style={{ padding: "clamp(48px, 7vw, 80px) var(--page-padding-x)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
+      <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
         <div className="page-container">
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "clamp(24px, 4vw, 36px)", flexWrap: "wrap", gap: 12 }}>
             <div>
@@ -307,7 +307,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── CANDIDATE CTA ── */}
-      <section style={{ padding: "clamp(48px, 7vw, 80px) var(--page-padding-x)", borderBottom: "1px solid var(--border)" }}>
+      <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)" }}>
         <div className="page-container">
           <div style={{
             background: "var(--black)", borderRadius: 20, padding: "clamp(32px, 5vw, 56px) clamp(24px, 5vw, 56px)",
@@ -353,7 +353,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section style={{ padding: "clamp(48px, 7vw, 80px) var(--page-padding-x)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
+      <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
         <div className="page-container">
           <div style={{ maxWidth: 780, margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: "clamp(28px, 4vw, 44px)" }}>
@@ -370,7 +370,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── EMPLOYER CTA ── */}
-      <section style={{ padding: "clamp(48px, 7vw, 80px) var(--page-padding-x)" }}>
+      <section style={{ padding: "clamp(48px, 7vw, 80px) 0" }}>
         <div className="page-container">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, padding: "clamp(28px, 5vw, 48px)", border: "1px solid var(--border)", borderRadius: 16, background: "var(--surface)" }}>
             <div>
