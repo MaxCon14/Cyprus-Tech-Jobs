@@ -2,26 +2,25 @@
 
 import Link from "next/link";
 import { Briefcase, Search } from "lucide-react";
-import type { Metadata } from "next";
 
 export default function LoginPage() {
   return (
     <div style={{
-      minHeight: "calc(100vh - 61px)", display: "flex", flexDirection: "column",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
-      background: "var(--bg)", padding: "clamp(24px, 5vw, 48px) var(--page-padding-x)",
+      background: "var(--bg)", padding: "24px",
     }}>
-      <div style={{ width: "100%", maxWidth: 440 }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
 
         {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
           <Link href="/" style={{ textDecoration: "none" }}>
             <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, letterSpacing: "-0.5px", color: "var(--text)" }}>
               CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
             </span>
           </Link>
           <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 8 }}>
-            Choose how you&apos;re signing in
+            Choose how you're signing in
           </p>
         </div>
 
@@ -48,7 +47,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", marginBottom: 3 }}>
-                  I&apos;m looking for a job
+                  I'm looking for a job
                 </p>
                 <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
                   Sign in to your candidate account
@@ -77,7 +76,7 @@ export default function LoginPage() {
               </div>
               <div>
                 <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", marginBottom: 3 }}>
-                  I&apos;m hiring
+                  I'm hiring
                 </p>
                 <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
                   Sign in to your employer account

@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -306,29 +307,67 @@ function Step6Done({ state }: { state: CandidateWizardState }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function CandidateOnboardingPage() {
+  const router = useRouter();
   const [state, dispatch] = useReducer(candidateReducer, initialCandidateState());
   const [, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState("");
   const hydrated = useRef(false);
+  // null = checking, false = not a candidate (allow), true = redirect in progress
+  const [authChecked, setAuthChecked] = useState(false);
 
+  // Security guard: if user is already a registered candidate, send them to
+  // their dashboard. This prevents accessing other users' localStorage drafts.
   useEffect(() => {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-        const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
-        for (const field of fields) {
-          if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user?.email) {
+        const res = await fetch("/api/candidates/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: user.email }),
+        });
+        const { exists } = await res.json();
+        if (exists) {
+          router.replace("/candidates/dashboard");
+          return;
         }
-      } catch { /* ignore */ }
-    }
-    hydrated.current = true;
+        // Scope the draft to this user's email so different accounts
+        // can never see each other's unfinished onboarding state.
+        const scopedKey = `${LS_KEY}:${user.email}`;
+        const saved = localStorage.getItem(scopedKey) ?? localStorage.getItem(LS_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
+            for (const field of fields) {
+              if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
+            }
+          } catch { /* ignore */ }
+        }
+      } else {
+        // Not logged in — restore generic draft
+        const saved = localStorage.getItem(LS_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
+            for (const field of fields) {
+              if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
+            }
+          } catch { /* ignore */ }
+        }
+      }
+      hydrated.current = true;
+      setAuthChecked(true);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!hydrated.current) return;
     const { errors, touched, submitting, direction, candidateId, ...persistable } = state;
-    localStorage.setItem(LS_KEY, JSON.stringify(persistable));
+    // Scope draft to email when available so different users don't share state
+    const key = state.email ? `${LS_KEY}:${state.email}` : LS_KEY;
+    localStorage.setItem(key, JSON.stringify(persistable));
   }, [state]);
 
   const handleNext = () => {
@@ -394,6 +433,10 @@ export default function CandidateOnboardingPage() {
   };
 
   const showNav = state.step < 6;
+
+  // Block render until we've confirmed the user isn't already registered.
+  // This prevents any flash of the wizard (and localStorage restore) before redirect.
+  if (!authChecked) return null;
 
   return (
     <WizardShell steps={CANDIDATE_STEPS} currentStep={state.step - 1}>
