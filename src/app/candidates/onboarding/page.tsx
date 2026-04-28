@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, Camera, X, AtSign } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, Camera, X, AtSign, Briefcase, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -467,6 +467,128 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
   );
 }
 
+// ─── Step 8: Experience ───────────────────────────────────────────────────────
+
+interface PositionDraft {
+  id: string;
+  title: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+  description: string;
+}
+
+const emptyDraft = (): PositionDraft => ({
+  id: Math.random().toString(36).slice(2),
+  title: "", company: "", startDate: "", endDate: "", current: false, description: "",
+});
+
+function Step8Experience() {
+  const [positions, setPositions] = useState<PositionDraft[]>([]);
+  const [form, setForm] = useState<PositionDraft>(emptyDraft());
+  const [adding, setAdding] = useState(false);
+
+  const setField = (field: keyof PositionDraft, value: string | boolean) =>
+    setForm((f) => ({ ...f, [field]: value }));
+
+  const addPosition = () => {
+    if (!form.title.trim() || !form.company.trim()) return;
+    setPositions((p) => [...p, form]);
+    setForm(emptyDraft());
+    setAdding(false);
+  };
+
+  const remove = (id: string) => setPositions((p) => p.filter((x) => x.id !== id));
+
+  return (
+    <div>
+      <StepHeader
+        icon={<Briefcase size={20} style={{ color: "var(--accent)" }} />}
+        title="Work experience"
+        subtitle="Add your previous roles — or skip and do it later."
+      />
+
+      {/* Saved positions list */}
+      {positions.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+          {positions.map((p) => (
+            <div key={p.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "14px 16px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--surface)" }}>
+              <div>
+                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)" }}>{p.title}</p>
+                <p className="body-s" style={{ color: "var(--text-muted)" }}>{p.company}{p.startDate ? ` · ${p.startDate}${p.current ? " – Present" : p.endDate ? ` – ${p.endDate}` : ""}` : ""}</p>
+              </div>
+              <button type="button" onClick={() => remove(p.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4, display: "grid", placeItems: "center" }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add form */}
+      {adding ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "18px", borderRadius: "var(--radius-md)", border: "1.5px solid var(--accent)", background: "var(--accent-soft)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Field label="Job title" required>
+              <input className="input" type="text" value={form.title} placeholder="Senior Engineer"
+                onChange={(e) => setField("title", e.target.value)} autoFocus />
+            </Field>
+            <Field label="Company" required>
+              <input className="input" type="text" value={form.company} placeholder="Acme Corp"
+                onChange={(e) => setField("company", e.target.value)} />
+            </Field>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Field label="Start date">
+              <input className="input" type="month" value={form.startDate}
+                onChange={(e) => setField("startDate", e.target.value)} />
+            </Field>
+            <Field label="End date">
+              <input className="input" type="month" value={form.endDate}
+                disabled={form.current}
+                onChange={(e) => setField("endDate", e.target.value)} />
+            </Field>
+          </div>
+
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+            <input type="checkbox" checked={form.current}
+              onChange={(e) => { setField("current", e.target.checked); if (e.target.checked) setField("endDate", ""); }} />
+            <span className="body-s">I currently work here</span>
+          </label>
+
+          <Field label="Description (optional)">
+            <textarea className="input" value={form.description} placeholder="What did you build or achieve?"
+              rows={2} maxLength={400}
+              onChange={(e) => setField("description", e.target.value)}
+              style={{ resize: "vertical" }} />
+          </Field>
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <button type="button" className="btn btn-accent" onClick={addPosition}
+              disabled={!form.title.trim() || !form.company.trim()}>
+              <Plus size={14} /> Add position
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => { setAdding(false); setForm(emptyDraft()); }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}
+          onClick={() => setAdding(true)}>
+          <Plus size={15} /> Add a position
+        </button>
+      )}
+
+      <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 16 }}>
+        You can add and edit your full work history from your dashboard after signing in.
+      </p>
+    </div>
+  );
+}
+
 // ─── Step 9: Done ─────────────────────────────────────────────────────────────
 
 function Step9Done({ state }: { state: CandidateWizardState }) {
@@ -648,7 +770,7 @@ export default function CandidateOnboardingPage() {
         {state.step === 5 && <Step5Skills state={state} dispatch={dispatch} />}
         {state.step === 6 && <Step6Alerts state={state} dispatch={dispatch} />}
         {state.step === 7 && <Step7Profile state={state} dispatch={dispatch} onNext={handleNext} />}
-        {state.step === 8 && null /* Experience — coming in 1f */}
+        {state.step === 8 && <Step8Experience />}
         {state.step === 9 && <Step9Done state={state} />}
       </StepSlide>
 
