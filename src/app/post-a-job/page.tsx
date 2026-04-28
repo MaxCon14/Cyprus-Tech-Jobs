@@ -1,63 +1,37 @@
 import Link from "next/link";
-import { CATEGORIES } from "@/lib/placeholder-data";
-import { Check, Zap, Star, Building2 } from "lucide-react";
+import { Check } from "lucide-react";
 import type { Metadata } from "next";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
+import { PostJobForm } from "./PostJobForm";
 
 export const metadata: Metadata = {
   title: "Post a Job — Hire Tech Talent in Cyprus",
   description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live within minutes.",
 };
 
-const PLANS = [
-  {
-    name: "Standard",
-    price: "€99",
-    period: "per listing · 30 days",
-    description: "Everything you need to find great candidates.",
-    features: [
-      "Listed for 30 days",
-      "Appears in all relevant category feeds",
-      "Job alert emails to matching candidates",
-      "Company profile page",
-      "Apply tracking link",
-    ],
-    cta: "Post a standard listing",
-    accent: false,
-  },
-  {
-    name: "Featured",
-    price: "€199",
-    period: "per listing · 30 days",
-    description: "Maximum visibility for roles you need to fill fast.",
-    features: [
-      "Everything in Standard",
-      "FEATURED badge on all listings",
-      "Pinned to top of category for 7 days",
-      "Highlighted in homepage hero",
-      "\"Hiring this week\" company strip",
-      "2× more applications on average",
-    ],
-    cta: "Post a featured listing",
-    accent: true,
-  },
-  {
-    name: "Bundle",
-    price: "€349",
-    period: "5 listings · 60 days each",
-    description: "For teams with multiple open roles.",
-    features: [
-      "5 featured listings",
-      "60-day duration per listing",
-      "Dedicated company profile",
-      "Priority support",
-      "Candidate shortlist report",
-    ],
-    cta: "Get the bundle",
-    accent: false,
-  },
-];
+export default async function PostAJobPage() {
+  // Fetch employer context for pre-filling "Posting as…"
+  let companyName: string | undefined;
+  let companySlug: string | undefined;
 
-export default function PostAJobPage() {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const employer = await prisma.employer.findUnique({
+        where: { email: user.email },
+        include: { company: true },
+      });
+      if (employer?.company) {
+        companyName = employer.company.name;
+        companySlug = employer.company.slug;
+      }
+    }
+  } catch {
+    // Non-fatal — form still works, just won't show "Posting as"
+  }
+
   return (
     <div>
       {/* Hero */}
@@ -90,170 +64,10 @@ export default function PostAJobPage() {
       </div>
 
       <div className="page-container" style={{ paddingBlock: "clamp(40px, 6vw, 64px)" }}>
+        <div className="layout-sidebar-right">
 
-        {/* Pricing */}
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <h2 className="display-m" style={{ marginBottom: 8 }}>Simple pricing</h2>
-          <p className="body" style={{ color: "var(--text-muted)" }}>No subscriptions. Pay per listing. Cancel anytime.</p>
-        </div>
-
-        <div className="grid-3" style={{ marginBottom: 80 }}>
-          {PLANS.map(plan => (
-            <div
-              key={plan.name}
-              style={{
-                border: plan.accent ? "2px solid var(--accent)" : "1px solid var(--border)",
-                borderRadius: 12, padding: 28,
-                background: plan.accent ? "var(--accent-soft)" : "var(--surface)",
-                position: "relative",
-              }}
-            >
-              {plan.accent && (
-                <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
-                  <span style={{ background: "var(--accent)", color: "var(--white)", padding: "4px 14px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
-                    MOST POPULAR
-                  </span>
-                </div>
-              )}
-
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>{plan.name}</div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 700, color: "var(--text)" }}>{plan.price}</span>
-                </div>
-                <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{plan.period}</div>
-              </div>
-
-              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>{plan.description}</p>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 24 }}>
-                {plan.features.map(f => (
-                  <div key={f} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <span style={{ width: 16, height: 16, borderRadius: "50%", background: plan.accent ? "var(--accent)" : "var(--success-bg)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
-                      <Check size={9} style={{ color: plan.accent ? "var(--white)" : "var(--success)" }} />
-                    </span>
-                    <span className="body-s">{f}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Link href="#form" className={`btn ${plan.accent ? "btn-accent" : "btn-outline"}`} style={{ width: "100%", justifyContent: "center" }}>
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
-
-        {/* Job posting form */}
-        <div id="form" className="layout-sidebar-right">
-
-          {/* Form */}
-          <div>
-            <h2 className="h2" style={{ marginBottom: 6 }}>Post your job</h2>
-            <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 32 }}>Fill in the details below. Your listing will be reviewed and go live within 30 minutes.</p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-
-              {/* Section: Company */}
-              <FormSection icon={<Building2 size={14} />} title="Company details">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <Field label="Company name" required>
-                    <input className="input" type="text" placeholder="e.g. Acme Technologies" />
-                  </Field>
-                  <Field label="Company website" required>
-                    <input className="input" type="url" placeholder="https://yourcompany.com" />
-                  </Field>
-                </div>
-                <Field label="Company description">
-                  <textarea className="textarea" placeholder="Brief description of your company (shown on your company profile)…" style={{ minHeight: 80 }} />
-                </Field>
-              </FormSection>
-
-              {/* Section: Job */}
-              <FormSection icon={<Zap size={14} />} title="Job details">
-                <Field label="Job title" required>
-                  <input className="input" type="text" placeholder="e.g. Senior Frontend Engineer" />
-                </Field>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <Field label="Category" required>
-                    <select className="select">
-                      <option value="">Select category</option>
-                      {CATEGORIES.slice(1).map(c => <option key={c.slug} value={c.slug}>{c.label}</option>)}
-                    </select>
-                  </Field>
-                  <Field label="Experience level" required>
-                    <select className="select">
-                      <option value="">Select level</option>
-                      <option>Junior</option>
-                      <option>Mid-level</option>
-                      <option>Senior</option>
-                      <option>Lead</option>
-                      <option>Executive</option>
-                    </select>
-                  </Field>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <Field label="Work type" required>
-                    <select className="select">
-                      <option value="">Select work type</option>
-                      <option>Remote</option>
-                      <option>Hybrid</option>
-                      <option>On-site</option>
-                    </select>
-                  </Field>
-                  <Field label="Employment type" required>
-                    <select className="select">
-                      <option value="">Select type</option>
-                      <option>Full-time</option>
-                      <option>Part-time</option>
-                      <option>Contract</option>
-                      <option>Internship</option>
-                    </select>
-                  </Field>
-                </div>
-                <Field label="City">
-                  <select className="select">
-                    <option value="">Select city</option>
-                    <option>Limassol</option>
-                    <option>Nicosia</option>
-                    <option>Larnaca</option>
-                    <option>Paphos</option>
-                  </select>
-                </Field>
-                <Field label="Job description" required>
-                  <textarea className="textarea" placeholder="Describe the role, team, responsibilities, and what you're looking for. Markdown supported." style={{ minHeight: 200 }} />
-                  <span className="mono-s" style={{ color: "var(--text-subtle)" }}>MARKDOWN SUPPORTED · MIN 200 CHARACTERS</span>
-                </Field>
-              </FormSection>
-
-              {/* Section: Salary */}
-              <FormSection icon={<Star size={14} />} title="Salary & apply">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <Field label="Salary min (€/year)">
-                    <input className="input" type="number" placeholder="e.g. 60000" />
-                  </Field>
-                  <Field label="Salary max (€/year)">
-                    <input className="input" type="number" placeholder="e.g. 85000" />
-                  </Field>
-                </div>
-                <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
-                  LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
-                </p>
-                <Field label="Application URL or email" required>
-                  <input className="input" type="text" placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" />
-                </Field>
-              </FormSection>
-
-              <div style={{ marginTop: 8 }}>
-                <button className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-                  Continue to payment →
-                </button>
-                <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
-                  REVIEWED WITHIN 30 MINUTES · SECURE PAYMENT VIA STRIPE
-                </p>
-              </div>
-            </div>
-          </div>
+          {/* Form (plan picker + job form) */}
+          <PostJobForm companyName={companyName} companySlug={companySlug} />
 
           {/* Sidebar */}
           <aside style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 80 }}>
@@ -296,33 +110,9 @@ export default function PostAJobPage() {
               </Link>
             </div>
           </aside>
+
         </div>
       </div>
-    </div>
-  );
-}
-
-function FormSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ border: "1px solid var(--border)", borderRadius: 10, marginBottom: 16, overflow: "hidden", background: "var(--surface)" }}>
-      <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8, background: "var(--bg-alt)" }}>
-        <span style={{ color: "var(--accent)" }}>{icon}</span>
-        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{title}</span>
-      </div>
-      <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
-  return (
-    <div>
-      <label style={{ display: "block", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 12, marginBottom: 6 }}>
-        {label} {required && <span style={{ color: "var(--accent)" }}>*</span>}
-      </label>
-      {children}
     </div>
   );
 }
