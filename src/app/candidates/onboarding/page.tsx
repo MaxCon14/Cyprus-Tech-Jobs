@@ -735,6 +735,12 @@ export default function CandidateOnboardingPage() {
         return;
       }
 
+      if (data.exists) {
+        setSubmitError("An account already exists with this email. Please sign in instead.");
+        dispatch({ type: "SET_SUBMITTING", value: false });
+        return;
+      }
+
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       await supabase.auth.signInWithOtp({
         email: state.email,
