@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, Camera, X, AtSign } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -26,8 +26,9 @@ const LS_KEY = "cyprustechjobs:candidate-draft";
 
 const PERSIST_FIELDS = [
   "categories", "remoteType", "city", "experienceLevel", "salaryMin",
-  "alertFrequency", "firstName", "lastName", "email",
+  "skills", "alertFrequency", "firstName", "lastName", "email", "bio",
   "githubUrl", "linkedinUrl", "portfolioUrl",
+  "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl",
 ] as const;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -326,21 +327,90 @@ function Step6Alerts({ state, dispatch }: { state: CandidateWizardState; dispatc
   );
 }
 
+// ─── Avatar upload ────────────────────────────────────────────────────────────
+
+function AvatarUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (file: File) => {
+    if (file.size > 2 * 1024 * 1024) return; // 2 MB limit
+    const reader = new FileReader();
+    reader.onload = (e) => onChange(e.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+        style={{
+          width: 72, height: 72, borderRadius: "50%", flexShrink: 0,
+          border: "2px dashed var(--border-strong)", background: "var(--bg-muted)",
+          cursor: "pointer", overflow: "hidden", display: "grid", placeItems: "center",
+          transition: "border-color 150ms ease",
+        }}
+      >
+        {value
+          ? <img src={value} alt="Avatar preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : <Camera size={22} style={{ color: "var(--text-muted)" }} />
+        }
+      </button>
+
+      <div>
+        <p className="body-s" style={{ fontWeight: 500, marginBottom: 4 }}>Profile photo <span style={{ color: "var(--text-subtle)", fontWeight: 400 }}>(optional)</span></p>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 10px" }} onClick={() => inputRef.current?.click()}>
+            Upload
+          </button>
+          {value && (
+            <button type="button" className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 10px" }} onClick={() => onChange("")}>
+              <X size={12} /> Remove
+            </button>
+          )}
+        </div>
+        <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4 }}>JPG or PNG, max 2 MB</p>
+      </div>
+
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+    </div>
+  );
+}
+
 // ─── Step 7: Profile / account ────────────────────────────────────────────────
 
 function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
+  const socialLinks = [
+    { field: "githubUrl",   icon: <Code2 size={14} />,    placeholder: "github.com/yourname" },
+    { field: "linkedinUrl", icon: <Link2 size={14} />,    placeholder: "linkedin.com/in/yourname" },
+    { field: "portfolioUrl",icon: <Globe size={14} />,    placeholder: "yourportfolio.com" },
+    { field: "twitterUrl",  icon: <AtSign size={14} />,   placeholder: "x.com/yourhandle" },
+    { field: "dribbbleUrl", icon: <Globe size={14} />,    placeholder: "dribbble.com/yourname" },
+    { field: "behanceUrl",  icon: <Link2 size={14} />,    placeholder: "behance.net/yourname" },
+    { field: "mediumUrl",   icon: <Globe size={14} />,    placeholder: "medium.com/@yourname" },
+  ];
+
   return (
     <div>
       <StepHeader icon={<User size={20} style={{ color: "var(--accent)" }} />} title="Create your account" subtitle="We'll send you a magic link — no password needed." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Avatar */}
+        <AvatarUpload
+          value={state.avatarUrl}
+          onChange={(v) => dispatch({ type: "SET_FIELD", field: "avatarUrl", value: v })}
+        />
+
+        {/* Name */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <Field label="First name" required>
             <input className="input" type="text" value={state.firstName} placeholder="Alex"
               onChange={(e) => dispatch({ type: "SET_FIELD", field: "firstName", value: e.target.value })}
               onBlur={() => dispatch({ type: "BLUR_FIELD", field: "firstName" })}
-              style={state.touched.firstName && state.errors.firstName ? { borderColor: "var(--error)" } : undefined}
-              autoFocus />
+              style={state.touched.firstName && state.errors.firstName ? { borderColor: "var(--error)" } : undefined} />
             <FieldError error={state.errors.firstName} touched={state.touched.firstName} />
           </Field>
           <Field label="Last name">
@@ -349,6 +419,7 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           </Field>
         </div>
 
+        {/* Email */}
         <Field label="Email address" required>
           <input className="input" type="email" value={state.email} placeholder="alex@email.com"
             onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
@@ -358,19 +429,26 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           <FieldError error={state.errors.email} touched={state.touched.email} />
         </Field>
 
+        {/* Bio */}
+        <Field label="Bio (optional)">
+          <textarea className="input" value={state.bio} placeholder="A short intro about you and what you're looking for…"
+            rows={3} maxLength={300}
+            onChange={(e) => dispatch({ type: "SET_FIELD", field: "bio", value: e.target.value })}
+            style={{ resize: "vertical", minHeight: 80 }} />
+          <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "right" }}>{state.bio.length}/300</p>
+        </Field>
+
+        {/* Social links */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
-          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>Links (optional — you can add more in your profile)</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {[
-              { field: "githubUrl", icon: <Code2 size={14} />, placeholder: "github.com/yourname" },
-              { field: "linkedinUrl", icon: <Link2 size={14} />, placeholder: "linkedin.com/in/yourname" },
-              { field: "portfolioUrl", icon: <Globe size={14} />, placeholder: "yourportfolio.com" },
-            ].map(({ field, icon, placeholder }) => (
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>Links (all optional)</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {socialLinks.map(({ field, icon, placeholder }) => (
               <div key={field} style={{ position: "relative" }}>
                 <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", display: "flex", alignItems: "center" }}>
                   {icon}
                 </span>
-                <input className="input" type="text" value={state[field as keyof CandidateWizardState] as string}
+                <input className="input" type="text"
+                  value={state[field as keyof CandidateWizardState] as string}
                   placeholder={placeholder}
                   onChange={(e) => dispatch({ type: "SET_FIELD", field, value: e.target.value })}
                   style={{ paddingLeft: 36 }} />
@@ -513,10 +591,17 @@ export default function CandidateOnboardingPage() {
           city: state.city || null,
           experienceLevel: state.experienceLevel || null,
           salaryMin: state.salaryMin ? parseInt(state.salaryMin, 10) : null,
+          skills: state.skills,
           alertFrequency: state.alertFrequency,
+          bio: state.bio || null,
+          avatarUrl: state.avatarUrl || null,
           githubUrl: state.githubUrl || null,
           linkedinUrl: state.linkedinUrl || null,
           portfolioUrl: state.portfolioUrl || null,
+          dribbbleUrl: state.dribbbleUrl || null,
+          behanceUrl: state.behanceUrl || null,
+          twitterUrl: state.twitterUrl || null,
+          mediumUrl: state.mediumUrl || null,
         }),
       });
 
