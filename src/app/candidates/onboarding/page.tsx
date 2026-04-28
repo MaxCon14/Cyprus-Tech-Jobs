@@ -22,7 +22,13 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 const supabase = createSupabaseBrowserClient();
 const LS_KEY = "cyprustechjobs:candidate-draft";
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+const PERSIST_FIELDS = [
+  "categories", "remoteType", "city", "experienceLevel", "salaryMin",
+  "alertFrequency", "firstName", "lastName", "email",
+  "githubUrl", "linkedinUrl", "portfolioUrl",
+] as const;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function StepHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
@@ -54,9 +60,89 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-// ─── Step 1: Work type ──────────────────────────────────────────────────────
+// ─── Mascot ───────────────────────────────────────────────────────────────────
 
-function Step1WorkType({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+function MascotSpeaking() {
+  return (
+    <div className="mascot-float">
+      <svg width="110" height="101" viewBox="0 0 628 576" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M234.178 81.8274C258.724 80.0262 283.352 84.0763 306.031 93.6387C354.289 114.076 376.911 148.774 395.717 194.74C427.171 196.938 456.134 207.959 481.685 229.363C548.67 285.475 573.597 455.969 516.642 524.313C481.668 566.276 378.055 570.73 322.872 574.333C240.4 577.345 67.8426 585.082 19.4964 502.064C-5.19045 459.673 -3.93004 390.244 9.41989 343.66C21.3852 301.91 39.1243 279.682 76.4278 258.847C92.2975 168.801 137.32 95.4874 234.178 81.8274Z" fill="#0A0A0A"/>
+        <g className="mascot-eye-left">
+          <path d="M286.845 278.152C256.611 278.152 247.806 312.32 247.805 354.471C247.805 396.623 256.611 430.796 286.845 430.796C317.079 430.794 325.881 396.622 325.881 354.471C325.88 312.321 317.079 278.154 286.845 278.152Z" fill="white"/>
+        </g>
+        <g className="mascot-eye-right">
+          <path d="M422.629 278.152C392.394 278.152 383.59 312.32 383.589 354.471C383.589 396.623 392.394 430.796 422.629 430.796C452.863 430.794 461.665 396.622 461.665 354.471C461.664 312.321 452.863 278.154 422.629 278.152Z" fill="white"/>
+        </g>
+        <g className="mascot-star">
+          <path d="M544.097 4.72659C546.156 -1.57553 555.154 -1.57553 557.213 4.72659L573.818 55.5565C574.491 57.6168 576.11 59.2388 578.182 59.928L623.301 74.9354C629.566 77.0196 629.566 85.8011 623.301 87.8852L578.182 102.893C576.11 103.582 574.491 105.204 573.818 107.264L557.213 158.094C555.154 164.396 546.156 164.396 544.097 158.094L527.475 107.213C526.811 105.182 525.227 103.574 523.192 102.87L479.861 87.8576C473.704 85.7244 473.704 77.0962 479.861 74.9631L523.192 59.9511C525.227 59.2462 526.811 57.639 527.475 55.6072L544.097 4.72659Z" fill="#FD3F73"/>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Step 1: Welcome ──────────────────────────────────────────────────────────
+
+function Step1Welcome() {
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <MascotSpeaking />
+      </div>
+
+      {/* Speech bubble */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 36 }}>
+        <div style={{
+          position: "relative",
+          background: "var(--surface)",
+          border: "1.5px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "20px 24px",
+          maxWidth: 360,
+          textAlign: "left",
+        }}>
+          <div style={{
+            position: "absolute",
+            top: -10,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "10px solid transparent",
+            borderRight: "10px solid transparent",
+            borderBottom: "10px solid var(--border)",
+          }} />
+          <div style={{
+            position: "absolute",
+            top: -8,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "9px solid transparent",
+            borderRight: "9px solid transparent",
+            borderBottom: "9px solid var(--surface)",
+          }} />
+          <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", marginBottom: 8 }}>
+            Hey! I&#39;m so glad you&#39;re here 👋
+          </p>
+          <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
+            I&#39;m going to help you find your next tech job in Cyprus. It&#39;ll only take 2 minutes — promise.
+          </p>
+        </div>
+      </div>
+
+      <h1 className="h1" style={{ marginBottom: 10 }}>Find your dream tech job in Cyprus</h1>
+      <p className="body" style={{ color: "var(--text-muted)", maxWidth: 340, margin: "0 auto" }}>
+        Tell us what you&#39;re looking for and we&#39;ll match you with the best opportunities.
+      </p>
+    </div>
+  );
+}
+
+// ─── Step 2: Work type ────────────────────────────────────────────────────────
+
+function Step2WorkType({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
   const remoteOptions = [
     { value: "REMOTE", label: "Remote", description: "Work from anywhere" },
     { value: "HYBRID", label: "Hybrid", description: "Mix of office & home" },
@@ -103,9 +189,9 @@ function Step1WorkType({ state, dispatch }: { state: CandidateWizardState; dispa
   );
 }
 
-// ─── Step 2: Location ───────────────────────────────────────────────────────
+// ─── Step 3: Location ─────────────────────────────────────────────────────────
 
-function Step2Location({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+function Step3Location({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
   const isRemoteOnly = state.remoteType === "REMOTE";
 
   return (
@@ -115,7 +201,7 @@ function Step2Location({ state, dispatch }: { state: CandidateWizardState; dispa
       {isRemoteOnly ? (
         <div className="alert alert-success" style={{ borderRadius: "var(--radius-md)" }}>
           <span className="body-s">
-            You selected <strong>Remote only</strong> — location doesn't matter. We'll show you fully remote roles from Cyprus-based companies.
+            You selected <strong>Remote only</strong> — location doesn&#39;t matter. We&#39;ll show you fully remote roles from Cyprus-based companies.
           </span>
         </div>
       ) : (
@@ -131,9 +217,9 @@ function Step2Location({ state, dispatch }: { state: CandidateWizardState; dispa
   );
 }
 
-// ─── Step 3: Experience level ───────────────────────────────────────────────
+// ─── Step 4: Experience level ─────────────────────────────────────────────────
 
-function Step3Level({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+function Step4Level({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
   return (
     <div>
       <StepHeader icon={<BarChart2 size={20} style={{ color: "var(--accent)" }} />} title="Your experience level" subtitle="We'll filter out roles that don't match." />
@@ -170,9 +256,9 @@ function Step3Level({ state, dispatch }: { state: CandidateWizardState; dispatch
   );
 }
 
-// ─── Step 4: Alert frequency ────────────────────────────────────────────────
+// ─── Step 6: Alert frequency ──────────────────────────────────────────────────
 
-function Step4Frequency({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+function Step6Alerts({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
   const options = [
     { value: "DAILY" as const, label: "Daily digest", description: "Get new matching jobs every morning. Best for active job seekers.", icon: <Zap size={20} /> },
     { value: "WEEKLY" as const, label: "Weekly roundup", description: "A curated summary every Monday. Perfect if you're passively looking.", icon: <Bell size={20} /> },
@@ -204,15 +290,14 @@ function Step4Frequency({ state, dispatch }: { state: CandidateWizardState; disp
   );
 }
 
-// ─── Step 5: Profile ────────────────────────────────────────────────────────
+// ─── Step 7: Profile / account ────────────────────────────────────────────────
 
-function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
+function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
   return (
     <div>
       <StepHeader icon={<User size={20} style={{ color: "var(--accent)" }} />} title="Create your account" subtitle="We'll send you a magic link — no password needed." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {/* Name row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <Field label="First name" required>
             <input className="input" type="text" value={state.firstName} placeholder="Alex"
@@ -228,7 +313,6 @@ function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           </Field>
         </div>
 
-        {/* Email */}
         <Field label="Email address" required>
           <input className="input" type="email" value={state.email} placeholder="alex@email.com"
             onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
@@ -238,7 +322,6 @@ function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           <FieldError error={state.errors.email} touched={state.touched.email} />
         </Field>
 
-        {/* Optional links */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>Links (optional — you can add more in your profile)</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -270,9 +353,9 @@ function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState
   );
 }
 
-// ─── Step 6: Done ────────────────────────────────────────────────────────────
+// ─── Step 9: Done ─────────────────────────────────────────────────────────────
 
-function Step6Done({ state }: { state: CandidateWizardState }) {
+function Step9Done({ state }: { state: CandidateWizardState }) {
   return (
     <>
       <Confetti />
@@ -296,7 +379,7 @@ function Step6Done({ state }: { state: CandidateWizardState }) {
             Browse jobs while you wait <ArrowRight size={15} />
           </Link>
           <p className="body-s" style={{ color: "var(--text-subtle)" }}>
-            Click the link in your email to activate your account. Check spam if you don't see it.
+            Click the link in your email to activate your account. Check spam if you don&#39;t see it.
           </p>
         </div>
       </div>
@@ -312,11 +395,8 @@ export default function CandidateOnboardingPage() {
   const [, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState("");
   const hydrated = useRef(false);
-  // null = checking, false = not a candidate (allow), true = redirect in progress
   const [authChecked, setAuthChecked] = useState(false);
 
-  // Security guard: if user is already a registered candidate, send them to
-  // their dashboard. This prevents accessing other users' localStorage drafts.
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user?.email) {
@@ -330,27 +410,22 @@ export default function CandidateOnboardingPage() {
           router.replace("/candidates/dashboard");
           return;
         }
-        // Scope the draft to this user's email so different accounts
-        // can never see each other's unfinished onboarding state.
         const scopedKey = `${LS_KEY}:${user.email}`;
         const saved = localStorage.getItem(scopedKey) ?? localStorage.getItem(LS_KEY);
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
-            for (const field of fields) {
+            for (const field of PERSIST_FIELDS) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
           } catch { /* ignore */ }
         }
       } else {
-        // Not logged in — restore generic draft
         const saved = localStorage.getItem(LS_KEY);
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
-            for (const field of fields) {
+            for (const field of PERSIST_FIELDS) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
           } catch { /* ignore */ }
@@ -365,13 +440,17 @@ export default function CandidateOnboardingPage() {
   useEffect(() => {
     if (!hydrated.current) return;
     const { errors, touched, submitting, direction, candidateId, ...persistable } = state;
-    // Scope draft to email when available so different users don't share state
     const key = state.email ? `${LS_KEY}:${state.email}` : LS_KEY;
-    localStorage.setItem(key, JSON.stringify(persistable));
+    const toSave: Partial<typeof persistable> = {};
+    for (const field of PERSIST_FIELDS) {
+      // @ts-expect-error dynamic key
+      toSave[field] = persistable[field];
+    }
+    localStorage.setItem(key, JSON.stringify(toSave));
   }, [state]);
 
   const handleNext = () => {
-    if (state.step === 5 && !state.submitting && !state.candidateId) {
+    if (state.step === 7 && !state.submitting && !state.candidateId) {
       handleSubmit();
       return;
     }
@@ -379,6 +458,7 @@ export default function CandidateOnboardingPage() {
   };
 
   const handleBack = () => startTransition(() => dispatch({ type: "PREV_STEP" }));
+  const handleSkip = () => startTransition(() => dispatch({ type: "NEXT_STEP" }));
 
   const handleSubmit = async () => {
     dispatch({ type: "SET_SUBMITTING", value: true });
@@ -412,7 +492,6 @@ export default function CandidateOnboardingPage() {
         return;
       }
 
-      // Send magic link for auth
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       await supabase.auth.signInWithOtp({
         email: state.email,
@@ -432,21 +511,24 @@ export default function CandidateOnboardingPage() {
     }
   };
 
-  const showNav = state.step < 6;
+  const isSkippable = state.step === 5 || state.step === 8;
+  const isDone = state.step === 9;
+  const showNav = !isDone;
 
-  // Block render until we've confirmed the user isn't already registered.
-  // This prevents any flash of the wizard (and localStorage restore) before redirect.
   if (!authChecked) return null;
 
   return (
     <WizardShell steps={CANDIDATE_STEPS} currentStep={state.step - 1}>
       <StepSlide key={state.step} direction={state.direction}>
-        {state.step === 1 && <Step1WorkType state={state} dispatch={dispatch} />}
-        {state.step === 2 && <Step2Location state={state} dispatch={dispatch} />}
-        {state.step === 3 && <Step3Level state={state} dispatch={dispatch} />}
-        {state.step === 4 && <Step4Frequency state={state} dispatch={dispatch} />}
-        {state.step === 5 && <Step5Profile state={state} dispatch={dispatch} onNext={handleNext} />}
-        {state.step === 6 && <Step6Done state={state} />}
+        {state.step === 1 && <Step1Welcome />}
+        {state.step === 2 && <Step2WorkType state={state} dispatch={dispatch} />}
+        {state.step === 3 && <Step3Location state={state} dispatch={dispatch} />}
+        {state.step === 4 && <Step4Level state={state} dispatch={dispatch} />}
+        {state.step === 5 && null /* Skills — coming in 1c */}
+        {state.step === 6 && <Step6Alerts state={state} dispatch={dispatch} />}
+        {state.step === 7 && <Step7Profile state={state} dispatch={dispatch} onNext={handleNext} />}
+        {state.step === 8 && null /* Experience — coming in 1f */}
+        {state.step === 9 && <Step9Done state={state} />}
       </StepSlide>
 
       {submitError && (
@@ -460,9 +542,17 @@ export default function CandidateOnboardingPage() {
           {state.step > 1 ? (
             <button type="button" className="btn btn-ghost" onClick={handleBack}><ArrowLeft size={15} /> Back</button>
           ) : <div />}
-          <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
-            {state.submitting ? "Saving…" : state.step === 5 ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
-          </button>
+
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            {isSkippable && (
+              <button type="button" className="btn btn-ghost" onClick={handleSkip}>
+                Skip for now
+              </button>
+            )}
+            <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
+              {state.submitting ? "Saving…" : state.step === 7 ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
+            </button>
+          </div>
         </div>
       )}
     </WizardShell>
