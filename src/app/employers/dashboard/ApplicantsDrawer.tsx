@@ -1,0 +1,268 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Users, X, ExternalLink, Globe, AtSign,
+  FileText, Loader2, MapPin, Briefcase, DollarSign, Calendar, ChevronRight, Link2,
+} from "lucide-react";
+import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
+
+interface Application {
+  id: string;
+  coverLetter: string | null;
+  status: string;
+  appliedAt: string;
+  candidate: CandidateRow | null;
+  positions: PositionRow[];
+}
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function fmtDate(d: string | null) {
+  if (!d) return "";
+  const [y, m] = d.split("-");
+  const month = MONTHS[parseInt(m, 10) - 1];
+  return month ? `${month} ${y}` : y;
+}
+
+function fmtApplied(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function remoteLabel(r: string | null) {
+  if (r === "REMOTE")  return "Remote";
+  if (r === "HYBRID")  return "Hybrid";
+  if (r === "ON_SITE") return "On-site";
+  return r ?? "";
+}
+
+// ─── Applicant card ───────────────────────────────────────────────────────────
+
+function ApplicantCard({ app }: { app: Application }) {
+  const [showCover, setShowCover] = useState(false);
+  const c = app.candidate;
+  if (!c) return null;
+
+  const name = [c.firstName, c.lastName].filter(Boolean).join(" ") || c.email;
+  const initial = name[0].toUpperCase();
+  const skills = c.skills ?? [];
+  const visibleSkills = skills.slice(0, 6);
+  const extraSkills = skills.length - 6;
+
+  const links = [
+    { url: c.githubUrl,    icon: <Globe size={13} />,    label: "GitHub"    },
+    { url: c.linkedinUrl,  icon: <Link2 size={13} />,   label: "LinkedIn"  },
+    { url: c.portfolioUrl, icon: <Globe size={13} />,    label: "Portfolio" },
+    { url: c.twitterUrl,   icon: <AtSign size={13} />,   label: "Twitter"   },
+    { url: c.dribbbleUrl,  icon: <AtSign size={13} />,   label: "Dribbble"  },
+    { url: c.behanceUrl,   icon: <Globe size={13} />,    label: "Behance"   },
+  ].filter((l) => !!l.url);
+
+  return (
+    <div style={{ border: "1px solid var(--border)", borderRadius: 12, background: "var(--surface)", overflow: "hidden" }}>
+
+      {/* Header */}
+      <div style={{ padding: "16px 18px", display: "flex", gap: 14, alignItems: "flex-start" }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
+          background: "var(--accent-soft)", border: "1.5px solid var(--accent)",
+          display: "grid", placeItems: "center",
+        }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 17, color: "var(--accent)" }}>{initial}</span>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+            <div>
+              <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{name}</p>
+              {c.headline && <p className="body-s" style={{ color: "var(--text-muted)" }}>{c.headline}</p>}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <Calendar size={11} style={{ color: "var(--text-subtle)" }} />
+              <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{fmtApplied(app.appliedAt)}</span>
+            </div>
+          </div>
+
+          {/* Meta tags */}
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+            {c.city && (
+              <span className="tag" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
+                <MapPin size={9} /> {c.city}
+              </span>
+            )}
+            {c.remoteType && <span className="tag tag-outline" style={{ fontSize: 11 }}>{remoteLabel(c.remoteType)}</span>}
+            {c.experienceLevel && <span className="tag tag-outline" style={{ fontSize: 11 }}>{c.experienceLevel}</span>}
+            {c.salaryMin && (
+              <span className="tag" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
+                <DollarSign size={9} /> €{c.salaryMin.toLocaleString()}+ min
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bio */}
+      {c.bio && (
+        <div style={{ padding: "0 18px 14px" }}>
+          <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            {c.bio}
+          </p>
+        </div>
+      )}
+
+      {/* Skills */}
+      {visibleSkills.length > 0 && (
+        <div style={{ padding: "0 18px 14px", display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {visibleSkills.map((s) => (
+            <span key={s} className="tag" style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{s}</span>
+          ))}
+          {extraSkills > 0 && <span className="tag tag-outline" style={{ fontSize: 11 }}>+{extraSkills} more</span>}
+        </div>
+      )}
+
+      {/* Work history */}
+      {app.positions.length > 0 && (
+        <div style={{ padding: "0 18px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+          {app.positions.map((pos) => (
+            <div key={pos.id} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <Briefcase size={12} style={{ color: "var(--text-subtle)", flexShrink: 0, marginTop: 2 }} />
+              <div>
+                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)" }}>{pos.title}</p>
+                <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                  {pos.company} · {fmtDate(pos.startDate)} – {pos.current ? "Present" : fmtDate(pos.endDate)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{ padding: "12px 18px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {links.map(({ url, icon, label }) => (
+            <a key={label} href={url!.startsWith("http") ? url! : `https://${url}`}
+              target="_blank" rel="noopener noreferrer" title={label}
+              style={{ display: "flex", alignItems: "center", color: "var(--text-subtle)", textDecoration: "none", padding: "4px 8px", borderRadius: 6, border: "1px solid var(--border)" }}>
+              {icon}
+            </a>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {app.coverLetter && (
+            <button type="button" onClick={() => setShowCover((v) => !v)}
+              className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <FileText size={12} />
+              {showCover ? "Hide" : "Cover letter"}
+            </button>
+          )}
+          {c.cvUrl ? (
+            <a href={c.cvUrl.startsWith("http") ? c.cvUrl : `https://${c.cvUrl}`}
+              target="_blank" rel="noopener noreferrer"
+              className="btn btn-accent btn-sm"
+              style={{ display: "flex", alignItems: "center", gap: 5, textDecoration: "none" }}>
+              <ExternalLink size={12} /> View CV
+            </a>
+          ) : (
+            <button type="button" disabled className="btn btn-outline btn-sm" style={{ opacity: 0.4 }}>No CV</button>
+          )}
+        </div>
+      </div>
+
+      {/* Cover letter */}
+      {showCover && app.coverLetter && (
+        <div style={{ padding: "14px 18px 16px", borderTop: "1px solid var(--border)", background: "var(--bg-muted)" }}>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>Cover letter</p>
+          <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>{app.coverLetter}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Drawer (slide-in panel) ──────────────────────────────────────────────────
+
+export function ApplicantsDrawer({ jobId, count, jobTitle }: { jobId: string; count: number; jobTitle: string }) {
+  const [open, setOpen]                 = useState(false);
+  const [loading, setLoading]           = useState(false);
+  const [applications, setApplications] = useState<Application[] | null>(null);
+  const [error, setError]               = useState<string | null>(null);
+
+  async function openPanel() {
+    setOpen(true);
+    if (applications !== null) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/applications/${jobId}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setApplications(data.applications ?? []);
+    } catch {
+      setError("Could not load applicants. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={openPanel}
+        className="btn btn-ghost btn-sm"
+        style={{ display: "flex", alignItems: "center", gap: 5 }}
+      >
+        <Users size={12} />
+        <span>{count}</span>
+        <ChevronRight size={11} />
+      </button>
+
+      {/* Side panel */}
+      {open && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)" }}
+            onClick={() => setOpen(false)} />
+
+          <div style={{
+            position: "relative", width: "100%", maxWidth: 560, height: "100dvh",
+            background: "var(--surface)", borderLeft: "1px solid var(--border)",
+            display: "flex", flexDirection: "column", boxShadow: "var(--shadow-lg)",
+          }}>
+            {/* Header */}
+            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--surface)", zIndex: 1 }}>
+              <div>
+                <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>Applicants</p>
+                <h2 className="h3">{jobTitle}</h2>
+              </div>
+              <button type="button" onClick={() => setOpen(false)} className="btn btn-ghost btn-icon">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
+              {loading && (
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 0" }}>
+                  <Loader2 size={18} style={{ animation: "spin 1s linear infinite", color: "var(--accent)" }} />
+                  <span className="body-s" style={{ color: "var(--text-muted)" }}>Loading applicants…</span>
+                </div>
+              )}
+              {error && <p className="body-s" style={{ color: "var(--error)" }}>{error}</p>}
+              {applications !== null && applications.length === 0 && (
+                <div style={{ textAlign: "center", padding: "40px 0" }}>
+                  <Users size={32} style={{ color: "var(--text-subtle)", margin: "0 auto 12px" }} />
+                  <p className="body-s" style={{ color: "var(--text-subtle)" }}>No applications yet.</p>
+                </div>
+              )}
+              {applications?.map((app) => (
+                <ApplicantCard key={app.id} app={app} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

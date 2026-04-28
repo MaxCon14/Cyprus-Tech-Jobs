@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import { SignOutClient } from "./SignOutClient";
+import { ApplicantsDrawer } from "./ApplicantsDrawer";
 
 export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Jobs",
@@ -45,6 +46,20 @@ export default async function EmployerDashboard() {
 
   const company = employer.company;
   const jobs    = company?.jobs ?? [];
+
+  // Fetch application counts for all jobs
+  const jobIds = jobs.map((j) => j.id);
+  let applicationCounts: Record<string, number> = {};
+  if (jobIds.length > 0) {
+    const { data: appRows } = await supabaseAdmin
+      .from("job_applications")
+      .select("jobId")
+      .in("jobId", jobIds);
+    applicationCounts = (appRows ?? []).reduce<Record<string, number>>((acc, r) => {
+      acc[r.jobId] = (acc[r.jobId] ?? 0) + 1;
+      return acc;
+    }, {});
+  }
 
   const activeJobs  = jobs.filter(j => j.status === "ACTIVE");
   const draftJobs   = jobs.filter(j => j.status === "DRAFT");
@@ -191,8 +206,8 @@ export default async function EmployerDashboard() {
             /* Jobs list */
             <div>
               {/* Column headers */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 120px 140px 80px", gap: 16, padding: "10px 24px", borderBottom: "1px solid var(--border)" }}>
-                {["Role", "Status", "Posted", "Expires", ""].map(h => (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 120px 140px 80px", gap: 16, padding: "10px 24px", borderBottom: "1px solid var(--border)" }}>
+                {["Role", "Status", "Applicants", "Posted", "Expires", ""].map(h => (
                   <span key={h} className="caption" style={{ color: "var(--text-subtle)" }}>{h}</span>
                 ))}
               </div>
@@ -205,7 +220,7 @@ export default async function EmployerDashboard() {
 
                 return (
                   <div key={job.id} style={{
-                    display: "grid", gridTemplateColumns: "1fr 100px 120px 140px 80px",
+                    display: "grid", gridTemplateColumns: "1fr 100px 100px 120px 140px 80px",
                     gap: 16, padding: "16px 24px", alignItems: "center",
                     borderBottom: i < jobs.length - 1 ? "1px solid var(--border)" : "none",
                   }}>
@@ -238,6 +253,11 @@ export default async function EmployerDashboard() {
                         {job.status === "ACTIVE" && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--success)", display: "block" }} />}
                         {st.label}
                       </span>
+                    </div>
+
+                    {/* Applicants */}
+                    <div>
+                      <ApplicantsDrawer jobId={job.id} count={applicationCounts[job.id] ?? 0} jobTitle={job.title} />
                     </div>
 
                     {/* Posted */}

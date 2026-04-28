@@ -10,6 +10,7 @@ import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft, Check }
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
+import { ApplyPanel } from "./ApplyPanel";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -33,20 +34,36 @@ export default async function JobDetailPage({ params }: Props) {
   const similar    = similarRaw.map(serialiseJob);
   const salary     = formatSalary(job.salaryMin, job.salaryMax);
 
-  // Check if the visitor is a logged-in candidate with a saved CV
+  // Check if the visitor is a logged-in candidate
   let savedCvUrl: string | null = null;
+  let candidateId: string | null = null;
+  let candidateName: string | null = null;
+  let candidateHeadline: string | null = null;
+  let hasApplied = false;
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user?.email) {
-      const { data } = await supabaseAdmin
+      const { data: c } = await supabaseAdmin
         .from("candidates")
-        .select("cvUrl")
+        .select("id, firstName, lastName, headline, cvUrl")
         .eq("email", user.email)
         .single();
-      savedCvUrl = data?.cvUrl ?? null;
+      if (c) {
+        savedCvUrl      = c.cvUrl ?? null;
+        candidateId     = c.id;
+        candidateName   = [c.firstName, c.lastName].filter(Boolean).join(" ") || user.email;
+        candidateHeadline = c.headline ?? null;
+        const { data: existing } = await supabaseAdmin
+          .from("job_applications")
+          .select("id")
+          .eq("jobId", job.id)
+          .eq("candidateId", c.id)
+          .maybeSingle();
+        hasApplied = !!existing;
+      }
     }
-  } catch { /* non-critical — continue without saved CV */ }
+  } catch { /* non-critical — continue without candidate data */ }
 
   const metaItems = [
     { icon: <MapPin size={14} />,     label: job.city ?? "Cyprus" },
@@ -151,12 +168,29 @@ export default async function JobDetailPage({ params }: Props) {
                 <div className="mono-l" style={{ color: "var(--accent)", fontSize: 20 }}>{salary}</div>
               </div>
             )}
-            <a href={job.applyUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
-              Apply for this role →
-            </a>
+            <ApplyPanel
+              jobId={job.id}
+              jobSlug={job.slug}
+              jobTitle={job.title}
+              candidateId={candidateId}
+              candidateName={candidateName}
+              candidateHeadline={candidateHeadline}
+              hasApplied={hasApplied}
+            />
+            {job.applyUrl && (
+              <a
+                href={job.applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost btn-sm"
+                style={{ width: "100%", justifyContent: "center", marginTop: 8, display: "flex" }}
+              >
+                Apply externally →
+              </a>
+            )}
             <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
             <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
-              APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
+              YOUR PROFILE IS SHARED WITH {job.company.name.toUpperCase()}
             </p>
           </div>
 
