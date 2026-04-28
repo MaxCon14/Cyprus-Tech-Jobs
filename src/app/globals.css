@@ -1086,3 +1086,88 @@ details[open] .faq-chevron {
     display: none;
   }
 }
+
+/* =====================================================
+   EMPLOYER DASHBOARD — RESPONSIVE
+   ===================================================== */
+
+.emp-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* Stats: 4-col on desktop */
+.emp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* Job table column header row */
+.emp-job-headers {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 120px 140px 80px;
+  gap: 16px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Job table data row */
+.emp-job-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 100px 120px 140px 80px;
+  gap: 16px;
+  padding: 16px 24px;
+  align-items: center;
+}
+
+/* Nav company name — hide on small screens */
+.emp-nav-name {
+  /* visible by default */
+}
+
+@media (max-width: 860px) {
+  .emp-page { padding: 24px 20px 60px; }
+  .emp-nav-name { display: none; }
+  .emp-stats { grid-template-columns: repeat(2, 1fr); }
+
+  /* Tighter table: drop posted + expires */
+  .emp-job-headers {
+    grid-template-columns: 1fr 100px 100px 80px;
+  }
+  .emp-job-row {
+    grid-template-columns: 1fr 100px 100px 80px;
+  }
+  .emp-col-hide-tablet { display: none; }
+}
+
+@media (max-width: 640px) {
+  .emp-page { padding: 20px 16px 60px; }
+
+  /* Table headers hidden — each row is self-labelled */
+  .emp-job-headers { display: none; }
+
+  /* Row becomes a flex card */
+  .emp-job-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+  }
+
+  /* Role takes full width on its own line */
+  .emp-job-role { width: 100%; }
+
+  /* Status, applicants, and actions appear inline below */
+  .emp-job-status,
+  .emp-job-applicants { flex: 0 0 auto; }
+
+  /* Actions pushed to far right */
+  .emp-job-actions { margin-left: auto; }
+
+  /* Posted and expires hidden on mobile */
+  .emp-col-hide-tablet { display: none; }
+}

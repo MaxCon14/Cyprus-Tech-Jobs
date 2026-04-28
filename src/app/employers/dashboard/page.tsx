@@ -84,7 +84,7 @@ export default async function EmployerDashboard() {
             <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
               <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{companyInitial}</span>
             </div>
-            <span className="body-s" style={{ color: "var(--text-muted)" }}>{company?.name ?? employer.name ?? "Employer"}</span>
+            <span className="body-s emp-nav-name" style={{ color: "var(--text-muted)" }}>{company?.name ?? employer.name ?? "Employer"}</span>
             <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
             <Link href="/post-a-job" className="btn btn-accent btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Plus size={13} /> Post a job
@@ -94,7 +94,7 @@ export default async function EmployerDashboard() {
         </div>
       </header>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px 80px" }}>
+      <div className="emp-page">
 
         {/* ── Company hero ── */}
         <div style={{
@@ -155,7 +155,7 @@ export default async function EmployerDashboard() {
         </div>
 
         {/* ── Stats row ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 24 }}>
+        <div className="emp-stats">
           {[
             { label: "Active listings",  value: activeJobs.length.toString(),  icon: <Briefcase size={16} />,  accent: true },
             { label: "Draft",            value: draftJobs.length.toString(),   icon: <FileText size={16} />,   accent: false },
@@ -206,10 +206,13 @@ export default async function EmployerDashboard() {
             /* Jobs list */
             <div>
               {/* Column headers */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 100px 120px 140px 80px", gap: 16, padding: "10px 24px", borderBottom: "1px solid var(--border)" }}>
-                {["Role", "Status", "Applicants", "Posted", "Expires", ""].map(h => (
-                  <span key={h} className="caption" style={{ color: "var(--text-subtle)" }}>{h}</span>
-                ))}
+              <div className="emp-job-headers">
+                <span className="caption" style={{ color: "var(--text-subtle)" }}>Role</span>
+                <span className="caption" style={{ color: "var(--text-subtle)" }}>Status</span>
+                <span className="caption" style={{ color: "var(--text-subtle)" }}>Applicants</span>
+                <span className="caption emp-col-hide-tablet" style={{ color: "var(--text-subtle)" }}>Posted</span>
+                <span className="caption emp-col-hide-tablet" style={{ color: "var(--text-subtle)" }}>Expires</span>
+                <span className="caption" style={{ color: "var(--text-subtle)" }}></span>
               </div>
 
               {jobs.map((job, i) => {
@@ -219,13 +222,11 @@ export default async function EmployerDashboard() {
                   : false;
 
                 return (
-                  <div key={job.id} style={{
-                    display: "grid", gridTemplateColumns: "1fr 100px 100px 120px 140px 80px",
-                    gap: 16, padding: "16px 24px", alignItems: "center",
+                  <div key={job.id} className="emp-job-row" style={{
                     borderBottom: i < jobs.length - 1 ? "1px solid var(--border)" : "none",
                   }}>
                     {/* Role */}
-                    <div>
+                    <div className="emp-job-role">
                       <p className="body-s" style={{ fontWeight: 600, marginBottom: 4 }}>{job.title}</p>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                         {job.city && (
@@ -243,7 +244,7 @@ export default async function EmployerDashboard() {
                     </div>
 
                     {/* Status */}
-                    <div>
+                    <div className="emp-job-status">
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
                         padding: "4px 10px", borderRadius: 6, fontSize: 11,
@@ -256,17 +257,17 @@ export default async function EmployerDashboard() {
                     </div>
 
                     {/* Applicants */}
-                    <div>
+                    <div className="emp-job-applicants">
                       <ApplicantsDrawer jobId={job.id} count={applicationCounts[job.id] ?? 0} jobTitle={job.title} />
                     </div>
 
-                    {/* Posted */}
-                    <div className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                    {/* Posted — hidden on mobile */}
+                    <div className="mono-s emp-col-hide-tablet" style={{ color: "var(--text-subtle)" }}>
                       {job.postedAt ? timeAgo(job.postedAt) : job.createdAt ? timeAgo(job.createdAt) : "—"}
                     </div>
 
-                    {/* Expires */}
-                    <div className="mono-s" style={{ color: isExpiringSoon && job.status === "ACTIVE" ? "var(--warning)" : "var(--text-subtle)" }}>
+                    {/* Expires — hidden on mobile */}
+                    <div className={`mono-s emp-col-hide-tablet`} style={{ color: isExpiringSoon && job.status === "ACTIVE" ? "var(--warning)" : "var(--text-subtle)" }}>
                       {job.expiresAt
                         ? isExpiringSoon && job.status === "ACTIVE"
                           ? `Expires ${timeAgo(job.expiresAt)}`
@@ -275,7 +276,7 @@ export default async function EmployerDashboard() {
                     </div>
 
                     {/* Actions */}
-                    <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                    <div className="emp-job-actions" style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
                       <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
                         <Eye size={13} />
                       </Link>
