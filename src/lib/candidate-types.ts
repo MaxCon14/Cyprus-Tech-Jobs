@@ -14,6 +14,7 @@ export interface CandidateRow {
   dribbbleUrl: string | null;
   behanceUrl: string | null;
   twitterUrl: string | null;
+  mediumUrl: string | null;
   cvUrl: string | null;
   city: string | null;
   remoteType: "REMOTE" | "HYBRID" | "ON_SITE" | null;

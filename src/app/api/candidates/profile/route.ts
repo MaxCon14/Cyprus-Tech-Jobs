@@ -18,7 +18,7 @@ export async function PATCH(req: NextRequest) {
   const allowed = [
     "firstName", "lastName", "headline", "bio",
     "avatarUrl", "portfolioUrl", "githubUrl", "linkedinUrl",
-    "dribbbleUrl", "behanceUrl", "twitterUrl", "cvUrl",
+    "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl", "cvUrl",
     "city", "remoteType", "experienceLevel", "salaryMin",
     "openToWork", "categories", "skills", "alertFrequency",
   ];

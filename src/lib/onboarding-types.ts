@@ -141,7 +141,7 @@ export function employerReducer(
 // CANDIDATE WIZARD
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type CandidateWizardStep = 1 | 2 | 3 | 4 | 5 | 6;
+export type CandidateWizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export interface CandidateWizardState {
   step: CandidateWizardStep;
@@ -150,23 +150,31 @@ export interface CandidateWizardState {
   candidateId: string | null;
   errors: Record<string, string>;
   touched: Record<string, boolean>;
-  // Step 1
+  // Step 2 — work type
   categories: string[];
   remoteType: "REMOTE" | "HYBRID" | "ON_SITE" | "";
-  // Step 2
+  // Step 3 — location
   city: string;
-  // Step 3
+  // Step 4 — level
   experienceLevel: "JUNIOR" | "MID" | "SENIOR" | "LEAD" | "EXECUTIVE" | "";
   salaryMin: string;
-  // Step 4
+  // Step 5 — skills (skippable, max 10)
+  skills: string[];
+  // Step 6 — alerts
   alertFrequency: "DAILY" | "WEEKLY";
-  // Step 5 — profile
+  // Step 7 — profile / account
   firstName: string;
   lastName: string;
   email: string;
+  bio: string;
+  avatarUrl: string;
   githubUrl: string;
   linkedinUrl: string;
   portfolioUrl: string;
+  dribbbleUrl: string;
+  behanceUrl: string;
+  twitterUrl: string;
+  mediumUrl: string;
 }
 
 export type CandidateWizardAction =
@@ -192,13 +200,20 @@ export function initialCandidateState(): CandidateWizardState {
     city: "",
     experienceLevel: "",
     salaryMin: "",
+    skills: [],
     alertFrequency: "WEEKLY",
     firstName: "",
     lastName: "",
     email: "",
+    bio: "",
+    avatarUrl: "",
     githubUrl: "",
     linkedinUrl: "",
     portfolioUrl: "",
+    dribbbleUrl: "",
+    behanceUrl: "",
+    twitterUrl: "",
+    mediumUrl: "",
   };
 }
 
@@ -207,7 +222,7 @@ export function validateCandidateStep(
   state: CandidateWizardState,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  if (step === 5) {
+  if (step === 7) {
     if (!state.firstName.trim()) errors.firstName = "First name is required.";
     if (!state.email.trim()) {
       errors.email = "Email address is required.";
@@ -253,7 +268,7 @@ export function candidateReducer(
         );
         return { ...state, errors: stepErrors, touched: { ...state.touched, ...allTouched } };
       }
-      const next = Math.min(state.step + 1, 6) as CandidateWizardStep;
+      const next = Math.min(state.step + 1, 9) as CandidateWizardStep;
       return { ...state, step: next, direction: "forward", errors: {} };
     }
 
@@ -347,7 +362,7 @@ export function computeProfileScore(data: ProfileData): {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const EMPLOYER_STEPS = ["Account", "Company", "Profile", "Verify email", "Done"];
-export const CANDIDATE_STEPS = ["Work type", "Location", "Your level", "Alerts", "Your profile", "Done"];
+export const CANDIDATE_STEPS = ["Welcome", "Work type", "Location", "Level", "Skills", "Alerts", "Profile", "Experience", "Done"];
 
 export const COMPANY_SIZES = [
   { value: "startup",    label: "Startup",    description: "1–50 people" },
