@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(32px, 5vw, 48px) var(--page-padding-x)", marginTop: "auto" }}>
       <div className="page-container">
-        <div className="grid-4" style={{ gap: "clamp(24px, 4vw, 32px)", marginBottom: "clamp(32px, 5vw, 48px)" }}>
+        <div className="grid-5" style={{ gap: "clamp(24px, 4vw, 32px)", marginBottom: "clamp(32px, 5vw, 48px)" }}>
 
           {/* Brand */}
           <div>
@@ -41,6 +41,24 @@ export function Footer() {
                 ["Post a job",          "/post-a-job"],
                 ["Employer dashboard",  "/employers/dashboard"],
                 ["Pricing",             "/post-a-job#pricing"],
+              ].map(([label, href]) => (
+                <Link key={href} href={href} style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Compare */}
+          <div>
+            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Compare us with</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[
+                ["Ergodotisi",      "/compare/ergodotisi"],
+                ["CyprusWork",      "/compare/cypruswork"],
+                ["Carierista",      "/compare/carierista"],
+                ["Kariera.com.cy",  "/compare/kariera"],
+                ["CyprusJobs.com",  "/compare/cyprusjobs"],
               ].map(([label, href]) => (
                 <Link key={href} href={href} style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
                   {label}
