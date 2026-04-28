@@ -1000,3 +1000,89 @@ details[open] .faq-chevron {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+
+/* =====================================================
+   CANDIDATE DASHBOARD — RESPONSIVE
+   ===================================================== */
+
+/* Page wrapper */
+.dash-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* Hero card: avatar+info on left, ring on right */
+.dash-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Main two-column layout */
+.dash-two-col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Checklist header row: progress + hint label */
+.dash-checklist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+/* Form grids inside cards (name fields, date fields) */
+.dash-form-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Header nav name — hidden on very small screens */
+.dash-nav-name {
+  /* visible by default */
+}
+
+@media (max-width: 860px) {
+  /* Stack the main columns */
+  .dash-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Reduce page padding */
+  .dash-page {
+    padding: 20px 16px 60px;
+  }
+
+  /* Stack the hero: ring moves below name on narrow screens */
+  .dash-hero {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stack the ring below by reversing children order via row-reverse trick:
+     instead we rely on the ring being last in DOM so it just flows under */
+
+  /* Stack checklist header */
+  .dash-checklist-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Form two-col grids become single column */
+  .dash-form-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide name in sticky nav to save space */
+  .dash-nav-name {
+    display: none;
+  }
+}

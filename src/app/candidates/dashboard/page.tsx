@@ -89,7 +89,7 @@ export default async function CandidateDashboardPage() {
             <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
               <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{initials}</span>
             </div>
-            <span className="body-s" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
+            <span className="body-s dash-nav-name" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
             <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
             <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
             <SignOutClient />
@@ -97,7 +97,7 @@ export default async function CandidateDashboardPage() {
         </div>
       </header>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px 80px" }}>
+      <div className="dash-page">
 
         {/* ── Email unverified ── */}
         {!c.emailVerified && (
@@ -110,10 +110,9 @@ export default async function CandidateDashboardPage() {
         )}
 
         {/* ── Profile hero ── */}
-        <div style={{
+        <div className="dash-hero" style={{
           background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16,
           padding: "28px 32px", marginBottom: 20,
-          display: "grid", gridTemplateColumns: "1fr auto", gap: 20, alignItems: "start",
         }}>
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
             {/* Avatar */}
@@ -165,7 +164,7 @@ export default async function CandidateDashboardPage() {
             background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
             padding: "20px 24px", marginBottom: 20,
           }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <div className="dash-checklist-header">
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ height: 6, width: 120, background: "var(--bg-muted)", borderRadius: 99, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${completion.pct}%`, background: completion.pct < 50 ? "var(--warning)" : "var(--accent)", borderRadius: 99, transition: "width 600ms var(--ease-out)" }} />
@@ -193,7 +192,7 @@ export default async function CandidateDashboardPage() {
         )}
 
         {/* ── Two-column layout ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20, alignItems: "start" }}>
+        <div className="dash-two-col">
 
           {/* Left column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

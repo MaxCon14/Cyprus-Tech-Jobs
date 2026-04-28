@@ -60,7 +60,7 @@ export function ProfileSection({ candidate }: { candidate: CandidateRow }) {
   return (
     <Section title="Profile" saving={saving} onSave={save} onCancel={() => setEditing(false)}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div className="dash-form-two-col">
           <InputField label="First name" value={form.firstName} onChange={field("firstName")} placeholder="Alex" />
           <InputField label="Last name" value={form.lastName} onChange={field("lastName")} placeholder="Konstantinou" />
         </div>
@@ -241,11 +241,11 @@ export function ExperienceSection({ candidateId, initialPositions }: { candidate
           <div style={{ background: "var(--bg-muted)", borderRadius: 10, padding: "18px 20px", marginTop: positions.length > 0 ? 12 : 0 }}>
             <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>New position</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="dash-form-two-col">
                 <InputField label="Job title" value={form.title} onChange={formField("title")} placeholder="Senior Engineer" required />
                 <InputField label="Company" value={form.company} onChange={formField("company")} placeholder="Wargaming" required />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className="dash-form-two-col">
                 <InputField label="Start date" value={form.startDate} onChange={formField("startDate")} placeholder="2021-03" type="month" />
                 <InputField label="End date" value={form.endDate} onChange={formField("endDate")} placeholder="2024-01" type="month" disabled={form.current} />
               </div>
