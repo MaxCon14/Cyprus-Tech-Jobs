@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
-import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS } from "@/lib/onboarding-types";
+import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
+import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CITIES } from "@/lib/placeholder-data";
 
 // ─── Profile section ─────────────────────────────────────────────────────────
@@ -87,6 +88,7 @@ const LINK_FIELDS = [
   { key: "dribbbleUrl", label: "Dribbble",  icon: <AtSign size={14} />,       placeholder: "dribbble.com/yourname" },
   { key: "behanceUrl",  label: "Behance",   icon: <AtSign size={14} />,       placeholder: "behance.net/yourname" },
   { key: "twitterUrl",  label: "Twitter/X", icon: <AtSign size={14} />,       placeholder: "x.com/yourname" },
+  { key: "mediumUrl",   label: "Medium",    icon: <Globe size={14} />,         placeholder: "medium.com/@yourname" },
   { key: "cvUrl",       label: "CV / Résumé link", icon: <ExternalLink size={14} />, placeholder: "dropbox.com/s/… or any direct link" },
 ] as const;
 
@@ -268,6 +270,61 @@ export function ExperienceSection({ candidateId, initialPositions }: { candidate
           </div>
         )}
       </div>
+    </Section>
+  );
+}
+
+// ─── Skills section ───────────────────────────────────────────────────────────
+
+export function SkillsSection({ candidate }: { candidate: CandidateRow }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [skills, setSkills] = useState<string[]>(candidate.skills ?? []);
+  const MAX = 10;
+
+  async function save() {
+    setSaving(true);
+    await fetch("/api/candidates/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skills }),
+    });
+    setSaving(false);
+    setEditing(false);
+    window.location.reload();
+  }
+
+  if (!editing) {
+    return (
+      <Section title="Skills" onEdit={() => setEditing(true)}>
+        {skills.length > 0 ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {skills.map((s) => (
+              <span key={s} className="tag" style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{s}</span>
+            ))}
+          </div>
+        ) : (
+          <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic" }}>
+            No skills added yet. Add up to 10 technologies you work with.
+          </p>
+        )}
+      </Section>
+    );
+  }
+
+  return (
+    <Section title="Skills" saving={saving} onSave={save} onCancel={() => { setSkills(candidate.skills ?? []); setEditing(false); }}>
+      <TechStackSelector
+        options={skills.length >= MAX ? [] : TECH_STACK_OPTIONS}
+        selected={skills}
+        onChange={setSkills}
+        placeholder={skills.length >= MAX ? "10/10 skills selected" : "Search skills — e.g. React, Go, PostgreSQL"}
+      />
+      {skills.length >= MAX && (
+        <p className="body-s" style={{ color: "var(--text-muted)", marginTop: 8 }}>
+          You've reached the 10-skill limit. Remove one to add another.
+        </p>
+      )}
     </Section>
   );
 }
