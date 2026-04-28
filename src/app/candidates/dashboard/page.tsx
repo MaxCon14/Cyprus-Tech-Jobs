@@ -108,7 +108,7 @@ export default async function CandidateDashboardPage() {
             <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
               <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{initials}</span>
             </div>
-            <span className="body-s" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
+            <span className="body-s dashboard-header-name" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
             <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
             <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
             <SignOutClient />
@@ -116,7 +116,7 @@ export default async function CandidateDashboardPage() {
         </div>
       </header>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px 80px" }}>
+      <div className="dashboard-page-padding" style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* ── Email unverified ── */}
         {!c.emailVerified && (
@@ -129,10 +129,9 @@ export default async function CandidateDashboardPage() {
         )}
 
         {/* ── Profile hero ── */}
-        <div style={{
+        <div className="dashboard-hero" style={{
           background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16,
-          padding: "28px 32px", marginBottom: 20,
-          display: "grid", gridTemplateColumns: "1fr auto", gap: 20, alignItems: "start",
+          padding: "24px", marginBottom: 20,
         }}>
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
             {/* Avatar */}
@@ -170,8 +169,8 @@ export default async function CandidateDashboardPage() {
           </div>
 
           {/* Completion ring */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-            <ProfileRing score={completion.pct} size={84} strokeWidth={6} />
+          <div className="dashboard-hero-ring" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            <ProfileRing score={completion.pct} size={72} strokeWidth={6} />
             <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
               Profile strength
             </span>
@@ -193,7 +192,7 @@ export default async function CandidateDashboardPage() {
                   {completion.score}/{completion.items.length} complete
                 </span>
               </div>
-              <span className="caption" style={{ color: "var(--text-subtle)" }}>Complete your profile to stand out</span>
+              <span className="caption dashboard-checklist-label" style={{ color: "var(--text-subtle)" }}>Complete your profile to stand out</span>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 8 }}>
               {completion.items.map((item) => (
@@ -212,7 +211,7 @@ export default async function CandidateDashboardPage() {
         )}
 
         {/* ── Two-column layout ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20, alignItems: "start" }}>
+        <div className="dashboard-two-col">
 
           {/* Left column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

@@ -1039,3 +1039,63 @@ details[open] .faq-chevron {
   transform-origin: center;
   animation: mascot-star-spin 4s ease-in-out infinite;
 }
+
+/* =====================================================
+   CANDIDATE DASHBOARD — responsive layout
+   ===================================================== */
+
+.dashboard-page-padding {
+  padding: 32px 24px 80px;
+}
+
+.dashboard-two-col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+.dashboard-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: start;
+}
+
+.dashboard-checklist-label {
+  display: block;
+}
+
+.dashboard-header-name {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .dashboard-page-padding {
+    padding: 20px 16px 60px;
+  }
+
+  .dashboard-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero-ring {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-start;
+  }
+
+  .dashboard-checklist-label {
+    display: none;
+  }
+
+  .dashboard-header-name {
+    display: none;
+  }
+}
