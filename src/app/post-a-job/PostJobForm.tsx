@@ -24,6 +24,7 @@ const PLANS = [
     ],
     cta: "Post for free",
     accent: false,
+    badge: undefined,
     enabled: true,
   },
   {
@@ -57,6 +58,7 @@ const PLANS = [
     ],
     cta: "Coming soon",
     accent: false,
+    badge: undefined,
     enabled: false,
   },
 ] as const;
