@@ -1,14 +1,9 @@
 import { ImageResponse } from "next/og";
-import { comparisons, getComparison } from "@/data/comparisons";
+import { getComparison } from "@/data/comparisons";
 
-export const runtime = "edge";
 export const alt = "CyprusTech.Jobs vs competitor comparison";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-export function generateStaticParams() {
-  return comparisons.map((c) => ({ slug: c.slug }));
-}
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
