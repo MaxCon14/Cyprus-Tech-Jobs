@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
+import { SaveJobButton } from "./SaveJobButton";
 
 /* Map display name → Simple Icons slug (cdn.simpleicons.org/{slug}) */
 const SKILL_ICONS: Record<string, string> = {
@@ -106,9 +107,11 @@ type JobCardProps = {
   featured?: boolean;
   postedAt?: Date | string | null;
   tags?: { name: string }[];
+  savedJobIds?: string[];
 };
 
 export function JobCard({
+  id,
   slug,
   title,
   company,
@@ -122,6 +125,7 @@ export function JobCard({
   featured,
   postedAt,
   tags = [],
+  savedJobIds,
 }: JobCardProps) {
   const salary = formatSalary(salaryMin, salaryMax, salaryCurrency);
   const empLabel = employmentType.replace("_", "-").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -131,13 +135,16 @@ export function JobCard({
     <Link href={`/jobs/${slug}`} className="job-card">
       {featured && <span className="job-card-featured">FEATURED</span>}
 
-      {/* Header: logo + company + time */}
+      {/* Header: logo + company + time + save */}
       <div className="job-card-head">
         <CompanyLogo name={company.name} logoUrl={company.logoUrl} website={company.website} />
         <div className="job-card-head-info">
           <span className="job-card-company">{company.name}</span>
           {postedAt && <span className="job-card-time">{timeAgo(postedAt)}</span>}
         </div>
+        {savedJobIds !== undefined && (
+          <SaveJobButton jobId={id} initialSaved={savedJobIds.includes(id)} />
+        )}
       </div>
 
       {/* Title */}
