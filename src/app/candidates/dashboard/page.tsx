@@ -14,7 +14,7 @@ import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import type { Metadata } from "next";
 import {
   MapPin, Briefcase, CheckCircle2, Circle, AlertCircle,
-  ExternalLink, ChevronRight,
+  ExternalLink, ChevronRight, Heart,
 } from "lucide-react";
 
 export const metadata: Metadata = { title: "My dashboard — CyprusTech.Jobs" };
@@ -62,12 +62,34 @@ export default async function CandidateDashboardPage() {
 
   const completion = getCompletion(c, positions.length > 0);
 
-  // Fetch a few matching jobs for the sidebar
-  const matchingJobs = await getJobs({
-    remoteType:      c.remoteType  ?? undefined,
-    experienceLevel: c.experienceLevel ?? undefined,
-    take: 3,
-  });
+  // Fetch matching jobs and saved jobs in parallel
+  const [matchingJobs, savedJobsResult] = await Promise.all([
+    getJobs({
+      remoteType:      c.remoteType  ?? undefined,
+      experienceLevel: c.experienceLevel ?? undefined,
+      take: 3,
+    }),
+    supabaseAdmin.from("saved_jobs").select("jobId").eq("candidateId", c.id),
+  ]);
+
+  const savedJobIds = (savedJobsResult.data ?? []).map((r: { jobId: string }) => r.jobId);
+
+  let savedJobs: { id: string; slug: string; title: string; city: string | null; remoteType: string; companyName: string }[] = [];
+  if (savedJobIds.length > 0) {
+    const { data: jobRows } = await supabaseAdmin
+      .from("jobs")
+      .select("id, slug, title, city, remoteType, company:companies(name)")
+      .in("id", savedJobIds)
+      .eq("status", "ACTIVE");
+    savedJobs = (jobRows ?? []).map((j: { id: string; slug: string; title: string; city: string | null; remoteType: string; company: { name: string }[] }) => ({
+      id: j.id,
+      slug: j.slug,
+      title: j.title,
+      city: j.city,
+      remoteType: j.remoteType,
+      companyName: Array.isArray(j.company) ? (j.company[0]?.name ?? "") : "",
+    }));
+  }
 
   const displayName = [c.firstName, c.lastName].filter(Boolean).join(" ") || c.email;
   const initials    = (c.firstName?.[0] ?? c.email[0]).toUpperCase();
@@ -201,6 +223,7 @@ export default async function CandidateDashboardPage() {
 
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <SavedJobsCard jobs={savedJobs} />
             <LinksSection candidate={c} />
             <PreferencesSection candidate={c} />
             <AlertSection candidate={c} />
@@ -253,6 +276,44 @@ function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> 
           </Link>
         ))}
       </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Saved jobs card ──────────────────────────────────────────────────────────
+
+function SavedJobsCard({ jobs }: { jobs: { id: string; slug: string; title: string; city: string | null; remoteType: string; companyName: string }[] }) {
+  return (
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Heart size={14} style={{ color: "var(--accent)" }} fill="var(--accent)" />
+          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>Saved jobs</p>
+        </div>
+        <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
+      </div>
+      <div style={{ padding: "12px 20px", display: "flex", flexDirection: "column", gap: 0 }}>
+        {jobs.length === 0 ? (
+          <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic", padding: "8px 0" }}>
+            No saved jobs yet. Hit the ♥ on any listing to save it here.
+          </p>
+        ) : (
+          jobs.map((job, i) => (
+            <Link key={job.id} href={`/jobs/${job.slug}`}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "12px 0", borderBottom: i < jobs.length - 1 ? "1px solid var(--border)" : "none", textDecoration: "none" }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {job.title}
+                </p>
+                <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                  {job.companyName}{job.city ? ` · ${job.city}` : ""}
+                </p>
+              </div>
+              <ChevronRight size={14} style={{ color: "var(--text-subtle)", flexShrink: 0 }} />
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );
