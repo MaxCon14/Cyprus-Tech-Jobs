@@ -15,6 +15,7 @@ import {
   type CandidateWizardAction,
 } from "@/lib/onboarding-types";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
+import { CvUpload } from "@/components/candidates/CvUpload";
 import { CITIES } from "@/lib/placeholder-data";
 import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
@@ -28,7 +29,7 @@ const PERSIST_FIELDS = [
   "categories", "remoteType", "city", "experienceLevel", "salaryMin",
   "skills", "alertFrequency", "firstName", "lastName", "email", "bio",
   "githubUrl", "linkedinUrl", "portfolioUrl",
-  "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl",
+  "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl", "cvUrl",
 ] as const;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -438,6 +439,15 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "right" }}>{state.bio.length}/300</p>
         </Field>
 
+        {/* CV upload */}
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>CV / Résumé (optional)</p>
+          <CvUpload
+            currentUrl={state.cvUrl}
+            onChange={(url) => dispatch({ type: "SET_FIELD", field: "cvUrl", value: url })}
+          />
+        </div>
+
         {/* Social links */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>Links (all optional)</p>
@@ -724,6 +734,7 @@ export default function CandidateOnboardingPage() {
           behanceUrl: state.behanceUrl || null,
           twitterUrl: state.twitterUrl || null,
           mediumUrl: state.mediumUrl || null,
+          cvUrl: state.cvUrl || null,
         }),
       });
 

@@ -5,6 +5,7 @@ import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink,
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
+import { CvUpload } from "@/components/candidates/CvUpload";
 import { CITIES } from "@/lib/placeholder-data";
 
 // ─── Profile section ─────────────────────────────────────────────────────────
@@ -89,7 +90,6 @@ const LINK_FIELDS = [
   { key: "behanceUrl",  label: "Behance",   icon: <AtSign size={14} />,       placeholder: "behance.net/yourname" },
   { key: "twitterUrl",  label: "Twitter/X", icon: <AtSign size={14} />,       placeholder: "x.com/yourname" },
   { key: "mediumUrl",   label: "Medium",    icon: <Globe size={14} />,         placeholder: "medium.com/@yourname" },
-  { key: "cvUrl",       label: "CV / Résumé link", icon: <ExternalLink size={14} />, placeholder: "dropbox.com/s/… or any direct link" },
 ] as const;
 
 export function LinksSection({ candidate }: { candidate: CandidateRow }) {
@@ -270,6 +270,34 @@ export function ExperienceSection({ candidateId, initialPositions }: { candidate
           </div>
         )}
       </div>
+    </Section>
+  );
+}
+
+// ─── CV section ──────────────────────────────────────────────────────────────
+
+export function CvSection({ candidate }: { candidate: CandidateRow }) {
+  const [cvUrl, setCvUrl] = useState(candidate.cvUrl ?? "");
+
+  return (
+    <Section title="CV / Résumé">
+      <CvUpload
+        currentUrl={cvUrl}
+        onChange={(url) => {
+          setCvUrl(url);
+          // Persist the cleared state if user removes the CV
+          if (!url) {
+            fetch("/api/candidates/profile", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ cvUrl: null }),
+            });
+          }
+        }}
+      />
+      <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 10 }}>
+        PDF only · max 5 MB. Your CV is saved automatically on upload.
+      </p>
     </Section>
   );
 }

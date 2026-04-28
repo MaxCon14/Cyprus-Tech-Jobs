@@ -175,6 +175,7 @@ export interface CandidateWizardState {
   behanceUrl: string;
   twitterUrl: string;
   mediumUrl: string;
+  cvUrl: string;
 }
 
 export type CandidateWizardAction =
@@ -214,6 +215,7 @@ export function initialCandidateState(): CandidateWizardState {
     behanceUrl: "",
     twitterUrl: "",
     mediumUrl: "",
+    cvUrl: "",
   };
 }
 

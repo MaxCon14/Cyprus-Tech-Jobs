@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
       behanceUrl:      typeof body.behanceUrl === "string" ? body.behanceUrl.trim() || null : null,
       twitterUrl:      typeof body.twitterUrl === "string" ? body.twitterUrl.trim() || null : null,
       mediumUrl:       typeof body.mediumUrl === "string" ? body.mediumUrl.trim() || null : null,
+      cvUrl:           typeof body.cvUrl === "string" ? body.cvUrl.trim() || null : null,
     })
     .select("id")
     .single();
