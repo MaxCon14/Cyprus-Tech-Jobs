@@ -10,9 +10,11 @@ import {
   CANDIDATE_STEPS,
   EXPERIENCE_LEVEL_OPTIONS,
   CATEGORY_OPTIONS,
+  TECH_STACK_OPTIONS,
   type CandidateWizardState,
   type CandidateWizardAction,
 } from "@/lib/onboarding-types";
+import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CITIES } from "@/lib/placeholder-data";
 import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
@@ -252,6 +254,40 @@ function Step4Level({ state, dispatch }: { state: CandidateWizardState; dispatch
           <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 6 }}>Shown to you only — not shared with employers</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Step 5: Skills ───────────────────────────────────────────────────────────
+
+function Step5Skills({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+  const MAX = 10;
+  const atLimit = state.skills.length >= MAX;
+
+  return (
+    <div>
+      <StepHeader
+        icon={<Code2 size={20} style={{ color: "var(--accent)" }} />}
+        title="Your skills"
+        subtitle="Pick up to 10 — programming languages, tools, frameworks."
+      />
+
+      <TechStackSelector
+        options={atLimit ? [] : TECH_STACK_OPTIONS}
+        selected={state.skills}
+        onChange={(skills) => dispatch({ type: "SET_FIELD", field: "skills", value: skills })}
+        placeholder={atLimit ? "10/10 skills selected" : "Search skills — e.g. React, Go, PostgreSQL"}
+      />
+
+      {atLimit && (
+        <p className="body-s" style={{ color: "var(--text-muted)", marginTop: 10 }}>
+          You've reached the 10-skill limit. Remove one to add another.
+        </p>
+      )}
+
+      <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 14 }}>
+        You can update your skills anytime from your dashboard.
+      </p>
     </div>
   );
 }
@@ -524,7 +560,7 @@ export default function CandidateOnboardingPage() {
         {state.step === 2 && <Step2WorkType state={state} dispatch={dispatch} />}
         {state.step === 3 && <Step3Location state={state} dispatch={dispatch} />}
         {state.step === 4 && <Step4Level state={state} dispatch={dispatch} />}
-        {state.step === 5 && null /* Skills — coming in 1c */}
+        {state.step === 5 && <Step5Skills state={state} dispatch={dispatch} />}
         {state.step === 6 && <Step6Alerts state={state} dispatch={dispatch} />}
         {state.step === 7 && <Step7Profile state={state} dispatch={dispatch} onNext={handleNext} />}
         {state.step === 8 && null /* Experience — coming in 1f */}
