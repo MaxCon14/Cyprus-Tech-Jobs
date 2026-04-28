@@ -61,10 +61,7 @@ export default async function EmployerDashboard() {
         background: "var(--surface)", borderBottom: "1px solid var(--border)",
         padding: "0 24px",
       }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, color: "var(--text)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
-          </Link>
+        <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
               <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{companyInitial}</span>
