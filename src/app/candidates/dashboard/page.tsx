@@ -6,8 +6,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { AvatarHero, CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
-import { NavAvatar } from "./NavAvatar";
-import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
 import { remoteLabel, formatSalary } from "@/lib/utils";
@@ -71,31 +69,9 @@ export default async function CandidateDashboardPage() {
   });
 
   const displayName = [c.firstName, c.lastName].filter(Boolean).join(" ") || c.email;
-  const initials    = (c.firstName?.[0] ?? c.email[0]).toUpperCase();
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-
-      {/* ── Top nav ── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 20,
-        background: "var(--surface)", borderBottom: "1px solid var(--border)",
-        padding: "0 24px",
-      }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, color: "var(--text)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
-          </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <NavAvatar avatarUrl={c.avatarUrl} displayName={displayName} initials={initials} />
-            <span className="body-s dash-nav-name" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
-            <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
-            <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
-            <SignOutClient />
-          </div>
-        </div>
-      </header>
-
       <div className="dash-page">
 
         {/* ── Email unverified ── */}
