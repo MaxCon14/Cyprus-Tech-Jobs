@@ -46,14 +46,19 @@ export function LoginForm({ error: initialError }: { error?: string }) {
       email: targetEmail,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
       },
     });
 
     setLoading(false);
 
     if (err) {
-      setError("Couldn't send the sign-in link. Please try again.");
+      const msg = err.message ?? "";
+      if (msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second")) {
+        setError("Please wait a moment before requesting another link.");
+      } else {
+        setError(msg || "Couldn't send the sign-in link. Please try again.");
+      }
       return;
     }
 
