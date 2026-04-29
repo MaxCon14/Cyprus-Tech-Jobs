@@ -721,14 +721,26 @@ export default function CandidateOnboardingPage() {
       }
 
       // Send magic link for auth
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-      await supabase.auth.signInWithOtp({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email: state.email,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${appUrl}/api/auth/callback?next=/candidates/dashboard`,
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/candidates/dashboard`,
         },
       });
+      if (otpError) {
+        const msg = otpError.message ?? "";
+        const isRateLimit = msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second");
+        setSubmitError(isRateLimit
+          ? "Account created! Check your inbox — if no email arrived, wait 60 seconds and sign in from the login page."
+          : `Account created, but we couldn't send the sign-in link: ${msg}. Go to the login page to request a new one.`
+        );
+        dispatch({ type: "SET_CANDIDATE_ID", id: candidateId });
+        dispatch({ type: "SET_SUBMITTING", value: false });
+        localStorage.removeItem(LS_KEY);
+        dispatch({ type: "NEXT_STEP" });
+        return;
+      }
 
       dispatch({ type: "SET_CANDIDATE_ID", id: candidateId });
       dispatch({ type: "SET_SUBMITTING", value: false });

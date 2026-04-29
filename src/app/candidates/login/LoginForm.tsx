@@ -41,15 +41,20 @@ export function LoginForm() {
     const { error: err } = await supabase.auth.signInWithOtp({
       email: targetEmail,
       options: {
-        shouldCreateUser: true,
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback?next=/candidates/dashboard`,
+        shouldCreateUser: false,
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/candidates/dashboard`,
       },
     });
 
     setLoading(false);
 
     if (err) {
-      setError("Couldn't send the sign-in link. Please try again.");
+      const msg = err.message ?? "";
+      if (msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second")) {
+        setError("Please wait a moment before requesting another link.");
+      } else {
+        setError(msg || "Couldn't send the sign-in link. Please try again.");
+      }
       return;
     }
 
