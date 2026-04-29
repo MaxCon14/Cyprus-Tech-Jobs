@@ -88,7 +88,7 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="btn btn-outline"
+        className="btn btn-outline btn-lg"
         style={{ width: "100%", justifyContent: "center", gap: 8 }}
       >
         <FileText size={15} />
@@ -105,18 +105,7 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)" }} onClick={close} />
 
           {/* Panel */}
-          <div style={{
-            position: "relative",
-            width: "100%",
-            maxWidth: 480,
-            height: "100dvh",
-            background: "var(--surface)",
-            borderLeft: "1px solid var(--border)",
-            display: "flex",
-            flexDirection: "column",
-            overflowY: "auto",
-            boxShadow: "var(--shadow-lg)",
-          }}>
+          <div className="slide-panel" style={{ overflowY: "auto" }}>
             {/* Panel header */}
             <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--surface)", zIndex: 1 }}>
               <div>

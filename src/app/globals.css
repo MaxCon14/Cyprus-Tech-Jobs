@@ -601,6 +601,7 @@ body {
   .layout-sidebar-right > aside,
   .layout-sidebar-sm > aside {
     position: static !important;
+    order: -1;
   }
 
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
@@ -1170,4 +1171,25 @@ details[open] .faq-chevron {
 
   /* Posted and expires hidden on mobile */
   .emp-col-hide-tablet { display: none; }
+}
+
+/* ── Slide-in drawer panel (used by ApplyPanel & CvReviewPanel) ── */
+.slide-panel {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  height: 100dvh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 520px) {
+  .slide-panel {
+    max-width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 }

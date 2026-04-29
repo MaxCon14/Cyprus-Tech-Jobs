@@ -132,17 +132,7 @@ export function ApplyPanel({
         >
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)" }} onClick={close} />
 
-          <div style={{
-            position: "relative",
-            width: "100%",
-            maxWidth: 500,
-            height: "100dvh",
-            background: "var(--surface)",
-            borderLeft: "1px solid var(--border)",
-            display: "flex",
-            flexDirection: "column",
-            boxShadow: "var(--shadow-lg)",
-          }}>
+          <div className="slide-panel">
             {/* Header */}
             <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--surface)", zIndex: 1 }}>
               <div>

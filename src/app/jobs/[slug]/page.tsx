@@ -174,32 +174,34 @@ export default async function JobDetailPage({ params }: Props) {
                 <div className="mono-l" style={{ color: "var(--accent)", fontSize: 20 }}>{salary}</div>
               </div>
             )}
-            <ApplyPanel
-              jobId={job.id}
-              jobSlug={job.slug}
-              jobTitle={job.title}
-              candidateId={candidateId}
-              candidateName={candidateName}
-              candidateHeadline={candidateHeadline}
-              candidateCvUrl={savedCvUrl}
-              candidateLinkedinUrl={candidateLinkedinUrl}
-              candidatePortfolioUrl={candidatePortfolioUrl}
-              candidateSalaryMin={candidateSalaryMin}
-              hasApplied={hasApplied}
-            />
-            {job.applyUrl && (
-              <a
-                href={job.applyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-ghost btn-sm"
-                style={{ width: "100%", justifyContent: "center", marginTop: 8, display: "flex" }}
-              >
-                Apply externally →
-              </a>
-            )}
-            <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
-            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <ApplyPanel
+                jobId={job.id}
+                jobSlug={job.slug}
+                jobTitle={job.title}
+                candidateId={candidateId}
+                candidateName={candidateName}
+                candidateHeadline={candidateHeadline}
+                candidateCvUrl={savedCvUrl}
+                candidateLinkedinUrl={candidateLinkedinUrl}
+                candidatePortfolioUrl={candidatePortfolioUrl}
+                candidateSalaryMin={candidateSalaryMin}
+                hasApplied={hasApplied}
+              />
+              {job.applyUrl && (
+                <a
+                  href={job.applyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-ghost btn-sm"
+                  style={{ width: "100%", justifyContent: "center", display: "flex" }}
+                >
+                  Apply externally →
+                </a>
+              )}
+              <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
+            </div>
+            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 12 }}>
               YOUR PROFILE IS SHARED WITH {job.company.name.toUpperCase()}
             </p>
           </div>
