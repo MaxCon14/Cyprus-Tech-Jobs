@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText, Camera, Upload, X } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText, Camera, Upload, X, Briefcase, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -393,9 +393,151 @@ function Step5Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAv
   );
 }
 
-// ─── Step 6: Done ────────────────────────────────────────────────────────────
+// ─── Step 6: Work experience ────────────────────────────────────────────────
 
-function Step6Done({ state }: { state: CandidateWizardState }) {
+interface PositionDraft {
+  title: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+  description: string;
+}
+
+const emptyDraft = (): PositionDraft => ({ title: "", company: "", startDate: "", endDate: "", current: false, description: "" });
+
+function formatMonth(ym: string) {
+  if (!ym) return "";
+  const [y, m] = ym.split("-");
+  const date = new Date(Number(y), Number(m) - 1);
+  return date.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+}
+
+interface Step6Props {
+  positions: PositionDraft[];
+  setPositions: React.Dispatch<React.SetStateAction<PositionDraft[]>>;
+}
+
+function Step6Experience({ positions, setPositions }: Step6Props) {
+  const [draft, setDraft]     = useState<PositionDraft>(emptyDraft());
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [adding, setAdding]   = useState(positions.length === 0);
+
+  function field(k: keyof PositionDraft) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setDraft((d) => ({ ...d, [k]: e.target.value }));
+  }
+
+  function addPosition() {
+    const t = { title: true, company: true };
+    setTouched(t);
+    if (!draft.title.trim() || !draft.company.trim()) return;
+    setPositions((ps) => [...ps, { ...draft }]);
+    setDraft(emptyDraft());
+    setTouched({});
+    setAdding(false);
+  }
+
+  function remove(i: number) {
+    setPositions((ps) => ps.filter((_, idx) => idx !== i));
+  }
+
+  return (
+    <div>
+      <StepHeader
+        icon={<Briefcase size={20} style={{ color: "var(--accent)" }} />}
+        title="Work experience"
+        subtitle="Add past roles so employers can see your background. You can skip or edit anytime."
+      />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+        {/* Saved positions */}
+        {positions.map((p, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "14px 16px", background: "var(--bg-muted)", borderRadius: 10, border: "1px solid var(--border)" }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>{p.title}</p>
+              <p className="body-s" style={{ color: "var(--text-muted)", margin: "2px 0 0" }}>
+                {p.company}
+                {p.startDate && <> · {formatMonth(p.startDate)} – {p.current ? "Present" : formatMonth(p.endDate)}</>}
+              </p>
+            </div>
+            <button type="button" onClick={() => remove(i)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-subtle)", display: "flex", padding: 4, flexShrink: 0 }}>
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+
+        {/* Add form */}
+        {adding ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Field label="Job title" required>
+                <input className="input" type="text" value={draft.title} placeholder="Software Engineer"
+                  onChange={field("title")} onBlur={() => setTouched((t) => ({ ...t, title: true }))}
+                  style={touched.title && !draft.title.trim() ? { borderColor: "var(--error)" } : undefined} autoFocus />
+                {touched.title && !draft.title.trim() && <p className="body-s" style={{ color: "var(--error)", margin: 0 }}>Required</p>}
+              </Field>
+              <Field label="Company" required>
+                <input className="input" type="text" value={draft.company} placeholder="Acme Corp"
+                  onChange={field("company")} onBlur={() => setTouched((t) => ({ ...t, company: true }))}
+                  style={touched.company && !draft.company.trim() ? { borderColor: "var(--error)" } : undefined} />
+                {touched.company && !draft.company.trim() && <p className="body-s" style={{ color: "var(--error)", margin: 0 }}>Required</p>}
+              </Field>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Field label="Start date">
+                <input className="input" type="month" value={draft.startDate} onChange={field("startDate")} />
+              </Field>
+              <Field label="End date">
+                <input className="input" type="month" value={draft.endDate} onChange={field("endDate")} disabled={draft.current} style={draft.current ? { opacity: 0.4 } : undefined} />
+              </Field>
+            </div>
+
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+              <input type="checkbox" checked={draft.current}
+                onChange={(e) => setDraft((d) => ({ ...d, current: e.target.checked, endDate: "" }))} />
+              <span className="body-s" style={{ color: "var(--text)" }}>I currently work here</span>
+            </label>
+
+            <Field label="Description (optional)">
+              <textarea className="input" rows={3} value={draft.description}
+                placeholder="What did you build or achieve?"
+                onChange={field("description")}
+                style={{ resize: "vertical", fontFamily: "var(--font-sans)" }} />
+            </Field>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <button type="button" onClick={addPosition} className="btn btn-accent btn-sm" style={{ gap: 6 }}>
+                <Plus size={13} /> Add position
+              </button>
+              {positions.length > 0 && (
+                <button type="button" onClick={() => { setAdding(false); setDraft(emptyDraft()); setTouched({}); }}
+                  className="btn btn-ghost btn-sm">
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setAdding(true)} className="btn btn-outline btn-sm" style={{ alignSelf: "flex-start", gap: 6 }}>
+            <Plus size={13} /> Add another position
+          </button>
+        )}
+
+        <p className="body-s" style={{ color: "var(--text-subtle)" }}>
+          You can add, edit, or remove positions anytime from your dashboard.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 7: Done ────────────────────────────────────────────────────────────
+
+function Step7Done({ state, avatarUploadError }: { state: CandidateWizardState; avatarUploadError: boolean }) {
   return (
     <>
       <Confetti />
@@ -413,6 +555,12 @@ function Step6Done({ state }: { state: CandidateWizardState }) {
         <div style={{ display: "inline-block", padding: "8px 18px", background: "var(--bg-muted)", borderRadius: "var(--radius-md)", fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 32 }}>
           {state.email}
         </div>
+
+        {avatarUploadError && (
+          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>
+            Your profile photo couldn't be uploaded — you can add it from your dashboard.
+          </p>
+        )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 360, margin: "0 auto" }}>
           <Link href="/jobs" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
@@ -438,10 +586,12 @@ export default function CandidateOnboardingPage() {
   const [authChecked, setAuthChecked] = useState(false);
 
   // File upload state — kept outside the reducer since Files aren't serialisable
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [cvTab, setCvTab] = useState<"upload" | "link">("upload");
+  const [avatarFile, setAvatarFile]         = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview]   = useState<string | null>(null);
+  const [avatarUploadError, setAvatarUploadError] = useState(false);
+  const [cvFile, setCvFile]                 = useState<File | null>(null);
+  const [cvTab, setCvTab]                   = useState<"upload" | "link">("upload");
+  const [positions, setPositions]           = useState<PositionDraft[]>([]);
 
   function handleAvatarChange(file: File | null) {
     setAvatarFile(file);
@@ -508,6 +658,10 @@ export default function CandidateOnboardingPage() {
       handleSubmit();
       return;
     }
+    if (state.step === 6) {
+      handleSavePositions();
+      return;
+    }
     startTransition(() => dispatch({ type: "NEXT_STEP" }));
   };
 
@@ -562,7 +716,8 @@ export default function CandidateOnboardingPage() {
         const fd = new FormData();
         fd.append("file", avatarFile);
         fd.append("candidateId", candidateId);
-        await fetch("/api/candidates/upload-avatar-onboarding", { method: "POST", body: fd });
+        const avatarRes = await fetch("/api/candidates/upload-avatar-onboarding", { method: "POST", body: fd });
+        if (!avatarRes.ok) setAvatarUploadError(true);
       }
 
       // Send magic link for auth
@@ -585,7 +740,18 @@ export default function CandidateOnboardingPage() {
     }
   };
 
-  const showNav = state.step < 6;
+  const handleSavePositions = async () => {
+    if (positions.length > 0 && state.candidateId) {
+      await fetch("/api/candidates/positions-onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId: state.candidateId, positions }),
+      });
+    }
+    startTransition(() => dispatch({ type: "NEXT_STEP" }));
+  };
+
+  const showNav = state.step < 7;
 
   // Block render until we've confirmed the user isn't already registered.
   // This prevents any flash of the wizard (and localStorage restore) before redirect.
@@ -612,7 +778,8 @@ export default function CandidateOnboardingPage() {
             onCvTabChange={setCvTab}
           />
         )}
-        {state.step === 6 && <Step6Done state={state} />}
+        {state.step === 6 && <Step6Experience positions={positions} setPositions={setPositions} />}
+        {state.step === 7 && <Step7Done state={state} avatarUploadError={avatarUploadError} />}
       </StepSlide>
 
       {submitError && (
@@ -627,7 +794,13 @@ export default function CandidateOnboardingPage() {
             <button type="button" className="btn btn-ghost" onClick={handleBack}><ArrowLeft size={15} /> Back</button>
           ) : <div />}
           <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
-            {state.submitting ? "Saving…" : state.step === 5 ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
+            {state.submitting
+              ? "Saving…"
+              : state.step === 5
+                ? <>Create account <ArrowRight size={15} /></>
+                : state.step === 6
+                  ? <>Finish <ArrowRight size={15} /></>
+                  : <>Next <ArrowRight size={15} /></>}
           </button>
         </div>
       )}

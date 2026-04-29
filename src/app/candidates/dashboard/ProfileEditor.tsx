@@ -218,6 +218,7 @@ export function AvatarHero({ candidate }: { candidate: CandidateRow }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [hovered, setHovered]     = useState(false);
+  const [imgError, setImgError]   = useState(false);
   const inputRef                  = useRef<HTMLInputElement>(null);
 
   const initials    = (candidate.firstName?.[0] ?? candidate.email[0]).toUpperCase();
@@ -263,8 +264,8 @@ export function AvatarHero({ candidate }: { candidate: CandidateRow }) {
           position: "relative",
         }}
       >
-        {candidate.avatarUrl
-          ? <img src={candidate.avatarUrl} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {candidate.avatarUrl && !imgError
+          ? <img src={candidate.avatarUrl} alt={displayName} onError={() => setImgError(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
         }
         {showOverlay && (

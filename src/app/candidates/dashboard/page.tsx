@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { AvatarHero, CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
+import { NavAvatar } from "./NavAvatar";
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -86,12 +87,7 @@ export default async function CandidateDashboardPage() {
             CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", overflow: "hidden", background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
-              {c.avatarUrl
-                ? <img src={c.avatarUrl} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{initials}</span>
-              }
-            </div>
+            <NavAvatar avatarUrl={c.avatarUrl} displayName={displayName} initials={initials} />
             <span className="body-s dash-nav-name" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
             <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
             <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
