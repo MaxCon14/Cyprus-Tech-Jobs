@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
-import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
+import { CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -202,6 +202,7 @@ export default async function CandidateDashboardPage() {
 
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <CvSection candidate={c} />
             <LinksSection candidate={c} />
             <PreferencesSection candidate={c} />
             <AlertSection candidate={c} />

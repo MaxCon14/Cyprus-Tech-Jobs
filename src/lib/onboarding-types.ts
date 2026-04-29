@@ -167,6 +167,7 @@ export interface CandidateWizardState {
   githubUrl: string;
   linkedinUrl: string;
   portfolioUrl: string;
+  cvUrl: string;
 }
 
 export type CandidateWizardAction =
@@ -199,6 +200,7 @@ export function initialCandidateState(): CandidateWizardState {
     githubUrl: "",
     linkedinUrl: "",
     portfolioUrl: "",
+    cvUrl: "",
   };
 }
 

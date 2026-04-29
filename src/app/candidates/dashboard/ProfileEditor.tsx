@@ -1,10 +1,105 @@
 "use client";
 
 import { useState } from "react";
-import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell } from "lucide-react";
+import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, Sliders, Bell, FileText, Eye } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS } from "@/lib/onboarding-types";
 import { CITIES } from "@/lib/placeholder-data";
+
+// ─── CV section ──────────────────────────────────────────────────────────────
+
+export function CvSection({ candidate }: { candidate: CandidateRow }) {
+  const [editing, setEditing] = useState(!candidate.cvUrl);
+  const [saving, setSaving]   = useState(false);
+  const [url, setUrl]         = useState(candidate.cvUrl ?? "");
+
+  async function save() {
+    setSaving(true);
+    await fetch("/api/candidates/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cvUrl: url.trim() || null }),
+    });
+    setSaving(false);
+    setEditing(false);
+    window.location.reload();
+  }
+
+  const displayUrl = candidate.cvUrl;
+  const href = displayUrl
+    ? displayUrl.startsWith("http") ? displayUrl : `https://${displayUrl}`
+    : null;
+
+  return (
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <FileText size={14} style={{ color: "var(--accent)" }} />
+          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>CV / Résumé</p>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          {editing ? (
+            <>
+              {displayUrl && (
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setUrl(candidate.cvUrl ?? ""); setEditing(false); }} style={{ color: "var(--text-subtle)" }}>
+                  Cancel
+                </button>
+              )}
+              <button type="button" className="btn btn-accent btn-sm" onClick={save} disabled={saving}>
+                {saving ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <><Save size={13} /> Save</>}
+              </button>
+            </>
+          ) : (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>
+              {displayUrl ? "Change CV" : "Add CV"}
+            </button>
+          )}
+        </div>
+      </div>
+      <div style={{ padding: "20px 20px" }}>
+        {editing ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <p className="body-s" style={{ color: "var(--text-muted)" }}>
+              Paste a link to your CV — Google Drive, Dropbox, or any direct URL.
+            </p>
+            <div style={{ position: "relative" }}>
+              <FileText size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
+              <input
+                className="input"
+                type="url"
+                value={url}
+                placeholder="drive.google.com/file/… or dropbox.com/s/…"
+                onChange={(e) => setUrl(e.target.value)}
+                style={{ paddingLeft: 36 }}
+                autoFocus
+              />
+            </div>
+            <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+              TIP: Make sure the link is publicly accessible before saving.
+            </p>
+          </div>
+        ) : displayUrl && href ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p className="body-s" style={{ color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {displayUrl.replace(/^https?:\/\//, "")}
+              </p>
+            </div>
+            <a href={href} target="_blank" rel="noopener noreferrer"
+              className="btn btn-outline btn-sm"
+              style={{ display: "flex", alignItems: "center", gap: 5, textDecoration: "none", flexShrink: 0 }}>
+              <Eye size={12} /> Preview
+            </a>
+          </div>
+        ) : (
+          <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic" }}>
+            No CV added yet. Add a link so employers can view your résumé.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ─── Profile section ─────────────────────────────────────────────────────────
 
@@ -81,13 +176,12 @@ export function ProfileSection({ candidate }: { candidate: CandidateRow }) {
 // ─── Links section ────────────────────────────────────────────────────────────
 
 const LINK_FIELDS = [
-  { key: "githubUrl",    label: "GitHub",    icon: <Code2 size={14} />,       placeholder: "github.com/yourname" },
-  { key: "linkedinUrl", label: "LinkedIn",  icon: <Link2 size={14} />,        placeholder: "linkedin.com/in/yourname" },
-  { key: "portfolioUrl",label: "Portfolio", icon: <Globe size={14} />,        placeholder: "yourportfolio.com" },
-  { key: "dribbbleUrl", label: "Dribbble",  icon: <AtSign size={14} />,       placeholder: "dribbble.com/yourname" },
-  { key: "behanceUrl",  label: "Behance",   icon: <AtSign size={14} />,       placeholder: "behance.net/yourname" },
-  { key: "twitterUrl",  label: "Twitter/X", icon: <AtSign size={14} />,       placeholder: "x.com/yourname" },
-  { key: "cvUrl",       label: "CV / Résumé link", icon: <ExternalLink size={14} />, placeholder: "dropbox.com/s/… or any direct link" },
+  { key: "githubUrl",    label: "GitHub",    icon: <Code2 size={14} />,  placeholder: "github.com/yourname" },
+  { key: "linkedinUrl", label: "LinkedIn",  icon: <Link2 size={14} />,   placeholder: "linkedin.com/in/yourname" },
+  { key: "portfolioUrl",label: "Portfolio", icon: <Globe size={14} />,   placeholder: "yourportfolio.com" },
+  { key: "dribbbleUrl", label: "Dribbble",  icon: <AtSign size={14} />,  placeholder: "dribbble.com/yourname" },
+  { key: "behanceUrl",  label: "Behance",   icon: <AtSign size={14} />,  placeholder: "behance.net/yourname" },
+  { key: "twitterUrl",  label: "Twitter/X", icon: <AtSign size={14} />,  placeholder: "x.com/yourname" },
 ] as const;
 
 export function LinksSection({ candidate }: { candidate: CandidateRow }) {

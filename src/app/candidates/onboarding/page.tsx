@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -238,6 +238,21 @@ function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           <FieldError error={state.errors.email} touched={state.touched.email} />
         </Field>
 
+        {/* CV */}
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>CV / Résumé (optional)</p>
+          <p className="body-s" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Paste a link to your CV — Google Drive, Dropbox, or any direct URL.</p>
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", display: "flex", alignItems: "center" }}>
+              <FileText size={14} />
+            </span>
+            <input className="input" type="url" value={state.cvUrl}
+              placeholder="drive.google.com/file/… or dropbox.com/s/…"
+              onChange={(e) => dispatch({ type: "SET_FIELD", field: "cvUrl", value: e.target.value })}
+              style={{ paddingLeft: 36 }} />
+          </div>
+        </div>
+
         {/* Optional links */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>Links (optional — you can add more in your profile)</p>
@@ -337,7 +352,7 @@ export default function CandidateOnboardingPage() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
             for (const field of fields) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
@@ -349,7 +364,7 @@ export default function CandidateOnboardingPage() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl"] as const;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
             for (const field of fields) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
@@ -401,6 +416,7 @@ export default function CandidateOnboardingPage() {
           githubUrl: state.githubUrl || null,
           linkedinUrl: state.linkedinUrl || null,
           portfolioUrl: state.portfolioUrl || null,
+          cvUrl: state.cvUrl || null,
         }),
       });
 

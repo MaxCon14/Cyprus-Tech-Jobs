@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
       githubUrl:       typeof body.githubUrl === "string" ? body.githubUrl.trim() || null : null,
       linkedinUrl:     typeof body.linkedinUrl === "string" ? body.linkedinUrl.trim() || null : null,
       portfolioUrl:    typeof body.portfolioUrl === "string" ? body.portfolioUrl.trim() || null : null,
+      cvUrl:           typeof body.cvUrl === "string" ? body.cvUrl.trim() || null : null,
     })
     .select("id")
     .single();
