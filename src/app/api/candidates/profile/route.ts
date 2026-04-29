@@ -19,7 +19,7 @@ export async function PATCH(req: NextRequest) {
     "firstName", "lastName", "headline", "bio",
     "avatarUrl", "portfolioUrl", "githubUrl", "linkedinUrl",
     "dribbbleUrl", "behanceUrl", "twitterUrl", "cvUrl",
-    "city", "remoteType", "experienceLevel", "salaryMin",
+    "city", "remoteType", "experienceLevel",
     "openToWork", "categories", "skills", "alertFrequency",
   ];
 

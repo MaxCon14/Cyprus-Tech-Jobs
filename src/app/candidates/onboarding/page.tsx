@@ -157,16 +157,7 @@ function Step3Level({ state, dispatch }: { state: CandidateWizardState; dispatch
           </div>
         </div>
 
-        <div>
-          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Minimum salary (optional)</p>
-          <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--text-muted)" }}>€</span>
-            <input className="input" type="number" value={state.salaryMin} placeholder="30000" min={0} step={1000}
-              onChange={(e) => dispatch({ type: "SET_FIELD", field: "salaryMin", value: e.target.value })}
-              style={{ paddingLeft: 28 }} />
-          </div>
-          <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 6 }}>Shown to you only — not shared with employers</p>
-        </div>
+
       </div>
     </div>
   );
@@ -643,7 +634,7 @@ export default function CandidateOnboardingPage() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "skills", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "alertFrequency", "skills", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
             for (const field of fields) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
@@ -655,7 +646,7 @@ export default function CandidateOnboardingPage() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "skills", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "alertFrequency", "skills", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
             for (const field of fields) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
@@ -706,7 +697,6 @@ export default function CandidateOnboardingPage() {
           remoteType: state.remoteType || null,
           city: state.city || null,
           experienceLevel: state.experienceLevel || null,
-          salaryMin: state.salaryMin ? parseInt(state.salaryMin, 10) : null,
           alertFrequency: state.alertFrequency,
           skills: state.skills,
           githubUrl: state.githubUrl || null,

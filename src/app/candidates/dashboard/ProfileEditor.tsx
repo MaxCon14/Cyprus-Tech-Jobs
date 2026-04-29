@@ -632,7 +632,6 @@ export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
     remoteType:      candidate.remoteType  ?? "",
     city:            candidate.city        ?? "",
     experienceLevel: candidate.experienceLevel ?? "",
-    salaryMin:       candidate.salaryMin?.toString() ?? "",
   });
 
   function toggleCat(slug: string) {
@@ -654,7 +653,6 @@ export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
         remoteType:      form.remoteType      || null,
         city:            form.city.trim()     || null,
         experienceLevel: form.experienceLevel || null,
-        salaryMin:       form.salaryMin ? parseInt(form.salaryMin, 10) : null,
       }),
     });
     setSaving(false);
@@ -668,7 +666,6 @@ export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
       ["Work setup",  candidate.remoteType ?? "Any"],
       ["Location",    candidate.city ?? "Any city"],
       ["Level",       candidate.experienceLevel ?? "Any level"],
-      ["Min salary",  candidate.salaryMin ? `€${candidate.salaryMin.toLocaleString()}` : "Not set"],
     ];
     return (
       <Section title="Job preferences" icon={<Sliders size={14} />} onEdit={() => setEditing(true)}>
@@ -748,14 +745,6 @@ export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
           </div>
         </div>
 
-        {/* Min salary */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <label className="body-s" style={{ fontWeight: 500, color: "var(--text)" }}>Minimum salary (EUR / year)</label>
-          <input className="input" type="number" min={0} step={1000}
-            value={form.salaryMin}
-            onChange={e => setForm(f => ({ ...f, salaryMin: e.target.value }))}
-            placeholder="e.g. 40000" />
-        </div>
       </div>
     </Section>
   );

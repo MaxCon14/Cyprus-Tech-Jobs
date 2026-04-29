@@ -34,7 +34,6 @@ export async function POST(req: NextRequest) {
       remoteType:      typeof body.remoteType === "string" && body.remoteType ? body.remoteType : null,
       city:            typeof body.city === "string" && body.city ? body.city.trim() : null,
       experienceLevel: typeof body.experienceLevel === "string" && body.experienceLevel ? body.experienceLevel : null,
-      salaryMin:       typeof body.salaryMin === "number" && body.salaryMin > 0 ? body.salaryMin : null,
       categories:      Array.isArray(body.categories) ? body.categories : [],
       alertFrequency:  body.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY",
       githubUrl:       typeof body.githubUrl === "string" ? body.githubUrl.trim() || null : null,

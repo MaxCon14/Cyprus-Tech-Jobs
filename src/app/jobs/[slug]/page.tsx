@@ -41,7 +41,6 @@ export default async function JobDetailPage({ params }: Props) {
   let candidateHeadline: string | null = null;
   let candidateLinkedinUrl: string | null = null;
   let candidatePortfolioUrl: string | null = null;
-  let candidateSalaryMin: number | null = null;
   let hasApplied = false;
   try {
     const supabase = await createSupabaseServerClient();
@@ -49,7 +48,7 @@ export default async function JobDetailPage({ params }: Props) {
     if (user?.email) {
       const { data: c } = await supabaseAdmin
         .from("candidates")
-        .select("id, firstName, lastName, headline, cvUrl, linkedinUrl, portfolioUrl, salaryMin")
+        .select("id, firstName, lastName, headline, cvUrl, linkedinUrl, portfolioUrl")
         .eq("email", user.email)
         .single();
       if (c) {
@@ -59,7 +58,6 @@ export default async function JobDetailPage({ params }: Props) {
         candidateHeadline     = c.headline ?? null;
         candidateLinkedinUrl  = c.linkedinUrl ?? null;
         candidatePortfolioUrl = c.portfolioUrl ?? null;
-        candidateSalaryMin    = c.salaryMin ?? null;
         const { data: existing } = await supabaseAdmin
           .from("job_applications")
           .select("id")
@@ -185,7 +183,6 @@ export default async function JobDetailPage({ params }: Props) {
                 candidateCvUrl={savedCvUrl}
                 candidateLinkedinUrl={candidateLinkedinUrl}
                 candidatePortfolioUrl={candidatePortfolioUrl}
-                candidateSalaryMin={candidateSalaryMin}
                 hasApplied={hasApplied}
               />
               {job.applyUrl && (

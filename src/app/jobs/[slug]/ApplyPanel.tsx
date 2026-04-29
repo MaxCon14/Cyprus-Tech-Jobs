@@ -14,7 +14,6 @@ interface Props {
   candidateCvUrl?: string | null;
   candidateLinkedinUrl?: string | null;
   candidatePortfolioUrl?: string | null;
-  candidateSalaryMin?: number | null;
   hasApplied: boolean;
 }
 
@@ -28,7 +27,6 @@ export function ApplyPanel({
   candidateCvUrl,
   candidateLinkedinUrl,
   candidatePortfolioUrl,
-  candidateSalaryMin,
   hasApplied: initialHasApplied,
 }: Props) {
   const [open, setOpen]     = useState(false);
@@ -41,7 +39,7 @@ export function ApplyPanel({
   const [customCvUrl, setCustomCvUrl]   = useState("");
   const [availability, setAvailability] = useState("");
   const [noticePeriod, setNoticePeriod] = useState("");
-  const [expectedSalary, setExpectedSalary] = useState(candidateSalaryMin ? String(candidateSalaryMin) : "");
+  const [expectedSalary, setExpectedSalary] = useState("");
   const [rightToWork, setRightToWork]   = useState("");
   const [linkedinUrl, setLinkedinUrl]   = useState(candidateLinkedinUrl ?? "");
   const [portfolioUrl, setPortfolioUrl] = useState(candidatePortfolioUrl ?? "");
