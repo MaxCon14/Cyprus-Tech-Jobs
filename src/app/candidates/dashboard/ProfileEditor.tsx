@@ -212,22 +212,20 @@ export function CvSection({ candidate }: { candidate: CandidateRow }) {
   );
 }
 
-// ─── Avatar section ───────────────────────────────────────────────────────────
+// ─── Avatar hero (inline photo upload inside the hero banner) ────────────────
 
-export function AvatarSection({ candidate }: { candidate: CandidateRow }) {
-  const [file, setFile]         = useState<File | null>(null);
-  const [preview, setPreview]   = useState<string | null>(null);
+export function AvatarHero({ candidate }: { candidate: CandidateRow }) {
   const [uploading, setUploading] = useState(false);
-  const [error, setError]       = useState<string | null>(null);
-  const inputRef                = useRef<HTMLInputElement>(null);
+  const [error, setError]         = useState<string | null>(null);
+  const [hovered, setHovered]     = useState(false);
+  const inputRef                  = useRef<HTMLInputElement>(null);
 
-  const initials = (candidate.firstName?.[0] ?? candidate.email[0]).toUpperCase();
+  const initials    = (candidate.firstName?.[0] ?? candidate.email[0]).toUpperCase();
   const displayName = [candidate.firstName, candidate.lastName].filter(Boolean).join(" ") || candidate.email;
 
-  function handleFile(f: File | null) {
-    if (!f) return;
+  async function handleFile(f: File) {
     if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) {
-      setError("Only JPEG, PNG, or WebP images are accepted.");
+      setError("JPEG, PNG or WebP only.");
       return;
     }
     if (f.size > 2 * 1024 * 1024) {
@@ -235,81 +233,63 @@ export function AvatarSection({ candidate }: { candidate: CandidateRow }) {
       return;
     }
     setError(null);
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-  }
-
-  async function upload() {
-    if (!file) return;
     setUploading(true);
     const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/candidates/upload-avatar", { method: "POST", body: fd });
+    fd.append("file", f);
+    const res  = await fetch("/api/candidates/upload-avatar", { method: "POST", body: fd });
     const data = await res.json();
-    setUploading(false);
-    if (!res.ok) { setError(data.error ?? "Upload failed."); return; }
+    if (!res.ok) {
+      setUploading(false);
+      setError(data.error ?? "Upload failed.");
+      return;
+    }
     window.location.reload();
   }
 
-  const shownSrc = preview ?? candidate.avatarUrl;
+  const showOverlay = hovered || uploading;
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Camera size={14} style={{ color: "var(--accent)" }} />
-          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>Profile photo</p>
-        </div>
-      </div>
-
-      <div style={{ padding: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-        {/* Avatar preview */}
-        <div style={{
-          width: 88, height: 88, borderRadius: "50%", overflow: "hidden",
-          border: "2px solid var(--border)", background: "var(--accent-soft)",
-          display: "grid", placeItems: "center", flexShrink: 0,
-        }}>
-          {shownSrc
-            ? <img src={shownSrc} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 30, color: "var(--accent)" }}>{initials}</span>
-          }
-        </div>
-
-        {/* File input */}
-        <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }}
-          onChange={(e) => handleFile(e.target.files?.[0] ?? null)} />
-
-        {!file ? (
-          <button type="button" onClick={() => inputRef.current?.click()} className="btn btn-outline btn-sm" style={{ gap: 6 }}>
-            <Upload size={13} /> {candidate.avatarUrl ? "Change photo" : "Upload photo"}
-          </button>
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span className="body-s" style={{ color: "var(--text-muted)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {file.name}
-            </span>
-            <button type="button" onClick={() => { setFile(null); setPreview(null); if (inputRef.current) inputRef.current.value = ""; }}
-              className="btn btn-ghost btn-icon btn-sm" style={{ color: "var(--text-subtle)" }}>
-              <X size={13} />
-            </button>
+    <div style={{ position: "relative", flexShrink: 0 }}>
+      <div
+        onClick={() => !uploading && inputRef.current?.click()}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        title={candidate.avatarUrl ? "Change photo" : "Add a photo"}
+        style={{
+          width: 72, height: 72, borderRadius: 14, overflow: "hidden",
+          background: "var(--accent-soft)", border: "2px solid var(--accent)",
+          display: "grid", placeItems: "center",
+          cursor: uploading ? "wait" : "pointer",
+          position: "relative",
+        }}
+      >
+        {candidate.avatarUrl
+          ? <img src={candidate.avatarUrl} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
+        }
+        {showOverlay && (
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "rgba(0,0,0,0.45)",
+            display: "grid", placeItems: "center",
+          }}>
+            {uploading
+              ? <Loader2 size={20} style={{ color: "#fff", animation: "spin 1s linear infinite" }} />
+              : <Camera size={20} style={{ color: "#fff" }} />
+            }
           </div>
         )}
-
-        {error && <p className="body-s" style={{ color: "var(--error)", textAlign: "center" }}>{error}</p>}
-
-        {file && (
-          <button type="button" onClick={upload} disabled={uploading}
-            className="btn btn-accent btn-sm" style={{ width: "100%", justifyContent: "center", gap: 6 }}>
-            {uploading
-              ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Uploading…</>
-              : <><Upload size={13} /> Save photo</>}
-          </button>
-        )}
-
-        <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
-          JPEG, PNG or WebP · Max 2 MB
-        </p>
       </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        style={{ display: "none" }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+      />
+      {error && (
+        <p className="mono-s" style={{ color: "var(--error)", marginTop: 4, maxWidth: 80, lineHeight: 1.3 }}>{error}</p>
+      )}
     </div>
   );
 }

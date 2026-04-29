@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
-import { AvatarSection, CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
+import { AvatarHero, CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -118,17 +118,8 @@ export default async function CandidateDashboardPage() {
           padding: "28px 32px", marginBottom: 20,
         }}>
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* Avatar */}
-            <div style={{
-              width: 72, height: 72, borderRadius: 14, flexShrink: 0, overflow: "hidden",
-              background: "var(--accent-soft)", border: "2px solid var(--accent)",
-              display: "grid", placeItems: "center",
-            }}>
-              {c.avatarUrl
-                ? <img src={c.avatarUrl} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
-              }
-            </div>
+            {/* Avatar — click to change photo */}
+            <AvatarHero candidate={c} />
 
             {/* Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -208,7 +199,6 @@ export default async function CandidateDashboardPage() {
 
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <AvatarSection candidate={c} />
             <CvSection candidate={c} />
             <LinksSection candidate={c} />
             <PreferencesSection candidate={c} />
