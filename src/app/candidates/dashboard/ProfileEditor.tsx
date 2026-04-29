@@ -1,100 +1,211 @@
 "use client";
 
-import { useState } from "react";
-import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, Sliders, Bell, FileText, Eye } from "lucide-react";
+import { useState, useRef } from "react";
+import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, Sliders, Bell, FileText, Eye, Upload, X } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS } from "@/lib/onboarding-types";
 import { CITIES } from "@/lib/placeholder-data";
 
 // ─── CV section ──────────────────────────────────────────────────────────────
 
-export function CvSection({ candidate }: { candidate: CandidateRow }) {
-  const [editing, setEditing] = useState(!candidate.cvUrl);
-  const [saving, setSaving]   = useState(false);
-  const [url, setUrl]         = useState(candidate.cvUrl ?? "");
+function fileLabel(url: string): string {
+  try {
+    const parts = new URL(url).pathname.split("/");
+    const name = parts[parts.length - 1];
+    return decodeURIComponent(name);
+  } catch {
+    return url.replace(/^https?:\/\//, "");
+  }
+}
 
-  async function save() {
-    setSaving(true);
-    await fetch("/api/candidates/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cvUrl: url.trim() || null }),
-    });
-    setSaving(false);
-    setEditing(false);
+export function CvSection({ candidate }: { candidate: CandidateRow }) {
+  const [editing, setEditing]   = useState(!candidate.cvUrl);
+  const [tab, setTab]           = useState<"upload" | "link">("upload");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [linkUrl, setLinkUrl]   = useState(candidate.cvUrl ?? "");
+  const [savingLink, setSavingLink] = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const currentUrl  = candidate.cvUrl;
+  const currentHref = currentUrl
+    ? (currentUrl.startsWith("http") ? currentUrl : `https://${currentUrl}`)
+    : null;
+
+  function handleFileChange(file: File | null) {
+    if (!file) return;
+    setError(null);
+    setSelectedFile(file);
+  }
+
+  async function uploadFile() {
+    if (!selectedFile) return;
+    setUploading(true);
+    setError(null);
+    const body = new FormData();
+    body.append("file", selectedFile);
+    const res = await fetch("/api/candidates/upload-cv", { method: "POST", body });
+    const data = await res.json();
+    setUploading(false);
+    if (!res.ok) { setError(data.error ?? "Upload failed."); return; }
     window.location.reload();
   }
 
-  const displayUrl = candidate.cvUrl;
-  const href = displayUrl
-    ? displayUrl.startsWith("http") ? displayUrl : `https://${displayUrl}`
-    : null;
+  async function saveLink() {
+    setSavingLink(true);
+    setError(null);
+    await fetch("/api/candidates/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cvUrl: linkUrl.trim() || null }),
+    });
+    setSavingLink(false);
+    window.location.reload();
+  }
+
+  function cancel() {
+    setEditing(false);
+    setSelectedFile(null);
+    setError(null);
+    setLinkUrl(candidate.cvUrl ?? "");
+  }
+
+  const EXT_BADGE: Record<string, string> = { pdf: "#e53e3e", doc: "#2b6cb0", docx: "#2b6cb0" };
+  const fileExt = selectedFile?.name.split(".").pop()?.toLowerCase() ?? "";
 
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <FileText size={14} style={{ color: "var(--accent)" }} />
           <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>CV / Résumé</p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {editing ? (
-            <>
-              {displayUrl && (
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setUrl(candidate.cvUrl ?? ""); setEditing(false); }} style={{ color: "var(--text-subtle)" }}>
-                  Cancel
-                </button>
-              )}
-              <button type="button" className="btn btn-accent btn-sm" onClick={save} disabled={saving}>
-                {saving ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <><Save size={13} /> Save</>}
-              </button>
-            </>
-          ) : (
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>
-              {displayUrl ? "Change CV" : "Add CV"}
-            </button>
-          )}
-        </div>
+        {!editing ? (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>
+            {currentUrl ? "Change CV" : "Add CV"}
+          </button>
+        ) : currentUrl && (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={cancel} style={{ color: "var(--text-subtle)" }}>
+            Cancel
+          </button>
+        )}
       </div>
-      <div style={{ padding: "20px 20px" }}>
-        {editing ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <p className="body-s" style={{ color: "var(--text-muted)" }}>
-              Paste a link to your CV — Google Drive, Dropbox, or any direct URL.
-            </p>
-            <div style={{ position: "relative" }}>
-              <FileText size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
-              <input
-                className="input"
-                type="url"
-                value={url}
-                placeholder="drive.google.com/file/… or dropbox.com/s/…"
-                onChange={(e) => setUrl(e.target.value)}
-                style={{ paddingLeft: 36 }}
-                autoFocus
-              />
-            </div>
-            <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-              TIP: Make sure the link is publicly accessible before saving.
-            </p>
-          </div>
-        ) : displayUrl && href ? (
+
+      <div style={{ padding: "20px" }}>
+        {/* Current CV display */}
+        {!editing && currentUrl && currentHref && (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p className="body-s" style={{ color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {displayUrl.replace(/^https?:\/\//, "")}
-              </p>
-            </div>
-            <a href={href} target="_blank" rel="noopener noreferrer"
+            <FileText size={16} style={{ color: "var(--accent)", flexShrink: 0 }} />
+            <p className="body-s" style={{ flex: 1, minWidth: 0, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {fileLabel(currentUrl)}
+            </p>
+            <a href={currentHref} target="_blank" rel="noopener noreferrer"
               className="btn btn-outline btn-sm"
               style={{ display: "flex", alignItems: "center", gap: 5, textDecoration: "none", flexShrink: 0 }}>
               <Eye size={12} /> Preview
             </a>
           </div>
-        ) : (
+        )}
+
+        {!editing && !currentUrl && (
           <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic" }}>
-            No CV added yet. Add a link so employers can view your résumé.
+            No CV added yet. Employers see a &quot;No CV&quot; badge on your application.
           </p>
+        )}
+
+        {/* Editor */}
+        {editing && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Tab toggle */}
+            <div style={{ display: "flex", gap: 0, border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", alignSelf: "flex-start" }}>
+              {(["upload", "link"] as const).map((t) => (
+                <button key={t} type="button" onClick={() => { setTab(t); setError(null); setSelectedFile(null); }}
+                  style={{ padding: "7px 16px", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, cursor: "pointer", border: "none", background: tab === t ? "var(--accent)" : "transparent", color: tab === t ? "var(--white)" : "var(--text-muted)", transition: "all 120ms" }}>
+                  {t === "upload" ? "Upload file" : "Use a link"}
+                </button>
+              ))}
+            </div>
+
+            {/* Upload tab */}
+            {tab === "upload" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" style={{ display: "none" }}
+                  onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)} />
+
+                {!selectedFile ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFileChange(e.dataTransfer.files[0] ?? null); }}
+                    style={{
+                      border: `2px dashed ${dragOver ? "var(--accent)" : "var(--border)"}`,
+                      borderRadius: 10, padding: "32px 20px", textAlign: "center", cursor: "pointer",
+                      background: dragOver ? "var(--accent-soft)" : "var(--bg-muted)",
+                      transition: "all 150ms",
+                    }}
+                  >
+                    <Upload size={24} style={{ color: "var(--text-subtle)", margin: "0 auto 10px", display: "block" }} />
+                    <p className="body-s" style={{ color: "var(--text)", fontWeight: 600, marginBottom: 4 }}>
+                      Click to browse or drag & drop
+                    </p>
+                    <p className="mono-s" style={{ color: "var(--text-subtle)" }}>PDF, DOC or DOCX · Max 10 MB</p>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "var(--bg-muted)", borderRadius: 10, border: "1px solid var(--border)" }}>
+                    <span style={{ padding: "3px 7px", borderRadius: 4, background: EXT_BADGE[fileExt] ?? "var(--text-subtle)", color: "#fff", fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
+                      {fileExt.toUpperCase()}
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {selectedFile.name}
+                      </p>
+                      <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                        {(selectedFile.size / 1024).toFixed(0)} KB
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => { setSelectedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="btn btn-ghost btn-icon" style={{ color: "var(--text-subtle)", flexShrink: 0 }}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {error && <p className="body-s" style={{ color: "var(--error)" }}>{error}</p>}
+
+                <button type="button" onClick={uploadFile} disabled={!selectedFile || uploading}
+                  className="btn btn-accent" style={{ width: "100%", justifyContent: "center", gap: 8 }}>
+                  {uploading
+                    ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Uploading…</>
+                    : <><Upload size={14} /> Upload CV</>}
+                </button>
+              </div>
+            )}
+
+            {/* Link tab */}
+            {tab === "link" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ position: "relative" }}>
+                  <Link2 size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
+                  <input className="input" type="url" value={linkUrl}
+                    placeholder="drive.google.com/file/… or dropbox.com/s/…"
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    style={{ paddingLeft: 36 }} autoFocus />
+                </div>
+                <p className="mono-s" style={{ color: "var(--text-subtle)" }}>Make sure the link is publicly accessible.</p>
+                {error && <p className="body-s" style={{ color: "var(--error)" }}>{error}</p>}
+                <button type="button" onClick={saveLink} disabled={!linkUrl.trim() || savingLink}
+                  className="btn btn-accent" style={{ width: "100%", justifyContent: "center", gap: 8 }}>
+                  {savingLink
+                    ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Saving…</>
+                    : <><Save size={14} /> Save link</>}
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

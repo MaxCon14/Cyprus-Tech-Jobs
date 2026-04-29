@@ -241,7 +241,7 @@ function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState
         {/* CV */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>CV / Résumé (optional)</p>
-          <p className="body-s" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Paste a link to your CV — Google Drive, Dropbox, or any direct URL.</p>
+          <p className="body-s" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Paste a link to your CV, or upload a file directly from your dashboard after signing in.</p>
           <div style={{ position: "relative" }}>
             <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", display: "flex", alignItems: "center" }}>
               <FileText size={14} />
