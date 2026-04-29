@@ -92,7 +92,7 @@ export function Footer() {
           flexWrap: "wrap", gap: 12,
         }}>
           <span className="mono-s" style={{ color: "var(--text-subtle)" }}>
-            © {new Date().getFullYear()} CYPRUSTECHJOBS · ALL RIGHTS RESERVED
+            © {new Date().getFullYear()} CYPRUSTECHCAREERS · ALL RIGHTS RESERVED
           </span>
           <span className="mono-s" style={{ color: "var(--text-subtle)" }}>
             BUILT FOR CYPRUS TECH · v1.0

@@ -101,7 +101,7 @@ export default async function ComparisonPage({
             Platform comparison
           </p>
           <h1 className="heading-xl" style={{ marginBottom: 16 }}>
-            CyprusTech.Jobs vs {c.competitor.name}
+            CyprusTech.Careers vs {c.competitor.name}
           </h1>
           <p className="body-m" style={{ color: "var(--text-secondary)" }}>
             {c.competitor.tagline}
@@ -160,7 +160,7 @@ export default async function ComparisonPage({
                 className="body-s"
                 style={{ fontWeight: 700, color: "var(--accent)", textAlign: "center" }}
               >
-                CyprusTech.Jobs
+                CyprusTech.Careers
               </span>
               <span
                 className="body-s"
@@ -219,7 +219,7 @@ export default async function ComparisonPage({
                 className="body-s"
                 style={{ fontWeight: 700, color: "var(--accent)", marginBottom: 10 }}
               >
-                CyprusTech.Jobs
+                CyprusTech.Careers
               </p>
               <p className="body-s" style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>
                 {c.aboutCyprusTech}
@@ -274,7 +274,7 @@ export default async function ComparisonPage({
                 className="body-s"
                 style={{ fontWeight: 700, color: "var(--accent)", marginBottom: 12 }}
               >
-                Use CyprusTech.Jobs if you…
+                Use CyprusTech.Careers if you…
               </p>
               <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
                 {c.whoShouldUseCyprusTech.map((point) => (
@@ -354,7 +354,7 @@ export default async function ComparisonPage({
           }}
         >
           <h2 className="heading-s" style={{ marginBottom: 8 }}>
-            Ready to try CyprusTech.Jobs?
+            Ready to try CyprusTech.Careers?
           </h2>
           <p className="body-s" style={{ color: "var(--text-secondary)", marginBottom: 20 }}>
             Browse every tech role in Cyprus with salary shown upfront.
@@ -390,7 +390,7 @@ export default async function ComparisonPage({
                   }}
                 >
                   <ArrowRight size={14} />
-                  CyprusTech.Jobs vs {o.competitor.name}
+                  CyprusTech.Careers vs {o.competitor.name}
                 </Link>
               ))}
             </div>

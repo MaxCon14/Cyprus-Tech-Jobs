@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const FAQS = [
   {
     q: "What tech jobs are available in Cyprus?",
-    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Sectors include fintech (Revolut, eToro, XM Group), gaming (Wargaming), and a growing startup ecosystem. CyprusTech.Jobs lists all active roles with verified salaries.",
+    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Sectors include fintech (Revolut, eToro, XM Group), gaming (Wargaming), and a growing startup ecosystem. CyprusTech.Careers lists all active roles with verified salaries.",
   },
   {
     q: "What is the average salary for software engineers in Cyprus?",
@@ -34,7 +34,7 @@ const FAQS = [
   },
   {
     q: "How do I find a software developer job in Cyprus?",
-    a: "Create a free candidate profile on CyprusTech.Jobs, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Our listings always include salaries — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
+    a: "Create a free candidate profile on CyprusTech.Careers, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Our listings always include salaries — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
   },
   {
     q: "What is the cost of living in Cyprus compared to salaries?",
@@ -71,7 +71,7 @@ export default async function HomePage() {
         <div className="page-container">
           <div className="mono-s" style={{ color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 24, height: 1, background: "var(--accent)", display: "inline-block" }} />
-            CYPRUSTECHJOBS · THE HOME FOR TECH JOBS IN CYPRUS
+            CYPRUSTECHCAREERS · THE HOME FOR TECH JOBS IN CYPRUS
           </div>
 
           <h1 className="display-xl" style={{ marginBottom: 16, maxWidth: 780 }}>

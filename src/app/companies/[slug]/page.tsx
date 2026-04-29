@@ -61,7 +61,7 @@ export default async function CompanyProfilePage({ params }: Props) {
               {co.createdAt && (
                 <span style={{ display: "flex", alignItems: "center", gap: 6 }} className="body-s">
                   <Calendar size={13} style={{ color: "var(--text-subtle)" }} />
-                  <span style={{ color: "var(--text-muted)" }}>On CyprusTech.Jobs since {new Date(co.createdAt).getFullYear()}</span>
+                  <span style={{ color: "var(--text-muted)" }}>On CyprusTech.Careers since {new Date(co.createdAt).getFullYear()}</span>
                 </span>
               )}
               <span style={{ display: "flex", alignItems: "center", gap: 6 }} className="body-s">

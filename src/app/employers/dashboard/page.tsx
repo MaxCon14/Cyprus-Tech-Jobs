@@ -16,7 +16,7 @@ import { SignOutClient } from "./SignOutClient";
 import { ApplicantsDrawer } from "./ApplicantsDrawer";
 
 export const metadata: Metadata = {
-  title: "Employer Dashboard — CyprusTech.Jobs",
+  title: "Employer Dashboard — CyprusTech.Careers",
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

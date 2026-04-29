@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { comparisons } from "@/data/comparisons";
 import { prisma } from "@/lib/prisma";
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.jobs";
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

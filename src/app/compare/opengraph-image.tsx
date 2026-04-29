@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "CyprusTech.Jobs — Compare Tech Job Boards in Cyprus";
+export const alt = "CyprusTech.Careers — Compare Tech Job Boards in Cyprus";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,7 +40,7 @@ export default function Image() {
             }}
           />
           <span style={{ color: "#ffffff", fontSize: 28, fontWeight: 700 }}>
-            CyprusTech.Jobs
+            CyprusTech.Careers
           </span>
         </div>
 

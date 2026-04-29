@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getComparison } from "@/data/comparisons";
 
-export const alt = "CyprusTech.Jobs vs competitor comparison";
+export const alt = "CyprusTech.Careers vs competitor comparison";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -47,7 +47,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             margin: "0 0 24px",
           }}
         >
-          CyprusTech.Jobs
+          CyprusTech.Careers
           <br />
           <span style={{ color: "#a1a1aa", fontSize: 46 }}>vs {competitorName}</span>
         </h1>

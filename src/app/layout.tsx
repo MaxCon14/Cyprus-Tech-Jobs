@@ -21,8 +21,8 @@ const fragmentMono = Fragment_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CyprusTech.Jobs — Tech jobs in Cyprus",
-    template: "%s | CyprusTech.Jobs",
+    default: "CyprusTech.Careers — Tech jobs in Cyprus",
+    template: "%s | CyprusTech.Careers",
   },
   description:
     "The home for tech jobs in Cyprus. Find roles at the best companies in Limassol, Nicosia, Larnaca and beyond — or post a job to reach Cyprus's top tech talent.",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     shortcut: "/logo.svg",
   },
   openGraph: {
-    siteName: "CyprusTech.Jobs",
+    siteName: "CyprusTech.Careers",
     type: "website",
   },
 };

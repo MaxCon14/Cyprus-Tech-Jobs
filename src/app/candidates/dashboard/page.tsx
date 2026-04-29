@@ -18,7 +18,7 @@ import {
   ExternalLink, ChevronRight,
 } from "lucide-react";
 
-export const metadata: Metadata = { title: "My dashboard — CyprusTech.Jobs" };
+export const metadata: Metadata = { title: "My dashboard — CyprusTech.Careers" };
 
 // ─── Completion ───────────────────────────────────────────────────────────────
 

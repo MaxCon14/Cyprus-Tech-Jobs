@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 export const metadata: Metadata = {
   title: "Best Tech Job Board in Cyprus — How We Compare",
   description:
-    "See how CyprusTech.Jobs compares to Ergodotisi, Carierista, CyprusWork, Kariera.com.cy, and CyprusJobs.com for technology professionals in Cyprus.",
+    "See how CyprusTech.Careers compares to Ergodotisi, Carierista, CyprusWork, Kariera.com.cy, and CyprusJobs.com for technology professionals in Cyprus.",
   alternates: { canonical: "/compare" },
 };
 
@@ -27,10 +27,10 @@ export default function ComparePage() {
           Platform comparison
         </p>
         <h1 className="heading-xl" style={{ marginBottom: 16 }}>
-          CyprusTech.Jobs vs Cyprus job boards
+          CyprusTech.Careers vs Cyprus job boards
         </h1>
         <p className="body-m" style={{ color: "var(--text-secondary)", maxWidth: 620 }}>
-          We built CyprusTech.Jobs specifically for technology professionals in Cyprus. Here&apos;s
+          We built CyprusTech.Careers specifically for technology professionals in Cyprus. Here&apos;s
           how we compare to the general job boards on the island — on salary transparency, tech
           filtering, and tools for job seekers.
         </p>
@@ -48,7 +48,7 @@ export default function ComparePage() {
           relevant roles quickly.
         </p>
         <p className="body-m" style={{ color: "var(--text-secondary)", marginBottom: 24 }}>
-          CyprusTech.Jobs focuses exclusively on software, engineering, data, design, and IT roles
+          CyprusTech.Careers focuses exclusively on software, engineering, data, design, and IT roles
           in Cyprus. Three things we do differently:
         </p>
         <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -95,7 +95,7 @@ export default function ComparePage() {
             >
               <div>
                 <p className="body-s" style={{ color: "var(--text-secondary)", marginBottom: 4 }}>
-                  CyprusTech.Jobs vs
+                  CyprusTech.Careers vs
                 </p>
                 <p
                   className="body-m"

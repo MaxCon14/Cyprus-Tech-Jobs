@@ -39,7 +39,7 @@ export default async function PostAJobPage() {
         <div style={{ maxWidth: 860, margin: "0 auto", textAlign: "center" }}>
           <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
             <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-            FOR EMPLOYERS · CYPRUSTECHJOBS
+            FOR EMPLOYERS · CYPRUSTECHCAREERS
           </div>
           <h1 className="display-l" style={{ marginBottom: 16 }}>
             Hire tech talent<br />
@@ -72,7 +72,7 @@ export default async function PostAJobPage() {
           {/* Sidebar */}
           <aside style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 80 }}>
             <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
-              <h3 className="h3" style={{ marginBottom: 16 }}>Why CyprusTech.Jobs?</h3>
+              <h3 className="h3" style={{ marginBottom: 16 }}>Why CyprusTech.Careers?</h3>
               {[
                 ["Niche audience", "Every visitor is a tech professional actively looking for work in Cyprus."],
                 ["Salary transparency", "Listings with salaries get 2× more applications. We encourage it."],

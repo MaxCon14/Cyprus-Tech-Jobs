@@ -22,7 +22,7 @@ import { Confetti } from "@/components/onboarding/Confetti";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const supabase = createSupabaseBrowserClient();
-const LS_KEY = "cyprustechjobs:candidate-draft";
+const LS_KEY = "cyprustechcareers:candidate-draft";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

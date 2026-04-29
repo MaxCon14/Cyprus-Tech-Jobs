@@ -3,7 +3,7 @@ import { RoleCards } from "./RoleCards";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Get Started — CyprusTech.Jobs",
+  title: "Get Started — CyprusTech.Careers",
 };
 
 export default function GetStartedPage() {
@@ -12,7 +12,7 @@ export default function GetStartedPage() {
 
       <div style={{ textAlign: "center", marginBottom: "clamp(32px, 5vw, 56px)", maxWidth: 520 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 16 }}>GET STARTED</div>
-        <h1 className="h1" style={{ marginBottom: 12 }}>How are you using CyprusTech.Jobs?</h1>
+        <h1 className="h1" style={{ marginBottom: 12 }}>How are you using CyprusTech.Careers?</h1>
         <p className="body-l" style={{ color: "var(--text-muted)" }}>
           Choose your path — we'll tailor the experience for you.
         </p>

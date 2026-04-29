@@ -121,7 +121,7 @@ export function ApplyPanel({
         className="btn btn-accent btn-lg"
         style={{ width: "100%", justifyContent: "center", gap: 8 }}
       >
-        Apply on CyprusTech.Jobs <ArrowRight size={15} />
+        Apply on CyprusTech.Careers <ArrowRight size={15} />
       </button>
 
       {/* Panel overlay */}
