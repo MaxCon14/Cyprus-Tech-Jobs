@@ -9,6 +9,8 @@ async function ensureBucket() {
   const { data: bucket } = await supabaseAdmin.storage.getBucket(BUCKET);
   if (!bucket) {
     await supabaseAdmin.storage.createBucket(BUCKET, { public: true });
+  } else if (!bucket.public) {
+    await supabaseAdmin.storage.updateBucket(BUCKET, { public: true });
   }
 }
 
@@ -66,10 +68,15 @@ export async function POST(req: NextRequest) {
 
   const { data: { publicUrl } } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(storagePath);
 
-  await supabaseAdmin
+  const { error: dbError } = await supabaseAdmin
     .from("candidates")
     .update({ avatarUrl: publicUrl })
     .eq("id", candidateId);
+
+  if (dbError) {
+    console.error("[upload-avatar-onboarding] db update failed:", dbError);
+    return NextResponse.json({ error: "Upload succeeded but profile could not be updated." }, { status: 500 });
+  }
 
   return NextResponse.json({ url: publicUrl });
 }

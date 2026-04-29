@@ -84,7 +84,7 @@ export default async function CandidateDashboardPage() {
       }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, color: "var(--text)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
+            CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <NavAvatar avatarUrl={c.avatarUrl} displayName={displayName} initials={initials} />
