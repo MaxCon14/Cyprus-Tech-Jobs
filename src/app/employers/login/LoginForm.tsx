@@ -58,8 +58,9 @@ export function LoginForm({ error: initialError }: { error?: string }) {
       if (err) {
         console.error("[employer-login] signInWithOtp error:", err);
         const msg = err.message ?? "";
-        if (msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second")) {
-          setError("Please wait a moment before requesting another link.");
+        if (msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second") || err.status === 429) {
+          setError("Too many attempts — please wait 60 seconds before trying again.");
+          setCooldown(RESEND_COOLDOWN);
         } else {
           setError(msg || "Couldn't send the sign-in link. Please try again.");
         }
@@ -192,13 +193,15 @@ export function LoginForm({ error: initialError }: { error?: string }) {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || cooldown > 0}
         className="btn btn-accent"
         style={{ width: "100%", justifyContent: "center" }}
       >
         {loading
           ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
-          : <>Send sign-in link <ArrowRight size={14} /></>}
+          : cooldown > 0
+            ? `Try again in ${cooldown}s`
+            : <>Send sign-in link <ArrowRight size={14} /></>}
       </button>
     </form>
   );
