@@ -212,7 +212,7 @@ export function validateCandidateStep(
   state: CandidateWizardState,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  if (step === 5) {
+  if (step === 6) {
     if (!state.firstName.trim()) errors.firstName = "First name is required.";
     if (!state.email.trim()) {
       errors.email = "Email address is required.";
