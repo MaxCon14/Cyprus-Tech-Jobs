@@ -25,45 +25,56 @@ export function LoginForm({ error: initialError }: { error?: string }) {
     setError(null);
     setLoading(true);
 
-    // Verify the email belongs to a known employer before sending
-    const check = await fetch("/api/employers/check-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: targetEmail }),
-    });
-    const { exists } = await check.json();
+    try {
+      // Verify the email belongs to a known employer before sending
+      const check = await fetch("/api/employers/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: targetEmail }),
+      });
 
-    if (!exists) {
-      setError("No employer account found for that email.");
-      setLoading(false);
-      return;
+      if (!check.ok) {
+        setError("Could not verify account. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const { exists } = await check.json();
+
+      if (!exists) {
+        setError("No employer account found for that email.");
+        setLoading(false);
+        return;
+      }
+
+      const { error: err } = await supabase.auth.signInWithOtp({
+        email: targetEmail,
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      });
+
+      if (err) {
+        console.error("[employer-login] signInWithOtp error:", err);
+        const msg = err.message ?? "";
+        if (msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second")) {
+          setError("Please wait a moment before requesting another link.");
+        } else {
+          setError(msg || "Couldn't send the sign-in link. Please try again.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      setSent(true);
+      setCooldown(RESEND_COOLDOWN);
+    } catch (e) {
+      console.error("[employer-login] unexpected error:", e);
+      setError("Something went wrong. Please try again.");
     }
-
-    // Use shouldCreateUser: true so employers who haven't confirmed their
-    // Supabase Auth account yet (never clicked the original onboarding link)
-    // still receive a working sign-in link.
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: targetEmail,
-      options: {
-        shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    });
 
     setLoading(false);
-
-    if (err) {
-      const msg = err.message ?? "";
-      if (msg.toLowerCase().includes("rate") || msg.toLowerCase().includes("second")) {
-        setError("Please wait a moment before requesting another link.");
-      } else {
-        setError(msg || "Couldn't send the sign-in link. Please try again.");
-      }
-      return;
-    }
-
-    setSent(true);
-    setCooldown(RESEND_COOLDOWN);
   }
 
   async function handleSubmit(e: React.FormEvent) {

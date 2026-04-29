@@ -297,7 +297,7 @@ function Step4Verify({ state, dispatch }: { state: EmployerWizardState; dispatch
   const handleResend = async () => {
     await supabase.auth.signInWithOtp({
       email: state.email,
-      options: { shouldCreateUser: true, emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback` },
+      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/api/auth/callback` },
     });
     setResent(true);
     setTimeout(() => setResent(false), 5000);
@@ -483,7 +483,7 @@ export default function EmployerOnboardingPage() {
       }
       await supabase.auth.signInWithOtp({
         email: state.email,
-        options: { shouldCreateUser: true, emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback` },
+        options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/api/auth/callback` },
       });
       dispatch({ type: "SET_EMPLOYER_ID", id: data.employerId });
       dispatch({ type: "SET_SUBMITTING", value: false });
