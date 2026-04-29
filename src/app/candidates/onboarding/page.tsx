@@ -10,9 +10,11 @@ import {
   CANDIDATE_STEPS,
   EXPERIENCE_LEVEL_OPTIONS,
   CATEGORY_OPTIONS,
+  TECH_STACK_OPTIONS,
   type CandidateWizardState,
   type CandidateWizardAction,
 } from "@/lib/onboarding-types";
+import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CITIES } from "@/lib/placeholder-data";
 import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
@@ -204,9 +206,24 @@ function Step4Frequency({ state, dispatch }: { state: CandidateWizardState; disp
   );
 }
 
-// ─── Step 5: Profile ────────────────────────────────────────────────────────
+// ─── Step 5: Skills ─────────────────────────────────────────────────────────
 
-interface Step5Props {
+function Step5Skills({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+  return (
+    <div>
+      <StepHeader icon={<Code2 size={20} style={{ color: "var(--accent)" }} />} title="Your tech stack" subtitle="Add skills so employers can find you. Optional — you can update anytime." />
+      <TechStackSelector
+        options={TECH_STACK_OPTIONS}
+        selected={state.skills}
+        onChange={(tags) => dispatch({ type: "SET_FIELD", field: "skills", value: tags })}
+      />
+    </div>
+  );
+}
+
+// ─── Step 6: Profile ────────────────────────────────────────────────────────
+
+interface Step6Props {
   state: CandidateWizardState;
   dispatch: React.Dispatch<CandidateWizardAction>;
   onNext: () => void;
@@ -219,7 +236,7 @@ interface Step5Props {
   onCvTabChange: (tab: "upload" | "link") => void;
 }
 
-function Step5Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAvatarChange, cvFile, cvTab, onCvFileChange, onCvTabChange }: Step5Props) {
+function Step6Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAvatarChange, cvFile, cvTab, onCvFileChange, onCvTabChange }: Step6Props) {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const cvInputRef = useRef<HTMLInputElement>(null);
   const [cvDragOver, setCvDragOver] = useState(false);
@@ -393,7 +410,7 @@ function Step5Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAv
   );
 }
 
-// ─── Step 6: Work experience ────────────────────────────────────────────────
+// ─── Step 7: Work experience ────────────────────────────────────────────────
 
 interface PositionDraft {
   title: string;
@@ -413,12 +430,12 @@ function formatMonth(ym: string) {
   return date.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 }
 
-interface Step6Props {
+interface Step7Props {
   positions: PositionDraft[];
   setPositions: React.Dispatch<React.SetStateAction<PositionDraft[]>>;
 }
 
-function Step6Experience({ positions, setPositions }: Step6Props) {
+function Step7Experience({ positions, setPositions }: Step7Props) {
   const [draft, setDraft]     = useState<PositionDraft>(emptyDraft());
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [adding, setAdding]   = useState(positions.length === 0);
@@ -535,9 +552,9 @@ function Step6Experience({ positions, setPositions }: Step6Props) {
   );
 }
 
-// ─── Step 7: Done ────────────────────────────────────────────────────────────
+// ─── Step 8: Done ────────────────────────────────────────────────────────────
 
-function Step7Done({ state, avatarUploadError }: { state: CandidateWizardState; avatarUploadError: boolean }) {
+function Step8Done({ state, avatarUploadError, submitError }: { state: CandidateWizardState; avatarUploadError: boolean; submitError: string }) {
   return (
     <>
       <Confetti />
@@ -552,9 +569,15 @@ function Step7Done({ state, avatarUploadError }: { state: CandidateWizardState; 
         <p className="body" style={{ color: "var(--text-muted)", marginBottom: 8 }}>
           We sent a sign-in link to
         </p>
-        <div style={{ display: "inline-block", padding: "8px 18px", background: "var(--bg-muted)", borderRadius: "var(--radius-md)", fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 32 }}>
+        <div style={{ display: "inline-block", padding: "8px 18px", background: "var(--bg-muted)", borderRadius: "var(--radius-md)", fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 24 }}>
           {state.email}
         </div>
+
+        {submitError && (
+          <div className="alert alert-error" style={{ marginBottom: 20, borderRadius: "var(--radius-md)", textAlign: "left" }}>
+            {submitError}
+          </div>
+        )}
 
         {avatarUploadError && (
           <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>
@@ -620,7 +643,7 @@ export default function CandidateOnboardingPage() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "skills", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
             for (const field of fields) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
@@ -632,7 +655,7 @@ export default function CandidateOnboardingPage() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved) as Partial<CandidateWizardState>;
-            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
+            const fields = ["categories", "remoteType", "city", "experienceLevel", "salaryMin", "alertFrequency", "skills", "firstName", "lastName", "email", "githubUrl", "linkedinUrl", "portfolioUrl", "cvUrl"] as const;
             for (const field of fields) {
               if (parsed[field] !== undefined) dispatch({ type: "SET_FIELD", field, value: parsed[field] as string | string[] });
             }
@@ -654,11 +677,11 @@ export default function CandidateOnboardingPage() {
   }, [state]);
 
   const handleNext = () => {
-    if (state.step === 5 && !state.submitting && !state.candidateId) {
+    if (state.step === 6 && !state.submitting && !state.candidateId) {
       handleSubmit();
       return;
     }
-    if (state.step === 6) {
+    if (state.step === 7) {
       handleSavePositions();
       return;
     }
@@ -685,6 +708,7 @@ export default function CandidateOnboardingPage() {
           experienceLevel: state.experienceLevel || null,
           salaryMin: state.salaryMin ? parseInt(state.salaryMin, 10) : null,
           alertFrequency: state.alertFrequency,
+          skills: state.skills,
           githubUrl: state.githubUrl || null,
           linkedinUrl: state.linkedinUrl || null,
           portfolioUrl: state.portfolioUrl || null,
@@ -763,7 +787,7 @@ export default function CandidateOnboardingPage() {
     startTransition(() => dispatch({ type: "NEXT_STEP" }));
   };
 
-  const showNav = state.step < 7;
+  const showNav = state.step < 8;
 
   // Block render until we've confirmed the user isn't already registered.
   // This prevents any flash of the wizard (and localStorage restore) before redirect.
@@ -776,8 +800,9 @@ export default function CandidateOnboardingPage() {
         {state.step === 2 && <Step2Location state={state} dispatch={dispatch} />}
         {state.step === 3 && <Step3Level state={state} dispatch={dispatch} />}
         {state.step === 4 && <Step4Frequency state={state} dispatch={dispatch} />}
-        {state.step === 5 && (
-          <Step5Profile
+        {state.step === 5 && <Step5Skills state={state} dispatch={dispatch} />}
+        {state.step === 6 && (
+          <Step6Profile
             state={state}
             dispatch={dispatch}
             onNext={handleNext}
@@ -790,15 +815,9 @@ export default function CandidateOnboardingPage() {
             onCvTabChange={setCvTab}
           />
         )}
-        {state.step === 6 && <Step6Experience positions={positions} setPositions={setPositions} />}
-        {state.step === 7 && <Step7Done state={state} avatarUploadError={avatarUploadError} />}
+        {state.step === 7 && <Step7Experience positions={positions} setPositions={setPositions} />}
+        {state.step === 8 && <Step8Done state={state} avatarUploadError={avatarUploadError} submitError={submitError} />}
       </StepSlide>
-
-      {submitError && (
-        <div className="alert alert-error" style={{ marginTop: 16, borderRadius: "var(--radius-md)" }}>
-          {submitError}
-        </div>
-      )}
 
       {showNav && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 36, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
@@ -808,11 +827,9 @@ export default function CandidateOnboardingPage() {
           <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
             {state.submitting
               ? "Saving…"
-              : state.step === 5
+              : state.step === 6
                 ? <>Create account <ArrowRight size={15} /></>
-                : state.step === 6
-                  ? <>Finish <ArrowRight size={15} /></>
-                  : <>Next <ArrowRight size={15} /></>}
+                : <>Next <ArrowRight size={15} /></>}
           </button>
         </div>
       )}

@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       linkedinUrl:     typeof body.linkedinUrl === "string" ? body.linkedinUrl.trim() || null : null,
       portfolioUrl:    typeof body.portfolioUrl === "string" ? body.portfolioUrl.trim() || null : null,
       cvUrl:           typeof body.cvUrl === "string" ? body.cvUrl.trim() || null : null,
+      skills:          Array.isArray(body.skills) ? body.skills : [],
     })
     .select("id")
     .single();

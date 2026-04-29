@@ -30,7 +30,7 @@ export function WizardShell({ steps, currentStep, children, sidePanel }: Props) 
         </div>
       ) : (
         <div style={{ flex: 1, display: "flex" }}>
-          <div style={{ maxWidth: 600, width: "100%", margin: "0 auto", padding: "clamp(32px, 5vw, 52px) var(--page-padding-x) 100px", overflowX: "hidden" }}>
+          <div style={{ maxWidth: 600, width: "100%", margin: "0 auto", padding: "clamp(32px, 5vw, 52px) var(--page-padding-x) 48px", overflowX: "hidden" }}>
             {children}
           </div>
         </div>
