@@ -40,9 +40,12 @@ export async function GET(req: NextRequest) {
   ]);
 
   // Determine where to send the user
+  // Only allow relative paths (starts with "/" but not "//") to prevent open-redirect
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+
   let destination: string;
-  if (next) {
-    destination = next;
+  if (safeNext) {
+    destination = safeNext;
   } else {
     const [employer, { data: candidate }] = await Promise.all([
       prisma.employer.findUnique({ where: { email }, select: { id: true } }),

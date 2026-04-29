@@ -45,7 +45,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "File must be under 10 MB." }, { status: 422 });
   }
 
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf";
+  const extMap: Record<string, string> = {
+    "application/pdf": "pdf",
+    "application/msword": "doc",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  };
+  const ext = extMap[file.type] ?? "pdf";
   const storagePath = `${candidate.id}/cv.${ext}`;
   const buffer = await file.arrayBuffer();
 
