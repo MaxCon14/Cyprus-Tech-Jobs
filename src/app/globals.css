@@ -608,6 +608,33 @@ body {
   .grid-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* ── Hero search & stats ── */
+.hero-search {
+  display: flex;
+  gap: 8px;
+  max-width: 640px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .hero-search {
+    flex-direction: column;
+    max-width: 100%;
+    margin-bottom: 32px;
+  }
+  .hero-search > * {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+  .hero-search .btn {
+    justify-content: center;
+  }
+  .hero-stats {
+    gap: 20px !important;
+  }
+}
+
 /* ── 640px: single column, mobile-first ── */
 @media (max-width: 640px) {
   .grid-2,
