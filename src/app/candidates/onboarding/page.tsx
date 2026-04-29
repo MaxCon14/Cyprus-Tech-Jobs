@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText, Camera, Upload, X } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -206,12 +206,67 @@ function Step4Frequency({ state, dispatch }: { state: CandidateWizardState; disp
 
 // ─── Step 5: Profile ────────────────────────────────────────────────────────
 
-function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
+interface Step5Props {
+  state: CandidateWizardState;
+  dispatch: React.Dispatch<CandidateWizardAction>;
+  onNext: () => void;
+  avatarFile: File | null;
+  avatarPreview: string | null;
+  onAvatarChange: (file: File | null) => void;
+  cvFile: File | null;
+  cvTab: "upload" | "link";
+  onCvFileChange: (file: File | null) => void;
+  onCvTabChange: (tab: "upload" | "link") => void;
+}
+
+function Step5Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAvatarChange, cvFile, cvTab, onCvFileChange, onCvTabChange }: Step5Props) {
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const cvInputRef = useRef<HTMLInputElement>(null);
+  const [cvDragOver, setCvDragOver] = useState(false);
+
+  const EXT_BADGE: Record<string, string> = { pdf: "#e53e3e", doc: "#2b6cb0", docx: "#2b6cb0" };
+  const cvExt = cvFile?.name.split(".").pop()?.toLowerCase() ?? "";
+
   return (
     <div>
       <StepHeader icon={<User size={20} style={{ color: "var(--accent)" }} />} title="Create your account" subtitle="We'll send you a magic link — no password needed." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+        {/* Avatar picker */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <div style={{ position: "relative" }}>
+            <div
+              onClick={() => avatarInputRef.current?.click()}
+              style={{
+                width: 80, height: 80, borderRadius: "50%", cursor: "pointer",
+                overflow: "hidden", display: "grid", placeItems: "center",
+                background: avatarPreview ? "transparent" : "var(--bg-muted)",
+                border: "2px dashed var(--border-strong)",
+                transition: "border-color 150ms",
+              }}
+            >
+              {avatarPreview
+                ? <img src={avatarPreview} alt="Profile preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <User size={28} style={{ color: "var(--text-subtle)" }} />
+              }
+            </div>
+            <div style={{
+              position: "absolute", bottom: 2, right: 2,
+              width: 22, height: 22, borderRadius: "50%",
+              background: "var(--accent)", display: "grid", placeItems: "center",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.2)", pointerEvents: "none",
+            }}>
+              <Camera size={11} style={{ color: "var(--white)" }} />
+            </div>
+            <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }}
+              onChange={(e) => onAvatarChange(e.target.files?.[0] ?? null)} />
+          </div>
+          <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+            {avatarFile ? avatarFile.name : "Click to add a profile photo (optional)"}
+          </p>
+        </div>
+
         {/* Name row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <Field label="First name" required>
@@ -240,17 +295,70 @@ function Step5Profile({ state, dispatch, onNext }: { state: CandidateWizardState
 
         {/* CV */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20 }}>
-          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>CV / Résumé (optional)</p>
-          <p className="body-s" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Paste a link to your CV, or upload a file directly from your dashboard after signing in.</p>
-          <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", display: "flex", alignItems: "center" }}>
-              <FileText size={14} />
-            </span>
-            <input className="input" type="url" value={state.cvUrl}
-              placeholder="drive.google.com/file/… or dropbox.com/s/…"
-              onChange={(e) => dispatch({ type: "SET_FIELD", field: "cvUrl", value: e.target.value })}
-              style={{ paddingLeft: 36 }} />
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>CV / Résumé (optional)</p>
+
+          {/* Tab toggle */}
+          <div style={{ display: "flex", gap: 0, border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden", alignSelf: "flex-start", marginBottom: 12, width: "fit-content" }}>
+            {(["upload", "link"] as const).map((t) => (
+              <button key={t} type="button" onClick={() => { onCvTabChange(t); onCvFileChange(null); dispatch({ type: "SET_FIELD", field: "cvUrl", value: "" }); }}
+                style={{ padding: "7px 16px", fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, cursor: "pointer", border: "none", background: cvTab === t ? "var(--accent)" : "transparent", color: cvTab === t ? "var(--white)" : "var(--text-muted)", transition: "all 120ms" }}>
+                {t === "upload" ? "Upload file" : "Use a link"}
+              </button>
+            ))}
           </div>
+
+          {cvTab === "upload" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <input ref={cvInputRef} type="file" accept=".pdf,.doc,.docx" style={{ display: "none" }}
+                onChange={(e) => onCvFileChange(e.target.files?.[0] ?? null)} />
+              {!cvFile ? (
+                <div
+                  onClick={() => cvInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setCvDragOver(true); }}
+                  onDragLeave={() => setCvDragOver(false)}
+                  onDrop={(e) => { e.preventDefault(); setCvDragOver(false); onCvFileChange(e.dataTransfer.files[0] ?? null); }}
+                  style={{
+                    border: `2px dashed ${cvDragOver ? "var(--accent)" : "var(--border)"}`,
+                    borderRadius: 10, padding: "28px 20px", textAlign: "center", cursor: "pointer",
+                    background: cvDragOver ? "var(--accent-soft)" : "var(--bg-muted)",
+                    transition: "all 150ms",
+                  }}
+                >
+                  <Upload size={22} style={{ color: "var(--text-subtle)", margin: "0 auto 8px", display: "block" }} />
+                  <p className="body-s" style={{ color: "var(--text)", fontWeight: 600, marginBottom: 3 }}>Click to browse or drag & drop</p>
+                  <p className="mono-s" style={{ color: "var(--text-subtle)" }}>PDF, DOC or DOCX · Max 10 MB</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", background: "var(--bg-muted)", borderRadius: 10, border: "1px solid var(--border)" }}>
+                  <span style={{ padding: "3px 7px", borderRadius: 4, background: EXT_BADGE[cvExt] ?? "var(--text-subtle)", color: "#fff", fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
+                    {cvExt.toUpperCase()}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {cvFile.name}
+                    </p>
+                    <p className="mono-s" style={{ color: "var(--text-subtle)" }}>{(cvFile.size / 1024).toFixed(0)} KB</p>
+                  </div>
+                  <button type="button" onClick={() => { onCvFileChange(null); if (cvInputRef.current) cvInputRef.current.value = ""; }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-subtle)", display: "flex", padding: 4 }}>
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {cvTab === "link" && (
+            <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", display: "flex", alignItems: "center" }}>
+                <FileText size={14} />
+              </span>
+              <input className="input" type="url" value={state.cvUrl}
+                placeholder="drive.google.com/file/… or dropbox.com/s/…"
+                onChange={(e) => dispatch({ type: "SET_FIELD", field: "cvUrl", value: e.target.value })}
+                style={{ paddingLeft: 36 }} />
+            </div>
+          )}
         </div>
 
         {/* Optional links */}
@@ -327,8 +435,18 @@ export default function CandidateOnboardingPage() {
   const [, startTransition] = useTransition();
   const [submitError, setSubmitError] = useState("");
   const hydrated = useRef(false);
-  // null = checking, false = not a candidate (allow), true = redirect in progress
   const [authChecked, setAuthChecked] = useState(false);
+
+  // File upload state — kept outside the reducer since Files aren't serialisable
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [cvTab, setCvTab] = useState<"upload" | "link">("upload");
+
+  function handleAvatarChange(file: File | null) {
+    setAvatarFile(file);
+    setAvatarPreview(file ? URL.createObjectURL(file) : null);
+  }
 
   // Security guard: if user is already a registered candidate, send them to
   // their dashboard. This prevents accessing other users' localStorage drafts.
@@ -416,7 +534,8 @@ export default function CandidateOnboardingPage() {
           githubUrl: state.githubUrl || null,
           linkedinUrl: state.linkedinUrl || null,
           portfolioUrl: state.portfolioUrl || null,
-          cvUrl: state.cvUrl || null,
+          // Only send cvUrl when the link tab is active; file upload happens below
+          cvUrl: cvTab === "link" ? (state.cvUrl || null) : null,
         }),
       });
 
@@ -426,6 +545,24 @@ export default function CandidateOnboardingPage() {
         setSubmitError(data.error ?? "Something went wrong.");
         dispatch({ type: "SET_SUBMITTING", value: false });
         return;
+      }
+
+      const { candidateId } = data as { candidateId: string };
+
+      // Upload CV file if one was selected
+      if (cvFile && cvTab === "upload") {
+        const fd = new FormData();
+        fd.append("file", cvFile);
+        fd.append("candidateId", candidateId);
+        await fetch("/api/candidates/upload-cv-onboarding", { method: "POST", body: fd });
+      }
+
+      // Upload avatar if one was selected
+      if (avatarFile) {
+        const fd = new FormData();
+        fd.append("file", avatarFile);
+        fd.append("candidateId", candidateId);
+        await fetch("/api/candidates/upload-avatar-onboarding", { method: "POST", body: fd });
       }
 
       // Send magic link for auth
@@ -438,7 +575,7 @@ export default function CandidateOnboardingPage() {
         },
       });
 
-      dispatch({ type: "SET_CANDIDATE_ID", id: data.candidateId });
+      dispatch({ type: "SET_CANDIDATE_ID", id: candidateId });
       dispatch({ type: "SET_SUBMITTING", value: false });
       localStorage.removeItem(LS_KEY);
       dispatch({ type: "NEXT_STEP" });
@@ -461,7 +598,20 @@ export default function CandidateOnboardingPage() {
         {state.step === 2 && <Step2Location state={state} dispatch={dispatch} />}
         {state.step === 3 && <Step3Level state={state} dispatch={dispatch} />}
         {state.step === 4 && <Step4Frequency state={state} dispatch={dispatch} />}
-        {state.step === 5 && <Step5Profile state={state} dispatch={dispatch} onNext={handleNext} />}
+        {state.step === 5 && (
+          <Step5Profile
+            state={state}
+            dispatch={dispatch}
+            onNext={handleNext}
+            avatarFile={avatarFile}
+            avatarPreview={avatarPreview}
+            onAvatarChange={handleAvatarChange}
+            cvFile={cvFile}
+            cvTab={cvTab}
+            onCvFileChange={setCvFile}
+            onCvTabChange={setCvTab}
+          />
+        )}
         {state.step === 6 && <Step6Done state={state} />}
       </StepSlide>
 

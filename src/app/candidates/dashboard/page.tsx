@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
-import { CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
+import { AvatarSection, CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -86,8 +86,11 @@ export default async function CandidateDashboardPage() {
             CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{initials}</span>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", overflow: "hidden", background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+              {c.avatarUrl
+                ? <img src={c.avatarUrl} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{initials}</span>
+              }
             </div>
             <span className="body-s dash-nav-name" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
             <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
@@ -117,11 +120,14 @@ export default async function CandidateDashboardPage() {
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
             {/* Avatar */}
             <div style={{
-              width: 72, height: 72, borderRadius: 14, flexShrink: 0,
+              width: 72, height: 72, borderRadius: 14, flexShrink: 0, overflow: "hidden",
               background: "var(--accent-soft)", border: "2px solid var(--accent)",
               display: "grid", placeItems: "center",
             }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
+              {c.avatarUrl
+                ? <img src={c.avatarUrl} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
+              }
             </div>
 
             {/* Info */}
@@ -202,6 +208,7 @@ export default async function CandidateDashboardPage() {
 
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <AvatarSection candidate={c} />
             <CvSection candidate={c} />
             <LinksSection candidate={c} />
             <PreferencesSection candidate={c} />
