@@ -39,6 +39,9 @@ export default async function JobDetailPage({ params }: Props) {
   let candidateId: string | null = null;
   let candidateName: string | null = null;
   let candidateHeadline: string | null = null;
+  let candidateLinkedinUrl: string | null = null;
+  let candidatePortfolioUrl: string | null = null;
+  let candidateSalaryMin: number | null = null;
   let hasApplied = false;
   try {
     const supabase = await createSupabaseServerClient();
@@ -46,14 +49,17 @@ export default async function JobDetailPage({ params }: Props) {
     if (user?.email) {
       const { data: c } = await supabaseAdmin
         .from("candidates")
-        .select("id, firstName, lastName, headline, cvUrl")
+        .select("id, firstName, lastName, headline, cvUrl, linkedinUrl, portfolioUrl, salaryMin")
         .eq("email", user.email)
         .single();
       if (c) {
-        savedCvUrl      = c.cvUrl ?? null;
-        candidateId     = c.id;
-        candidateName   = [c.firstName, c.lastName].filter(Boolean).join(" ") || user.email;
-        candidateHeadline = c.headline ?? null;
+        savedCvUrl            = c.cvUrl ?? null;
+        candidateId           = c.id;
+        candidateName         = [c.firstName, c.lastName].filter(Boolean).join(" ") || user.email;
+        candidateHeadline     = c.headline ?? null;
+        candidateLinkedinUrl  = c.linkedinUrl ?? null;
+        candidatePortfolioUrl = c.portfolioUrl ?? null;
+        candidateSalaryMin    = c.salaryMin ?? null;
         const { data: existing } = await supabaseAdmin
           .from("job_applications")
           .select("id")
@@ -175,6 +181,10 @@ export default async function JobDetailPage({ params }: Props) {
               candidateId={candidateId}
               candidateName={candidateName}
               candidateHeadline={candidateHeadline}
+              candidateCvUrl={savedCvUrl}
+              candidateLinkedinUrl={candidateLinkedinUrl}
+              candidatePortfolioUrl={candidatePortfolioUrl}
+              candidateSalaryMin={candidateSalaryMin}
               hasApplied={hasApplied}
             />
             {job.applyUrl && (

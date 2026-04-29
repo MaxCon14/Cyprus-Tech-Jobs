@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Users, X, ExternalLink, Globe, AtSign,
   FileText, Loader2, MapPin, Briefcase, DollarSign, Calendar, ChevronRight, Link2,
+  Clock, ShieldCheck,
 } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 
@@ -12,6 +13,13 @@ interface Application {
   coverLetter: string | null;
   status: string;
   appliedAt: string;
+  cvUrl: string | null;
+  availability: string | null;
+  noticePeriod: string | null;
+  expectedSalary: number | null;
+  rightToWork: string | null;
+  linkedinUrl: string | null;
+  portfolioUrl: string | null;
   candidate: CandidateRow | null;
   positions: PositionRow[];
 }
@@ -36,6 +44,37 @@ function remoteLabel(r: string | null) {
   return r ?? "";
 }
 
+function availabilityLabel(v: string | null) {
+  if (!v) return null;
+  const map: Record<string, string> = {
+    IMMEDIATELY:     "Immediately",
+    "2_WEEKS":       "2 weeks",
+    "1_MONTH":       "1 month",
+    "3_MONTHS_PLUS": "3 months+",
+  };
+  return map[v] ?? v;
+}
+
+function noticePeriodLabel(v: string | null) {
+  if (!v) return null;
+  const map: Record<string, string> = {
+    IMMEDIATE:       "Immediate",
+    "2_WEEKS":       "2 weeks",
+    "1_MONTH":       "1 month",
+    "2_MONTHS":      "2 months",
+    "3_MONTHS_PLUS": "3 months+",
+  };
+  return map[v] ?? v;
+}
+
+function rightToWorkInfo(v: string | null): { label: string; color: string; bg: string } | null {
+  if (!v) return null;
+  if (v === "EU_CITIZEN")        return { label: "EU / EEA citizen",       color: "var(--success)", bg: "var(--success-bg)" };
+  if (v === "WORK_PERMIT")       return { label: "Work permit holder",     color: "#b45309",         bg: "#fef3c7"           };
+  if (v === "NEEDS_SPONSORSHIP") return { label: "Needs visa sponsorship", color: "var(--error)",   bg: "var(--error-bg)"  };
+  return null;
+}
+
 // ─── Applicant card ───────────────────────────────────────────────────────────
 
 function ApplicantCard({ app }: { app: Application }) {
@@ -49,14 +88,23 @@ function ApplicantCard({ app }: { app: Application }) {
   const visibleSkills = skills.slice(0, 6);
   const extraSkills = skills.length - 6;
 
+  // Option B: application-specific values override profile links
+  const cvLink       = app.cvUrl       ?? c.cvUrl;
+  const linkedinUrl  = app.linkedinUrl  ?? c.linkedinUrl;
+  const portfolioUrl = app.portfolioUrl ?? c.portfolioUrl;
+
   const links = [
-    { url: c.githubUrl,    icon: <Globe size={13} />,    label: "GitHub"    },
-    { url: c.linkedinUrl,  icon: <Link2 size={13} />,   label: "LinkedIn"  },
-    { url: c.portfolioUrl, icon: <Globe size={13} />,    label: "Portfolio" },
-    { url: c.twitterUrl,   icon: <AtSign size={13} />,   label: "Twitter"   },
-    { url: c.dribbbleUrl,  icon: <AtSign size={13} />,   label: "Dribbble"  },
-    { url: c.behanceUrl,   icon: <Globe size={13} />,    label: "Behance"   },
+    { url: c.githubUrl,   icon: <Globe size={13} />,  label: "GitHub"    },
+    { url: linkedinUrl,   icon: <Link2 size={13} />,  label: "LinkedIn"  },
+    { url: portfolioUrl,  icon: <Globe size={13} />,  label: "Portfolio" },
+    { url: c.twitterUrl,  icon: <AtSign size={13} />, label: "Twitter"   },
+    { url: c.dribbbleUrl, icon: <AtSign size={13} />, label: "Dribbble"  },
+    { url: c.behanceUrl,  icon: <Globe size={13} />,  label: "Behance"   },
   ].filter((l) => !!l.url);
+
+  const rtw    = rightToWorkInfo(app.rightToWork);
+  const avail  = availabilityLabel(app.availability);
+  const notice = noticePeriodLabel(app.noticePeriod);
 
   return (
     <div style={{ border: "1px solid var(--border)", borderRadius: 12, background: "var(--surface)", overflow: "hidden" }}>
@@ -82,7 +130,7 @@ function ApplicantCard({ app }: { app: Application }) {
             </div>
           </div>
 
-          {/* Meta tags */}
+          {/* Profile meta tags */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
             {c.city && (
               <span className="tag" style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11 }}>
@@ -99,6 +147,51 @@ function ApplicantCard({ app }: { app: Application }) {
           </div>
         </div>
       </div>
+
+      {/* ── Zone A: Application summary ─────────────────────────────────────── */}
+      {(rtw || avail || notice || app.expectedSalary) && (
+        <div style={{ margin: "0 18px 14px", padding: "12px 14px", background: "var(--bg-muted)", borderRadius: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 2 }}>APPLICATION DETAILS</p>
+
+          {/* Right to work — most prominent */}
+          {rtw && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <ShieldCheck size={13} style={{ color: rtw.color, flexShrink: 0 }} />
+              <span style={{
+                fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 12,
+                color: rtw.color, background: rtw.bg,
+                padding: "3px 10px", borderRadius: 99,
+              }}>
+                {rtw.label}
+              </span>
+            </div>
+          )}
+
+          {/* Availability + notice period */}
+          {(avail || notice) && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              <Clock size={12} style={{ color: "var(--text-subtle)", flexShrink: 0 }} />
+              <span className="body-s" style={{ color: "var(--text-muted)" }}>
+                {avail && <>Available: <strong>{avail}</strong></>}
+                {avail && notice && <span style={{ color: "var(--border-strong)" }}> · </span>}
+                {notice && <>Notice: <strong>{notice}</strong></>}
+              </span>
+            </div>
+          )}
+
+          {/* Expected salary */}
+          {app.expectedSalary && (
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <DollarSign size={12} style={{ color: "var(--text-subtle)", flexShrink: 0 }} />
+              <span className="body-s" style={{ color: "var(--text-muted)" }}>
+                Expects <strong>€{app.expectedSalary.toLocaleString()}/yr</strong>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Zone B: Candidate profile ───────────────────────────────────────── */}
 
       {/* Bio */}
       {c.bio && (
@@ -119,7 +212,7 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
       )}
 
-      {/* Work history */}
+      {/* Work history — all positions */}
       {app.positions.length > 0 && (
         <div style={{ padding: "0 18px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
           {app.positions.map((pos) => (
@@ -155,8 +248,8 @@ function ApplicantCard({ app }: { app: Application }) {
               {showCover ? "Hide" : "Cover letter"}
             </button>
           )}
-          {c.cvUrl ? (
-            <a href={c.cvUrl.startsWith("http") ? c.cvUrl : `https://${c.cvUrl}`}
+          {cvLink ? (
+            <a href={cvLink.startsWith("http") ? cvLink : `https://${cvLink}`}
               target="_blank" rel="noopener noreferrer"
               className="btn btn-accent btn-sm"
               style={{ display: "flex", alignItems: "center", gap: 5, textDecoration: "none" }}>

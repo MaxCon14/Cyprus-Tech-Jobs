@@ -40,7 +40,7 @@ export async function GET(
   // Fetch applications
   const { data: applications, error } = await supabaseAdmin
     .from("job_applications")
-    .select("id, candidateId, coverLetter, status, appliedAt")
+    .select("id, candidateId, coverLetter, status, appliedAt, cvUrl, availability, noticePeriod, expectedSalary, rightToWork, linkedinUrl, portfolioUrl")
     .eq("jobId", jobId)
     .order("appliedAt", { ascending: false });
 
@@ -61,7 +61,7 @@ export async function GET(
     .select("*")
     .in("id", candidateIds);
 
-  // Batch fetch positions (latest 2 per candidate)
+  // Batch fetch all positions per candidate (no cap)
   const { data: allPositions } = await supabaseAdmin
     .from("candidate_positions")
     .select("*")
@@ -76,19 +76,24 @@ export async function GET(
   const positionsMap = new Map<string, PositionRow[]>();
   for (const pos of (allPositions ?? []) as PositionRow[]) {
     const arr = positionsMap.get(pos.candidateId) ?? [];
-    if (arr.length < 2) {
-      arr.push(pos);
-      positionsMap.set(pos.candidateId, arr);
-    }
+    arr.push(pos);
+    positionsMap.set(pos.candidateId, arr);
   }
 
   const result = applications.map((app) => ({
-    id: app.id,
-    coverLetter: app.coverLetter,
-    status: app.status,
-    appliedAt: app.appliedAt,
-    candidate: candidateMap.get(app.candidateId) ?? null,
-    positions: positionsMap.get(app.candidateId) ?? [],
+    id:             app.id,
+    coverLetter:    app.coverLetter,
+    status:         app.status,
+    appliedAt:      app.appliedAt,
+    cvUrl:          app.cvUrl,
+    availability:   app.availability,
+    noticePeriod:   app.noticePeriod,
+    expectedSalary: app.expectedSalary,
+    rightToWork:    app.rightToWork,
+    linkedinUrl:    app.linkedinUrl,
+    portfolioUrl:   app.portfolioUrl,
+    candidate:      candidateMap.get(app.candidateId) ?? null,
+    positions:      positionsMap.get(app.candidateId) ?? [],
   }));
 
   return NextResponse.json({ applications: result });

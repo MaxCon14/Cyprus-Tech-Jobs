@@ -32,13 +32,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "jobId is required." }, { status: 422 });
   }
 
-  const coverLetter =
-    typeof body.coverLetter === "string" ? body.coverLetter.trim().slice(0, 1000) || null : null;
+  const coverLetter    = typeof body.coverLetter === "string" ? body.coverLetter.trim().slice(0, 1000) || null : null;
+  const cvUrl          = typeof body.cvUrl === "string" ? body.cvUrl.trim() || null : null;
+  const availability   = typeof body.availability === "string" ? body.availability || null : null;
+  const noticePeriod   = typeof body.noticePeriod === "string" ? body.noticePeriod || null : null;
+  const expectedSalary = typeof body.expectedSalary === "number" && body.expectedSalary > 0 ? body.expectedSalary : null;
+  const rightToWork    = typeof body.rightToWork === "string" ? body.rightToWork || null : null;
+  const linkedinUrl    = typeof body.linkedinUrl === "string" ? body.linkedinUrl.trim() || null : null;
+  const portfolioUrl   = typeof body.portfolioUrl === "string" ? body.portfolioUrl.trim() || null : null;
 
   const { data, error } = await supabaseAdmin
     .from("job_applications")
     .upsert(
-      { jobId, candidateId: candidate.id, coverLetter },
+      { jobId, candidateId: candidate.id, coverLetter, cvUrl, availability, noticePeriod, expectedSalary, rightToWork, linkedinUrl, portfolioUrl },
       { onConflict: "jobId,candidateId", ignoreDuplicates: true }
     )
     .select("id")
