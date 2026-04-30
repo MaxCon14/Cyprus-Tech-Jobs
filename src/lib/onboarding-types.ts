@@ -23,7 +23,6 @@ export interface EmployerWizardState {
   // Step 3
   description: string;
   techStack: string[];
-  logoUrl: string;
 }
 
 export type EmployerWizardAction =
@@ -52,7 +51,6 @@ export function initialEmployerState(): EmployerWizardState {
     size: "",
     description: "",
     techStack: [],
-    logoUrl: "",
   };
 }
 

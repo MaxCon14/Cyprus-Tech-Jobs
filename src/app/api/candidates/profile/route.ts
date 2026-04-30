@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest) {
   // Only allow explicit profile fields to be updated
   const allowed = [
     "firstName", "lastName", "headline", "bio",
-    "avatarUrl", "portfolioUrl", "githubUrl", "linkedinUrl",
+    "portfolioUrl", "githubUrl", "linkedinUrl",
     "dribbbleUrl", "behanceUrl", "twitterUrl", "cvUrl",
     "city", "remoteType", "experienceLevel",
     "openToWork", "categories", "skills", "alertFrequency",

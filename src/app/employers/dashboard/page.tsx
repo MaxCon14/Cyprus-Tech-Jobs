@@ -78,7 +78,7 @@ export default async function EmployerDashboard() {
       }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Link href="/" style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, color: "var(--text)", textDecoration: "none", letterSpacing: "-0.3px" }}>
-            CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
+            CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
           </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
@@ -103,13 +103,11 @@ export default async function EmployerDashboard() {
           display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20,
         }}>
           <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: 14, flexShrink: 0,
-              background: "var(--black)", color: "var(--white)",
-              display: "grid", placeItems: "center",
-              fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 24,
-            }}>
-              {companyInitial}
+            <div style={{ width: 64, height: 64, borderRadius: 14, flexShrink: 0, overflow: "hidden", border: "1px solid var(--border)" }}>
+              {company?.logoUrl
+                ? <img src={company.logoUrl} alt={company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <div style={{ width: "100%", height: "100%", background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 24 }}>{companyInitial}</div>
+              }
             </div>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>

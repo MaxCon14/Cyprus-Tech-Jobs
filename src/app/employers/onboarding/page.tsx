@@ -57,8 +57,8 @@ function FilledBadge({ filled }: { filled: boolean }) {
   return <CheckCircle size={14} style={{ color: "var(--success)", flexShrink: 0 }} />;
 }
 
-function getNextTip(state: EmployerWizardState): string | null {
-  if (!state.logoUrl) return "Upload a logo to reach 70%";
+function getNextTip(state: EmployerWizardState, hasLogo: boolean): string | null {
+  if (!hasLogo) return "Upload a logo to reach 70%";
   if (state.description.trim().length < 80) return "Expand your description to reach 80%";
   if (state.techStack.length < 3) return "Add 3+ tech stack items to reach 90%";
   if (!state.website) return "Add your website for full marks";
@@ -122,7 +122,7 @@ function Step1Account({ state, dispatch, onNext }: { state: EmployerWizardState;
 
 // ─── Step 2 ─────────────────────────────────────────────────────────────────
 
-function Step2Company({ state, dispatch }: { state: EmployerWizardState; dispatch: React.Dispatch<EmployerWizardAction> }) {
+function Step2Company({ state, dispatch, logoFile, logoPreview, onLogoChange }: { state: EmployerWizardState; dispatch: React.Dispatch<EmployerWizardAction>; logoFile: File | null; logoPreview: string | null; onLogoChange: (file: File | null) => void }) {
   return (
     <div>
       <div style={{ marginBottom: 32 }}>
@@ -146,8 +146,9 @@ function Step2Company({ state, dispatch }: { state: EmployerWizardState; dispatc
               Logo
             </div>
             <LogoUpload
-              value={state.logoUrl}
-              onChange={(v) => dispatch({ type: "SET_FIELD", field: "logoUrl", value: v })}
+              file={logoFile}
+              preview={logoPreview}
+              onChange={onLogoChange}
             />
             <p className="body-s" style={{ color: "var(--accent)", marginTop: 6, fontSize: 11 }}>3× more clicks</p>
           </div>
@@ -350,13 +351,13 @@ function Step4Verify({ state, dispatch }: { state: EmployerWizardState; dispatch
 
 // ─── Step 5 ─────────────────────────────────────────────────────────────────
 
-function Step5Done({ state }: { state: EmployerWizardState }) {
+function Step5Done({ state, logoUrl }: { state: EmployerWizardState; logoUrl: string }) {
   const { score, breakdown } = computeProfileScore({
     emailVerified: false,
     description: state.description,
     techStack: state.techStack,
     website: state.website,
-    logoUrl: state.logoUrl,
+    logoUrl,
     hasPostedJob: false,
   });
 
@@ -401,6 +402,13 @@ export default function EmployerOnboardingPage() {
   const [, startTransition] = useTransition();
   const hydrated = useRef(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  function handleLogoChange(file: File | null) {
+    setLogoFile(file);
+    setLogoPreview(file ? URL.createObjectURL(file) : null);
+  }
 
   // Security guard: redirect already-registered employers to their dashboard.
   useEffect(() => {
@@ -448,7 +456,7 @@ export default function EmployerOnboardingPage() {
 
   useEffect(() => {
     if (!hydrated.current) return;
-    const { errors, touched, submitting, direction, logoUrl, ...persistable } = state;
+    const { errors, touched, submitting, direction, ...persistable } = state;
     const key = state.email ? `${LS_KEY}:${state.email}` : LS_KEY;
     localStorage.setItem(key, JSON.stringify(persistable));
   }, [state]);
@@ -481,6 +489,15 @@ export default function EmployerOnboardingPage() {
         dispatch({ type: "SET_SUBMITTING", value: false });
         return;
       }
+
+      // Upload logo if one was selected
+      if (logoFile && data.companyId) {
+        const fd = new FormData();
+        fd.append("file", logoFile);
+        fd.append("companyId", data.companyId);
+        await fetch("/api/employers/upload-logo", { method: "POST", body: fd });
+      }
+
       await supabase.auth.signInWithOtp({
         email: state.email,
         options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/api/auth/callback` },
@@ -500,10 +517,10 @@ export default function EmployerOnboardingPage() {
     description: state.description,
     techStack: state.techStack,
     website: state.website,
-    logoUrl: state.logoUrl,
+    logoUrl: logoPreview ?? "",
     hasPostedJob: false,
   });
-  const nextTip = getNextTip(state);
+  const nextTip = getNextTip(state, !!logoFile);
 
   const showSidePanel = state.step === 2 || state.step === 3;
   const isLastInputStep = state.step === 3;
@@ -512,7 +529,7 @@ export default function EmployerOnboardingPage() {
   const sidePanel = showSidePanel ? (
     <CompanyPreviewCard
       name={state.companyName}
-      logoUrl={state.logoUrl}
+      logoUrl={logoPreview ?? ""}
       city={state.city}
       website={state.website}
       size={state.size}
@@ -529,10 +546,10 @@ export default function EmployerOnboardingPage() {
     <WizardShell steps={EMPLOYER_STEPS} currentStep={state.step - 1} sidePanel={sidePanel}>
       <StepSlide key={state.step} direction={state.direction}>
         {state.step === 1 && <Step1Account state={state} dispatch={dispatch} onNext={handleNext} />}
-        {state.step === 2 && <Step2Company state={state} dispatch={dispatch} />}
+        {state.step === 2 && <Step2Company state={state} dispatch={dispatch} logoFile={logoFile} logoPreview={logoPreview} onLogoChange={handleLogoChange} />}
         {state.step === 3 && <Step3Profile state={state} dispatch={dispatch} />}
         {state.step === 4 && <Step4Verify state={state} dispatch={dispatch} />}
-        {state.step === 5 && <Step5Done state={state} />}
+        {state.step === 5 && <Step5Done state={state} logoUrl={logoPreview ?? ""} />}
       </StepSlide>
 
       {state.errors.submit && (
@@ -555,7 +572,7 @@ export default function EmployerOnboardingPage() {
             disabled={state.submitting}
             style={{ minWidth: 140, justifyContent: "center" }}
           >
-            {state.submitting ? "Saving…" : isLastInputStep ? <>Continue <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
+            {state.submitting ? "Saving…" : isLastInputStep ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
           </button>
         </div>
       )}

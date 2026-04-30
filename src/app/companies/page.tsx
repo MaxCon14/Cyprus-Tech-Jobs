@@ -84,8 +84,11 @@ function CompanyCard({ company: co, large = false }: { company: Company; large?:
       style={{ display: "block", textDecoration: "none", border: "1px solid var(--border)", borderRadius: 10, padding: large ? 24 : 20, background: "var(--surface)", transition: "all 200ms cubic-bezier(0.16,1,0.3,1)" }}
     >
       <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: large ? 16 : 12 }}>
-        <div style={{ width: large ? 52 : 44, height: large ? 52 : 44, borderRadius: 8, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: large ? 18 : 15, flexShrink: 0 }}>
-          {co.name.charAt(0)}
+        <div style={{ width: large ? 52 : 44, height: large ? 52 : 44, borderRadius: 8, flexShrink: 0, overflow: "hidden", border: "1px solid var(--border)" }}>
+          {co.logoUrl
+            ? <img src={co.logoUrl} alt={co.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <div style={{ width: "100%", height: "100%", background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: large ? 18 : 15 }}>{co.name.charAt(0)}</div>
+          }
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>

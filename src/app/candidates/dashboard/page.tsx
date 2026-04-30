@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
-import { AvatarHero, CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
+import { CvSection, ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection } from "./ProfileEditor";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
 import { remoteLabel, formatSalary } from "@/lib/utils";
@@ -90,9 +90,6 @@ export default async function CandidateDashboardPage() {
           padding: "28px 32px", marginBottom: 20,
         }}>
           <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* Avatar — click to change photo */}
-            <AvatarHero candidate={c} />
-
             {/* Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>

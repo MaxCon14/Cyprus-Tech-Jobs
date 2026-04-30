@@ -42,8 +42,11 @@ export default async function CompanyProfilePage({ params }: Props) {
       {/* Header */}
       <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 32, marginBottom: 32, background: "var(--surface)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap" }}>
-          <div style={{ width: 80, height: 80, borderRadius: 14, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 28, flexShrink: 0, border: "1px solid var(--border)" }}>
-            {co.name.charAt(0)}
+          <div style={{ width: 80, height: 80, borderRadius: 14, flexShrink: 0, overflow: "hidden", border: "1px solid var(--border)" }}>
+            {co.logoUrl
+              ? <img src={co.logoUrl} alt={co.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              : <div style={{ width: "100%", height: "100%", background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 28 }}>{co.name.charAt(0)}</div>
+            }
           </div>
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, flexWrap: "wrap" }}>

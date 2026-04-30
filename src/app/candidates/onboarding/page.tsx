@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText, Camera, Upload, X, Briefcase, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, FileText, Upload, X, Briefcase, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -218,17 +218,13 @@ interface Step6Props {
   state: CandidateWizardState;
   dispatch: React.Dispatch<CandidateWizardAction>;
   onNext: () => void;
-  avatarFile: File | null;
-  avatarPreview: string | null;
-  onAvatarChange: (file: File | null) => void;
   cvFile: File | null;
   cvTab: "upload" | "link";
   onCvFileChange: (file: File | null) => void;
   onCvTabChange: (tab: "upload" | "link") => void;
 }
 
-function Step6Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAvatarChange, cvFile, cvTab, onCvFileChange, onCvTabChange }: Step6Props) {
-  const avatarInputRef = useRef<HTMLInputElement>(null);
+function Step6Profile({ state, dispatch, onNext, cvFile, cvTab, onCvFileChange, onCvTabChange }: Step6Props) {
   const cvInputRef = useRef<HTMLInputElement>(null);
   const [cvDragOver, setCvDragOver] = useState(false);
 
@@ -240,40 +236,6 @@ function Step6Profile({ state, dispatch, onNext, avatarFile, avatarPreview, onAv
       <StepHeader icon={<User size={20} style={{ color: "var(--accent)" }} />} title="Create your account" subtitle="We'll send you a magic link — no password needed." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
-        {/* Avatar picker */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-          <div style={{ position: "relative" }}>
-            <div
-              onClick={() => avatarInputRef.current?.click()}
-              style={{
-                width: 80, height: 80, borderRadius: "50%", cursor: "pointer",
-                overflow: "hidden", display: "grid", placeItems: "center",
-                background: avatarPreview ? "transparent" : "var(--bg-muted)",
-                border: "2px dashed var(--border-strong)",
-                transition: "border-color 150ms",
-              }}
-            >
-              {avatarPreview
-                ? <img src={avatarPreview} alt="Profile preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <User size={28} style={{ color: "var(--text-subtle)" }} />
-              }
-            </div>
-            <div style={{
-              position: "absolute", bottom: 2, right: 2,
-              width: 22, height: 22, borderRadius: "50%",
-              background: "var(--accent)", display: "grid", placeItems: "center",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.2)", pointerEvents: "none",
-            }}>
-              <Camera size={11} style={{ color: "var(--white)" }} />
-            </div>
-            <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }}
-              onChange={(e) => onAvatarChange(e.target.files?.[0] ?? null)} />
-          </div>
-          <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-            {avatarFile ? avatarFile.name : "Click to add a profile photo (optional)"}
-          </p>
-        </div>
 
         {/* Name row */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -545,7 +507,7 @@ function Step7Experience({ positions, setPositions }: Step7Props) {
 
 // ─── Step 8: Done ────────────────────────────────────────────────────────────
 
-function Step8Done({ state, avatarUploadError, submitError }: { state: CandidateWizardState; avatarUploadError: boolean; submitError: string }) {
+function Step8Done({ state, submitError }: { state: CandidateWizardState; submitError: string }) {
   return (
     <>
       <Confetti />
@@ -568,12 +530,6 @@ function Step8Done({ state, avatarUploadError, submitError }: { state: Candidate
           <div className="alert alert-error" style={{ marginBottom: 20, borderRadius: "var(--radius-md)", textAlign: "left" }}>
             {submitError}
           </div>
-        )}
-
-        {avatarUploadError && (
-          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>
-            Your profile photo couldn't be uploaded — you can add it from your dashboard.
-          </p>
         )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 360, margin: "0 auto" }}>
@@ -600,17 +556,9 @@ export default function CandidateOnboardingPage() {
   const [authChecked, setAuthChecked] = useState(false);
 
   // File upload state — kept outside the reducer since Files aren't serialisable
-  const [avatarFile, setAvatarFile]         = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview]   = useState<string | null>(null);
-  const [avatarUploadError, setAvatarUploadError] = useState(false);
-  const [cvFile, setCvFile]                 = useState<File | null>(null);
-  const [cvTab, setCvTab]                   = useState<"upload" | "link">("upload");
-  const [positions, setPositions]           = useState<PositionDraft[]>([]);
-
-  function handleAvatarChange(file: File | null) {
-    setAvatarFile(file);
-    setAvatarPreview(file ? URL.createObjectURL(file) : null);
-  }
+  const [cvFile, setCvFile]     = useState<File | null>(null);
+  const [cvTab, setCvTab]       = useState<"upload" | "link">("upload");
+  const [positions, setPositions] = useState<PositionDraft[]>([]);
 
   // Security guard: if user is already a registered candidate, send them to
   // their dashboard. This prevents accessing other users' localStorage drafts.
@@ -668,12 +616,8 @@ export default function CandidateOnboardingPage() {
   }, [state]);
 
   const handleNext = () => {
-    if (state.step === 6 && !state.submitting && !state.candidateId) {
-      handleSubmit();
-      return;
-    }
-    if (state.step === 7) {
-      handleSavePositions();
+    if (state.step === 7 && !state.submitting && !state.candidateId) {
+      handleCreateAccount();
       return;
     }
     startTransition(() => dispatch({ type: "NEXT_STEP" }));
@@ -681,11 +625,12 @@ export default function CandidateOnboardingPage() {
 
   const handleBack = () => startTransition(() => dispatch({ type: "PREV_STEP" }));
 
-  const handleSubmit = async () => {
+  const handleCreateAccount = async () => {
     dispatch({ type: "SET_SUBMITTING", value: true });
     setSubmitError("");
 
     try {
+      // 1. Create candidate account
       const res = await fetch("/api/candidates/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -702,7 +647,6 @@ export default function CandidateOnboardingPage() {
           githubUrl: state.githubUrl || null,
           linkedinUrl: state.linkedinUrl || null,
           portfolioUrl: state.portfolioUrl || null,
-          // Only send cvUrl when the link tab is active; file upload happens below
           cvUrl: cvTab === "link" ? (state.cvUrl || null) : null,
         }),
       });
@@ -717,7 +661,7 @@ export default function CandidateOnboardingPage() {
 
       const { candidateId } = data as { candidateId: string };
 
-      // Upload CV file if one was selected
+      // 2. Upload CV file if one was selected
       if (cvFile && cvTab === "upload") {
         const fd = new FormData();
         fd.append("file", cvFile);
@@ -725,16 +669,16 @@ export default function CandidateOnboardingPage() {
         await fetch("/api/candidates/upload-cv-onboarding", { method: "POST", body: fd });
       }
 
-      // Upload avatar if one was selected
-      if (avatarFile) {
-        const fd = new FormData();
-        fd.append("file", avatarFile);
-        fd.append("candidateId", candidateId);
-        const avatarRes = await fetch("/api/candidates/upload-avatar-onboarding", { method: "POST", body: fd });
-        if (!avatarRes.ok) setAvatarUploadError(true);
+      // 3. Save work experience positions if any
+      if (positions.length > 0) {
+        await fetch("/api/candidates/positions-onboarding", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ candidateId, positions }),
+        });
       }
 
-      // Send magic link for auth
+      // 4. Send magic link for auth
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: state.email,
         options: {
@@ -749,11 +693,6 @@ export default function CandidateOnboardingPage() {
           ? "Account created! Check your inbox — if no email arrived, wait 60 seconds and sign in from the login page."
           : `Account created, but we couldn't send the sign-in link: ${msg}. Go to the login page to request a new one.`
         );
-        dispatch({ type: "SET_CANDIDATE_ID", id: candidateId });
-        dispatch({ type: "SET_SUBMITTING", value: false });
-        localStorage.removeItem(LS_KEY);
-        dispatch({ type: "NEXT_STEP" });
-        return;
       }
 
       dispatch({ type: "SET_CANDIDATE_ID", id: candidateId });
@@ -764,17 +703,6 @@ export default function CandidateOnboardingPage() {
       setSubmitError("Network error. Please try again.");
       dispatch({ type: "SET_SUBMITTING", value: false });
     }
-  };
-
-  const handleSavePositions = async () => {
-    if (positions.length > 0 && state.candidateId) {
-      await fetch("/api/candidates/positions-onboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ candidateId: state.candidateId, positions }),
-      });
-    }
-    startTransition(() => dispatch({ type: "NEXT_STEP" }));
   };
 
   const showNav = state.step < 8;
@@ -796,9 +724,6 @@ export default function CandidateOnboardingPage() {
             state={state}
             dispatch={dispatch}
             onNext={handleNext}
-            avatarFile={avatarFile}
-            avatarPreview={avatarPreview}
-            onAvatarChange={handleAvatarChange}
             cvFile={cvFile}
             cvTab={cvTab}
             onCvFileChange={setCvFile}
@@ -806,7 +731,7 @@ export default function CandidateOnboardingPage() {
           />
         )}
         {state.step === 7 && <Step7Experience positions={positions} setPositions={setPositions} />}
-        {state.step === 8 && <Step8Done state={state} avatarUploadError={avatarUploadError} submitError={submitError} />}
+        {state.step === 8 && <Step8Done state={state} submitError={submitError} />}
       </StepSlide>
 
       {showNav && (
@@ -817,7 +742,7 @@ export default function CandidateOnboardingPage() {
           <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
             {state.submitting
               ? "Saving…"
-              : state.step === 6
+              : state.step === 7
                 ? <>Create account <ArrowRight size={15} /></>
                 : <>Next <ArrowRight size={15} /></>}
           </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, Sliders, Bell, FileText, Eye, Upload, X, Camera } from "lucide-react";
+import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, Sliders, Bell, FileText, Eye, Upload, X } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS } from "@/lib/onboarding-types";
 import { CITIES } from "@/lib/placeholder-data";
@@ -208,89 +208,6 @@ export function CvSection({ candidate }: { candidate: CandidateRow }) {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-// ─── Avatar hero (inline photo upload inside the hero banner) ────────────────
-
-export function AvatarHero({ candidate }: { candidate: CandidateRow }) {
-  const [uploading, setUploading] = useState(false);
-  const [error, setError]         = useState<string | null>(null);
-  const [hovered, setHovered]     = useState(false);
-  const [imgError, setImgError]   = useState(false);
-  const inputRef                  = useRef<HTMLInputElement>(null);
-
-  const initials    = (candidate.firstName?.[0] ?? candidate.email[0]).toUpperCase();
-  const displayName = [candidate.firstName, candidate.lastName].filter(Boolean).join(" ") || candidate.email;
-
-  async function handleFile(f: File) {
-    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) {
-      setError("JPEG, PNG or WebP only.");
-      return;
-    }
-    if (f.size > 2 * 1024 * 1024) {
-      setError("Image must be under 2 MB.");
-      return;
-    }
-    setError(null);
-    setUploading(true);
-    const fd = new FormData();
-    fd.append("file", f);
-    const res  = await fetch("/api/candidates/upload-avatar", { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) {
-      setUploading(false);
-      setError(data.error ?? "Upload failed.");
-      return;
-    }
-    window.location.reload();
-  }
-
-  const showOverlay = hovered || uploading;
-
-  return (
-    <div style={{ position: "relative", flexShrink: 0 }}>
-      <div
-        onClick={() => !uploading && inputRef.current?.click()}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        title={candidate.avatarUrl ? "Change photo" : "Add a photo"}
-        style={{
-          width: 72, height: 72, borderRadius: 14, overflow: "hidden",
-          background: "var(--accent-soft)", border: "2px solid var(--accent)",
-          display: "grid", placeItems: "center",
-          cursor: uploading ? "wait" : "pointer",
-          position: "relative",
-        }}
-      >
-        {candidate.avatarUrl && !imgError
-          ? <img src={candidate.avatarUrl} alt={displayName} onError={() => setImgError(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
-        }
-        {showOverlay && (
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "rgba(0,0,0,0.45)",
-            display: "grid", placeItems: "center",
-          }}>
-            {uploading
-              ? <Loader2 size={20} style={{ color: "#fff", animation: "spin 1s linear infinite" }} />
-              : <Camera size={20} style={{ color: "#fff" }} />
-            }
-          </div>
-        )}
-      </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        style={{ display: "none" }}
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
-      />
-      {error && (
-        <p className="mono-s" style={{ color: "var(--error)", marginTop: 4, maxWidth: 80, lineHeight: 1.3 }}>{error}</p>
-      )}
     </div>
   );
 }

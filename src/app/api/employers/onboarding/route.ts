@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
   const techStack   = Array.isArray(body.techStack) ? (body.techStack as string[]) : [];
 
   try {
-    const existing = await prisma.employer.findUnique({ where: { email } });
-    if (existing) return NextResponse.json({ employerId: existing.id, exists: true }, { status: 200 });
+    const existing = await prisma.employer.findUnique({ where: { email }, include: { company: { select: { id: true } } } });
+    if (existing) return NextResponse.json({ employerId: existing.id, companyId: existing.company?.id ?? null, exists: true }, { status: 200 });
 
     const baseSlug = slugify(companyName);
     const existingCompany = await prisma.company.findUnique({ where: { slug: baseSlug } });
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       data: { email, name, companyId: company.id },
     });
 
-    return NextResponse.json({ employerId: employer.id }, { status: 201 });
+    return NextResponse.json({ employerId: employer.id, companyId: company.id }, { status: 201 });
   } catch (err) {
     console.error("[employers/onboarding]", err);
     return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
