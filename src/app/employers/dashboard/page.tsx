@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Jobs",
 };
 
+export const dynamic = "force-dynamic";
+
 const MOCK_LISTINGS = JOBS.slice(0, 4).map((job, i) => ({
   ...job,
   status:  i === 2 ? "EXPIRED" : "ACTIVE",

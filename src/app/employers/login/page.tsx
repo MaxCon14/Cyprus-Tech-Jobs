@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: Props) {
         </div>
         <h1 className="h1" style={{ marginBottom: 8 }}>Sign in</h1>
         <p className="body-s" style={{ color: "var(--text-muted)" }}>
-          Enter your employer email and we'll send you a sign-in link.
+          Enter your employer email and we&apos;ll send you a sign-in link.
         </p>
       </div>
 

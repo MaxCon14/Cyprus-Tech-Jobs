@@ -329,7 +329,7 @@ function Step4Verify({ state, dispatch }: { state: EmployerWizardState; dispatch
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
         <p className="body-s" style={{ color: "var(--text-subtle)" }}>
-          Didn't receive it? Check spam or{" "}
+          Didn&apos;t receive it? Check spam or{" "}
           <button
             type="button"
             style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontFamily: "inherit", fontSize: "inherit", padding: 0, textDecoration: "underline" }}
@@ -367,7 +367,7 @@ function Step5Done({ state }: { state: EmployerWizardState }) {
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--success)", display: "grid", placeItems: "center", margin: "0 auto 16px" }}>
             <CheckCircle2 size={28} style={{ color: "var(--white)" }} strokeWidth={2} />
           </div>
-          <h1 className="h1" style={{ marginBottom: 8 }}>You're all set, {state.name.split(" ")[0]}!</h1>
+          <h1 className="h1" style={{ marginBottom: 8 }}>You&apos;re all set, {state.name.split(" ")[0]}!</h1>
           <p className="body" style={{ color: "var(--text-muted)" }}>
             Your employer account for <strong>{state.companyName}</strong> has been created.
             Verify your email to unlock full access.

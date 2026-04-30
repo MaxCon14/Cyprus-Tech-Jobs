@@ -2,6 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, Mail, Inbox } from "lucide-react";
+import Link from "next/link";
 import {
   candidateReducer,
   initialCandidateState,
@@ -142,14 +143,14 @@ function Step2Location({
         </div>
         <div>
           <h1 className="h1">Where are you based?</h1>
-          <p className="body-s" style={{ color: "var(--text-muted)" }}>We'll prioritise jobs near you.</p>
+          <p className="body-s" style={{ color: "var(--text-muted)" }}>We&apos;ll prioritise jobs near you.</p>
         </div>
       </div>
 
       {isRemoteOnly ? (
         <div className="alert alert-success" style={{ borderRadius: "var(--radius-md)" }}>
           <span className="body-s">
-            You selected <strong>Remote only</strong> — location doesn't matter. We'll show you fully remote roles from Cyprus-based companies worldwide.
+            You selected <strong>Remote only</strong> — location doesn&apos;t matter. We&apos;ll show you fully remote roles from Cyprus-based companies worldwide.
           </span>
         </div>
       ) : (
@@ -191,7 +192,7 @@ function Step3Level({
         </div>
         <div>
           <h1 className="h1">Your experience level</h1>
-          <p className="body-s" style={{ color: "var(--text-muted)" }}>We'll filter out roles that don't match.</p>
+          <p className="body-s" style={{ color: "var(--text-muted)" }}>We&apos;ll filter out roles that don&apos;t match.</p>
         </div>
       </div>
 
@@ -548,11 +549,11 @@ function Step6Done({ state }: { state: CandidateWizardState }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 360, margin: "0 auto" }}>
-        <a href="/jobs" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
+        <Link href="/jobs" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
           Browse jobs now →
-        </a>
+        </Link>
         <p className="body-s" style={{ color: "var(--text-subtle)" }}>
-          Click the link in your email to confirm your subscription. Check spam if you don't see it.
+          Click the link in your email to confirm your subscription. Check spam if you don&apos;t see it.
         </p>
       </div>
     </div>

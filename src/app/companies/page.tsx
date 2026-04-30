@@ -66,7 +66,7 @@ export default async function CompaniesPage() {
       <div style={{ marginTop: 64, padding: 40, border: "1px solid var(--border)", borderRadius: 12, background: "var(--surface-alt)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
         <div>
           <h2 className="h2" style={{ marginBottom: 6 }}>Is your company hiring?</h2>
-          <p className="body" style={{ color: "var(--text-muted)" }}>Get your roles in front of Cyprus's top tech talent. Listings go live in minutes.</p>
+          <p className="body" style={{ color: "var(--text-muted)" }}>Get your roles in front of Cyprus&apos;s top tech talent. Listings go live in minutes.</p>
         </div>
         <Link href="/post-a-job" className="btn btn-accent btn-lg">Post a job →</Link>
       </div>
