@@ -15,7 +15,7 @@ export default async function CompaniesPage() {
   const featured   = companies.filter(c => c.featured);
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       <div style={{ marginBottom: 40 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
@@ -43,7 +43,7 @@ export default async function CompaniesPage() {
             </div>
             <span className="tag tag-pulse tag-success">Live now</span>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          <div className="grid-3">
             {featured.map(co => (
               <CompanyCard key={co.slug} company={co} large />
             ))}
@@ -57,7 +57,7 @@ export default async function CompaniesPage() {
           <h2 className="h2">All companies</h2>
           <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{companies.length} TOTAL</span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+        <div className="grid-2" style={{ gap: 12 }}>
           {companies.map(co => <CompanyCard key={co.slug} company={co} />)}
         </div>
       </div>

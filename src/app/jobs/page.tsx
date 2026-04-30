@@ -3,13 +3,16 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
-import { SlidersHorizontal, Search } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
+import { FiltersPanel } from "./FiltersPanel";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Browse Tech Jobs in Cyprus",
-  description: "Browse all tech jobs in Cyprus. Filter by category, location, remote type, and salary.",
+  description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary.",
 };
 
 const REMOTE_OPTIONS = [
@@ -25,46 +28,125 @@ const EXPERIENCE_OPTIONS = [
   { label: "Lead",      value: "LEAD" },
 ];
 
-export default async function JobsPage() {
+const TYPE_LABELS: Record<string, string> = {
+  FULL_TIME: "Full-time",
+  PART_TIME: "Part-time",
+  CONTRACT:  "Contract",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  frontend: "Frontend",
+  backend:  "Backend",
+  devops:   "DevOps & Cloud",
+  design:   "UI/UX Design",
+  data:     "Data & Analytics",
+  mobile:   "Mobile",
+  product:  "Product",
+  security: "Security",
+  qa:       "QA & Testing",
+};
+
+type SearchParams = Promise<{
+  category?: string;
+  type?: string;
+  city?: string;
+  level?: string;
+}>;
+
+export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams;
+  const { category, type, city, level } = params;
+
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const [jobs, categories] = await Promise.all([
-    getJobs({ take: 20 }),
+    getJobs({
+      categorySlug:    category,
+      remoteType:      type,
+      city:            city && city !== "Remote" ? city : undefined,
+      experienceLevel: level,
+      take: 20,
+    }),
     getCategoriesWithCount(),
   ]);
+
+  let savedJobIds: string[] | undefined;
+  if (user?.email) {
+    const { data: candidate } = await supabaseAdmin
+      .from("candidates").select("id").eq("email", user.email).single();
+    if (candidate) {
+      const { data: saved } = await supabaseAdmin
+        .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
+      savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
+    }
+  }
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
 
+  /* Active filter pills */
+  const activeFilters: { label: string; removeKey: string }[] = [];
+  if (category) activeFilters.push({ label: CATEGORY_LABELS[category] ?? category, removeKey: "category" });
+  if (type)     activeFilters.push({ label: TYPE_LABELS[type] ?? type, removeKey: "type" });
+  if (city)     activeFilters.push({ label: city, removeKey: "city" });
+  if (level)    activeFilters.push({ label: level, removeKey: "level" });
+
+  function buildUrl(remove: string) {
+    const p = new URLSearchParams();
+    if (category && remove !== "category") p.set("category", category);
+    if (type     && remove !== "type")     p.set("type", type);
+    if (city     && remove !== "city")     p.set("city", city);
+    if (level    && remove !== "level")    p.set("level", level);
+    const qs = p.toString();
+    return qs ? `/jobs?${qs}` : "/jobs";
+  }
+
+  const pageTitle = category
+    ? `${CATEGORY_LABELS[category] ?? category} Jobs in Cyprus`
+    : city
+      ? `Tech Jobs in ${city}`
+      : type
+        ? `${TYPE_LABELS[type] ?? type} Tech Jobs in Cyprus`
+        : "Tech Jobs in Cyprus";
+
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       <div style={{ marginBottom: 32 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-          {totalJobs} JOBS · UPDATED DAILY
+          {serialisedJobs.length} {activeFilters.length ? "matching" : "total"} JOBS · UPDATED DAILY
         </div>
-        <h1 className="display-m" style={{ marginBottom: 8 }}>Tech jobs in Cyprus</h1>
+        <h1 className="display-m" style={{ marginBottom: 8 }}>{pageTitle}</h1>
         <p className="body" style={{ color: "var(--text-muted)" }}>
           Curated roles at the best tech companies — salaries included, no recruiter noise.
         </p>
       </div>
 
-      {/* Search */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 32, maxWidth: 680 }}>
-        <div style={{ position: "relative", flex: 1 }}>
-          <Search size={15} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
-          <input className="input" type="text" placeholder="Job title, company, skill…" style={{ paddingLeft: 36 }} />
+      {/* Active filter pills */}
+      {activeFilters.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24, alignItems: "center" }}>
+          <span className="mono-s" style={{ color: "var(--text-subtle)" }}>FILTERED BY:</span>
+          {activeFilters.map(f => (
+            <Link
+              key={f.removeKey}
+              href={buildUrl(f.removeKey)}
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", background: "var(--accent-soft)", color: "var(--accent)", borderRadius: 99, fontSize: 12, fontFamily: "var(--font-sans)", textDecoration: "none", fontWeight: 500 }}
+            >
+              {f.label} <X size={11} />
+            </Link>
+          ))}
+          <Link href="/jobs" style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-subtle)", textDecoration: "none" }}>
+            Clear all
+          </Link>
         </div>
-        <select className="select" style={{ width: 170 }}>
-          <option value="">All locations</option>
-          {CITIES.map(c => <option key={c} value={c.toLowerCase()}>{c}</option>)}
-        </select>
-        <button className="btn btn-accent">Search</button>
-      </div>
+      )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 40, alignItems: "start" }}>
+      <div className="layout-sidebar-left">
 
-        {/* Filters sidebar */}
-        <aside>
+        {/* Filters sidebar — collapsible on mobile */}
+        <FiltersPanel activeCount={activeFilters.length}>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
               <SlidersHorizontal size={14} style={{ color: "var(--text-muted)" }} />
@@ -73,70 +155,90 @@ export default async function JobsPage() {
 
             <FilterSection title="Category">
               {categories.slice(1).map(cat => (
-                <FilterCheckbox key={cat.slug} label={cat.label} count={cat.count} />
+                <FilterLink
+                  key={cat.slug}
+                  label={cat.label}
+                  count={cat.count}
+                  href={`/jobs?category=${cat.slug}${type ? `&type=${type}` : ""}${city ? `&city=${city}` : ""}`}
+                  active={category === cat.slug}
+                />
               ))}
             </FilterSection>
 
             <FilterSection title="Work type">
-              {REMOTE_OPTIONS.map(o => <FilterCheckbox key={o.value} label={o.label} />)}
+              {REMOTE_OPTIONS.map(o => (
+                <FilterLink
+                  key={o.value}
+                  label={o.label}
+                  href={`/jobs?${category ? `category=${category}&` : ""}type=${o.value}${city ? `&city=${city}` : ""}`}
+                  active={type === o.value}
+                />
+              ))}
             </FilterSection>
 
             <FilterSection title="Experience">
-              {EXPERIENCE_OPTIONS.map(o => <FilterCheckbox key={o.value} label={o.label} />)}
+              {EXPERIENCE_OPTIONS.map(o => (
+                <FilterLink
+                  key={o.value}
+                  label={o.label}
+                  href={`/jobs?${category ? `category=${category}&` : ""}level=${o.value}${city ? `&city=${city}` : ""}`}
+                  active={level === o.value}
+                />
+              ))}
             </FilterSection>
 
-            <FilterSection title="City">
-              {CITIES.map(c => <FilterCheckbox key={c} label={c} />)}
-            </FilterSection>
-
-            <FilterSection title="Salary (annual)" last>
-              {["Up to €40K","€40K – €60K","€60K – €80K","€80K – €100K","€100K+"].map(s => (
-                <FilterCheckbox key={s} label={s} />
+            <FilterSection title="City" last>
+              {CITIES.map(c => (
+                <FilterLink
+                  key={c}
+                  label={c}
+                  href={`/jobs?${category ? `category=${category}&` : ""}city=${c}`}
+                  active={city === c}
+                />
               ))}
             </FilterSection>
           </div>
-          <button className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10 }}>
+          <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10, textDecoration: "none" }}>
             Clear all filters
-          </button>
-        </aside>
+          </Link>
+        </FiltersPanel>
 
         {/* Job list */}
         <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
             <span className="body-s" style={{ color: "var(--text-muted)" }}>
-              Showing <strong style={{ color: "var(--text)" }}>{serialisedJobs.length}</strong> of {totalJobs} jobs
+              Showing <strong style={{ color: "var(--text)" }}>{serialisedJobs.length}</strong>
+              {activeFilters.length ? " matching" : ""} jobs
             </span>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span className="body-s" style={{ color: "var(--text-muted)" }}>Sort by</span>
-              <select className="select" style={{ width: "auto", padding: "6px 10px", fontSize: 13 }}>
-                <option>Most recent</option>
-                <option>Salary: high to low</option>
-                <option>Salary: low to high</option>
-              </select>
-            </div>
           </div>
 
           {/* Category chips */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-            {categories.map((cat, i) => (
-              <Link key={cat.slug} href={cat.slug ? `/jobs/category/${cat.slug}` : "/jobs"} className={`chip${i === 0 ? " chip-active" : ""}`}>
+            <Link href="/jobs" className={`chip${!category ? " chip-active" : ""}`}>
+              All <span className="chip-count">{totalJobs}</span>
+            </Link>
+            {categories.slice(1).map(cat => (
+              <Link
+                key={cat.slug}
+                href={`/jobs?category=${cat.slug}`}
+                className={`chip${category === cat.slug ? " chip-active" : ""}`}
+              >
                 {cat.label} <span className="chip-count">{cat.count}</span>
               </Link>
             ))}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {serialisedJobs.map(job => <JobCard key={job.id} {...job} />)}
-          </div>
-
-          {/* Pagination */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 32 }}>
-            {["←", "1", "2", "3", "→"].map((p, i) => (
-              <button key={i} className={`btn btn-sm ${p === "1" ? "btn-primary" : "btn-ghost"}`} style={{ minWidth: 36, justifyContent: "center" }}>
-                {p}
-              </button>
-            ))}
-          </div>
+          {serialisedJobs.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 24px" }}>
+              <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 16, marginBottom: 8 }}>No jobs match your filters</div>
+              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>Try removing a filter or browsing all jobs.</p>
+              <Link href="/jobs" className="btn btn-outline">View all jobs</Link>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -147,19 +249,28 @@ function FilterSection({ title, children, last = false }: { title: string; child
   return (
     <div style={{ padding: "16px", borderBottom: last ? "none" : "1px solid var(--border)" }}>
       <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>{title}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{children}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>{children}</div>
     </div>
   );
 }
 
-function FilterCheckbox({ label, count }: { label: string; count?: number }) {
+function FilterLink({ label, count, href, active }: { label: string; count?: number; href: string; active?: boolean }) {
   return (
-    <label style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", gap: 8 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ width: 16, height: 16, border: "1.5px solid var(--border-strong)", borderRadius: 4, display: "inline-block", flexShrink: 0 }} />
-        <span className="body-s">{label}</span>
-      </div>
-      {count !== undefined && <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{count}</span>}
-    </label>
+    <Link
+      href={href}
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "5px 8px", borderRadius: 6, textDecoration: "none",
+        background: active ? "var(--accent-soft)" : "transparent",
+        transition: "background 100ms ease",
+      }}
+    >
+      <span className="body-s" style={{ color: active ? "var(--accent)" : "var(--text)", fontWeight: active ? 500 : 400 }}>
+        {label}
+      </span>
+      {count !== undefined && (
+        <span className="mono-s" style={{ color: active ? "var(--accent)" : "var(--text-subtle)" }}>{count}</span>
+      )}
+    </Link>
   );
 }

@@ -22,10 +22,16 @@ export async function proxy(req: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-
   const { pathname } = req.nextUrl;
+
   if (pathname.startsWith("/employers/dashboard") && !user) {
     const loginUrl = new URL("/employers/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (pathname.startsWith("/candidates/dashboard") && !user) {
+    const loginUrl = new URL("/candidates/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -34,5 +40,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/employers/dashboard/:path*"],
+  matcher: ["/employers/dashboard/:path*", "/candidates/dashboard/:path*"],
 };

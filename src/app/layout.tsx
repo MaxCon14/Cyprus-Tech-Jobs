@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   description:
     "The home for tech jobs in Cyprus. Find roles at the best companies in Limassol, Nicosia, Larnaca and beyond — or post a job to reach Cyprus's top tech talent.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  icons: {
+    icon: "/logo.svg",
+    shortcut: "/logo.svg",
+  },
   openGraph: {
     siteName: "CyprusTech.Jobs",
     type: "website",

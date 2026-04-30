@@ -94,7 +94,7 @@ const SEEKER_PERKS = [
 
 export function RoleCards() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, width: "100%", maxWidth: 760 }}>
+    <div className="grid-2" style={{ width: "100%", maxWidth: 760 }}>
       <RoleCard
         href="/employers/onboarding"
         icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>}

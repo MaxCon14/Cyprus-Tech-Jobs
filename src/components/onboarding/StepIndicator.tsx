@@ -18,7 +18,7 @@ export function StepIndicator({ steps, currentStep }: Props) {
         zIndex: 30,
         background: "var(--surface)",
         borderBottom: "1px solid var(--border)",
-        padding: "0 24px",
+        padding: "0 var(--page-padding-x)",
       }}
     >
       {/* Progress bar */}

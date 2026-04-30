@@ -14,7 +14,7 @@ type PrismaJob = {
   salaryCurrency: string;
   featured: boolean;
   postedAt: Date | null;
-  company: { name: string; slug: string; logoUrl: string | null };
+  company: { name: string; slug: string; logoUrl: string | null; website: string | null };
   tags: { tag: { name: string } }[];
 };
 
@@ -36,6 +36,7 @@ export function serialiseJob(job: PrismaJob) {
       name:    job.company.name,
       slug:    job.company.slug,
       logoUrl: job.company.logoUrl,
+      website: job.company.website,
     },
     tags: job.tags.map(t => ({ name: t.tag.name })),
   };

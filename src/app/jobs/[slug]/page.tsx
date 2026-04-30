@@ -7,6 +7,9 @@ import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft, Check } from "lucide-react";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { CvReviewPanel } from "./CvReviewPanel";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -30,6 +33,21 @@ export default async function JobDetailPage({ params }: Props) {
   const similar    = similarRaw.map(serialiseJob);
   const salary     = formatSalary(job.salaryMin, job.salaryMax);
 
+  // Check if the visitor is a logged-in candidate with a saved CV
+  let savedCvUrl: string | null = null;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data } = await supabaseAdmin
+        .from("candidates")
+        .select("cvUrl")
+        .eq("email", user.email)
+        .single();
+      savedCvUrl = data?.cvUrl ?? null;
+    }
+  } catch { /* non-critical — continue without saved CV */ }
+
   const metaItems = [
     { icon: <MapPin size={14} />,     label: job.city ?? "Cyprus" },
     { icon: <Briefcase size={14} />,  label: remoteLabel(job.remoteType) },
@@ -40,7 +58,7 @@ export default async function JobDetailPage({ params }: Props) {
   const descBlocks = job.description.split("\n\n");
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Breadcrumb */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28 }}>
@@ -51,7 +69,7 @@ export default async function JobDetailPage({ params }: Props) {
         <span className="body-s" style={{ color: "var(--text-subtle)" }}>{job.title}</span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 48, alignItems: "start" }}>
+      <div className="layout-sidebar-right">
 
         {/* Left */}
         <div>
@@ -136,7 +154,8 @@ export default async function JobDetailPage({ params }: Props) {
             <a href={job.applyUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
               Apply for this role →
             </a>
-            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
+            <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
+            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
               APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
             </p>
           </div>

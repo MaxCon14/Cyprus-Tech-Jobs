@@ -32,7 +32,7 @@ const LEVEL_COLORS: Record<string, string> = {
 
 export default function SalaryGuidePage() {
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
+    <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Header */}
       <div style={{ marginBottom: 56 }}>
@@ -47,7 +47,7 @@ export default function SalaryGuidePage() {
       </div>
 
       {/* Key stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 56 }}>
+      <div className="grid-stats" style={{ marginBottom: 56 }}>
         {[
           { label: "Median senior engineer", value: "€75,000", sub: "across all disciplines" },
           { label: "Top paying city",        value: "Limassol", sub: "68% of senior roles" },
@@ -74,9 +74,10 @@ export default function SalaryGuidePage() {
       </div>
 
       {/* Salary table */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 3, marginBottom: 64 }}>
+      <div style={{ overflowX: "auto", marginBottom: 64 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 640 }}>
         {/* Table header */}
-        <div style={{ display: "grid", gridTemplateColumns: "200px 1fr 90px 90px 90px 90px", gap: 16, padding: "10px 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "180px 1fr 80px 80px 80px 80px", gap: 12, padding: "10px 20px" }}>
           <span className="caption" style={{ color: "var(--text-subtle)" }}>CATEGORY</span>
           <span className="caption" style={{ color: "var(--text-subtle)" }}>SALARY RANGE VISUALISATION</span>
           <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>JUNIOR</span>
@@ -88,7 +89,7 @@ export default function SalaryGuidePage() {
         {SALARY_DATA.map(row => (
           <div
             key={row.category}
-            style={{ display: "grid", gridTemplateColumns: "200px 1fr 90px 90px 90px 90px", gap: 16, padding: "20px", border: "1px solid var(--border)", borderRadius: 10, background: "var(--surface)", alignItems: "center" }}
+            style={{ display: "grid", gridTemplateColumns: "180px 1fr 80px 80px 80px 80px", gap: 12, padding: "16px 20px", border: "1px solid var(--border)", borderRadius: 10, background: "var(--surface)", alignItems: "center" }}
           >
             <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{row.category}</span>
 
@@ -113,9 +114,10 @@ export default function SalaryGuidePage() {
           </div>
         ))}
       </div>
+      </div>
 
       {/* Notes */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 64 }}>
+      <div className="grid-2" style={{ marginBottom: 64 }}>
         <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
           <h3 className="h3" style={{ marginBottom: 12 }}>How salaries work in Cyprus</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
