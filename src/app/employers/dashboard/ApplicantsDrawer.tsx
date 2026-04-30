@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   Users, X, ExternalLink, Globe, AtSign,
-  FileText, Loader2, MapPin, Briefcase, DollarSign, Calendar, ChevronRight, Link2,
+  FileText, Loader2, MapPin, Briefcase, DollarSign, Calendar, ChevronRight, ChevronDown, Link2,
   Clock, ShieldCheck,
 } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
@@ -35,6 +35,20 @@ function fmtDate(d: string | null) {
 
 function fmtApplied(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function durationLabel(start: string | null, end: string | null, current: boolean): string {
+  if (!start) return "";
+  const s = new Date(start + "-01");
+  const e = current ? new Date() : (end ? new Date(end + "-01") : null);
+  if (!e) return "";
+  const months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+  if (months < 1) return "< 1 mo";
+  const yrs = Math.floor(months / 12);
+  const mos = months % 12;
+  if (yrs === 0) return `${mos} mo${mos !== 1 ? "s" : ""}`;
+  if (mos === 0) return `${yrs} yr${yrs !== 1 ? "s" : ""}`;
+  return `${yrs} yr${yrs !== 1 ? "s" : ""} ${mos} mo${mos !== 1 ? "s" : ""}`;
 }
 
 function remoteLabel(r: string | null) {
@@ -73,6 +87,51 @@ function rightToWorkInfo(v: string | null): { label: string; color: string; bg: 
   if (v === "WORK_PERMIT")       return { label: "Work permit holder",     color: "#b45309",         bg: "#fef3c7"           };
   if (v === "NEEDS_SPONSORSHIP") return { label: "Needs visa sponsorship", color: "var(--error)",   bg: "var(--error-bg)"  };
   return null;
+}
+
+// ─── Position accordion item ──────────────────────────────────────────────────
+
+function PositionItem({ pos }: { pos: PositionRow }) {
+  const [open, setOpen] = useState(false);
+  const hasDesc = !!pos.description?.trim();
+  const duration = durationLabel(pos.startDate, pos.endDate, pos.current);
+
+  return (
+    <div style={{ borderRadius: 8, border: "1px solid var(--border)", overflow: "hidden" }}>
+      <button
+        type="button"
+        onClick={() => hasDesc && setOpen((v) => !v)}
+        style={{
+          width: "100%", display: "flex", alignItems: "flex-start", gap: 10,
+          padding: "10px 12px", background: "none", border: "none",
+          cursor: hasDesc ? "pointer" : "default", textAlign: "left",
+        }}
+      >
+        <Briefcase size={12} style={{ color: "var(--text-subtle)", flexShrink: 0, marginTop: 3 }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", marginBottom: 2 }}>{pos.title}</p>
+          <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+            {pos.company} · {fmtDate(pos.startDate)} – {pos.current ? "Present" : fmtDate(pos.endDate)}
+            {duration && <> · {duration}</>}
+          </p>
+        </div>
+        {hasDesc && (
+          <ChevronDown size={13} style={{
+            color: "var(--text-subtle)", flexShrink: 0, marginTop: 2,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 200ms ease",
+          }} />
+        )}
+      </button>
+      {open && hasDesc && (
+        <div style={{ padding: "0 12px 12px 34px", borderTop: "1px solid var(--border)" }}>
+          <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.7, whiteSpace: "pre-wrap", paddingTop: 10 }}>
+            {pos.description}
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ─── Applicant card ───────────────────────────────────────────────────────────
@@ -212,20 +271,13 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
       )}
 
-      {/* Work history — all positions */}
+      {/* Work history — expandable accordion cards */}
       {app.positions.length > 0 && (
-        <div style={{ padding: "0 18px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
-          {app.positions.map((pos) => (
-            <div key={pos.id} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-              <Briefcase size={12} style={{ color: "var(--text-subtle)", flexShrink: 0, marginTop: 2 }} />
-              <div>
-                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)" }}>{pos.title}</p>
-                <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-                  {pos.company} · {fmtDate(pos.startDate)} – {pos.current ? "Present" : fmtDate(pos.endDate)}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div style={{ padding: "0 18px 14px" }}>
+          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>WORK EXPERIENCE</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {app.positions.map((pos) => <PositionItem key={pos.id} pos={pos} />)}
+          </div>
         </div>
       )}
 
