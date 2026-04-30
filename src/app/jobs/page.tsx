@@ -86,6 +86,18 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     return qs ? `/jobs?${qs}` : "/jobs";
   }
 
+  function setFilter(key: string, value: string) {
+    const p = new URLSearchParams();
+    if (category) p.set("category", category);
+    if (type)     p.set("type", type);
+    if (city)     p.set("city", city);
+    if (level)    p.set("level", level);
+    if (p.get(key) === value) p.delete(key);
+    else p.set(key, value);
+    const qs = p.toString();
+    return qs ? `/jobs?${qs}` : "/jobs";
+  }
+
   const pageTitle = category
     ? `${CATEGORY_LABELS[category] ?? category} Jobs in Cyprus`
     : city
@@ -143,7 +155,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                   key={cat.slug}
                   label={cat.label}
                   count={cat.count}
-                  href={`/jobs?category=${cat.slug}${type ? `&type=${type}` : ""}${city ? `&city=${city}` : ""}`}
+                  href={setFilter("category", cat.slug)}
                   active={category === cat.slug}
                 />
               ))}
@@ -154,7 +166,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                 <FilterLink
                   key={o.value}
                   label={o.label}
-                  href={`/jobs?${category ? `category=${category}&` : ""}type=${o.value}${city ? `&city=${city}` : ""}`}
+                  href={setFilter("type", o.value)}
                   active={type === o.value}
                 />
               ))}
@@ -165,7 +177,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                 <FilterLink
                   key={o.value}
                   label={o.label}
-                  href={`/jobs?${category ? `category=${category}&` : ""}level=${o.value}${city ? `&city=${city}` : ""}`}
+                  href={setFilter("level", o.value)}
                   active={level === o.value}
                 />
               ))}
@@ -176,7 +188,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                 <FilterLink
                   key={c}
                   label={c}
-                  href={`/jobs?${category ? `category=${category}&` : ""}city=${c}`}
+                  href={setFilter("city", c)}
                   active={city === c}
                 />
               ))}
@@ -198,13 +210,13 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
           {/* Category chips */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-            <Link href="/jobs" className={`chip${!category ? " chip-active" : ""}`}>
+            <Link href={buildUrl("category")} className={`chip${!category ? " chip-active" : ""}`}>
               All <span className="chip-count">{totalJobs}</span>
             </Link>
             {categories.slice(1).map(cat => (
               <Link
                 key={cat.slug}
-                href={`/jobs?category=${cat.slug}`}
+                href={setFilter("category", cat.slug)}
                 className={`chip${category === cat.slug ? " chip-active" : ""}`}
               >
                 {cat.label} <span className="chip-count">{cat.count}</span>
