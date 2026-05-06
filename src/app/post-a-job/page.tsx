@@ -10,10 +10,17 @@ export const metadata: Metadata = {
   description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live within minutes.",
 };
 
-export default async function PostAJobPage() {
-  // Fetch employer context for pre-filling "Posting as…"
+interface Props {
+  searchParams: Promise<{ payment?: string }>;
+}
+
+export default async function PostAJobPage({ searchParams }: Props) {
+  const { payment } = await searchParams;
+
   let companyName: string | undefined;
   let companySlug: string | undefined;
+  let standardCredits = 0;
+  let featuredCredits = 0;
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -27,9 +34,13 @@ export default async function PostAJobPage() {
         companyName = employer.company.name;
         companySlug = employer.company.slug;
       }
+      if (employer) {
+        standardCredits = employer.standardCredits;
+        featuredCredits = employer.featuredCredits;
+      }
     }
   } catch {
-    // Non-fatal — form still works, just won't show "Posting as"
+    // Non-fatal
   }
 
   return (
@@ -66,8 +77,13 @@ export default async function PostAJobPage() {
       <div className="page-container" style={{ paddingBlock: "clamp(40px, 6vw, 64px)" }}>
         <div className="layout-sidebar-right">
 
-          {/* Form (plan picker + job form) */}
-          <PostJobForm companyName={companyName} companySlug={companySlug} />
+          <PostJobForm
+            companyName={companyName}
+            companySlug={companySlug}
+            standardCredits={standardCredits}
+            featuredCredits={featuredCredits}
+            paymentSuccess={payment === "success"}
+          />
 
           {/* Sidebar */}
           <aside style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 80 }}>

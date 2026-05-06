@@ -39,6 +39,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Description must be at least 100 characters." }, { status: 422 });
   if (!categorySlug) return NextResponse.json({ error: "Category is required." }, { status: 422 });
 
+  const listingType = body.listingType === "featured" ? "featured" : "standard";
+
+  // Check credits
+  if (listingType === "featured" && employer.featuredCredits < 1) {
+    return NextResponse.json({ error: "No featured credits. Purchase a featured listing first.", code: "NO_CREDITS" }, { status: 402 });
+  }
+  if (listingType === "standard" && employer.standardCredits < 1) {
+    return NextResponse.json({ error: "No standard credits. Purchase a listing first.", code: "NO_CREDITS" }, { status: 402 });
+  }
+
   const experienceLevel = typeof body.experienceLevel === "string" ? body.experienceLevel.toUpperCase() : "MID";
   const remoteType      = typeof body.remoteType === "string" ? body.remoteType.toUpperCase().replace("-", "_") : "ON_SITE";
   const employmentType  = typeof body.employmentType === "string" ? body.employmentType.toUpperCase().replace("-", "_") : "FULL_TIME";
@@ -65,24 +75,34 @@ export async function POST(req: NextRequest) {
   const postedAt  = new Date();
   const expiresAt = new Date(postedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  const job = await prisma.job.create({
-    data: {
-      slug:           jobSlug,
-      title,
-      description,
-      experienceLevel: experienceLevel as never,
-      remoteType:      remoteType as never,
-      employmentType:  employmentType as never,
-      city,
-      salaryMin,
-      salaryMax,
-      status:    "ACTIVE",
-      postedAt,
-      expiresAt,
-      companyId: employer.company.id,
-      categoryId: category.id,
-    },
-  });
+  // Create job and deduct credit in a transaction
+  const [job] = await prisma.$transaction([
+    prisma.job.create({
+      data: {
+        slug:            jobSlug,
+        title,
+        description,
+        experienceLevel: experienceLevel as never,
+        remoteType:      remoteType as never,
+        employmentType:  employmentType as never,
+        city,
+        salaryMin,
+        salaryMax,
+        status:          "ACTIVE",
+        featured:        listingType === "featured",
+        postedAt,
+        expiresAt,
+        companyId:       employer.company.id,
+        categoryId:      category.id,
+      },
+    }),
+    prisma.employer.update({
+      where: { id: employer.id },
+      data: listingType === "featured"
+        ? { featuredCredits: { decrement: 1 } }
+        : { standardCredits: { decrement: 1 } },
+    }),
+  ]);
 
   // Upsert tags and create junction records
   if (tagNames.length > 0) {

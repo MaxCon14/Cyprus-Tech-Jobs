@@ -149,6 +149,8 @@ model Employer {
   name                String?
   plan                EmployerPlan @default(FREE)
   stripeCustomerId    String?
+  standardCredits     Int          @default(0)
+  featuredCredits     Int          @default(0)
   emailVerified       Boolean      @default(false)
   verifyToken         String?      @unique
   verifyTokenExpiry   DateTime?

@@ -3,79 +3,35 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Check, Zap, Star, Building2, Loader2, Lock, ChevronRight,
+  Check, Zap, Star, Building2, Loader2, ChevronRight,
+  Minus, Plus, CreditCard, Sparkles,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/placeholder-data";
 
-// ─── Pricing plans ───────────────────────────────────────────────────────────
-
-const PLANS = [
-  {
-    id: "free",
-    name: "Free",
-    price: "€0",
-    period: "30-day listing",
-    description: "Get your first role in front of Cyprus tech talent.",
-    features: [
-      "Listed for 30 days",
-      "Appears in category feeds",
-      "Job alerts to matching candidates",
-      "Internal application tracking",
-    ],
-    cta: "Post for free",
-    accent: false,
-    badge: undefined,
-    enabled: true,
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    price: "€9.99",
-    period: "per listing · 30 days",
-    description: "More visibility for roles you need to fill faster.",
-    features: [
-      "Everything in Free",
-      "Highlighted in search results",
-      "Priority in category feeds",
-      "Applicant shortlist tools",
-    ],
-    cta: "Coming soon",
-    accent: true,
-    badge: "MOST POPULAR",
-    enabled: false,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "€24.99",
-    period: "per listing · 30 days",
-    description: "Maximum visibility — fill roles in days, not weeks.",
-    features: [
-      "Everything in Standard",
-      "FEATURED badge on listing",
-      "Pinned to top for 7 days",
-      "Homepage hero placement",
-    ],
-    cta: "Coming soon",
-    accent: false,
-    badge: undefined,
-    enabled: false,
-  },
-] as const;
-
-type PlanId = (typeof PLANS)[number]["id"];
-
-// ─── Component ────────────────────────────────────────────────────────────────
+const STANDARD_PRICE = 9.99;
+const FEATURED_PRICE = 14.99;
 
 interface Props {
   companyName?: string;
   companySlug?: string;
+  standardCredits: number;
+  featuredCredits: number;
+  paymentSuccess: boolean;
 }
 
-export function PostJobForm({ companyName, companySlug }: Props) {
+export function PostJobForm({ companyName, companySlug, standardCredits, featuredCredits, paymentSuccess }: Props) {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<PlanId>("free");
 
+  // Purchase panel state
+  const [buyStd, setBuyStd] = useState(1);
+  const [buyFeat, setBuyFeat] = useState(0);
+  const [purchasing, setPurchasing] = useState(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+
+  // Post form state
+  const [listingType, setListingType] = useState<"standard" | "featured">(
+    featuredCredits > 0 ? "featured" : "standard"
+  );
   const [form, setForm] = useState({
     title:           "",
     categorySlug:    "",
@@ -88,7 +44,6 @@ export function PostJobForm({ companyName, companySlug }: Props) {
     salaryMax:       "",
     tags:            "",
   });
-
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState<string | null>(null);
 
@@ -97,11 +52,41 @@ export function PostJobForm({ companyName, companySlug }: Props) {
       setForm((f) => ({ ...f, [key]: e.target.value }));
   }
 
-  const canSubmit = selectedPlan === "free" && !loading;
+  // Price calculation
+  const totalQty  = buyStd + buyFeat;
+  const discount  = totalQty >= 5 ? 0.20 : totalQty >= 3 ? 0.10 : 0;
+  const rawTotal  = buyStd * STANDARD_PRICE + buyFeat * FEATURED_PRICE;
+  const total     = rawTotal * (1 - discount);
+  const savings   = rawTotal - total;
+
+  async function purchase() {
+    if (totalQty === 0) return;
+    setPurchaseError(null);
+    setPurchasing(true);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ standardQty: buyStd, featuredQty: buyFeat }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPurchaseError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setPurchaseError("Network error. Please try again.");
+    } finally {
+      setPurchasing(false);
+    }
+  }
+
+  const hasCredits = listingType === "featured" ? featuredCredits > 0 : standardCredits > 0;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!hasCredits || loading) return;
     setError(null);
     setLoading(true);
 
@@ -126,6 +111,7 @@ export function PostJobForm({ companyName, companySlug }: Props) {
           salaryMin:       form.salaryMin ? parseInt(form.salaryMin, 10) : null,
           salaryMax:       form.salaryMax ? parseInt(form.salaryMax, 10) : null,
           tags,
+          listingType,
         }),
       });
 
@@ -144,269 +130,358 @@ export function PostJobForm({ companyName, companySlug }: Props) {
   }
 
   return (
-    <form onSubmit={submit}>
-      {/* ── Plan selector ── */}
-      <div style={{ marginBottom: 60 }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <h2 className="display-m" style={{ marginBottom: 8 }}>Choose a plan</h2>
-          <p className="body" style={{ color: "var(--text-muted)" }}>Start free. Upgrade anytime for more visibility.</p>
+    <div>
+      {/* Payment success banner */}
+      {paymentSuccess && (
+        <div style={{ background: "var(--success-bg)", border: "1px solid var(--success)", borderRadius: 10, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
+          <Check size={16} style={{ color: "var(--success)", flexShrink: 0 }} />
+          <p className="body-s" style={{ color: "var(--success)" }}>
+            <strong>Listings purchased!</strong> Your credits are ready — fill in your job details below and hit "Post Job".
+          </p>
+        </div>
+      )}
+
+      {/* Credit balance */}
+      {(standardCredits > 0 || featuredCredits > 0) && (
+        <div style={{ background: "var(--accent-soft)", border: "1px solid var(--accent)", borderRadius: 10, padding: "12px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <CreditCard size={15} style={{ color: "var(--accent)", flexShrink: 0 }} />
+          <span className="body-s" style={{ color: "var(--text)" }}>
+            <strong>Your credits:</strong>{" "}
+            {standardCredits > 0 && <span>{standardCredits} Standard</span>}
+            {standardCredits > 0 && featuredCredits > 0 && <span style={{ margin: "0 6px", color: "var(--text-subtle)" }}>·</span>}
+            {featuredCredits > 0 && <span>{featuredCredits} Featured</span>}
+          </span>
+        </div>
+      )}
+
+      {/* ── Buy listings panel ── */}
+      <div style={{ border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden", background: "var(--surface)", marginBottom: 32 }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8, background: "var(--bg-alt)" }}>
+          <CreditCard size={14} style={{ color: "var(--accent)" }} />
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>
+            {standardCredits + featuredCredits > 0 ? "Buy more listings" : "Buy listing credits"}
+          </span>
+          {discount > 0 && (
+            <span style={{ marginLeft: "auto", background: "var(--success-bg)", color: "var(--success)", padding: "2px 8px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.05em" }}>
+              {(discount * 100).toFixed(0)}% OFF
+            </span>
+          )}
         </div>
 
-        <div className="grid-3" style={{ gap: 20 }}>
-          {PLANS.map((plan) => {
-            const selected = selectedPlan === plan.id;
-            return (
-              <button
-                key={plan.id}
-                type="button"
-                onClick={() => setSelectedPlan(plan.id)}
-                style={{
-                  border: selected
-                    ? "2px solid var(--accent)"
-                    : plan.accent
-                    ? "2px solid var(--border)"
-                    : "1px solid var(--border)",
-                  borderRadius: 14,
-                  padding: 24,
-                  background: selected
-                    ? "var(--accent-soft)"
-                    : plan.accent
-                    ? "var(--surface)"
-                    : "var(--surface)",
-                  position: "relative",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "border-color 150ms, background 150ms",
-                  width: "100%",
-                }}
-              >
-                {plan.badge && (
-                  <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
-                    <span style={{ background: "var(--accent)", color: "var(--white)", padding: "3px 12px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
-                      {plan.badge}
-                    </span>
+        <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Bulk discount nudge */}
+          <div style={{ display: "flex", gap: 8 }}>
+            <span style={{ background: totalQty >= 3 ? "var(--success-bg)" : "var(--bg-muted)", color: totalQty >= 3 ? "var(--success)" : "var(--text-subtle)", padding: "4px 10px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.05em", transition: "all 150ms" }}>
+              3+ LISTINGS: 10% OFF
+            </span>
+            <span style={{ background: totalQty >= 5 ? "var(--success-bg)" : "var(--bg-muted)", color: totalQty >= 5 ? "var(--success)" : "var(--text-subtle)", padding: "4px 10px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.05em", transition: "all 150ms" }}>
+              5+ LISTINGS: 20% OFF
+            </span>
+          </div>
+
+          {/* Standard row */}
+          <ListingTypeRow
+            icon={<Zap size={13} />}
+            label="Standard"
+            sublabel="Highlighted in feeds · job alerts · 30 days"
+            price={STANDARD_PRICE}
+            qty={buyStd}
+            onChange={setBuyStd}
+          />
+
+          {/* Featured row */}
+          <ListingTypeRow
+            icon={<Sparkles size={13} />}
+            label="Featured"
+            sublabel="FEATURED badge · pinned to top · homepage placement"
+            price={FEATURED_PRICE}
+            qty={buyFeat}
+            onChange={setBuyFeat}
+            accent
+          />
+
+          {/* Total + buy button */}
+          {totalQty > 0 && (
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 700, color: "var(--text)" }}>
+                  €{total.toFixed(2)}
+                </div>
+                {savings > 0.009 && (
+                  <div className="mono-s" style={{ color: "var(--success)" }}>
+                    Save €{savings.toFixed(2)} ({(discount * 100).toFixed(0)}% bulk discount)
                   </div>
                 )}
+              </div>
 
-                {/* Selected indicator */}
-                <div style={{
-                  position: "absolute", top: 14, right: 14,
-                  width: 20, height: 20, borderRadius: "50%",
-                  border: `2px solid ${selected ? "var(--accent)" : "var(--border)"}`,
-                  background: selected ? "var(--accent)" : "transparent",
-                  display: "grid", placeItems: "center",
-                  transition: "all 150ms",
-                }}>
-                  {selected && <Check size={11} style={{ color: "var(--white)" }} />}
-                </div>
+              {purchaseError && (
+                <p className="body-s" style={{ color: "var(--error)", width: "100%" }}>{purchaseError}</p>
+              )}
 
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: "var(--text-muted)", marginBottom: 6 }}>
-                    {plan.name}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 2 }}>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 28, fontWeight: 700, color: selected ? "var(--accent)" : "var(--text)" }}>
-                      {plan.price}
-                    </span>
-                  </div>
-                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{plan.period}</div>
-                </div>
-
-                <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16 }}>{plan.description}</p>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
-                  {plan.features.map((f) => (
-                    <div key={f} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                      {plan.enabled ? (
-                        <span style={{ width: 15, height: 15, borderRadius: "50%", background: selected ? "var(--accent)" : "var(--success-bg)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
-                          <Check size={8} style={{ color: selected ? "var(--white)" : "var(--success)" }} />
-                        </span>
-                      ) : (
-                        <Lock size={12} style={{ color: "var(--text-subtle)", flexShrink: 0, marginTop: 2 }} />
-                      )}
-                      <span className="body-s" style={{ color: plan.enabled ? "var(--text)" : "var(--text-subtle)" }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{
-                  padding: "8px 14px", borderRadius: 8, textAlign: "center",
-                  fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
-                  background: !plan.enabled
-                    ? "var(--bg-muted)"
-                    : selected
-                    ? "var(--accent)"
-                    : "var(--bg-muted)",
-                  color: !plan.enabled
-                    ? "var(--text-subtle)"
-                    : selected
-                    ? "var(--white)"
-                    : "var(--text)",
-                }}>
-                  {!plan.enabled ? (
-                    <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                      <Lock size={12} /> {plan.cta}
-                    </span>
-                  ) : plan.cta}
-                </div>
+              <button
+                type="button"
+                onClick={purchase}
+                disabled={purchasing}
+                className="btn btn-accent"
+                style={{ gap: 8 }}
+              >
+                {purchasing ? (
+                  <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Redirecting…</>
+                ) : (
+                  <>Buy {totalQty} listing{totalQty !== 1 ? "s" : ""} — €{total.toFixed(2)} <ChevronRight size={14} /></>
+                )}
               </button>
-            );
-          })}
-        </div>
-
-        {selectedPlan !== "free" && (
-          <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--bg-muted)", borderRadius: 10, textAlign: "center" }}>
-            <p className="body-s" style={{ color: "var(--text-muted)" }}>
-              Paid plans are coming soon. Select <strong>Free</strong> to post your listing now.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* ── Job form ── */}
-      <div id="form">
-        <h2 className="h2" style={{ marginBottom: 6 }}>Job details</h2>
-        {companyName ? (
-          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 32 }}>
-            Posting as <strong>{companyName}</strong>
-            {companySlug && (
-              <> · <a href={`/companies/${companySlug}`} style={{ color: "var(--accent)" }}>view profile</a></>
-            )}
-          </p>
-        ) : (
-          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 32 }}>
-            Fill in the details below. Your listing will go live immediately on the free plan.
-          </p>
-        )}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-
-          {/* Role */}
-          <FormSection icon={<Zap size={14} />} title="Role information">
-            <Field label="Job title" required>
-              <input className="input" type="text" placeholder="e.g. Senior Frontend Engineer"
-                value={form.title} onChange={field("title")} required />
-            </Field>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <Field label="Category" required>
-                <select className="select" value={form.categorySlug} onChange={field("categorySlug")} required>
-                  <option value="">Select category</option>
-                  {CATEGORIES.slice(1).map((c) => (
-                    <option key={c.slug} value={c.slug}>{c.label}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Experience level" required>
-                <select className="select" value={form.experienceLevel} onChange={field("experienceLevel")} required>
-                  <option value="">Select level</option>
-                  <option value="JUNIOR">Junior</option>
-                  <option value="MID">Mid-level</option>
-                  <option value="SENIOR">Senior</option>
-                  <option value="LEAD">Lead</option>
-                  <option value="EXECUTIVE">Executive</option>
-                </select>
-              </Field>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <Field label="Work type" required>
-                <select className="select" value={form.remoteType} onChange={field("remoteType")} required>
-                  <option value="">Select work type</option>
-                  <option value="REMOTE">Remote</option>
-                  <option value="HYBRID">Hybrid</option>
-                  <option value="ON_SITE">On-site</option>
-                </select>
-              </Field>
-              <Field label="Employment type" required>
-                <select className="select" value={form.employmentType} onChange={field("employmentType")} required>
-                  <option value="">Select type</option>
-                  <option value="FULL_TIME">Full-time</option>
-                  <option value="PART_TIME">Part-time</option>
-                  <option value="CONTRACT">Contract</option>
-                  <option value="INTERNSHIP">Internship</option>
-                  <option value="FREELANCE">Freelance</option>
-                </select>
-              </Field>
-            </div>
-            <Field label="City">
-              <select className="select" value={form.city} onChange={field("city")}>
-                <option value="">Any / not specified</option>
-                <option>Limassol</option>
-                <option>Nicosia</option>
-                <option>Larnaca</option>
-                <option>Paphos</option>
-              </select>
-            </Field>
-            <Field label="Skills / tech stack">
-              <input className="input" type="text"
-                placeholder="e.g. React, TypeScript, Node.js (comma-separated, max 10)"
-                value={form.tags} onChange={field("tags")} />
-              <span className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4, display: "block" }}>COMMA-SEPARATED · MAX 10 TAGS</span>
-            </Field>
-          </FormSection>
-
-          {/* Description */}
-          <FormSection icon={<Building2 size={14} />} title="Job description">
-            <Field label="Description" required>
-              <textarea className="textarea"
-                placeholder="Describe the role, team, responsibilities, and what you're looking for…"
-                style={{ minHeight: 240 }}
-                value={form.description} onChange={field("description")}
-                required minLength={100} />
-              <span className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4, display: "block" }}>
-                {form.description.length} characters · MIN 100
-              </span>
-            </Field>
-          </FormSection>
-
-          {/* Salary */}
-          <FormSection icon={<Star size={14} />} title="Salary">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <Field label="Min salary (€/year)">
-                <input className="input" type="number" placeholder="e.g. 40000"
-                  value={form.salaryMin} onChange={field("salaryMin")} min={0} />
-              </Field>
-              <Field label="Max salary (€/year)">
-                <input className="input" type="number" placeholder="e.g. 60000"
-                  value={form.salaryMax} onChange={field("salaryMax")} min={0} />
-              </Field>
-            </div>
-            <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
-              LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
-            </p>
-          </FormSection>
-
-          {/* Error */}
-          {error && (
-            <div style={{ background: "var(--error-bg)", border: "1px solid var(--error)", borderRadius: 10, padding: "14px 18px", marginBottom: 8 }}>
-              <p className="body-s" style={{ color: "var(--error)" }}>{error}</p>
             </div>
           )}
-
-          {/* Submit */}
-          <div style={{ marginTop: 8 }}>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="btn btn-accent btn-lg"
-              style={{ width: "100%", justifyContent: "center", gap: 8, opacity: selectedPlan !== "free" ? 0.5 : 1 }}
-            >
-              {loading ? (
-                <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Posting your job…</>
-              ) : selectedPlan !== "free" ? (
-                <><Lock size={15} /> Payment required — select Free to post now</>
-              ) : (
-                <>Post job for free <ChevronRight size={15} /></>
-              )}
-            </button>
-            {selectedPlan === "free" && (
-              <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
-                GOES LIVE IMMEDIATELY · NO PAYMENT NEEDED
-              </p>
-            )}
-          </div>
         </div>
       </div>
-    </form>
+
+      {/* ── Post a job form ── */}
+      <form onSubmit={submit}>
+        <div id="form">
+          <h2 className="h2" style={{ marginBottom: 6 }}>Post a job</h2>
+          {companyName ? (
+            <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 24 }}>
+              Posting as <strong>{companyName}</strong>
+              {companySlug && (
+                <> · <a href={`/companies/${companySlug}`} style={{ color: "var(--accent)" }}>view profile</a></>
+              )}
+            </p>
+          ) : (
+            <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 24 }}>
+              Purchase listing credits above, then fill in your job details.
+            </p>
+          )}
+
+          {/* Listing type selector */}
+          <div style={{ marginBottom: 24 }}>
+            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>LISTING TYPE</div>
+            <div style={{ display: "flex", gap: 10 }}>
+              {(["standard", "featured"] as const).map((type) => {
+                const credits = type === "featured" ? featuredCredits : standardCredits;
+                const selected = listingType === type;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setListingType(type)}
+                    disabled={credits === 0}
+                    style={{
+                      flex: 1,
+                      padding: "12px 16px",
+                      borderRadius: 10,
+                      border: selected ? "2px solid var(--accent)" : "1px solid var(--border)",
+                      background: selected ? "var(--accent-soft)" : "var(--surface)",
+                      cursor: credits === 0 ? "not-allowed" : "pointer",
+                      opacity: credits === 0 ? 0.45 : 1,
+                      textAlign: "left",
+                      transition: "all 150ms",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                      {type === "featured" ? <Sparkles size={12} style={{ color: selected ? "var(--accent)" : "var(--text-subtle)" }} /> : <Zap size={12} style={{ color: selected ? "var(--accent)" : "var(--text-subtle)" }} />}
+                      <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: selected ? "var(--accent)" : "var(--text)" }}>
+                        {type === "standard" ? "Standard" : "Featured"}
+                      </span>
+                    </div>
+                    <div className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                      {credits} credit{credits !== 1 ? "s" : ""} available
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+
+            {/* Role */}
+            <FormSection icon={<Zap size={14} />} title="Role information">
+              <Field label="Job title" required>
+                <input className="input" type="text" placeholder="e.g. Senior Frontend Engineer"
+                  value={form.title} onChange={field("title")} required />
+              </Field>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <Field label="Category" required>
+                  <select className="select" value={form.categorySlug} onChange={field("categorySlug")} required>
+                    <option value="">Select category</option>
+                    {CATEGORIES.slice(1).map((c) => (
+                      <option key={c.slug} value={c.slug}>{c.label}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Experience level" required>
+                  <select className="select" value={form.experienceLevel} onChange={field("experienceLevel")} required>
+                    <option value="">Select level</option>
+                    <option value="JUNIOR">Junior</option>
+                    <option value="MID">Mid-level</option>
+                    <option value="SENIOR">Senior</option>
+                    <option value="LEAD">Lead</option>
+                    <option value="EXECUTIVE">Executive</option>
+                  </select>
+                </Field>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <Field label="Work type" required>
+                  <select className="select" value={form.remoteType} onChange={field("remoteType")} required>
+                    <option value="">Select work type</option>
+                    <option value="REMOTE">Remote</option>
+                    <option value="HYBRID">Hybrid</option>
+                    <option value="ON_SITE">On-site</option>
+                  </select>
+                </Field>
+                <Field label="Employment type" required>
+                  <select className="select" value={form.employmentType} onChange={field("employmentType")} required>
+                    <option value="">Select type</option>
+                    <option value="FULL_TIME">Full-time</option>
+                    <option value="PART_TIME">Part-time</option>
+                    <option value="CONTRACT">Contract</option>
+                    <option value="INTERNSHIP">Internship</option>
+                    <option value="FREELANCE">Freelance</option>
+                  </select>
+                </Field>
+              </div>
+              <Field label="City">
+                <select className="select" value={form.city} onChange={field("city")}>
+                  <option value="">Any / not specified</option>
+                  <option>Limassol</option>
+                  <option>Nicosia</option>
+                  <option>Larnaca</option>
+                  <option>Paphos</option>
+                </select>
+              </Field>
+              <Field label="Skills / tech stack">
+                <input className="input" type="text"
+                  placeholder="e.g. React, TypeScript, Node.js (comma-separated, max 10)"
+                  value={form.tags} onChange={field("tags")} />
+                <span className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4, display: "block" }}>COMMA-SEPARATED · MAX 10 TAGS</span>
+              </Field>
+            </FormSection>
+
+            {/* Description */}
+            <FormSection icon={<Building2 size={14} />} title="Job description">
+              <Field label="Description" required>
+                <textarea className="textarea"
+                  placeholder="Describe the role, team, responsibilities, and what you're looking for…"
+                  style={{ minHeight: 240 }}
+                  value={form.description} onChange={field("description")}
+                  required minLength={100} />
+                <span className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4, display: "block" }}>
+                  {form.description.length} characters · MIN 100
+                </span>
+              </Field>
+            </FormSection>
+
+            {/* Salary */}
+            <FormSection icon={<Star size={14} />} title="Salary">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <Field label="Min salary (€/year)">
+                  <input className="input" type="number" placeholder="e.g. 40000"
+                    value={form.salaryMin} onChange={field("salaryMin")} min={0} />
+                </Field>
+                <Field label="Max salary (€/year)">
+                  <input className="input" type="number" placeholder="e.g. 60000"
+                    value={form.salaryMax} onChange={field("salaryMax")} min={0} />
+                </Field>
+              </div>
+              <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
+                LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
+              </p>
+            </FormSection>
+
+            {/* Error */}
+            {error && (
+              <div style={{ background: "var(--error-bg)", border: "1px solid var(--error)", borderRadius: 10, padding: "14px 18px", marginBottom: 8 }}>
+                <p className="body-s" style={{ color: "var(--error)" }}>{error}</p>
+              </div>
+            )}
+
+            {/* Submit */}
+            <div style={{ marginTop: 8 }}>
+              {!hasCredits ? (
+                <div style={{ background: "var(--bg-muted)", borderRadius: 10, padding: "16px 20px", textAlign: "center" }}>
+                  <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 8 }}>
+                    You need {listingType === "featured" ? "featured" : "standard"} credits to post this listing.
+                  </p>
+                  <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                    ↑ PURCHASE CREDITS ABOVE TO CONTINUE
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-accent btn-lg"
+                  style={{ width: "100%", justifyContent: "center", gap: 8 }}
+                >
+                  {loading ? (
+                    <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Posting your job…</>
+                  ) : (
+                    <>Post {listingType === "featured" ? "Featured" : ""} Job <ChevronRight size={15} /></>
+                  )}
+                </button>
+              )}
+              {hasCredits && (
+                <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
+                  USES 1 {listingType.toUpperCase()} CREDIT · {listingType === "featured" ? featuredCredits : standardCredits} REMAINING
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// ─── Listing type row in purchase panel ──────────────────────────────────────
+
+function ListingTypeRow({
+  icon, label, sublabel, price, qty, onChange, accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sublabel: string;
+  price: number;
+  qty: number;
+  onChange: (n: number) => void;
+  accent?: boolean;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+      <div style={{ flex: 1, minWidth: 180 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+          <span style={{ color: accent ? "var(--accent)" : "var(--text-subtle)" }}>{icon}</span>
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: "var(--text)" }}>{label}</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--text-muted)" }}>€{price.toFixed(2)}/listing</span>
+        </div>
+        <p className="mono-s" style={{ color: "var(--text-subtle)" }}>{sublabel}</p>
+      </div>
+
+      {/* Quantity stepper */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(0, qty - 1))}
+          style={{ width: 30, height: 30, borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", display: "grid", placeItems: "center" }}
+        >
+          <Minus size={12} />
+        </button>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, minWidth: 20, textAlign: "center", color: "var(--text)" }}>
+          {qty}
+        </span>
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(10, qty + 1))}
+          style={{ width: 30, height: 30, borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", display: "grid", placeItems: "center" }}
+        >
+          <Plus size={12} />
+        </button>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: qty > 0 ? "var(--text)" : "var(--text-subtle)", minWidth: 50, textAlign: "right" }}>
+          €{(qty * price).toFixed(2)}
+        </span>
+      </div>
+    </div>
   );
 }
 
