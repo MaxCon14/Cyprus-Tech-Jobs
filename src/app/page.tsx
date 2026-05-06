@@ -2,8 +2,10 @@ import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
-import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
+import { Bell, UserPlus, Zap, Target } from "lucide-react";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
+import { HeroSearch } from "@/components/home/HeroSearch";
+import { AlertForm } from "@/components/home/AlertForm";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -85,24 +87,7 @@ export default async function HomePage() {
           </p>
 
           {/* Search */}
-          <div className="hero-search">
-            <div style={{ position: "relative", flex: "1 1 200px" }}>
-              <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
-              <input className="input" type="text" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
-            </div>
-            <div style={{ position: "relative", flex: "0 0 160px" }}>
-              <MapPin size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", zIndex: 1 }} />
-              <select className="select" style={{ paddingLeft: 38 }}>
-                <option value="">All locations</option>
-                <option value="limassol">Limassol</option>
-                <option value="nicosia">Nicosia</option>
-                <option value="larnaca">Larnaca</option>
-                <option value="paphos">Paphos</option>
-                <option value="remote">Remote</option>
-              </select>
-            </div>
-            <Link href="/jobs" className="btn btn-accent">Search</Link>
-          </div>
+          <HeroSearch />
 
           {/* Stats */}
           <div className="hero-stats" style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
@@ -209,16 +194,7 @@ export default async function HomePage() {
                 <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16 }}>
                   Get new Cyprus tech jobs in your inbox. Free, no account needed.
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <input className="input" type="email" placeholder="your@email.com" />
-                  <select className="select">
-                    <option value="">All categories</option>
-                    {categories.slice(1).map(cat => (
-                      <option key={cat.slug} value={cat.slug}>{cat.label}</option>
-                    ))}
-                  </select>
-                  <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>Get alerts</button>
-                </div>
+                <AlertForm categories={categories} />
                 <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 10 }}>UNSUBSCRIBE ANYTIME · NO SPAM</p>
               </div>
 

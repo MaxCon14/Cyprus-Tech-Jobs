@@ -142,8 +142,9 @@ export async function getCategoriesWithCount() {
   const total = await getJobCount();
 
   return [
-    { label: "All jobs", slug: "", count: total },
+    { id: "", label: "All jobs", slug: "", count: total },
     ...categories.map(c => ({
+      id:    c.id,
       label: c.name,
       slug:  c.slug,
       count: c._count.jobs,

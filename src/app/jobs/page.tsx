@@ -49,11 +49,12 @@ type SearchParams = Promise<{
   type?: string;
   city?: string;
   level?: string;
+  q?: string;
 }>;
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const { category, type, city, level } = params;
+  const { category, type, city, level, q } = params;
 
   const [jobs, categories] = await Promise.all([
     getJobs({
@@ -61,6 +62,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       remoteType:      type,
       city:            city && city !== "Remote" ? city : undefined,
       experienceLevel: level,
+      search:          q,
       take: 20,
     }),
     getCategoriesWithCount(),
@@ -71,6 +73,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   /* Active filter pills */
   const activeFilters: { label: string; removeKey: string }[] = [];
+  if (q)        activeFilters.push({ label: `"${q}"`, removeKey: "q" });
   if (category) activeFilters.push({ label: CATEGORY_LABELS[category] ?? category, removeKey: "category" });
   if (type)     activeFilters.push({ label: TYPE_LABELS[type] ?? type, removeKey: "type" });
   if (city)     activeFilters.push({ label: city, removeKey: "city" });
@@ -78,6 +81,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   function buildUrl(remove: string) {
     const p = new URLSearchParams();
+    if (q        && remove !== "q")        p.set("q", q);
     if (category && remove !== "category") p.set("category", category);
     if (type     && remove !== "type")     p.set("type", type);
     if (city     && remove !== "city")     p.set("city", city);
@@ -88,6 +92,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   function setFilter(key: string, value: string) {
     const p = new URLSearchParams();
+    if (q)        p.set("q", q);
     if (category) p.set("category", category);
     if (type)     p.set("type", type);
     if (city)     p.set("city", city);
