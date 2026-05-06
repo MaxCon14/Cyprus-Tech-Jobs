@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Check, Zap, Star, Building2, Loader2, ChevronRight,
-  Minus, Plus, CreditCard, Sparkles,
+  Minus, Plus, CreditCard, Sparkles, FlaskConical,
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/placeholder-data";
 
@@ -22,10 +22,17 @@ interface Props {
 export function PostJobForm({ companyName, companySlug, standardCredits, featuredCredits, paymentSuccess }: Props) {
   const router = useRouter();
 
+  // Detect local dev (client-side only, safe for SSR)
+  const [isLocalDev, setIsLocalDev] = useState(false);
+  useEffect(() => {
+    setIsLocalDev(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  }, []);
+
   // Purchase panel state
   const [buyStd, setBuyStd] = useState(1);
   const [buyFeat, setBuyFeat] = useState(0);
   const [purchasing, setPurchasing] = useState(false);
+  const [simulating, setSimulating] = useState(false);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
   // Post form state
@@ -79,6 +86,30 @@ export function PostJobForm({ companyName, companySlug, standardCredits, feature
       setPurchaseError("Network error. Please try again.");
     } finally {
       setPurchasing(false);
+    }
+  }
+
+  async function simulatePurchase() {
+    if (totalQty === 0) return;
+    setPurchaseError(null);
+    setSimulating(true);
+    try {
+      const res = await fetch("/api/stripe/test-credits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ standardQty: buyStd, featuredQty: buyFeat }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPurchaseError(data.error ?? "Test payment failed.");
+        return;
+      }
+      // Reload to refresh credit balance from server
+      window.location.href = "/post-a-job?payment=success";
+    } catch {
+      setPurchaseError("Network error. Please try again.");
+    } finally {
+      setSimulating(false);
     }
   }
 
@@ -218,19 +249,38 @@ export function PostJobForm({ companyName, companySlug, standardCredits, feature
                 <p className="body-s" style={{ color: "var(--error)", width: "100%" }}>{purchaseError}</p>
               )}
 
-              <button
-                type="button"
-                onClick={purchase}
-                disabled={purchasing}
-                className="btn btn-accent"
-                style={{ gap: 8 }}
-              >
-                {purchasing ? (
-                  <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Redirecting…</>
-                ) : (
-                  <>Buy {totalQty} listing{totalQty !== 1 ? "s" : ""} — €{total.toFixed(2)} <ChevronRight size={14} /></>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  onClick={purchase}
+                  disabled={purchasing || simulating}
+                  className="btn btn-accent"
+                  style={{ gap: 8 }}
+                >
+                  {purchasing ? (
+                    <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Redirecting…</>
+                  ) : (
+                    <>Buy {totalQty} listing{totalQty !== 1 ? "s" : ""} — €{total.toFixed(2)} <ChevronRight size={14} /></>
+                  )}
+                </button>
+
+                {isLocalDev && (
+                  <button
+                    type="button"
+                    onClick={simulatePurchase}
+                    disabled={purchasing || simulating}
+                    className="btn btn-outline"
+                    style={{ gap: 6, borderColor: "var(--warning, #d97706)", color: "var(--warning, #d97706)" }}
+                    title="Bypasses Stripe — dev only"
+                  >
+                    {simulating ? (
+                      <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Adding…</>
+                    ) : (
+                      <><FlaskConical size={13} /> Simulate payment</>
+                    )}
+                  </button>
                 )}
-              </button>
+              </div>
             </div>
           )}
         </div>
