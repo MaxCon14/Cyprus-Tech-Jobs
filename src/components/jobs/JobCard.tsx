@@ -128,7 +128,9 @@ export function JobCard({
   const expLabel = experienceLevel.charAt(0) + experienceLevel.slice(1).toLowerCase();
 
   return (
-    <Link href={`/jobs/${slug}`} className="job-card">
+    <article className="job-card" style={{ position: "relative" }}>
+      {/* invisible overlay — makes the whole card clickable */}
+      <Link href={`/jobs/${slug}`} style={{ position: "absolute", inset: 0, zIndex: 0 }} aria-label={`View ${title} at ${company.name}`} />
       {featured && <span className="job-card-featured">FEATURED</span>}
 
       {/* Header: logo + company + time */}
@@ -168,8 +170,10 @@ export function JobCard({
             <span className="job-card-salary-period"> / yr</span>
           </div>
         )}
-        <button className="btn btn-accent job-card-apply">Apply for this role →</button>
+        <Link href={`/jobs/${slug}`} className="btn btn-accent job-card-apply" style={{ position: "relative", zIndex: 1 }}>
+          Apply for this role →
+        </Link>
       </div>
-    </Link>
+    </article>
   );
 }
