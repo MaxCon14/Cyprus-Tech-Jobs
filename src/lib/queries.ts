@@ -77,6 +77,37 @@ export async function getJobCount(categorySlug?: string) {
   });
 }
 
+export async function getJobsCount({
+  categorySlug,
+  remoteType,
+  experienceLevel,
+  city,
+  search,
+}: {
+  categorySlug?: string;
+  remoteType?: string;
+  experienceLevel?: string;
+  city?: string;
+  search?: string;
+} = {}) {
+  return prisma.job.count({
+    where: {
+      status: "ACTIVE",
+      ...(categorySlug    && { category: { slug: categorySlug } }),
+      ...(remoteType      && { remoteType: remoteType as never }),
+      ...(experienceLevel && { experienceLevel: experienceLevel as never }),
+      ...(city            && { city: { contains: city, mode: "insensitive" } }),
+      ...(search          && {
+        OR: [
+          { title:       { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { company:     { name:  { contains: search, mode: "insensitive" } } },
+        ],
+      }),
+    },
+  });
+}
+
 export async function getSimilarJobs(jobId: string, categoryId: string, take = 3) {
   return prisma.job.findMany({
     where: { status: "ACTIVE", categoryId, id: { not: jobId } },

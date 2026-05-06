@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
-import { getJobs, getCategoriesWithCount } from "@/lib/queries";
+import { getJobs, getCategoriesWithCount, getJobsCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
 import { SlidersHorizontal, X } from "lucide-react";
@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   title: "Browse Tech Jobs in Cyprus",
   description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary.",
 };
+
+const PAGE_SIZE = 20;
 
 const REMOTE_OPTIONS = [
   { label: "Remote",  value: "REMOTE" },
@@ -50,26 +52,34 @@ type SearchParams = Promise<{
   city?: string;
   level?: string;
   q?: string;
+  page?: string;
 }>;
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const { category, type, city, level, q } = params;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
+  const skip = (page - 1) * PAGE_SIZE;
 
-  const [jobs, categories] = await Promise.all([
-    getJobs({
-      categorySlug:    category,
-      remoteType:      type,
-      city:            city && city !== "Remote" ? city : undefined,
-      experienceLevel: level,
-      search:          q,
-      take: 20,
-    }),
+  const jobParams = {
+    categorySlug:    category,
+    remoteType:      type,
+    city:            city && city !== "Remote" ? city : undefined,
+    experienceLevel: level,
+    search:          q,
+  };
+
+  const [jobs, categories, totalFiltered] = await Promise.all([
+    getJobs({ ...jobParams, take: PAGE_SIZE, skip }),
     getCategoriesWithCount(),
+    getJobsCount(jobParams),
   ]);
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
+  const totalPages     = Math.ceil(totalFiltered / PAGE_SIZE);
+  const from           = totalFiltered === 0 ? 0 : skip + 1;
+  const to             = Math.min(skip + PAGE_SIZE, totalFiltered);
 
   /* Active filter pills */
   const activeFilters: { label: string; removeKey: string }[] = [];
@@ -86,6 +96,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     if (type     && remove !== "type")     p.set("type", type);
     if (city     && remove !== "city")     p.set("city", city);
     if (level    && remove !== "level")    p.set("level", level);
+    // reset page when removing a filter
     const qs = p.toString();
     return qs ? `/jobs?${qs}` : "/jobs";
   }
@@ -99,8 +110,29 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     if (level)    p.set("level", level);
     if (p.get(key) === value) p.delete(key);
     else p.set(key, value);
+    // reset page when changing filter
     const qs = p.toString();
     return qs ? `/jobs?${qs}` : "/jobs";
+  }
+
+  function pageUrl(p: number) {
+    const ps = new URLSearchParams();
+    if (q)        ps.set("q", q);
+    if (category) ps.set("category", category);
+    if (type)     ps.set("type", type);
+    if (city)     ps.set("city", city);
+    if (level)    ps.set("level", level);
+    if (p > 1)    ps.set("page", String(p));
+    const qs = ps.toString();
+    return qs ? `/jobs?${qs}` : "/jobs";
+  }
+
+  /* Page number slots — up to 7 visible */
+  function pageSlots(): (number | "…")[] {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (page <= 4) return [1, 2, 3, 4, 5, "…", totalPages];
+    if (page >= totalPages - 3) return [1, "…", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    return [1, "…", page - 1, page, page + 1, "…", totalPages];
   }
 
   const pageTitle = category
@@ -117,7 +149,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       <div style={{ marginBottom: 32 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-          {serialisedJobs.length} {activeFilters.length ? "matching" : "total"} JOBS · UPDATED DAILY
+          {activeFilters.length ? totalFiltered : totalJobs} {activeFilters.length ? "matching" : "total"} JOBS · UPDATED DAILY
         </div>
         <h1 className="display-m" style={{ marginBottom: 8 }}>{pageTitle}</h1>
         <p className="body" style={{ color: "var(--text-muted)" }}>
@@ -146,7 +178,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
       <div className="layout-sidebar-left">
 
-        {/* Filters sidebar — collapsible on mobile */}
+        {/* Filters sidebar */}
         <FiltersPanel activeCount={activeFilters.length}>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
@@ -208,8 +240,10 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
             <span className="body-s" style={{ color: "var(--text-muted)" }}>
-              Showing <strong style={{ color: "var(--text)" }}>{serialisedJobs.length}</strong>
-              {activeFilters.length ? " matching" : ""} jobs
+              {totalFiltered === 0
+                ? "No jobs found"
+                : <>Showing <strong style={{ color: "var(--text)" }}>{from}–{to}</strong> of <strong style={{ color: "var(--text)" }}>{totalFiltered}</strong> {activeFilters.length ? "matching " : ""}jobs</>
+              }
             </span>
           </div>
 
@@ -238,6 +272,61 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {serialisedJobs.map(job => <JobCard key={job.id} {...job} />)}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 40, flexWrap: "wrap" }}>
+              <Link
+                href={pageUrl(page - 1)}
+                aria-disabled={page === 1}
+                style={{
+                  padding: "8px 14px", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)",
+                  border: "1px solid var(--border)", textDecoration: "none",
+                  color: page === 1 ? "var(--text-subtle)" : "var(--text)",
+                  background: "var(--surface)", pointerEvents: page === 1 ? "none" : "auto",
+                  opacity: page === 1 ? 0.4 : 1,
+                }}
+              >
+                ← Prev
+              </Link>
+
+              {pageSlots().map((slot, i) =>
+                slot === "…" ? (
+                  <span key={`ellipsis-${i}`} style={{ padding: "8px 4px", color: "var(--text-subtle)", fontSize: 13 }}>…</span>
+                ) : (
+                  <Link
+                    key={slot}
+                    href={pageUrl(slot)}
+                    style={{
+                      width: 36, height: 36, display: "grid", placeItems: "center",
+                      borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none",
+                      border: slot === page ? "1px solid var(--accent)" : "1px solid var(--border)",
+                      background: slot === page ? "var(--accent)" : "var(--surface)",
+                      color: slot === page ? "#fff" : "var(--text)",
+                      fontWeight: slot === page ? 600 : 400,
+                      pointerEvents: slot === page ? "none" : "auto",
+                    }}
+                  >
+                    {slot}
+                  </Link>
+                )
+              )}
+
+              <Link
+                href={pageUrl(page + 1)}
+                aria-disabled={page === totalPages}
+                style={{
+                  padding: "8px 14px", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)",
+                  border: "1px solid var(--border)", textDecoration: "none",
+                  color: page === totalPages ? "var(--text-subtle)" : "var(--text)",
+                  background: "var(--surface)", pointerEvents: page === totalPages ? "none" : "auto",
+                  opacity: page === totalPages ? 0.4 : 1,
+                }}
+              >
+                Next →
+              </Link>
             </div>
           )}
         </div>
