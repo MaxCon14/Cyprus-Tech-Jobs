@@ -7,13 +7,14 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getEmployerWithCompanyAndJobs } from "@/lib/queries";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import {
-  Plus, Eye, Edit2, Briefcase, Building2,
+  Plus, Eye, Briefcase, Building2,
   ExternalLink, MapPin, Clock, ChevronRight,
   CheckCircle2, AlertCircle, FileText,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { SignOutClient } from "./SignOutClient";
 import { ApplicantsDrawer } from "./ApplicantsDrawer";
+import { EditJobDrawer } from "./EditJobDrawer";
 
 export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Careers",
@@ -278,9 +279,7 @@ export default async function EmployerDashboard() {
                       <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
                         <Eye size={13} />
                       </Link>
-                      <button className="btn btn-ghost btn-icon btn-sm" title="Edit listing" disabled>
-                        <Edit2 size={13} />
-                      </button>
+                      <EditJobDrawer job={job} />
                     </div>
                   </div>
                 );
