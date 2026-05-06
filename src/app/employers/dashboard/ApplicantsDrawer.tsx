@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   Users, X, ExternalLink, Globe, AtSign,
   FileText, Loader2, MapPin, Briefcase, DollarSign, Calendar, ChevronRight, ChevronDown, Link2,
-  Clock, ShieldCheck,
+  Clock, ShieldCheck, Star, Check, XCircle,
 } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 
@@ -23,6 +23,8 @@ interface Application {
   candidate: CandidateRow | null;
   positions: PositionRow[];
 }
+
+type FilterKey = "ALL" | "PENDING" | "SHORTLISTED" | "ACCEPTED" | "REJECTED";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -89,6 +91,13 @@ function rightToWorkInfo(v: string | null): { label: string; color: string; bg: 
   return null;
 }
 
+function statusBadge(s: string) {
+  if (s === "SHORTLISTED") return { label: "Shortlisted", color: "#b45309",        bg: "#fef3c7"           };
+  if (s === "ACCEPTED")    return { label: "Accepted",    color: "var(--success)", bg: "var(--success-bg)" };
+  if (s === "REJECTED")    return { label: "Rejected",    color: "var(--error)",   bg: "var(--error-bg)"  };
+  return null;
+}
+
 // ─── Position accordion item ──────────────────────────────────────────────────
 
 function PositionItem({ pos }: { pos: PositionRow }) {
@@ -136,7 +145,13 @@ function PositionItem({ pos }: { pos: PositionRow }) {
 
 // ─── Applicant card ───────────────────────────────────────────────────────────
 
-function ApplicantCard({ app }: { app: Application }) {
+function ApplicantCard({
+  app, status, onStatusChange,
+}: {
+  app: Application;
+  status: string;
+  onStatusChange: (appId: string, newStatus: string) => void;
+}) {
   const [showCover, setShowCover] = useState(false);
   const c = app.candidate;
   if (!c) return null;
@@ -147,7 +162,6 @@ function ApplicantCard({ app }: { app: Application }) {
   const visibleSkills = skills.slice(0, 6);
   const extraSkills = skills.length - 6;
 
-  // Option B: application-specific values override profile links
   const cvLink       = app.cvUrl       ?? c.cvUrl;
   const linkedinUrl  = app.linkedinUrl  ?? c.linkedinUrl;
   const portfolioUrl = app.portfolioUrl ?? c.portfolioUrl;
@@ -164,9 +178,17 @@ function ApplicantCard({ app }: { app: Application }) {
   const rtw    = rightToWorkInfo(app.rightToWork);
   const avail  = availabilityLabel(app.availability);
   const notice = noticePeriodLabel(app.noticePeriod);
+  const badge  = statusBadge(status);
+
+  const isShortlisted = status === "SHORTLISTED";
+  const isAccepted    = status === "ACCEPTED";
+  const isRejected    = status === "REJECTED";
 
   return (
-    <div style={{ border: "1px solid var(--border)", borderRadius: 12, background: "var(--surface)", overflow: "hidden" }}>
+    <div style={{
+      border: "1px solid var(--border)", borderRadius: 12, background: "var(--surface)",
+      overflow: "hidden", opacity: isRejected ? 0.65 : 1, transition: "opacity 200ms",
+    }}>
 
       {/* Header */}
       <div style={{ padding: "16px 18px", display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -179,15 +201,23 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-            <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{name}</p>
-              {c.headline && <p className="body-s" style={{ color: "var(--text-muted)" }}>{c.headline}</p>}
+              {badge && (
+                <span style={{
+                  fontSize: 10, padding: "2px 8px", borderRadius: 99, fontWeight: 600,
+                  color: badge.color, background: badge.bg,
+                }}>
+                  {badge.label}
+                </span>
+              )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <Calendar size={11} style={{ color: "var(--text-subtle)" }} />
               <span className="mono-s" style={{ color: "var(--text-subtle)" }}>{fmtApplied(app.appliedAt)}</span>
             </div>
           </div>
+          {c.headline && <p className="body-s" style={{ color: "var(--text-muted)" }}>{c.headline}</p>}
 
           {/* Profile meta tags */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
@@ -207,12 +237,57 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
       </div>
 
+      {/* Status action buttons */}
+      <div style={{ padding: "0 18px 14px", display: "flex", gap: 6 }}>
+        <button
+          type="button"
+          onClick={() => onStatusChange(app.id, "SHORTLISTED")}
+          className="btn btn-sm"
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            background: isShortlisted ? "#fef3c7" : "transparent",
+            color: isShortlisted ? "#b45309" : "var(--text-muted)",
+            border: `1px solid ${isShortlisted ? "#fcd34d" : "var(--border)"}`,
+          }}
+        >
+          <Star size={11} fill={isShortlisted ? "#b45309" : "none"} />
+          Shortlist
+        </button>
+        <button
+          type="button"
+          onClick={() => onStatusChange(app.id, "ACCEPTED")}
+          className="btn btn-sm"
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            background: isAccepted ? "var(--success-bg)" : "transparent",
+            color: isAccepted ? "var(--success)" : "var(--text-muted)",
+            border: `1px solid ${isAccepted ? "var(--success)" : "var(--border)"}`,
+          }}
+        >
+          <Check size={11} />
+          Accept
+        </button>
+        <button
+          type="button"
+          onClick={() => onStatusChange(app.id, "REJECTED")}
+          className="btn btn-sm"
+          style={{
+            display: "flex", alignItems: "center", gap: 5,
+            background: isRejected ? "var(--error-bg)" : "transparent",
+            color: isRejected ? "var(--error)" : "var(--text-muted)",
+            border: `1px solid ${isRejected ? "var(--error)" : "var(--border)"}`,
+          }}
+        >
+          <XCircle size={11} />
+          Reject
+        </button>
+      </div>
+
       {/* ── Zone A: Application summary ─────────────────────────────────────── */}
       {(rtw || avail || notice || app.expectedSalary) && (
         <div style={{ margin: "0 18px 14px", padding: "12px 14px", background: "var(--bg-muted)", borderRadius: 10, display: "flex", flexDirection: "column", gap: 8 }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 2 }}>APPLICATION DETAILS</p>
 
-          {/* Right to work — most prominent */}
           {rtw && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <ShieldCheck size={13} style={{ color: rtw.color, flexShrink: 0 }} />
@@ -226,7 +301,6 @@ function ApplicantCard({ app }: { app: Application }) {
             </div>
           )}
 
-          {/* Availability + notice period */}
           {(avail || notice) && (
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
               <Clock size={12} style={{ color: "var(--text-subtle)", flexShrink: 0 }} />
@@ -238,7 +312,6 @@ function ApplicantCard({ app }: { app: Application }) {
             </div>
           )}
 
-          {/* Expected salary */}
           {app.expectedSalary && (
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <DollarSign size={12} style={{ color: "var(--text-subtle)", flexShrink: 0 }} />
@@ -252,7 +325,6 @@ function ApplicantCard({ app }: { app: Application }) {
 
       {/* ── Zone B: Candidate profile ───────────────────────────────────────── */}
 
-      {/* Bio */}
       {c.bio && (
         <div style={{ padding: "0 18px 14px" }}>
           <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -261,7 +333,6 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
       )}
 
-      {/* Skills */}
       {visibleSkills.length > 0 && (
         <div style={{ padding: "0 18px 14px", display: "flex", gap: 6, flexWrap: "wrap" }}>
           {visibleSkills.map((s) => (
@@ -271,7 +342,6 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
       )}
 
-      {/* Work history — expandable accordion cards */}
       {app.positions.length > 0 && (
         <div style={{ padding: "0 18px 14px" }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>WORK EXPERIENCE</p>
@@ -313,7 +383,6 @@ function ApplicantCard({ app }: { app: Application }) {
         </div>
       </div>
 
-      {/* Cover letter */}
       {showCover && app.coverLetter && (
         <div style={{ padding: "14px 18px 16px", borderTop: "1px solid var(--border)", background: "var(--bg-muted)" }}>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>Cover letter</p>
@@ -331,6 +400,28 @@ export function ApplicantsDrawer({ jobId, count, jobTitle }: { jobId: string; co
   const [loading, setLoading]           = useState(false);
   const [applications, setApplications] = useState<Application[] | null>(null);
   const [error, setError]               = useState<string | null>(null);
+  const [statuses, setStatuses]         = useState<Record<string, string>>({});
+  const [filter, setFilter]             = useState<FilterKey>("ALL");
+
+  function getStatus(app: Application) {
+    return statuses[app.id] ?? app.status ?? "PENDING";
+  }
+
+  async function handleStatusChange(appId: string, newStatus: string) {
+    const current = statuses[appId] ?? applications?.find(a => a.id === appId)?.status ?? "PENDING";
+    const next = current === newStatus ? "PENDING" : newStatus;
+    setStatuses(s => ({ ...s, [appId]: next }));
+    try {
+      const res = await fetch(`/api/applications/${appId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: next }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setStatuses(s => ({ ...s, [appId]: current }));
+    }
+  }
 
   async function openPanel() {
     setOpen(true);
@@ -348,6 +439,24 @@ export function ApplicantsDrawer({ jobId, count, jobTitle }: { jobId: string; co
       setLoading(false);
     }
   }
+
+  const counts = applications ? {
+    ALL:         applications.length,
+    PENDING:     applications.filter(a => getStatus(a) === "PENDING").length,
+    SHORTLISTED: applications.filter(a => getStatus(a) === "SHORTLISTED").length,
+    ACCEPTED:    applications.filter(a => getStatus(a) === "ACCEPTED").length,
+    REJECTED:    applications.filter(a => getStatus(a) === "REJECTED").length,
+  } : null;
+
+  const filtered = applications?.filter(a => filter === "ALL" || getStatus(a) === filter);
+
+  const tabs: { key: FilterKey; label: string }[] = [
+    { key: "ALL",         label: "All"         },
+    { key: "PENDING",     label: "Pending"      },
+    { key: "SHORTLISTED", label: "Shortlisted"  },
+    { key: "ACCEPTED",    label: "Accepted"     },
+    { key: "REJECTED",    label: "Rejected"     },
+  ];
 
   return (
     <>
@@ -376,14 +485,53 @@ export function ApplicantsDrawer({ jobId, count, jobTitle }: { jobId: string; co
             display: "flex", flexDirection: "column", boxShadow: "var(--shadow-lg)",
           }}>
             {/* Header */}
-            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, background: "var(--surface)", zIndex: 1 }}>
-              <div>
-                <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>Applicants</p>
-                <h2 className="h3">{jobTitle}</h2>
+            <div style={{ padding: "20px 24px 0", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, background: "var(--surface)", zIndex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                <div>
+                  <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>Applicants</p>
+                  <h2 className="h3">{jobTitle}</h2>
+                </div>
+                <button type="button" onClick={() => setOpen(false)} className="btn btn-ghost btn-icon">
+                  <X size={18} />
+                </button>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="btn btn-ghost btn-icon">
-                <X size={18} />
-              </button>
+
+              {/* Filter tabs */}
+              {applications && applications.length > 0 && (
+                <div style={{ display: "flex", gap: 2, overflowX: "auto", paddingBottom: 0 }}>
+                  {tabs.map(tab => {
+                    const c = counts?.[tab.key] ?? 0;
+                    const active = filter === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setFilter(tab.key)}
+                        style={{
+                          padding: "8px 12px", fontSize: 12, fontFamily: "var(--font-sans)",
+                          fontWeight: active ? 600 : 400,
+                          color: active ? "var(--accent)" : "var(--text-muted)",
+                          background: "none", border: "none", cursor: "pointer",
+                          borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
+                          whiteSpace: "nowrap", flexShrink: 0,
+                        }}
+                      >
+                        {tab.label}
+                        {c > 0 && (
+                          <span style={{
+                            marginLeft: 5, fontSize: 10, fontWeight: 600, padding: "1px 5px",
+                            borderRadius: 99,
+                            background: active ? "var(--accent-soft)" : "var(--surface-alt)",
+                            color: active ? "var(--accent)" : "var(--text-subtle)",
+                          }}>
+                            {c}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Body */}
@@ -401,8 +549,18 @@ export function ApplicantsDrawer({ jobId, count, jobTitle }: { jobId: string; co
                   <p className="body-s" style={{ color: "var(--text-subtle)" }}>No applications yet.</p>
                 </div>
               )}
-              {applications?.map((app) => (
-                <ApplicantCard key={app.id} app={app} />
+              {filtered !== undefined && filtered.length === 0 && applications !== null && applications.length > 0 && (
+                <div style={{ textAlign: "center", padding: "40px 0" }}>
+                  <p className="body-s" style={{ color: "var(--text-subtle)" }}>No {filter.toLowerCase()} applicants.</p>
+                </div>
+              )}
+              {filtered?.map((app) => (
+                <ApplicantCard
+                  key={app.id}
+                  app={app}
+                  status={getStatus(app)}
+                  onStatusChange={handleStatusChange}
+                />
               ))}
             </div>
           </div>
