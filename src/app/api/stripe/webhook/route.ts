@@ -17,24 +17,27 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const jobId   = session.metadata?.jobId;
+    const session  = event.data.object as Stripe.Checkout.Session;
+    const meta     = session.metadata ?? {};
 
-    if (!jobId) {
-      console.error("[stripe/webhook] no jobId in session metadata");
-      return NextResponse.json({ ok: true });
+    if (meta.type === "slot_purchase") {
+      const { slotType, quantity, employerId } = meta;
+      const qty = parseInt(quantity ?? "0", 10);
+
+      if (!employerId || !slotType || !qty) {
+        console.error("[stripe/webhook] missing slot_purchase metadata", meta);
+        return NextResponse.json({ ok: true });
+      }
+
+      await prisma.employer.update({
+        where: { id: employerId },
+        data: slotType === "standard"
+          ? { standardSlots: { increment: qty } }
+          : { featuredSlots: { increment: qty } },
+      });
+
+      console.log(`[stripe/webhook] Added ${qty} ${slotType} slots to employer ${employerId}`);
     }
-
-    const now       = new Date();
-    const expiresAt = new Date(now);
-    expiresAt.setDate(expiresAt.getDate() + 30);
-
-    await prisma.job.update({
-      where: { id: jobId },
-      data:  { status: "ACTIVE", postedAt: now, expiresAt },
-    });
-
-    console.log(`[stripe/webhook] Job ${jobId} activated`);
   }
 
   return NextResponse.json({ ok: true });

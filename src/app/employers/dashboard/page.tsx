@@ -9,7 +9,7 @@ import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import {
   Plus, Eye, Edit2, Briefcase, Building2,
   ExternalLink, MapPin, Clock, ChevronRight,
-  CheckCircle2, AlertCircle, FileText,
+  CheckCircle2, AlertCircle, FileText, ShoppingBag,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { SignOutClient } from "./SignOutClient";
@@ -137,7 +137,7 @@ export default async function EmployerDashboard() {
         </div>
 
         {/* ── Stats row ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 14 }}>
           {[
             { label: "Active listings",  value: activeJobs.length.toString(),  icon: <Briefcase size={16} />,  accent: true },
             { label: "Draft",            value: draftJobs.length.toString(),   icon: <FileText size={16} />,   accent: false },
@@ -157,6 +157,34 @@ export default async function EmployerDashboard() {
               <div className="body-s" style={{ color: "var(--text-muted)" }}>{stat.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* ── Slot balance row ── */}
+        <div style={{
+          background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12,
+          padding: "16px 20px", marginBottom: 24,
+          display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap",
+        }}>
+          <ShoppingBag size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 20, color: "var(--accent)" }}>{employer.standardSlots}</span>
+            <span className="body-s" style={{ color: "var(--text-muted)" }}>standard slots</span>
+          </div>
+          <div style={{ width: 1, height: 20, background: "var(--border-strong)" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 20, color: "var(--accent)" }}>{employer.featuredSlots}</span>
+            <span className="body-s" style={{ color: "var(--text-muted)" }}>featured slots</span>
+          </div>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            {(employer.standardSlots > 0 || employer.featuredSlots > 0) && (
+              <Link href="/post-a-job" className="btn btn-accent btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Plus size={12} /> Post a job
+              </Link>
+            )}
+            <Link href="/buy-credits" className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <ShoppingBag size={12} /> Buy slots
+            </Link>
+          </div>
         </div>
 
         {/* ── Job listings ── */}
@@ -283,8 +311,8 @@ export default async function EmployerDashboard() {
           </div>
         )}
 
-        {/* ── Upgrade CTA (only for FREE plan) ── */}
-        {employer.plan === "FREE" && (
+        {/* ── Featured slots CTA (only when no featured slots) ── */}
+        {employer.featuredSlots === 0 && (
           <div style={{
             border: "1px solid var(--accent)", borderRadius: 12, padding: "20px 24px",
             background: "var(--accent-soft)",
@@ -293,14 +321,14 @@ export default async function EmployerDashboard() {
           }}>
             <div>
               <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>
-                Upgrade to Featured for 2× visibility
+                Get featured listings for 2× visibility
               </p>
               <p className="body-s" style={{ color: "var(--text-muted)" }}>
-                Featured listings are pinned to the top of search results for 30 days.
+                Featured listings are pinned to the top of search results with a FEATURED badge.
               </p>
             </div>
-            <Link href="/post-a-job#pricing" className="btn btn-accent" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              Upgrade listing <ChevronRight size={13} />
+            <Link href="/buy-credits" className="btn btn-accent" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              Buy featured slots <ChevronRight size={13} />
             </Link>
           </div>
         )}
