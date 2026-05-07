@@ -9,5 +9,5 @@ export function getStripe() {
 export const PRICE_IDS = {
   standard: process.env.STRIPE_PRICE_STANDARD ?? "price_1TUDGzRsffOCYGPJ6riZKaa2",
   featured:  process.env.STRIPE_PRICE_FEATURED  ?? "price_1TUDHORsffOCYGPJkzVpYRr1",
-  bundle:    process.env.STRIPE_PRICE_BUNDLE    ?? "",
+  bundle:    process.env.STRIPE_PRICE_BUNDLE    ?? "price_1TUX9RRsffOCYGPJBHkOJI7V",
 } as const;
