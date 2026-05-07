@@ -1099,3 +1099,132 @@ details[open] .faq-chevron {
     display: none;
   }
 }
+
+/* =====================================================
+   EMPLOYER DASHBOARD — responsive layout
+   ===================================================== */
+
+.employer-page-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.employer-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.employer-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.employer-slot-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.employer-slot-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.employer-job-header-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 140px 80px;
+  gap: 16px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.employer-job-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 140px 80px;
+  gap: 16px;
+  padding: 16px 24px;
+  align-items: center;
+}
+
+.employer-row-mobile-meta {
+  display: none;
+}
+
+.employer-nav-company-name {
+  /* visible on desktop */
+}
+
+/* ── 768px: 2-col stats ── */
+@media (max-width: 768px) {
+  .employer-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* ── 640px: full mobile ── */
+@media (max-width: 640px) {
+  .employer-page-inner {
+    padding: 20px 16px 60px;
+  }
+
+  .employer-nav-company-name {
+    display: none;
+  }
+
+  .employer-hero-actions {
+    width: 100%;
+  }
+
+  .employer-hero-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .employer-stats-grid {
+    gap: 8px;
+  }
+
+  .employer-slot-divider {
+    display: none;
+  }
+
+  .employer-slot-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .employer-slot-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .employer-job-header-row {
+    display: none;
+  }
+
+  .employer-job-row {
+    grid-template-columns: 1fr auto;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .employer-col-hide-mobile {
+    display: none;
+  }
+
+  .employer-row-mobile-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+}
