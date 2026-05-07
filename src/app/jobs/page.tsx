@@ -3,7 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Search } from "lucide-react";
 import { FiltersPanel } from "./FiltersPanel";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -51,11 +51,12 @@ type SearchParams = Promise<{
   type?: string;
   city?: string;
   level?: string;
+  search?: string;
 }>;
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const { category, type, city, level } = params;
+  const { category, type, city, level, search } = params;
 
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -66,6 +67,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       remoteType:      type,
       city:            city && city !== "Remote" ? city : undefined,
       experienceLevel: level,
+      search:          search?.trim() || undefined,
       take: 20,
     }),
     getCategoriesWithCount(),
@@ -87,6 +89,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   /* Active filter pills */
   const activeFilters: { label: string; removeKey: string }[] = [];
+  if (search)   activeFilters.push({ label: `"${search}"`, removeKey: "search" });
   if (category) activeFilters.push({ label: CATEGORY_LABELS[category] ?? category, removeKey: "category" });
   if (type)     activeFilters.push({ label: TYPE_LABELS[type] ?? type, removeKey: "type" });
   if (city)     activeFilters.push({ label: city, removeKey: "city" });
@@ -94,6 +97,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   function buildUrl(remove: string) {
     const p = new URLSearchParams();
+    if (search   && remove !== "search")   p.set("search", search);
     if (category && remove !== "category") p.set("category", category);
     if (type     && remove !== "type")     p.set("type", type);
     if (city     && remove !== "city")     p.set("city", city);
@@ -152,6 +156,24 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
               <SlidersHorizontal size={14} style={{ color: "var(--text-muted)" }} />
               <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13 }}>Filters</span>
             </div>
+            {/* Keyword search */}
+            <form action="/jobs" method="GET" style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+              {category && <input type="hidden" name="category" value={category} />}
+              {type     && <input type="hidden" name="type"     value={type} />}
+              {city     && <input type="hidden" name="city"     value={city} />}
+              {level    && <input type="hidden" name="level"    value={level} />}
+              <div style={{ position: "relative" }}>
+                <Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
+                <input
+                  className="input"
+                  type="text"
+                  name="search"
+                  defaultValue={search ?? ""}
+                  placeholder="Keyword search…"
+                  style={{ paddingLeft: 30, fontSize: 13, height: 36 }}
+                />
+              </div>
+            </form>
 
             <FilterSection title="Category">
               {categories.slice(1).map(cat => (

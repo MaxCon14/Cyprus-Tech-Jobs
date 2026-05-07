@@ -85,24 +85,23 @@ export default async function HomePage() {
           </p>
 
           {/* Search */}
-          <div style={{ display: "flex", gap: 8, maxWidth: 640, marginBottom: 40, flexWrap: "wrap" }}>
+          <form action="/jobs" method="GET" style={{ display: "flex", gap: 8, maxWidth: 640, marginBottom: 40, flexWrap: "wrap" }}>
             <div style={{ position: "relative", flex: "1 1 200px" }}>
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
-              <input className="input" type="text" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
+              <input className="input" type="text" name="search" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
             </div>
             <div style={{ position: "relative", flex: "0 0 160px" }}>
               <MapPin size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", zIndex: 1 }} />
-              <select className="select" style={{ paddingLeft: 38 }}>
+              <select className="select" name="city" style={{ paddingLeft: 38 }}>
                 <option value="">All locations</option>
-                <option value="limassol">Limassol</option>
-                <option value="nicosia">Nicosia</option>
-                <option value="larnaca">Larnaca</option>
-                <option value="paphos">Paphos</option>
-                <option value="remote">Remote</option>
+                <option value="Limassol">Limassol</option>
+                <option value="Nicosia">Nicosia</option>
+                <option value="Larnaca">Larnaca</option>
+                <option value="Paphos">Paphos</option>
               </select>
             </div>
-            <Link href="/jobs" className="btn btn-accent">Search</Link>
-          </div>
+            <button type="submit" className="btn btn-accent">Search</button>
+          </form>
 
           {/* Stats */}
           <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>

@@ -25,7 +25,10 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   CLOSED:  { bg: "var(--bg-muted)",    color: "var(--text-subtle)", label: "Closed" },
 };
 
-export default async function EmployerDashboard() {
+type SearchParams = Promise<{ posted?: string; edited?: string }>;
+
+export default async function EmployerDashboard({ searchParams }: { searchParams: SearchParams }) {
+  const { posted, edited } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) redirect("/employers/login?callbackUrl=/employers/dashboard");
@@ -74,6 +77,20 @@ export default async function EmployerDashboard() {
       </header>
 
       <div className="employer-page-inner">
+
+        {/* ── Success banner ── */}
+        {(posted || edited) && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: "var(--success-bg)", border: "1px solid var(--success)",
+            borderRadius: 10, padding: "12px 18px", marginBottom: 16,
+          }}>
+            <CheckCircle2 size={15} style={{ color: "var(--success)", flexShrink: 0 }} />
+            <span className="body-s" style={{ color: "var(--success)", fontWeight: 500 }}>
+              {posted ? "Your job listing is now live." : "Your listing has been updated successfully."}
+            </span>
+          </div>
+        )}
 
         {/* ── Company hero ── */}
         <div style={{
@@ -298,9 +315,9 @@ export default async function EmployerDashboard() {
                       <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
                         <Eye size={13} />
                       </Link>
-                      <button className="btn btn-ghost btn-icon btn-sm" title="Edit listing" disabled>
+                      <Link href={`/employers/jobs/${job.id}/edit`} className="btn btn-ghost btn-icon btn-sm" title="Edit listing">
                         <Edit2 size={13} />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 );

@@ -86,6 +86,13 @@ export async function getSimilarJobs(jobId: string, categoryId: string, take = 3
   });
 }
 
+export async function getJobById(id: string) {
+  return prisma.job.findUnique({
+    where: { id },
+    include: { company: true, category: true },
+  });
+}
+
 // ─── Employer dashboard ────────────────────────────────────────
 
 export async function getEmployerWithCompanyAndJobs(email: string) {
