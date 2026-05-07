@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { stripe, PRICE_IDS } from "@/lib/stripe";
+import { getStripe, PRICE_IDS } from "@/lib/stripe";
 import { slugify } from "@/lib/utils";
 
 const CATEGORY_NAMES: Record<string, string> = {
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode:       "payment",
       line_items: [{ price: PRICE_IDS[plan as keyof typeof PRICE_IDS], quantity: 1 }],
       metadata:   { jobId: job.id },
