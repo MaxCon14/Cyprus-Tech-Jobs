@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/placeholder-data";
 import { Check, Zap, Star, Building2, Loader2 } from "lucide-react";
 
 type Plan = "standard" | "featured" | "bundle";
 
-const PLANS: { id: Plan; name: string; price: string; period: string; description: string; features: string[]; accent: boolean }[] = [
+const PLANS: { id: Plan; name: string; price: string; period: string; description: string; features: string[]; highlight: boolean }[] = [
   {
     id: "standard",
     name: "Standard",
@@ -21,7 +20,7 @@ const PLANS: { id: Plan; name: string; price: string; period: string; descriptio
       "Company profile page",
       "Apply tracking link",
     ],
-    accent: false,
+    highlight: false,
   },
   {
     id: "featured",
@@ -37,7 +36,7 @@ const PLANS: { id: Plan; name: string; price: string; period: string; descriptio
       "\"Hiring this week\" company strip",
       "2× more applications on average",
     ],
-    accent: true,
+    highlight: true,
   },
   {
     id: "bundle",
@@ -52,15 +51,16 @@ const PLANS: { id: Plan; name: string; price: string; period: string; descriptio
       "Priority support",
       "Candidate shortlist report",
     ],
-    accent: false,
+    highlight: false,
   },
 ];
 
 export function PostJobForm() {
-  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<Plan>("standard");
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState<string | null>(null);
+
+  const activePlan = PLANS.find(p => p.id === selectedPlan)!;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -102,7 +102,8 @@ export function PostJobForm() {
         return;
       }
 
-      router.push(data.url);
+      // Use window.location for external Stripe checkout URL
+      window.location.href = data.url;
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);
@@ -112,70 +113,89 @@ export function PostJobForm() {
   return (
     <div>
       {/* Plan selector */}
-      <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <h2 className="display-m" style={{ marginBottom: 8 }}>Simple pricing</h2>
+      <div style={{ textAlign: "center", marginBottom: 16 }}>
+        <h2 className="display-m" style={{ marginBottom: 8 }}>Choose your plan</h2>
         <p className="body" style={{ color: "var(--text-muted)" }}>No subscriptions. Pay per listing. Cancel anytime.</p>
       </div>
 
-      <div className="grid-3" style={{ marginBottom: 80 }}>
+      <div className="grid-3" style={{ marginBottom: 32 }}>
         {PLANS.map(plan => {
           const isSelected = selectedPlan === plan.id;
           return (
-            <div
+            <button
               key={plan.id}
+              type="button"
               onClick={() => setSelectedPlan(plan.id)}
               style={{
-                border: isSelected
-                  ? "2px solid var(--accent)"
-                  : plan.accent
-                    ? "2px solid var(--accent)"
-                    : "1px solid var(--border)",
-                borderRadius: 12, padding: 28,
-                background: plan.accent || isSelected ? "var(--accent-soft)" : "var(--surface)",
-                position:   "relative",
-                cursor:     "pointer",
-                transition: "box-shadow 0.15s",
-                boxShadow:  isSelected ? "0 0 0 3px var(--accent-soft)" : "none",
+                all: "unset",
+                display: "block",
+                cursor: "pointer",
+                border: isSelected ? "2.5px solid var(--accent)" : "1.5px solid var(--border)",
+                borderRadius: 12,
+                padding: 24,
+                background: isSelected ? "var(--accent-soft)" : "var(--surface)",
+                position: "relative",
+                transition: "border-color 0.15s, background 0.15s",
+                textAlign: "left",
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
-              {plan.accent && (
-                <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)" }}>
-                  <span style={{ background: "var(--accent)", color: "var(--white)", padding: "4px 14px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
+              {plan.highlight && !isSelected && (
+                <div style={{ position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)" }}>
+                  <span style={{ background: "var(--accent)", color: "var(--white)", padding: "3px 12px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
                     MOST POPULAR
                   </span>
                 </div>
               )}
               {isSelected && (
-                <div style={{ position: "absolute", top: 12, right: 12 }}>
-                  <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--accent)", display: "grid", placeItems: "center" }}>
-                    <Check size={11} style={{ color: "var(--white)" }} />
+                <div style={{ position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)" }}>
+                  <span style={{ background: "var(--accent)", color: "var(--white)", padding: "3px 14px", borderRadius: 99, fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.08em", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 }}>
+                    <Check size={9} /> SELECTED
                   </span>
                 </div>
               )}
 
-              <div style={{ marginBottom: 20 }}>
-                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>{plan.name}</div>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 4 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 700, color: "var(--text)" }}>{plan.price}</span>
-                </div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 13, color: isSelected ? "var(--accent)" : "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>{plan.name}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 30, fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>{plan.price}</div>
                 <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{plan.period}</div>
               </div>
 
-              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>{plan.description}</p>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {plan.features.map(f => (
-                  <div key={f} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                    <span style={{ width: 16, height: 16, borderRadius: "50%", background: plan.accent || isSelected ? "var(--accent)" : "var(--success-bg)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
-                      <Check size={9} style={{ color: plan.accent || isSelected ? "var(--white)" : "var(--success)" }} />
+                  <div key={f} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
+                    <span style={{
+                      width: 16, height: 16, borderRadius: "50%", flexShrink: 0, marginTop: 1,
+                      background: isSelected ? "var(--accent)" : "var(--success-bg)",
+                      display: "grid", placeItems: "center",
+                    }}>
+                      <Check size={9} style={{ color: isSelected ? "var(--white)" : "var(--success)" }} />
                     </span>
                     <span className="body-s">{f}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </button>
           );
         })}
+      </div>
+
+      {/* Selected plan summary bar */}
+      <div style={{
+        background: "var(--accent-soft)", border: "1.5px solid var(--accent)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 40,
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Check size={11} style={{ color: "var(--white)" }} />
+          </span>
+          <span className="body-s" style={{ fontWeight: 600 }}>
+            Selected: <span style={{ color: "var(--accent)" }}>{activePlan.name}</span> — {activePlan.price} / {activePlan.period}
+          </span>
+        </div>
+        <span className="mono-s" style={{ color: "var(--text-subtle)" }}>Click a plan above to change</span>
       </div>
 
       {/* Job form */}
@@ -214,16 +234,16 @@ export function PostJobForm() {
               </Field>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <Field label="Category" required>
-                  <select className="select" name="category" required>
-                    <option value="">Select category</option>
+                  <select className="select" name="category" required defaultValue="">
+                    <option value="" disabled>Select category</option>
                     {CATEGORIES.slice(1).map(c => (
                       <option key={c.slug} value={c.slug}>{c.label}</option>
                     ))}
                   </select>
                 </Field>
                 <Field label="Experience level" required>
-                  <select className="select" name="experienceLevel" required>
-                    <option value="">Select level</option>
+                  <select className="select" name="experienceLevel" required defaultValue="">
+                    <option value="" disabled>Select level</option>
                     <option>Junior</option>
                     <option>Mid-level</option>
                     <option>Senior</option>
@@ -234,16 +254,16 @@ export function PostJobForm() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <Field label="Work type" required>
-                  <select className="select" name="remoteType" required>
-                    <option value="">Select work type</option>
+                  <select className="select" name="remoteType" required defaultValue="">
+                    <option value="" disabled>Select work type</option>
                     <option>Remote</option>
                     <option>Hybrid</option>
                     <option>On-site</option>
                   </select>
                 </Field>
                 <Field label="Employment type" required>
-                  <select className="select" name="employmentType" required>
-                    <option value="">Select type</option>
+                  <select className="select" name="employmentType" required defaultValue="">
+                    <option value="" disabled>Select type</option>
                     <option>Full-time</option>
                     <option>Part-time</option>
                     <option>Contract</option>
@@ -252,7 +272,7 @@ export function PostJobForm() {
                 </Field>
               </div>
               <Field label="City">
-                <select className="select" name="city">
+                <select className="select" name="city" defaultValue="">
                   <option value="">Select city</option>
                   <option>Limassol</option>
                   <option>Nicosia</option>
@@ -279,7 +299,7 @@ export function PostJobForm() {
                 LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
               </p>
               <Field label="Application URL or email" required>
-                <input className="input" name="applyUrl" type="text" placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" />
+                <input className="input" name="applyUrl" type="text" placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" required />
               </Field>
             </FormSection>
 
@@ -291,9 +311,9 @@ export function PostJobForm() {
                 style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", gap: 8 }}
               >
                 {loading ? (
-                  <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Redirecting to payment…</>
+                  <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Redirecting to Stripe…</>
                 ) : (
-                  `Continue to payment — ${PLANS.find(p => p.id === selectedPlan)?.price} →`
+                  <>Pay {activePlan.price} · {activePlan.name} listing →</>
                 )}
               </button>
               <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
