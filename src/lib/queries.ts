@@ -8,6 +8,7 @@ export async function getJobs({
   experienceLevel,
   city,
   search,
+  salary,
   take = 20,
   skip = 0,
 }: {
@@ -16,6 +17,7 @@ export async function getJobs({
   experienceLevel?: string;
   city?: string;
   search?: string;
+  salary?: number;
   take?: number;
   skip?: number;
 } = {}) {
@@ -26,6 +28,7 @@ export async function getJobs({
       ...(remoteType   && { remoteType: remoteType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city         && { city: { contains: city, mode: "insensitive" } }),
+      ...(salary       && { salaryMin: { gte: salary } }),
       ...(search       && {
         OR: [
           { title:       { contains: search, mode: "insensitive" } },
@@ -68,11 +71,36 @@ export async function getFeaturedJobs(take = 5) {
   });
 }
 
-export async function getJobCount(categorySlug?: string) {
+export async function getJobCount({
+  categorySlug,
+  remoteType,
+  experienceLevel,
+  city,
+  search,
+  salary,
+}: {
+  categorySlug?: string;
+  remoteType?: string;
+  experienceLevel?: string;
+  city?: string;
+  search?: string;
+  salary?: number;
+} = {}) {
   return prisma.job.count({
     where: {
       status: "ACTIVE",
-      ...(categorySlug && { category: { slug: categorySlug } }),
+      ...(categorySlug    && { category: { slug: categorySlug } }),
+      ...(remoteType      && { remoteType: remoteType as never }),
+      ...(experienceLevel && { experienceLevel: experienceLevel as never }),
+      ...(city            && { city: { contains: city, mode: "insensitive" } }),
+      ...(salary          && { salaryMin: { gte: salary } }),
+      ...(search          && {
+        OR: [
+          { title:       { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { company:     { name: { contains: search, mode: "insensitive" } } },
+        ],
+      }),
     },
   });
 }

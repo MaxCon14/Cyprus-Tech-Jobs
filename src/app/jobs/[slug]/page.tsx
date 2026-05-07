@@ -10,6 +10,7 @@ import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft, Check }
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
+import { ShareButton } from "./ShareButton";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -56,6 +57,7 @@ export default async function JobDetailPage({ params }: Props) {
   ];
 
   const descBlocks = job.description.split("\n\n");
+  const jobUrl     = `https://cyprustech.careers/jobs/${job.slug}`;
 
   return (
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
@@ -158,6 +160,12 @@ export default async function JobDetailPage({ params }: Props) {
             <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
               APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
             </p>
+          </div>
+
+          {/* Share */}
+          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "12px 16px", background: "var(--surface)" }}>
+            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>SHARE THIS ROLE</div>
+            <ShareButton url={jobUrl} title={job.title} />
           </div>
 
           {/* Job meta */}
