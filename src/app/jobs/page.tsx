@@ -3,7 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
-import { SlidersHorizontal, X, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FiltersPanel } from "./FiltersPanel";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -186,35 +186,31 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         </div>
       )}
 
+      {/* Keyword search — always visible above the grid */}
+      <form action="/jobs" method="GET" style={{ marginBottom: 20, maxWidth: "100%" }}>
+        {category       && <input type="hidden" name="category" value={category} />}
+        {type           && <input type="hidden" name="type"     value={type} />}
+        {city           && <input type="hidden" name="city"     value={city} />}
+        {level          && <input type="hidden" name="level"    value={level} />}
+        {params.salary  && <input type="hidden" name="salary"   value={params.salary} />}
+        <div style={{ position: "relative", maxWidth: 480 }}>
+          <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
+          <input
+            className="input"
+            type="text"
+            name="search"
+            defaultValue={search ?? ""}
+            placeholder="Search by title, company, or keyword…"
+            style={{ paddingLeft: 36 }}
+          />
+        </div>
+      </form>
+
       <div className="layout-sidebar-left">
 
         {/* Filters sidebar — collapsible on mobile */}
         <FiltersPanel activeCount={activeFilters.length}>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-            <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
-              <SlidersHorizontal size={14} style={{ color: "var(--text-muted)" }} />
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13 }}>Filters</span>
-            </div>
-            {/* Keyword search */}
-            <form action="/jobs" method="GET" style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
-              {category       && <input type="hidden" name="category" value={category} />}
-              {type           && <input type="hidden" name="type"     value={type} />}
-              {city           && <input type="hidden" name="city"     value={city} />}
-              {level          && <input type="hidden" name="level"    value={level} />}
-              {params.salary  && <input type="hidden" name="salary"   value={params.salary} />}
-              <div style={{ position: "relative" }}>
-                <Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
-                <input
-                  className="input"
-                  type="text"
-                  name="search"
-                  defaultValue={search ?? ""}
-                  placeholder="Keyword search…"
-                  style={{ paddingLeft: 30, fontSize: 13, height: 36 }}
-                />
-              </div>
-            </form>
-
             <FilterSection title="Category">
               {categories.slice(1).map(cat => (
                 <FilterLink
