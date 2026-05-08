@@ -718,14 +718,16 @@ body {
   display: none;
 }
 
-.job-header-inner {
+.job-header-inner,
+.company-header-inner {
   display: flex;
   gap: 20px;
   align-items: flex-start;
 }
 
 @media (max-width: 640px) {
-  .job-header-inner {
+  .job-header-inner,
+  .company-header-inner {
     flex-direction: column;
     gap: 14px;
   }
