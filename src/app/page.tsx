@@ -4,6 +4,7 @@ import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
+import { buildWebSiteSchema } from "@/lib/schema";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -66,6 +67,10 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebSiteSchema()) }}
+      />
       {/* ── HERO ── */}
       <section style={{ borderBottom: "1px solid var(--border)", padding: "clamp(48px, 8vw, 80px) 0 clamp(40px, 6vw, 64px)" }}>
         <div className="page-container">

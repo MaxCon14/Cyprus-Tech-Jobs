@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
 import { ShareButton } from "./ShareButton";
+import { buildJobPostingSchema, buildBreadcrumbSchema } from "@/lib/schema";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -59,7 +60,23 @@ export default async function JobDetailPage({ params }: Props) {
   const descBlocks = job.description.split("\n\n");
   const jobUrl     = `https://cyprustech.careers/jobs/${job.slug}`;
 
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Jobs", path: "/jobs" },
+    { name: job.title, path: `/jobs/${job.slug}` },
+  ]);
+
   return (
+    <>
+      {job.applyUrl && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJobPostingSchema(job)) }}
+        />
+      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Breadcrumb */}
@@ -226,5 +243,6 @@ export default async function JobDetailPage({ params }: Props) {
         </div>
       )}
     </div>
+    </>
   );
 }

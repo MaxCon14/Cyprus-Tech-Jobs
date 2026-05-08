@@ -6,6 +6,7 @@ import { getCompanyBySlug } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { ExternalLink, MapPin, Users, Calendar, ChevronLeft } from "lucide-react";
+import { buildOrganizationSchema, buildBreadcrumbSchema } from "@/lib/schema";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -27,7 +28,16 @@ export default async function CompanyProfilePage({ params }: Props) {
 
   const jobs = co.jobs.map(j => serialiseJob({ ...j, company: co, tags: j.tags }));
 
+  const orgSchema        = buildOrganizationSchema(co);
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Companies", path: "/companies" },
+    { name: co.name, path: `/companies/${co.slug}` },
+  ]);
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
 
       {/* Breadcrumb */}
@@ -140,5 +150,6 @@ export default async function CompanyProfilePage({ params }: Props) {
         </aside>
       </div>
     </div>
+    </>
   );
 }
