@@ -2,6 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { ExperienceLevel, RemoteType } from "@prisma/client";
 
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const email     = searchParams.get("email")?.trim().toLowerCase() ?? "";
+  const companyId = searchParams.get("companyId") ?? null;
+
+  if (!email) {
+    return NextResponse.json({ error: "email is required" }, { status: 400 });
+  }
+
+  const alert = await prisma.jobAlert.findFirst({
+    where: {
+      email,
+      companyId: companyId ?? null,
+    },
+    select: { alertFrequency: true },
+  });
+
+  return NextResponse.json({
+    subscribed:     !!alert,
+    alertFrequency: alert?.alertFrequency ?? null,
+  });
+}
+
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
@@ -16,6 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   const categoryId      = typeof body.categoryId === "string" ? body.categoryId : null;
+  const companyId       = typeof body.companyId  === "string" ? body.companyId  : null;
   const remoteType      = typeof body.remoteType === "string" ? (body.remoteType as RemoteType) : null;
   const city            = typeof body.city === "string" && body.city ? body.city : null;
   const firstName       = typeof body.firstName === "string" ? body.firstName.trim() : null;
@@ -27,16 +51,18 @@ export async function POST(req: NextRequest) {
   try {
     const alert = await prisma.jobAlert.upsert({
       where: {
-        email_categoryId_remoteType: {
+        email_categoryId_remoteType_companyId: {
           email,
           categoryId: categoryId ?? "",
           remoteType: remoteType as RemoteType,
+          companyId:  companyId ?? "",
         },
       },
       create: {
         email,
         firstName,
         categoryId,
+        companyId,
         remoteType,
         city,
         experienceLevel,
@@ -52,7 +78,37 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ alertId: alert.id }, { status: 201 });
   } catch (err) {
-    console.error("[candidates/alert]", err);
+    console.error("[candidates/alert POST]", err);
     return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  const email     = typeof body.email     === "string" ? body.email.trim().toLowerCase() : "";
+  const companyId = typeof body.companyId === "string" ? body.companyId : null;
+
+  if (!email) {
+    return NextResponse.json({ error: "email is required." }, { status: 422 });
+  }
+
+  try {
+    await prisma.jobAlert.deleteMany({
+      where: {
+        email,
+        companyId: companyId ?? null,
+      },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[candidates/alert DELETE]", err);
+    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
   }
 }

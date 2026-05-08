@@ -175,6 +175,7 @@ model JobAlert {
   email           String
   firstName       String?
   categoryId      String?
+  companyId       String?
   remoteType      RemoteType?
   city            String?
   experienceLevel ExperienceLevel?
@@ -185,6 +186,6 @@ model JobAlert {
   createdAt       DateTime         @default(now())
   lastSentAt      DateTime?
 
-  @@unique([email, categoryId, remoteType])
+  @@unique([email, categoryId, remoteType, companyId])
   @@map("job_alerts")
 }

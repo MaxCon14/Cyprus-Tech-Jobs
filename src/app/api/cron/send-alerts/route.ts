@@ -54,6 +54,9 @@ export async function GET(req: NextRequest) {
     if (alert.salaryMin) {
       where.salaryMin = { gte: alert.salaryMin };
     }
+    if (alert.companyId) {
+      where.companyId = alert.companyId;
+    }
 
     const jobs = await prisma.job.findMany({
       where,

@@ -201,10 +201,11 @@ export async function createJobAlert({
 }) {
   return prisma.jobAlert.upsert({
     where: {
-      email_categoryId_remoteType: {
+      email_categoryId_remoteType_companyId: {
         email,
         categoryId: categoryId ?? "",
         remoteType: (remoteType ?? "") as never,
+        companyId:  "",
       },
     },
     update: {},

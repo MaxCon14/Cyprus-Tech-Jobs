@@ -1,35 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell, Check } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface Category {
-  slug: string;
+  slug:  string;
   label: string;
 }
 
 interface Props {
-  categories?: Category[];
-  /** Pre-select a category by slug (e.g. when on a company profile page) */
+  categories?:          Category[];
   defaultCategorySlug?: string;
-  /** Display context — shown as a label hint */
-  companyName?: string;
+  companyName?:         string;
+  companyId?:           string;
 }
 
 type Step = "idle" | "loading" | "done" | "error";
 
-export function JobAlertForm({ categories = [], defaultCategorySlug, companyName }: Props) {
-  const [email,    setEmail]    = useState("");
-  const [category, setCategory] = useState(defaultCategorySlug ?? "");
-  const [freq,     setFreq]     = useState<"DAILY" | "WEEKLY">("WEEKLY");
-  const [step,     setStep]     = useState<Step>("idle");
-  const [err,      setErr]      = useState("");
+export function JobAlertForm({ categories = [], defaultCategorySlug, companyName, companyId }: Props) {
+  const [email,       setEmail]       = useState("");
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+  const [category,    setCategory]    = useState(defaultCategorySlug ?? "");
+  const [freq,        setFreq]        = useState<"DAILY" | "WEEKLY">("WEEKLY");
+  const [step,        setStep]        = useState<Step>("idle");
+  const [err,         setErr]         = useState("");
+
+  useEffect(() => {
+    createSupabaseBrowserClient()
+      .auth.getSession()
+      .then(({ data: { session } }) => {
+        if (session?.user?.email) setSessionEmail(session.user.email);
+      });
+  }, []);
+
+  const effectiveEmail = sessionEmail ?? email;
+  const isLoggedIn     = sessionEmail !== null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErr("");
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!isLoggedIn && (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
       setErr("Please enter a valid email address.");
       return;
     }
@@ -37,11 +49,12 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
     setStep("loading");
     try {
       const res = await fetch("/api/candidates/alert", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          categoryId: category || null,
+        body:    JSON.stringify({
+          email:          effectiveEmail,
+          categoryId:     category || null,
+          companyId:      companyId  || null,
           alertFrequency: freq,
         }),
       });
@@ -72,26 +85,35 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
     );
   }
 
-  const placeholder = companyName
-    ? `Get notified when ${companyName} posts a new role`
-    : "Get new Cyprus tech jobs in your inbox";
-
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10 }} noValidate>
-      {companyName && (
-        <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>{placeholder}</p>
+      {companyName && !isLoggedIn && (
+        <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
+          Get notified when {companyName} posts a new role
+        </p>
       )}
 
-      <input
-        className="input"
-        type="email"
-        placeholder="your@email.com"
-        value={email}
-        onChange={e => { setEmail(e.target.value); setErr(""); }}
-        required
-        autoComplete="email"
-      />
+      {/* Email — hidden when already logged in */}
+      {!isLoggedIn && (
+        <input
+          className="input"
+          type="email"
+          placeholder="your@email.com"
+          value={email}
+          onChange={e => { setEmail(e.target.value); setErr(""); }}
+          required
+          autoComplete="email"
+        />
+      )}
 
+      {/* Logged-in hint */}
+      {isLoggedIn && (
+        <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
+          Alerts sent to <strong>{sessionEmail}</strong>
+        </p>
+      )}
+
+      {/* Category — only shown on general form (not company-specific) */}
       {categories.length > 0 && !companyName && (
         <select
           className="select"
@@ -105,6 +127,7 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
         </select>
       )}
 
+      {/* Frequency toggle */}
       <div style={{ display: "flex", gap: 8 }}>
         {(["DAILY", "WEEKLY"] as const).map(f => (
           <button
@@ -129,17 +152,10 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
         style={{ width: "100%", justifyContent: "center" }}
         disabled={step === "loading"}
       >
-        {step === "loading" ? (
-          "Subscribing…"
-        ) : (
-          <>
-            <Bell size={14} />
-            {companyName ? "Notify me" : "Get alerts"}
-          </>
-        )}
+        {step === "loading" ? "Subscribing…" : <><Bell size={14} />{companyName ? "Notify me" : "Get alerts"}</>}
       </button>
 
-      {!companyName && (
+      {!companyName && !isLoggedIn && (
         <p className="mono-s" style={{ color: "var(--text-subtle)", margin: 0 }}>UNSUBSCRIBE ANYTIME · NO SPAM</p>
       )}
     </form>
