@@ -7,6 +7,7 @@ import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { ExternalLink, MapPin, Users, Calendar, ChevronLeft } from "lucide-react";
 import { buildOrganizationSchema, buildBreadcrumbSchema } from "@/lib/schema";
+import { JobAlertForm } from "@/components/alerts/JobAlertForm";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -149,12 +150,8 @@ export default async function CompanyProfilePage({ params }: Props) {
             </div>
 
             <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
-              <h3 className="h3" style={{ marginBottom: 8 }}>Get alerts for {co.name}</h3>
-              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14 }}>
-                Be the first to know when {co.name} posts a new role.
-              </p>
-              <input className="input" type="email" placeholder="your@email.com" style={{ marginBottom: 10 }} />
-              <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>Notify me</button>
+              <h3 className="h3" style={{ marginBottom: 12 }}>Get alerts for {co.name}</h3>
+              <JobAlertForm companyName={co.name} />
             </div>
           </aside>
         </div>

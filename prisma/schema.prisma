@@ -183,6 +183,7 @@ model JobAlert {
   confirmed       Boolean          @default(false)
   token           String           @unique @default(cuid())
   createdAt       DateTime         @default(now())
+  lastSentAt      DateTime?
 
   @@unique([email, categoryId, remoteType])
   @@map("job_alerts")

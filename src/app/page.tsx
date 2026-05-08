@@ -5,6 +5,7 @@ import { serialiseJob } from "@/lib/serialise";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { buildWebSiteSchema } from "@/lib/schema";
+import { JobAlertForm } from "@/components/alerts/JobAlertForm";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -214,17 +215,7 @@ export default async function HomePage() {
                 <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16 }}>
                   Get new Cyprus tech jobs in your inbox. Free, no account needed.
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <input className="input" type="email" placeholder="your@email.com" />
-                  <select className="select">
-                    <option value="">All categories</option>
-                    {categories.slice(1).map(cat => (
-                      <option key={cat.slug} value={cat.slug}>{cat.label}</option>
-                    ))}
-                  </select>
-                  <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>Get alerts</button>
-                </div>
-                <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 10 }}>UNSUBSCRIBE ANYTIME · NO SPAM</p>
+                <JobAlertForm categories={categories.slice(1).map(c => ({ slug: c.slug ?? "", label: c.label }))} />
               </div>
 
               {/* Hiring CTA */}
