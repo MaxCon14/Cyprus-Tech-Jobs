@@ -13,7 +13,7 @@ export function DashboardGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
-        router.replace("/employers/login?callbackUrl=/employers/dashboard");
+        router.replace("/login");
       } else {
         setReady(true);
       }

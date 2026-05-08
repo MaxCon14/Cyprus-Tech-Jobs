@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const next  = searchParams.get("next");
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/employers/login?error=auth_failed`);
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
   // Collect cookies written by exchangeCodeForSession so we can attach them
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !user?.email) {
-    return NextResponse.redirect(`${origin}/employers/login?error=auth_failed`);
+    return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
   const email = user.email;

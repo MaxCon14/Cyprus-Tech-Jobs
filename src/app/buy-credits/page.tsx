@@ -16,7 +16,7 @@ export default async function BuyCreditsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user?.email) {
-    redirect("/employers/login?callbackUrl=/buy-credits");
+    redirect("/login");
   }
 
   const employer = await prisma.employer.findUnique({ where: { email: user.email } });

@@ -31,14 +31,14 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
   const { posted, edited } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) redirect("/employers/login?callbackUrl=/employers/dashboard");
+  if (!user?.email) redirect("/login");
 
   const employer = await getEmployerWithCompanyAndJobs(user.email);
 
   if (!employer) {
     const { data: candidate } = await supabaseAdmin
       .from("candidates").select("id").eq("email", user.email).single();
-    redirect(candidate ? "/candidates/dashboard" : "/employers/login");
+    redirect(candidate ? "/candidates/dashboard" : "/login");
   }
 
   const company = employer.company;

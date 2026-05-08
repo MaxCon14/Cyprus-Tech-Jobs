@@ -40,7 +40,7 @@ function getCompletion(c: CandidateRow, hasPositions: boolean) {
 export default async function CandidateDashboardPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) redirect("/candidates/login");
+  if (!user?.email) redirect("/login");
 
   const { data: candidateRaw } = await supabaseAdmin
     .from("candidates").select("*").eq("email", user.email).single();

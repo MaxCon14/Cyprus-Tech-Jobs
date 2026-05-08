@@ -17,7 +17,7 @@ export default async function EditJobPage({
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) {
-    redirect(`/employers/login?callbackUrl=/employers/jobs/${id}/edit`);
+    redirect("/login");
   }
 
   const employer = await prisma.employer.findUnique({

@@ -14,7 +14,7 @@ export default async function PostAJobPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user?.email) {
-    redirect("/employers/login?callbackUrl=/post-a-job");
+    redirect("/login");
   }
 
   const employer = await prisma.employer.findUnique({ where: { email: user.email } });
