@@ -6,12 +6,13 @@ import { getJobBySlug, getSimilarJobs } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
-import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft, Check } from "lucide-react";
+import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
 import { ShareButton } from "./ShareButton";
 import { ApplyButton } from "./ApplyButton";
+import { SkillTag } from "@/components/jobs/SkillTag";
 import { buildJobPostingSchema, buildBreadcrumbSchema } from "@/lib/schema";
 import type { Metadata } from "next";
 
@@ -179,9 +180,7 @@ export default async function JobDetailPage({ params }: Props) {
             <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {job.tags.map(t => (
-                <span key={t.tag.name} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 12px", background: "var(--bg-muted)", borderRadius: 6, fontFamily: "var(--font-mono)", fontSize: 12 }}>
-                  <Check size={11} style={{ color: "var(--success)" }} /> {t.tag.name}
-                </span>
+                <SkillTag key={t.tag.name} name={t.tag.name} size="md" />
               ))}
             </div>
           </div>
