@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { resend, FROM_EMAIL, FROM_NAME, buildAlertEmail } from "@/lib/resend";
+import { getResend, FROM_EMAIL, FROM_NAME, buildAlertEmail } from "@/lib/resend";
 import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
     ).replace("{{TOKEN}}", alert.token);
 
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from:    `${FROM_NAME} <${FROM_EMAIL}>`,
         to:      alert.email,
         subject: `${jobs.length} new tech job${jobs.length !== 1 ? "s" : ""} in Cyprus — CyprusTech.Jobs`,
