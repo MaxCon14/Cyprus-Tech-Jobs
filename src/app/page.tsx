@@ -290,43 +290,52 @@ export default async function HomePage() {
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)" }}>
         <div className="page-container">
           <div style={{
-            background: "var(--black)", borderRadius: 20, padding: "clamp(32px, 5vw, 56px) clamp(24px, 5vw, 56px)",
-            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 32,
-            position: "relative", overflow: "hidden",
+            background: "var(--black)", borderRadius: 24,
+            padding: "clamp(48px, 7vw, 72px) clamp(24px, 5vw, 64px)",
+            position: "relative", overflow: "hidden", textAlign: "center",
           }}>
-            {/* Decorative glow */}
-            <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "var(--accent)", opacity: 0.12, pointerEvents: "none" }} />
-            <div style={{ position: "absolute", bottom: -80, left: 80, width: 200, height: 200, borderRadius: "50%", background: "var(--accent)", opacity: 0.07, pointerEvents: "none" }} />
+            {/* Blurred glow blobs */}
+            <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "#FF3D7F", opacity: 0.18, filter: "blur(50px)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", bottom: -100, left: -60, width: 300, height: 300, borderRadius: "50%", background: "#FF3D7F", opacity: 0.1, filter: "blur(40px)", pointerEvents: "none" }} />
 
-            <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
-              <div className="caption" style={{ color: "var(--accent)", marginBottom: 12 }}>FOR JOB SEEKERS</div>
-              <h2 className="display-m" style={{ color: "var(--white)", marginBottom: 16, lineHeight: 1.15 }}>
-                Build your profile.<br />Let the right jobs find you.
+            <div style={{ position: "relative", maxWidth: 560, margin: "0 auto" }}>
+              {/* Badge */}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,61,127,0.12)", border: "1px solid rgba(255,61,127,0.3)", borderRadius: 99, padding: "6px 14px", marginBottom: 24 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF3D7F", display: "inline-block", flexShrink: 0 }} />
+                <span className="mono-s" style={{ color: "#FF3D7F" }}>FOR JOB SEEKERS</span>
+              </div>
+
+              {/* Headline */}
+              <h2 className="display-l" style={{ color: "var(--white)", marginBottom: 24, lineHeight: 1.1 }}>
+                Build your profile.<br />Let the right jobs<br />find you.
               </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+
+              {/* Feature bullets */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left", maxWidth: 400, margin: "0 auto 40px" }}>
                 {[
                   "Upload your CV and get AI-powered match scores",
                   "Personalised job alerts — daily or weekly",
                   "Save your preferences, salary expectations, and work type",
                   "Free forever for candidates",
                 ].map(item => (
-                  <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--accent)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 2 }}>
-                      <Target size={9} style={{ color: "var(--white)" }} />
+                  <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,61,127,0.2)", border: "1px solid rgba(255,61,127,0.4)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
+                      <Target size={10} style={{ color: "#FF3D7F" }} />
                     </div>
-                    <span className="body-s" style={{ color: "var(--neutral-300)", lineHeight: 1.5 }}>{item}</span>
+                    <span style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.55, fontFamily: "var(--font-sans)" }}>{item}</span>
                   </div>
                 ))}
               </div>
-            </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative", flexShrink: 0, minWidth: 0 }}>
-              <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center" }}>
-                Create free candidate account →
-              </Link>
-              <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ justifyContent: "center", color: "var(--neutral-400)" }}>
-                Browse jobs without an account
-              </Link>
+              {/* CTA */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 10, maxWidth: 360, margin: "0 auto" }}>
+                <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center", boxShadow: "0 0 40px rgba(255,61,127,0.45)" }}>
+                  Create free candidate account →
+                </Link>
+                <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ justifyContent: "center", color: "rgba(255,255,255,0.4)" }}>
+                  Browse jobs without an account
+                </Link>
+              </div>
             </div>
           </div>
         </div>
