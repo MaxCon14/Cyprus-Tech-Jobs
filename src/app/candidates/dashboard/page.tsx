@@ -9,12 +9,12 @@ import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, Al
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
-import { remoteLabel, formatSalary } from "@/lib/utils";
+import { remoteLabel, formatSalary, timeAgo } from "@/lib/utils";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import type { Metadata } from "next";
 import {
   MapPin, Briefcase, CheckCircle2, Circle, AlertCircle,
-  ExternalLink, ChevronRight, Heart,
+  ExternalLink, ChevronRight, Heart, Send,
 } from "lucide-react";
 
 export const metadata: Metadata = { title: "My dashboard — CyprusTech.Jobs" };
@@ -40,7 +40,7 @@ function getCompletion(c: CandidateRow, hasPositions: boolean) {
 export default async function CandidateDashboardPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) redirect("/candidates/login");
+  if (!user?.email) redirect("/login");
 
   const { data: candidateRaw } = await supabaseAdmin
     .from("candidates").select("*").eq("email", user.email).single();
@@ -62,14 +62,15 @@ export default async function CandidateDashboardPage() {
 
   const completion = getCompletion(c, positions.length > 0);
 
-  // Fetch matching jobs and saved jobs in parallel
-  const [matchingJobs, savedJobsResult] = await Promise.all([
+  // Fetch matching jobs, saved jobs, and applied jobs in parallel
+  const [matchingJobs, savedJobsResult, appliedJobsResult] = await Promise.all([
     getJobs({
       remoteType:      c.remoteType  ?? undefined,
       experienceLevel: c.experienceLevel ?? undefined,
       take: 3,
     }),
     supabaseAdmin.from("saved_jobs").select("jobId").eq("candidateId", c.id),
+    supabaseAdmin.from("applied_jobs").select("jobId, appliedAt").eq("candidateId", c.id).order("appliedAt", { ascending: false }),
   ]);
 
   const savedJobIds = (savedJobsResult.data ?? []).map((r: { jobId: string }) => r.jobId);
@@ -89,6 +90,31 @@ export default async function CandidateDashboardPage() {
       remoteType: j.remoteType,
       companyName: Array.isArray(j.company) ? (j.company[0]?.name ?? "") : "",
     }));
+  }
+
+  const appliedJobIds = (appliedJobsResult.data ?? []).map((r: { jobId: string }) => r.jobId);
+  const appliedAtMap  = Object.fromEntries(
+    (appliedJobsResult.data ?? []).map((r: { jobId: string; appliedAt: string }) => [r.jobId, r.appliedAt])
+  );
+
+  type AppliedJob = { id: string; slug: string; title: string; city: string | null; companyName: string; appliedAt: string };
+  let appliedJobs: AppliedJob[] = [];
+  if (appliedJobIds.length > 0) {
+    const { data: jobRows } = await supabaseAdmin
+      .from("jobs")
+      .select("id, slug, title, city, company:companies(name)")
+      .in("id", appliedJobIds)
+      .eq("status", "ACTIVE");
+    appliedJobs = (jobRows ?? []).map((j: { id: string; slug: string; title: string; city: string | null; company: { name: string }[] }) => ({
+      id: j.id,
+      slug: j.slug,
+      title: j.title,
+      city: j.city,
+      companyName: Array.isArray(j.company) ? (j.company[0]?.name ?? "") : "",
+      appliedAt: appliedAtMap[j.id] ?? "",
+    }));
+    // Restore chronological order from the applied_jobs query
+    appliedJobs.sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime());
   }
 
   const displayName = [c.firstName, c.lastName].filter(Boolean).join(" ") || c.email;
@@ -224,6 +250,7 @@ export default async function CandidateDashboardPage() {
           {/* Right column */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <SavedJobsCard jobs={savedJobs} />
+            <AppliedJobsCard jobs={appliedJobs} />
             <LinksSection candidate={c} />
             <PreferencesSection candidate={c} />
             <AlertSection candidate={c} />
@@ -276,6 +303,51 @@ function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> 
           </Link>
         ))}
       </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Applied jobs card ────────────────────────────────────────────────────────
+
+function AppliedJobsCard({ jobs }: { jobs: { id: string; slug: string; title: string; city: string | null; companyName: string; appliedAt: string }[] }) {
+  return (
+    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Send size={14} style={{ color: "var(--accent)" }} />
+          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>Applied jobs</p>
+          {jobs.length > 0 && (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent)", background: "var(--accent-soft)", padding: "2px 7px", borderRadius: 99 }}>
+              {jobs.length}
+            </span>
+          )}
+        </div>
+        <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
+      </div>
+      <div style={{ padding: "12px 20px", display: "flex", flexDirection: "column", gap: 0 }}>
+        {jobs.length === 0 ? (
+          <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic", padding: "8px 0" }}>
+            Jobs you apply to will appear here.
+          </p>
+        ) : (
+          jobs.map((job, i) => (
+            <Link key={job.id} href={`/jobs/${job.slug}`}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "12px 0", borderBottom: i < jobs.length - 1 ? "1px solid var(--border)" : "none", textDecoration: "none" }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {job.title}
+                </p>
+                <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                  {job.companyName}{job.city ? ` · ${job.city}` : ""}
+                </p>
+              </div>
+              <span className="mono-s" style={{ color: "var(--text-subtle)", flexShrink: 0, fontSize: 11 }}>
+                {job.appliedAt ? timeAgo(new Date(job.appliedAt)) : ""}
+              </span>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );

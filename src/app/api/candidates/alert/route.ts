@@ -15,15 +15,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Valid email is required." }, { status: 422 });
   }
 
-  const categoryId     = typeof body.categoryId === "string" ? body.categoryId : null;
-  const remoteType     = typeof body.remoteType === "string" ? (body.remoteType as RemoteType) : null;
-  const city           = typeof body.city === "string" && body.city ? body.city : null;
-  const firstName      = typeof body.firstName === "string" ? body.firstName.trim() : null;
+  const categoryId      = typeof body.categoryId === "string" ? body.categoryId : null;
+  const remoteType      = typeof body.remoteType === "string" ? (body.remoteType as RemoteType) : null;
+  const city            = typeof body.city === "string" && body.city ? body.city : null;
+  const firstName       = typeof body.firstName === "string" ? body.firstName.trim() : null;
   const experienceLevel =
     typeof body.experienceLevel === "string" ? (body.experienceLevel as ExperienceLevel) : null;
-  const salaryMin = typeof body.salaryMin === "number" ? body.salaryMin : null;
-  const alertFrequency =
-    body.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY";
+  const salaryMin       = typeof body.salaryMin === "number" ? body.salaryMin : null;
+  const alertFrequency  = body.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY";
 
   try {
     const alert = await prisma.jobAlert.upsert({
@@ -43,8 +42,12 @@ export async function POST(req: NextRequest) {
         experienceLevel,
         salaryMin,
         alertFrequency,
+        confirmed: true,
       },
-      update: {},
+      update: {
+        alertFrequency,
+        confirmed: true,
+      },
     });
 
     return NextResponse.json({ alertId: alert.id }, { status: 201 });

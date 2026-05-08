@@ -4,6 +4,8 @@ import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
+import { buildWebSiteSchema } from "@/lib/schema";
+import { JobAlertForm } from "@/components/alerts/JobAlertForm";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -66,6 +68,10 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebSiteSchema()) }}
+      />
       {/* ── HERO ── */}
       <section style={{ borderBottom: "1px solid var(--border)", padding: "clamp(48px, 8vw, 80px) 0 clamp(40px, 6vw, 64px)" }}>
         <div className="page-container">
@@ -85,24 +91,23 @@ export default async function HomePage() {
           </p>
 
           {/* Search */}
-          <div style={{ display: "flex", gap: 8, maxWidth: 640, marginBottom: 40, flexWrap: "wrap" }}>
+          <form action="/jobs" method="GET" className="hero-search" style={{ maxWidth: 640, marginBottom: 40 }}>
             <div style={{ position: "relative", flex: "1 1 200px" }}>
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
-              <input className="input" type="text" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
+              <input className="input" type="text" name="search" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
             </div>
             <div style={{ position: "relative", flex: "0 0 160px" }}>
               <MapPin size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", zIndex: 1 }} />
-              <select className="select" style={{ paddingLeft: 38 }}>
+              <select className="select" name="city" style={{ paddingLeft: 38 }}>
                 <option value="">All locations</option>
-                <option value="limassol">Limassol</option>
-                <option value="nicosia">Nicosia</option>
-                <option value="larnaca">Larnaca</option>
-                <option value="paphos">Paphos</option>
-                <option value="remote">Remote</option>
+                <option value="Limassol">Limassol</option>
+                <option value="Nicosia">Nicosia</option>
+                <option value="Larnaca">Larnaca</option>
+                <option value="Paphos">Paphos</option>
               </select>
             </div>
-            <Link href="/jobs" className="btn btn-accent">Search</Link>
-          </div>
+            <button type="submit" className="btn btn-accent">Search</button>
+          </form>
 
           {/* Stats */}
           <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
@@ -120,30 +125,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── COMPANIES TICKER ── */}
-      <section style={{ borderBottom: "1px solid var(--border)", padding: "28px 0", background: "var(--bg-alt)", overflowX: "auto" }}>
-        <div className="page-container">
-          <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: "max-content" }}>
-            <span className="mono-s" style={{ color: "var(--text-subtle)", whiteSpace: "nowrap" }}>HIRING THIS WEEK</span>
-            <span style={{ width: 1, height: 20, background: "var(--border-strong)", display: "inline-block" }} />
-            {companies.map(co => (
-              <Link
-                key={co.slug}
-                href={`/companies/${co.slug}`}
-                style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", padding: "8px 14px", border: "1px solid var(--border)", borderRadius: 8, background: "var(--surface)", whiteSpace: "nowrap" }}
-              >
-                <span style={{ width: 28, height: 28, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 12, flexShrink: 0 }}>
-                  {co.name.charAt(0)}
-                </span>
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: "var(--text)" }}>{co.name}</div>
-                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{co.city}</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── HOW IT WORKS ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
@@ -234,17 +215,7 @@ export default async function HomePage() {
                 <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16 }}>
                   Get new Cyprus tech jobs in your inbox. Free, no account needed.
                 </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <input className="input" type="email" placeholder="your@email.com" />
-                  <select className="select">
-                    <option value="">All categories</option>
-                    {categories.slice(1).map(cat => (
-                      <option key={cat.slug} value={cat.slug}>{cat.label}</option>
-                    ))}
-                  </select>
-                  <button className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>Get alerts</button>
-                </div>
-                <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 10 }}>UNSUBSCRIBE ANYTIME · NO SPAM</p>
+                <JobAlertForm categories={categories.slice(1).map(c => ({ slug: c.slug ?? "", label: c.label }))} />
               </div>
 
               {/* Hiring CTA */}
@@ -310,43 +281,52 @@ export default async function HomePage() {
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)" }}>
         <div className="page-container">
           <div style={{
-            background: "var(--black)", borderRadius: 20, padding: "clamp(32px, 5vw, 56px) clamp(24px, 5vw, 56px)",
-            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 32,
-            position: "relative", overflow: "hidden",
+            background: "var(--black)", borderRadius: 24,
+            padding: "clamp(48px, 7vw, 72px) clamp(24px, 5vw, 64px)",
+            position: "relative", overflow: "hidden", textAlign: "center",
           }}>
-            {/* Decorative glow */}
-            <div style={{ position: "absolute", top: -60, right: -60, width: 300, height: 300, borderRadius: "50%", background: "var(--accent)", opacity: 0.12, pointerEvents: "none" }} />
-            <div style={{ position: "absolute", bottom: -80, left: 80, width: 200, height: 200, borderRadius: "50%", background: "var(--accent)", opacity: 0.07, pointerEvents: "none" }} />
+            {/* Blurred glow blobs */}
+            <div style={{ position: "absolute", top: -120, right: -80, width: 400, height: 400, borderRadius: "50%", background: "#FF3D7F", opacity: 0.18, filter: "blur(50px)", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", bottom: -100, left: -60, width: 300, height: 300, borderRadius: "50%", background: "#FF3D7F", opacity: 0.1, filter: "blur(40px)", pointerEvents: "none" }} />
 
-            <div style={{ flex: 1, minWidth: 260, position: "relative" }}>
-              <div className="caption" style={{ color: "var(--accent)", marginBottom: 12 }}>FOR JOB SEEKERS</div>
-              <h2 className="display-m" style={{ color: "var(--white)", marginBottom: 16, lineHeight: 1.15 }}>
-                Build your profile.<br />Let the right jobs find you.
+            <div style={{ position: "relative", maxWidth: 560, margin: "0 auto" }}>
+              {/* Badge */}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,61,127,0.12)", border: "1px solid rgba(255,61,127,0.3)", borderRadius: 99, padding: "6px 14px", marginBottom: 24 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF3D7F", display: "inline-block", flexShrink: 0 }} />
+                <span className="mono-s" style={{ color: "#FF3D7F" }}>FOR JOB SEEKERS</span>
+              </div>
+
+              {/* Headline */}
+              <h2 className="display-l" style={{ color: "var(--white)", marginBottom: 24, lineHeight: 1.1 }}>
+                Build your profile.<br />Let the right jobs<br />find you.
               </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+
+              {/* Feature bullets */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left", maxWidth: 400, margin: "0 auto 40px" }}>
                 {[
                   "Upload your CV and get AI-powered match scores",
                   "Personalised job alerts — daily or weekly",
                   "Save your preferences, salary expectations, and work type",
                   "Free forever for candidates",
                 ].map(item => (
-                  <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--accent)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 2 }}>
-                      <Target size={9} style={{ color: "var(--white)" }} />
+                  <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,61,127,0.2)", border: "1px solid rgba(255,61,127,0.4)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
+                      <Target size={10} style={{ color: "#FF3D7F" }} />
                     </div>
-                    <span className="body-s" style={{ color: "var(--neutral-300)", lineHeight: 1.5 }}>{item}</span>
+                    <span style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.55, fontFamily: "var(--font-sans)" }}>{item}</span>
                   </div>
                 ))}
               </div>
-            </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative", flexShrink: 0 }}>
-              <Link href="/get-started" className="btn btn-accent btn-lg" style={{ whiteSpace: "nowrap", justifyContent: "center" }}>
-                Create free candidate account →
-              </Link>
-              <Link href="/jobs" style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--neutral-400)", textDecoration: "none", textAlign: "center" }}>
-                Browse jobs without an account
-              </Link>
+              {/* CTA */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 10, maxWidth: 360, margin: "0 auto" }}>
+                <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center", boxShadow: "0 0 40px rgba(255,61,127,0.45)" }}>
+                  Create free candidate account →
+                </Link>
+                <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ justifyContent: "center", color: "rgba(255,255,255,0.4)" }}>
+                  Browse jobs without an account
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -372,7 +352,7 @@ export default async function HomePage() {
       {/* ── EMPLOYER CTA ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0" }}>
         <div className="page-container">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, padding: "clamp(28px, 5vw, 48px)", border: "1px solid var(--border)", borderRadius: 16, background: "var(--surface)" }}>
+          <div className="cta-strip" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, padding: "clamp(28px, 5vw, 48px)", border: "1px solid var(--border)", borderRadius: 16, background: "var(--surface)" }}>
             <div>
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>FOR EMPLOYERS</div>
               <h2 className="h1" style={{ marginBottom: 8 }}>Hiring tech talent in Cyprus?</h2>
@@ -381,7 +361,7 @@ export default async function HomePage() {
                 Listings go live in under 30 minutes.
               </p>
             </div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div className="btn-group-mobile">
               <Link href="/post-a-job" className="btn btn-accent btn-lg">Post a job →</Link>
               <Link href="/companies" className="btn btn-outline btn-lg">View companies</Link>
             </div>

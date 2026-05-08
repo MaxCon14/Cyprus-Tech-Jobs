@@ -487,6 +487,18 @@ body {
   border-radius: var(--radius-sm);
   transition: all var(--duration-fast) var(--ease-out);
 }
+
+/* Custom chevron for all selects — removes browser native arrow */
+.select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23A3A09A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
 .input::placeholder { color: var(--text-subtle); }
 .input:focus, .select:focus, .textarea:focus {
   outline: none;
@@ -606,6 +618,33 @@ body {
   .grid-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Hero search form */
+.hero-search {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Button group that stacks on mobile */
+.btn-group-mobile {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Stacked CTA strip (text + single button) — button goes full-width on mobile */
+@media (max-width: 640px) {
+  .cta-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cta-strip > a.btn,
+  .cta-strip > button.btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ── 640px: single column, mobile-first ── */
 @media (max-width: 640px) {
   .grid-2,
@@ -618,6 +657,56 @@ body {
   .layout-sidebar-left > aside {
     position: static !important;
   }
+
+  /* Touch targets: minimum 44px */
+  .btn {
+    min-height: 44px;
+    padding-inline: 16px;
+  }
+  .btn-sm {
+    min-height: 36px;
+  }
+  .btn-lg {
+    min-height: 48px;
+  }
+
+  /* Prevent iOS from zooming on input focus */
+  .input, .select, .textarea {
+    font-size: 16px;
+    min-height: 48px;
+    padding-block: 12px;
+  }
+
+  /* Match filter toggle height to input so they look like a pair */
+  .filters-mobile-toggle {
+    min-height: 48px;
+  }
+
+  /* Hero search: stack vertically, all controls full-width */
+  .hero-search {
+    flex-direction: column;
+  }
+  .hero-search > div {
+    flex: none !important;
+    width: 100%;
+    min-width: 0;
+  }
+  .hero-search > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Button groups that should stack on mobile */
+  .btn-group-mobile {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-group-mobile > * {
+    width: 100% !important;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+  }
 }
 
 /* =====================================================
@@ -627,6 +716,21 @@ body {
 /* Toggle button: hidden on desktop, shown on mobile */
 .filters-mobile-toggle {
   display: none;
+}
+
+.job-header-inner,
+.company-header-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  .job-header-inner,
+  .company-header-inner {
+    flex-direction: column;
+    gap: 14px;
+  }
 }
 
 /* Filter body: always visible on desktop */
@@ -642,8 +746,8 @@ body {
     width: 100%;
     padding: 12px 14px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
     font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 600;
@@ -661,14 +765,16 @@ body {
   .filters-panel-body {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 340ms cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: 0;
+    /* Include margin-top in transition so it doesn't snap on close */
+    transition: max-height 320ms cubic-bezier(0.4, 0, 0.2, 1),
+                margin-top 320ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* Expanded */
   .filters-panel-body.open {
     max-height: 1400px;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 }
 
@@ -1097,5 +1203,134 @@ details[open] .faq-chevron {
 
   .dashboard-header-name {
     display: none;
+  }
+}
+
+/* =====================================================
+   EMPLOYER DASHBOARD — responsive layout
+   ===================================================== */
+
+.employer-page-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.employer-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.employer-hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.employer-slot-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.employer-slot-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.employer-job-header-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 140px 80px;
+  gap: 16px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.employer-job-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 120px 140px 80px;
+  gap: 16px;
+  padding: 16px 24px;
+  align-items: center;
+}
+
+.employer-row-mobile-meta {
+  display: none;
+}
+
+.employer-nav-company-name {
+  /* visible on desktop */
+}
+
+/* ── 768px: 2-col stats ── */
+@media (max-width: 768px) {
+  .employer-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* ── 640px: full mobile ── */
+@media (max-width: 640px) {
+  .employer-page-inner {
+    padding: 20px 16px 60px;
+  }
+
+  .employer-nav-company-name {
+    display: none;
+  }
+
+  .employer-hero-actions {
+    width: 100%;
+  }
+
+  .employer-hero-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .employer-stats-grid {
+    gap: 8px;
+  }
+
+  .employer-slot-divider {
+    display: none;
+  }
+
+  .employer-slot-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .employer-slot-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .employer-job-header-row {
+    display: none;
+  }
+
+  .employer-job-row {
+    grid-template-columns: 1fr auto;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .employer-col-hide-mobile {
+    display: none;
+  }
+
+  .employer-row-mobile-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
   }
 }
