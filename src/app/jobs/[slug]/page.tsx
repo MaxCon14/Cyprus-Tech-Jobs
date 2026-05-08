@@ -142,16 +142,23 @@ export default async function JobDetailPage({ params }: Props) {
                       {m.icon} {m.label}
                     </span>
                   ))}
-                  {job.tags.map(t => (
-                    <span key={t.tag.name} className="tag">{t.tag.name}</span>
-                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Description */}
+          {/* Skills */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
+            <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {job.tags.map(t => (
+                <SkillTag key={t.tag.name} name={t.tag.name} size="md" />
+              ))}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, background: "var(--surface)" }}>
             <h2 className="h2" style={{ marginBottom: 20 }}>About the role</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {descBlocks.map((block, i) => {
@@ -172,16 +179,6 @@ export default async function JobDetailPage({ params }: Props) {
                 }
                 return <p key={i} className="body" style={{ color: "var(--text-muted)" }}>{block}</p>;
               })}
-            </div>
-          </div>
-
-          {/* Skills */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, background: "var(--surface)" }}>
-            <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {job.tags.map(t => (
-                <SkillTag key={t.tag.name} name={t.tag.name} size="md" />
-              ))}
             </div>
           </div>
         </div>
