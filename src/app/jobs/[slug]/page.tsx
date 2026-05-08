@@ -20,9 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
   if (!job) return {};
+  const isActive = job.status === "ACTIVE";
   return {
-    title: `${job.title} at ${job.company.name}`,
+    title: `${job.title} at ${job.company.name}${isActive ? "" : " (Closed)"}`,
     description: `${job.title} at ${job.company.name} in ${job.city}. ${formatSalary(job.salaryMin, job.salaryMax)} · ${remoteLabel(job.remoteType)}`,
+    // Non-active jobs: tell Google to stop indexing and remove from Jobs results
+    ...(!isActive && { robots: { index: false, follow: false } }),
   };
 }
 
@@ -59,6 +62,7 @@ export default async function JobDetailPage({ params }: Props) {
 
   const descBlocks = job.description.split("\n\n");
   const jobUrl     = `https://cyprustech.careers/jobs/${job.slug}`;
+  const isActive   = job.status === "ACTIVE";
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Jobs", path: "/jobs" },
@@ -67,7 +71,8 @@ export default async function JobDetailPage({ params }: Props) {
 
   return (
     <>
-      {job.applyUrl && (
+      {/* JobPosting schema: only for ACTIVE listings with a valid apply URL */}
+      {isActive && job.applyUrl && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJobPostingSchema(job)) }}
@@ -78,6 +83,28 @@ export default async function JobDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
+
+      {/* Closed banner */}
+      {!isActive && (
+        <div style={{
+          background: "var(--bg-muted)", border: "1px solid var(--border)",
+          borderRadius: 10, padding: "14px 20px", marginBottom: 24,
+          display: "flex", alignItems: "center", gap: 12,
+        }}>
+          <Clock size={15} style={{ color: "var(--text-subtle)", flexShrink: 0 }} />
+          <div>
+            <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: "var(--text)" }}>
+              This position is no longer accepting applications.
+            </span>
+            <span className="body-s" style={{ color: "var(--text-muted)", marginLeft: 8 }}>
+              Browse similar open roles below.
+            </span>
+          </div>
+          <Link href="/jobs" className="btn btn-outline btn-sm" style={{ marginLeft: "auto", flexShrink: 0 }}>
+            Browse open jobs
+          </Link>
+        </div>
+      )}
 
       {/* Breadcrumb */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 28 }}>
@@ -163,20 +190,33 @@ export default async function JobDetailPage({ params }: Props) {
         <aside style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 80 }}>
 
           {/* Apply card */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
+          <div style={{ border: `1px solid ${isActive ? "var(--border)" : "var(--border)"}`, borderRadius: 10, padding: 24, background: "var(--surface)" }}>
             {salary && (
               <div style={{ marginBottom: 16 }}>
                 <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>ANNUAL SALARY</div>
-                <div className="mono-l" style={{ color: "var(--accent)", fontSize: 20 }}>{salary}</div>
+                <div className="mono-l" style={{ color: isActive ? "var(--accent)" : "var(--text-muted)", fontSize: 20 }}>{salary}</div>
               </div>
             )}
-            <a href={job.applyUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
-              Apply for this role →
-            </a>
-            <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
-            <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
-              APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
-            </p>
+            {isActive ? (
+              <>
+                <a href={job.applyUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
+                  Apply for this role →
+                </a>
+                <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
+                <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
+                  APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="btn btn-outline btn-lg" style={{ width: "100%", justifyContent: "center", opacity: 0.5, cursor: "not-allowed", marginBottom: 10 }}>
+                  Applications closed
+                </div>
+                <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center" }}>
+                  Browse open roles →
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Share */}
