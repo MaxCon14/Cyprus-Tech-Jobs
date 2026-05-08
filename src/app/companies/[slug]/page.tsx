@@ -52,21 +52,27 @@ export default async function CompanyProfilePage({ params }: Props) {
 
         {/* Header card */}
         <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: "clamp(20px, 3vw, 32px)", marginBottom: 32, background: "var(--surface)" }}>
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
             {/* Logo */}
-            <div style={{ width: 72, height: 72, borderRadius: 14, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, flexShrink: 0, border: "1px solid var(--border)" }}>
+            <div style={{ width: 64, height: 64, borderRadius: 12, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 24, flexShrink: 0, border: "1px solid var(--border)" }}>
               {co.name.charAt(0)}
             </div>
 
-            {/* Info — everything in one column, no separate right-side action div */}
+            {/* Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                <h1 className="display-m" style={{ lineHeight: 1.1 }}>{co.name}</h1>
-                {co.verified && <span className="tag tag-success">✓ Verified</span>}
-                {co.featured && <span className="tag tag-accent">Featured</span>}
-              </div>
+              {/* Name on its own line — no badges competing for space */}
+              <h1 className="h1" style={{ marginBottom: 6, lineHeight: 1.1 }}>{co.name}</h1>
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
+              {/* Badges row */}
+              {(co.verified || co.featured) && (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                  {co.verified && <span className="tag tag-success">✓ Verified</span>}
+                  {co.featured && <span className="tag tag-accent">Featured</span>}
+                </div>
+              )}
+
+              {/* Meta */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
                 {co.city && (
                   <span style={{ display: "flex", alignItems: "center", gap: 5 }} className="body-s">
                     <MapPin size={13} style={{ color: "var(--text-subtle)" }} />
