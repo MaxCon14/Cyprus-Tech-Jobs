@@ -632,6 +632,19 @@ body {
   flex-wrap: wrap;
 }
 
+/* Stacked CTA strip (text + single button) — button goes full-width on mobile */
+@media (max-width: 640px) {
+  .cta-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cta-strip > a.btn,
+  .cta-strip > button.btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ── 640px: single column, mobile-first ── */
 @media (max-width: 640px) {
   .grid-2,

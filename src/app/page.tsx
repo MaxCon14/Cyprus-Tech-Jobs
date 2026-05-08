@@ -361,7 +361,7 @@ export default async function HomePage() {
       {/* ── EMPLOYER CTA ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0" }}>
         <div className="page-container">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, padding: "clamp(28px, 5vw, 48px)", border: "1px solid var(--border)", borderRadius: 16, background: "var(--surface)" }}>
+          <div className="cta-strip" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24, padding: "clamp(28px, 5vw, 48px)", border: "1px solid var(--border)", borderRadius: 16, background: "var(--surface)" }}>
             <div>
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>FOR EMPLOYERS</div>
               <h2 className="h1" style={{ marginBottom: 8 }}>Hiring tech talent in Cyprus?</h2>
