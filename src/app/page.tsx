@@ -124,30 +124,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── COMPANIES TICKER ── */}
-      <section style={{ borderBottom: "1px solid var(--border)", padding: "28px 0", background: "var(--bg-alt)", overflowX: "auto" }}>
-        <div className="page-container">
-          <div style={{ display: "flex", alignItems: "center", gap: 20, minWidth: "max-content" }}>
-            <span className="mono-s" style={{ color: "var(--text-subtle)", whiteSpace: "nowrap" }}>HIRING THIS WEEK</span>
-            <span style={{ width: 1, height: 20, background: "var(--border-strong)", display: "inline-block" }} />
-            {companies.map(co => (
-              <Link
-                key={co.slug}
-                href={`/companies/${co.slug}`}
-                style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", padding: "8px 14px", border: "1px solid var(--border)", borderRadius: 8, background: "var(--surface)", whiteSpace: "nowrap" }}
-              >
-                <span style={{ width: 28, height: 28, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 12, flexShrink: 0 }}>
-                  {co.name.charAt(0)}
-                </span>
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: "var(--text)" }}>{co.name}</div>
-                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{co.city}</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── HOW IT WORKS ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
