@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
 import { ShareButton } from "./ShareButton";
+import { ApplyButton } from "./ApplyButton";
 import { buildJobPostingSchema, buildBreadcrumbSchema } from "@/lib/schema";
 import type { Metadata } from "next";
 
@@ -199,13 +200,8 @@ export default async function JobDetailPage({ params }: Props) {
             )}
             {isActive ? (
               <>
-                <a href={job.applyUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}>
-                  Apply for this role →
-                </a>
+                <ApplyButton jobId={job.id} applyUrl={job.applyUrl ?? "#"} companyName={job.company.name} />
                 <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
-                <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
-                  APPLIES TO {job.company.name.toUpperCase()} DIRECTLY
-                </p>
               </>
             ) : (
               <>
