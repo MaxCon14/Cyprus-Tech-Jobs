@@ -629,6 +629,19 @@ body {
   display: none;
 }
 
+.job-header-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+@media (max-width: 640px) {
+  .job-header-inner {
+    flex-direction: column;
+    gap: 14px;
+  }
+}
+
 /* Filter body: always visible on desktop */
 .filters-panel-body {
   /* no constraint on desktop */

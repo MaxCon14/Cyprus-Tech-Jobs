@@ -122,7 +122,7 @@ export default async function JobDetailPage({ params }: Props) {
         <div>
           {/* Header card */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
-            <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+            <div className="job-header-inner">
               <div style={{ width: 64, height: 64, borderRadius: 10, flexShrink: 0, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, border: "1px solid var(--border)" }}>
                 {job.company.name.charAt(0)}
               </div>
