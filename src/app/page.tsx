@@ -90,7 +90,7 @@ export default async function HomePage() {
           </p>
 
           {/* Search */}
-          <form action="/jobs" method="GET" style={{ display: "flex", gap: 8, maxWidth: 640, marginBottom: 40, flexWrap: "wrap" }}>
+          <form action="/jobs" method="GET" className="hero-search" style={{ maxWidth: 640, marginBottom: 40 }}>
             <div style={{ position: "relative", flex: "1 1 200px" }}>
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
               <input className="input" type="text" name="search" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
@@ -344,11 +344,11 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative", flexShrink: 0 }}>
-              <Link href="/get-started" className="btn btn-accent btn-lg" style={{ whiteSpace: "nowrap", justifyContent: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, position: "relative", flexShrink: 0, minWidth: 0 }}>
+              <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center" }}>
                 Create free candidate account →
               </Link>
-              <Link href="/jobs" style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--neutral-400)", textDecoration: "none", textAlign: "center" }}>
+              <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ justifyContent: "center", color: "var(--neutral-400)" }}>
                 Browse jobs without an account
               </Link>
             </div>
@@ -385,7 +385,7 @@ export default async function HomePage() {
                 Listings go live in under 30 minutes.
               </p>
             </div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div className="btn-group-mobile">
               <Link href="/post-a-job" className="btn btn-accent btn-lg">Post a job →</Link>
               <Link href="/companies" className="btn btn-outline btn-lg">View companies</Link>
             </div>

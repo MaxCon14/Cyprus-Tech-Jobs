@@ -606,6 +606,20 @@ body {
   .grid-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Hero search form */
+.hero-search {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Button group that stacks on mobile */
+.btn-group-mobile {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* ── 640px: single column, mobile-first ── */
 @media (max-width: 640px) {
   .grid-2,
@@ -617,6 +631,51 @@ body {
 
   .layout-sidebar-left > aside {
     position: static !important;
+  }
+
+  /* Touch targets: minimum 44px */
+  .btn {
+    min-height: 44px;
+    padding-inline: 16px;
+  }
+  .btn-sm {
+    min-height: 36px;
+  }
+  .btn-lg {
+    min-height: 48px;
+  }
+
+  /* Prevent iOS from zooming on input focus */
+  .input, .select, .textarea {
+    font-size: 16px;
+    min-height: 48px;
+    padding-block: 12px;
+  }
+
+  /* Hero search: stack vertically, all controls full-width */
+  .hero-search {
+    flex-direction: column;
+  }
+  .hero-search > div {
+    flex: none !important;
+    width: 100%;
+    min-width: 0;
+  }
+  .hero-search > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Button groups that should stack on mobile */
+  .btn-group-mobile {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-group-mobile > * {
+    width: 100% !important;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
   }
 }
 
