@@ -49,32 +49,37 @@ export async function POST(req: NextRequest) {
   const alertFrequency  = body.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY";
 
   try {
-    const alert = await prisma.jobAlert.upsert({
+    // findFirst + update/create instead of upsert because PostgreSQL treats
+    // NULL != NULL in unique constraints, making the compound upsert unreliable
+    // when categoryId / companyId / remoteType are null.
+    const existing = await prisma.jobAlert.findFirst({
       where: {
-        email_categoryId_remoteType_companyId: {
-          email,
-          categoryId: categoryId ?? "",
-          remoteType: remoteType as RemoteType,
-          companyId:  companyId ?? "",
-        },
-      },
-      create: {
         email,
-        firstName,
-        categoryId,
-        companyId,
-        remoteType,
-        city,
-        experienceLevel,
-        salaryMin,
-        alertFrequency,
-        confirmed: true,
-      },
-      update: {
-        alertFrequency,
-        confirmed: true,
+        categoryId: categoryId ?? null,
+        companyId:  companyId  ?? null,
+        remoteType: remoteType ?? null,
       },
     });
+
+    const alert = existing
+      ? await prisma.jobAlert.update({
+          where: { id: existing.id },
+          data:  { alertFrequency, confirmed: true },
+        })
+      : await prisma.jobAlert.create({
+          data: {
+            email,
+            firstName,
+            categoryId,
+            companyId,
+            remoteType,
+            city,
+            experienceLevel,
+            salaryMin,
+            alertFrequency,
+            confirmed: true,
+          },
+        });
 
     return NextResponse.json({ alertId: alert.id }, { status: 201 });
   } catch (err) {
