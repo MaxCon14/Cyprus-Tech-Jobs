@@ -41,6 +41,7 @@ export default async function JobDetailPage({ params }: Props) {
   const salary     = formatSalary(job.salaryMin, job.salaryMax);
 
   // Check if the visitor is a logged-in candidate (for CV review + saved jobs)
+  let isCandidate  = false;
   let savedCvUrl: string | null = null;
   let savedJobIds: string[] | undefined;
   try {
@@ -53,7 +54,8 @@ export default async function JobDetailPage({ params }: Props) {
         .eq("email", user.email)
         .single();
       if (candidate) {
-        savedCvUrl = candidate.cvUrl ?? null;
+        isCandidate = true;
+        savedCvUrl  = candidate.cvUrl ?? null;
         const { data: saved } = await supabaseAdmin
           .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
         savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
@@ -203,7 +205,7 @@ export default async function JobDetailPage({ params }: Props) {
             {isActive ? (
               <>
                 <ApplyButton jobId={job.id} applyUrl={job.applyUrl ?? "#"} companyName={job.company.name} />
-                <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
+                <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} isCandidate={isCandidate} savedCvUrl={savedCvUrl} />
               </>
             ) : (
               <>

@@ -24,22 +24,36 @@ ${job.description}
 
 THE CANDIDATE'S CV IS ATTACHED AS A PDF DOCUMENT.
 
-Carefully read the CV and assess how well this candidate matches the job above.
+Carefully read the entire CV and assess how well this candidate matches the job above.
 
 Respond ONLY with a valid JSON object in this exact shape — no markdown, no code fences, just raw JSON:
 {
-  "score": <integer 0-100>,
+  "score": <integer 0-100 representing overall match percentage>,
   "headline": "<one upbeat sentence summarising the match, e.g. 'Strong match — a couple of quick additions will seal the deal'>",
-  "strengths": ["<specific strength 1>", "<specific strength 2>", "<specific strength 3>"],
-  "improvements": ["<specific, actionable improvement 1>", "<specific, actionable improvement 2>", "<specific, actionable improvement 3>"],
-  "encouragement": "<one warm closing sentence that genuinely encourages the candidate to apply>"
+  "strengths": [
+    { "title": "<short strength title, 3-6 words>", "detail": "<2-3 sentences with specific evidence from both the CV and the job ad — be concrete, name actual skills, projects, or experience>"},
+    { "title": "...", "detail": "..." },
+    { "title": "...", "detail": "..." }
+  ],
+  "improvements": [
+    {
+      "title": "<short gap title, 3-6 words>",
+      "detail": "<2-3 sentences explaining why this gap matters for this specific role and what the employer is looking for>",
+      "tip": "<specific, actionable advice: exactly what to add, rewrite, or highlight in the CV to close this gap — be concrete and practical>"
+    },
+    { "title": "...", "detail": "...", "tip": "..." },
+    { "title": "...", "detail": "...", "tip": "..." }
+  ],
+  "encouragement": "<one warm, genuine closing sentence that encourages the candidate to apply>"
 }
 
 Guidelines:
-- Score honestly but generously where the evidence supports it
-- Strengths: celebrate real matches specifically — mention actual details from both the CV and the job ad
-- Improvements: frame every gap as a quick win ("Adding X to your CV would show..." not "You lack X")
-- Encouragement: always end on a genuine, human note`;
+- Score 80-100 for strong matches, 60-79 for good matches with minor gaps, 40-59 for partial matches, below 40 for weak matches
+- Score honestly — a 72 means something; don't round everything to 80
+- Strengths: celebrate real matches — reference actual skills, job titles, or projects you can see in the CV
+- Improvements: frame every gap as a quick win, never as a deficiency ("Adding X would show..." not "You lack X")
+- Tips: be genuinely specific — "Add a bullet point about your experience with X in your Y role" beats "mention more skills"
+- Encouragement: make it warm and human, not generic`;
 
   return { job, prompt };
 }
@@ -53,7 +67,7 @@ async function runAnalysis(base64: string, prompt: string) {
 
   const message = await anthropic.messages.create({
     model:      "claude-haiku-4-5-20251001",
-    max_tokens: 1024,
+    max_tokens: 2048,
     messages: [
       {
         role: "user",
