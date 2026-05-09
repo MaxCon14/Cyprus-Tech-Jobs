@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { Heart, X } from "lucide-react";
 import Link from "next/link";
 
@@ -116,7 +117,10 @@ export function SaveJobButton({
 
   return (
     <>
-      {showModal && <GuestModal onClose={() => setShowModal(false)} />}
+      {showModal && createPortal(
+        <GuestModal onClose={() => setShowModal(false)} />,
+        document.body
+      )}
 
       <button
         type="button"
