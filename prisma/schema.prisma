@@ -155,6 +155,8 @@ model Employer {
   onboardingCompleted  Boolean      @default(false)
   loginToken           String?      @unique
   loginTokenExpiry     DateTime?
+  standardSlots        Int          @default(0)
+  featuredSlots        Int          @default(0)
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
 
@@ -173,6 +175,7 @@ model JobAlert {
   email           String
   firstName       String?
   categoryId      String?
+  companyId       String?
   remoteType      RemoteType?
   city            String?
   experienceLevel ExperienceLevel?
@@ -181,7 +184,8 @@ model JobAlert {
   confirmed       Boolean          @default(false)
   token           String           @unique @default(cuid())
   createdAt       DateTime         @default(now())
+  lastSentAt      DateTime?
 
-  @@unique([email, categoryId, remoteType])
+  @@unique([email, categoryId, remoteType, companyId])
   @@map("job_alerts")
 }

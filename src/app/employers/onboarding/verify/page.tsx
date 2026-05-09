@@ -61,7 +61,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
         </div>
         <h1 className="h1" style={{ marginBottom: 12 }}>Link expired</h1>
         <p className="body" style={{ color: "var(--text-muted)", marginBottom: 32 }}>
-          This verification link has expired (they're valid for 24 hours). Go back to your onboarding to request a new one.
+          This verification link has expired (they&apos;re valid for 24 hours). Go back to your onboarding to request a new one.
         </p>
         <Link href="/employers/onboarding" className="btn btn-accent" style={{ justifyContent: "center" }}>
           Back to onboarding

@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
-import { getJobs, getCategoriesWithCount } from "@/lib/queries";
+import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
-import { SlidersHorizontal, X } from "lucide-react";
+import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FiltersPanel } from "./FiltersPanel";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -28,6 +28,13 @@ const EXPERIENCE_OPTIONS = [
   { label: "Lead",      value: "LEAD" },
 ];
 
+const SALARY_OPTIONS = [
+  { label: "€30k+",  value: 30000 },
+  { label: "€50k+",  value: 50000 },
+  { label: "€70k+",  value: 70000 },
+  { label: "€100k+", value: 100000 },
+];
+
 const TYPE_LABELS: Record<string, string> = {
   FULL_TIME: "Full-time",
   PART_TIME: "Part-time",
@@ -46,28 +53,39 @@ const CATEGORY_LABELS: Record<string, string> = {
   qa:       "QA & Testing",
 };
 
+const PAGE_SIZE = 20;
+
 type SearchParams = Promise<{
   category?: string;
   type?: string;
   city?: string;
   level?: string;
+  search?: string;
+  salary?: string;
+  page?: string;
 }>;
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const { category, type, city, level } = params;
+  const { category, type, city, level, search } = params;
+  const salary  = params.salary ? parseInt(params.salary) : undefined;
+  const pageNum = Math.max(1, parseInt(params.page ?? "1") || 1);
 
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [jobs, categories] = await Promise.all([
-    getJobs({
-      categorySlug:    category,
-      remoteType:      type,
-      city:            city && city !== "Remote" ? city : undefined,
-      experienceLevel: level,
-      take: 20,
-    }),
+  const filters = {
+    categorySlug:    category,
+    remoteType:      type,
+    city:            city && city !== "Remote" ? city : undefined,
+    experienceLevel: level,
+    search:          search?.trim() || undefined,
+    salary,
+  };
+
+  const [jobs, filteredTotal, categories] = await Promise.all([
+    getJobs({ ...filters, take: PAGE_SIZE, skip: (pageNum - 1) * PAGE_SIZE }),
+    getJobCount(filters),
     getCategoriesWithCount(),
   ]);
 
@@ -84,23 +102,48 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
+  const showFrom       = filteredTotal === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1;
+  const showTo         = Math.min(pageNum * PAGE_SIZE, filteredTotal);
+  const hasPrev        = pageNum > 1;
+  const hasNext        = pageNum * PAGE_SIZE < filteredTotal;
 
-  /* Active filter pills */
-  const activeFilters: { label: string; removeKey: string }[] = [];
-  if (category) activeFilters.push({ label: CATEGORY_LABELS[category] ?? category, removeKey: "category" });
-  if (type)     activeFilters.push({ label: TYPE_LABELS[type] ?? type, removeKey: "type" });
-  if (city)     activeFilters.push({ label: city, removeKey: "city" });
-  if (level)    activeFilters.push({ label: level, removeKey: "level" });
-
-  function buildUrl(remove: string) {
+  /* Unified URL builder — sets/clears one param, resets page */
+  function urlWith(key: string, val: string | undefined) {
     const p = new URLSearchParams();
-    if (category && remove !== "category") p.set("category", category);
-    if (type     && remove !== "type")     p.set("type", type);
-    if (city     && remove !== "city")     p.set("city", city);
-    if (level    && remove !== "level")    p.set("level", level);
+    const current: Record<string, string | undefined> = {
+      search, category, type, city, level,
+      salary: params.salary,
+    };
+    current[key] = val;
+    for (const [k, v] of Object.entries(current)) {
+      if (v) p.set(k, v);
+    }
     const qs = p.toString();
     return qs ? `/jobs?${qs}` : "/jobs";
   }
+
+  /* Page navigation — keeps all current filters */
+  function pageUrl(p: number) {
+    const up = new URLSearchParams();
+    if (search         ) up.set("search",   search);
+    if (category       ) up.set("category", category);
+    if (type           ) up.set("type",     type);
+    if (city           ) up.set("city",     city);
+    if (level          ) up.set("level",    level);
+    if (params.salary  ) up.set("salary",   params.salary);
+    if (p > 1          ) up.set("page",     String(p));
+    const qs = up.toString();
+    return qs ? `/jobs?${qs}` : "/jobs";
+  }
+
+  /* Active filter pills */
+  const activeFilters: { label: string; key: string }[] = [];
+  if (search  ) activeFilters.push({ label: `"${search}"`,                                     key: "search" });
+  if (category) activeFilters.push({ label: CATEGORY_LABELS[category] ?? category,             key: "category" });
+  if (type    ) activeFilters.push({ label: TYPE_LABELS[type] ?? type,                         key: "type" });
+  if (city    ) activeFilters.push({ label: city,                                               key: "city" });
+  if (level   ) activeFilters.push({ label: level,                                              key: "level" });
+  if (salary  ) activeFilters.push({ label: `min €${(salary / 1000).toFixed(0)}k`,             key: "salary" });
 
   const pageTitle = category
     ? `${CATEGORY_LABELS[category] ?? category} Jobs in Cyprus`
@@ -116,7 +159,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       <div style={{ marginBottom: 32 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-          {serialisedJobs.length} {activeFilters.length ? "matching" : "total"} JOBS · UPDATED DAILY
+          {filteredTotal} {activeFilters.length ? "matching" : "total"} JOBS · UPDATED DAILY
         </div>
         <h1 className="display-m" style={{ marginBottom: 8 }}>{pageTitle}</h1>
         <p className="body" style={{ color: "var(--text-muted)" }}>
@@ -130,8 +173,8 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
           <span className="mono-s" style={{ color: "var(--text-subtle)" }}>FILTERED BY:</span>
           {activeFilters.map(f => (
             <Link
-              key={f.removeKey}
-              href={buildUrl(f.removeKey)}
+              key={f.key}
+              href={urlWith(f.key, undefined)}
               style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 10px", background: "var(--accent-soft)", color: "var(--accent)", borderRadius: 99, fontSize: 12, fontFamily: "var(--font-sans)", textDecoration: "none", fontWeight: 500 }}
             >
               {f.label} <X size={11} />
@@ -143,23 +186,38 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         </div>
       )}
 
+      {/* Keyword search — always visible above the grid */}
+      <form action="/jobs" method="GET" style={{ marginBottom: 20, maxWidth: "100%" }}>
+        {category       && <input type="hidden" name="category" value={category} />}
+        {type           && <input type="hidden" name="type"     value={type} />}
+        {city           && <input type="hidden" name="city"     value={city} />}
+        {level          && <input type="hidden" name="level"    value={level} />}
+        {params.salary  && <input type="hidden" name="salary"   value={params.salary} />}
+        <div style={{ position: "relative", maxWidth: 480 }}>
+          <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
+          <input
+            className="input"
+            type="text"
+            name="search"
+            defaultValue={search ?? ""}
+            placeholder="Search by title, company, or keyword…"
+            style={{ paddingLeft: 36 }}
+          />
+        </div>
+      </form>
+
       <div className="layout-sidebar-left">
 
         {/* Filters sidebar — collapsible on mobile */}
         <FiltersPanel activeCount={activeFilters.length}>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-            <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 8 }}>
-              <SlidersHorizontal size={14} style={{ color: "var(--text-muted)" }} />
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13 }}>Filters</span>
-            </div>
-
             <FilterSection title="Category">
               {categories.slice(1).map(cat => (
                 <FilterLink
                   key={cat.slug}
                   label={cat.label}
                   count={cat.count}
-                  href={`/jobs?category=${cat.slug}${type ? `&type=${type}` : ""}${city ? `&city=${city}` : ""}`}
+                  href={urlWith("category", category === cat.slug ? undefined : cat.slug)}
                   active={category === cat.slug}
                 />
               ))}
@@ -170,7 +228,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                 <FilterLink
                   key={o.value}
                   label={o.label}
-                  href={`/jobs?${category ? `category=${category}&` : ""}type=${o.value}${city ? `&city=${city}` : ""}`}
+                  href={urlWith("type", type === o.value ? undefined : o.value)}
                   active={type === o.value}
                 />
               ))}
@@ -181,19 +239,30 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                 <FilterLink
                   key={o.value}
                   label={o.label}
-                  href={`/jobs?${category ? `category=${category}&` : ""}level=${o.value}${city ? `&city=${city}` : ""}`}
+                  href={urlWith("level", level === o.value ? undefined : o.value)}
                   active={level === o.value}
                 />
               ))}
             </FilterSection>
 
-            <FilterSection title="City" last>
+            <FilterSection title="City">
               {CITIES.map(c => (
                 <FilterLink
                   key={c}
                   label={c}
-                  href={`/jobs?${category ? `category=${category}&` : ""}city=${c}`}
+                  href={urlWith("city", city === c ? undefined : c)}
                   active={city === c}
+                />
+              ))}
+            </FilterSection>
+
+            <FilterSection title="Min salary" last>
+              {SALARY_OPTIONS.map(o => (
+                <FilterLink
+                  key={o.value}
+                  label={o.label}
+                  href={urlWith("salary", salary === o.value ? undefined : String(o.value))}
+                  active={salary === o.value}
                 />
               ))}
             </FilterSection>
@@ -207,8 +276,10 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
             <span className="body-s" style={{ color: "var(--text-muted)" }}>
-              Showing <strong style={{ color: "var(--text)" }}>{serialisedJobs.length}</strong>
-              {activeFilters.length ? " matching" : ""} jobs
+              {filteredTotal === 0
+                ? "No jobs found"
+                : <>Showing <strong style={{ color: "var(--text)" }}>{showFrom}–{showTo}</strong> of <strong style={{ color: "var(--text)" }}>{filteredTotal}</strong> {activeFilters.length ? "matching " : ""}jobs</>
+              }
             </span>
           </div>
 
@@ -237,6 +308,23 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {(hasPrev || hasNext) && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, gap: 8 }}>
+              {hasPrev ? (
+                <Link href={pageUrl(pageNum - 1)} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <ChevronLeft size={14} /> Previous
+                </Link>
+              ) : <div />}
+              <span className="mono-s" style={{ color: "var(--text-subtle)" }}>Page {pageNum}</span>
+              {hasNext ? (
+                <Link href={pageUrl(pageNum + 1)} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  Next <ChevronRight size={14} />
+                </Link>
+              ) : <div />}
             </div>
           )}
         </div>

@@ -4,68 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { SaveJobButton } from "./SaveJobButton";
-
-/* Map display name → Simple Icons slug (cdn.simpleicons.org/{slug}) */
-const SKILL_ICONS: Record<string, string> = {
-  "React":          "react",
-  "React Native":   "react",
-  "TypeScript":     "typescript",
-  "JavaScript":     "javascript",
-  "Next.js":        "nextdotjs",
-  "Node.js":        "nodedotjs",
-  "Python":         "python",
-  "PostgreSQL":     "postgresql",
-  "Docker":         "docker",
-  "Kubernetes":     "kubernetes",
-  "AWS":            "amazonaws",
-  "Azure":          "microsoftazure",
-  "GCP":            "googlecloud",
-  "MongoDB":        "mongodb",
-  "Redis":          "redis",
-  "GraphQL":        "graphql",
-  "Go":             "go",
-  "Rust":           "rust",
-  "Terraform":      "terraform",
-  "Figma":          "figma",
-  "Flutter":        "flutter",
-  "Kotlin":         "kotlin",
-  "Swift":          "swift",
-  "Angular":        "angular",
-  "Svelte":         "svelte",
-  "MySQL":          "mysql",
-  "Elasticsearch":  "elasticsearch",
-  "Kafka":          "apachekafka",
-  "Spark":          "apachespark",
-  "Airflow":        "apacheairflow",
-  "Snowflake":      "snowflake",
-  "BigQuery":       "googlebigquery",
-  "Ansible":        "ansible",
-  "Java":           "java",
-  "C++":            "cplusplus",
-  "Android":        "android",
-  "RabbitMQ":       "rabbitmq",
-  "OWASP":          "owasp",
-};
-
-function SkillTag({ name }: { name: string }) {
-  const [iconFailed, setIconFailed] = useState(false);
-  const slug = SKILL_ICONS[name];
-
-  return (
-    <span className="tag tag-skill">
-      {slug && !iconFailed && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={`https://cdn.simpleicons.org/${slug}`}
-          alt=""
-          className="skill-tag-icon"
-          onError={() => setIconFailed(true)}
-        />
-      )}
-      {name}
-    </span>
-  );
-}
+import { SkillTag } from "./SkillTag";
 
 function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: string | null; website?: string | null }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -142,9 +81,11 @@ export function JobCard({
           <span className="job-card-company">{company.name}</span>
           {postedAt && <span className="job-card-time">{timeAgo(postedAt)}</span>}
         </div>
-        {savedJobIds !== undefined && (
-          <SaveJobButton jobId={id} initialSaved={savedJobIds.includes(id)} />
-        )}
+        <SaveJobButton
+          jobId={id}
+          initialSaved={savedJobIds?.includes(id) ?? false}
+          isCandidate={savedJobIds !== undefined}
+        />
       </div>
 
       {/* Title */}

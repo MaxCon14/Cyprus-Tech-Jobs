@@ -9,7 +9,7 @@ import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import {
   Plus, Eye, Edit2, Briefcase, Building2,
   ExternalLink, MapPin, Clock, ChevronRight,
-  CheckCircle2, AlertCircle, FileText,
+  CheckCircle2, AlertCircle, FileText, ShoppingBag,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { SignOutClient } from "./SignOutClient";
@@ -18,8 +18,6 @@ export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Jobs",
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   ACTIVE:  { bg: "var(--success-bg)",  color: "var(--success)",  label: "Active"  },
   DRAFT:   { bg: "var(--bg-muted)",    color: "var(--text-muted)", label: "Draft" },
@@ -27,20 +25,20 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   CLOSED:  { bg: "var(--bg-muted)",    color: "var(--text-subtle)", label: "Closed" },
 };
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+type SearchParams = Promise<{ posted?: string; edited?: string }>;
 
-export default async function EmployerDashboard() {
+export default async function EmployerDashboard({ searchParams }: { searchParams: SearchParams }) {
+  const { posted, edited } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) redirect("/employers/login?callbackUrl=/employers/dashboard");
+  if (!user?.email) redirect("/login");
 
   const employer = await getEmployerWithCompanyAndJobs(user.email);
 
   if (!employer) {
-    // Candidate trying to access employer dashboard
     const { data: candidate } = await supabaseAdmin
       .from("candidates").select("id").eq("email", user.email).single();
-    redirect(candidate ? "/candidates/dashboard" : "/employers/login");
+    redirect(candidate ? "/candidates/dashboard" : "/login");
   }
 
   const company = employer.company;
@@ -59,14 +57,16 @@ export default async function EmployerDashboard() {
       <header style={{
         position: "sticky", top: 0, zIndex: 20,
         background: "var(--surface)", borderBottom: "1px solid var(--border)",
-        padding: "0 24px",
+        padding: "0 clamp(16px,3vw,24px)",
       }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
               <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{companyInitial}</span>
             </div>
-            <span className="body-s" style={{ color: "var(--text-muted)" }}>{company?.name ?? employer.name ?? "Employer"}</span>
+            <span className="body-s employer-nav-company-name" style={{ color: "var(--text-muted)" }}>
+              {company?.name ?? employer.name ?? "Employer"}
+            </span>
             <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
             <Link href="/post-a-job" className="btn btn-accent btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Plus size={13} /> Post a job
@@ -76,26 +76,40 @@ export default async function EmployerDashboard() {
         </div>
       </header>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px 80px" }}>
+      <div className="employer-page-inner">
+
+        {/* ── Success banner ── */}
+        {(posted || edited) && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: "var(--success-bg)", border: "1px solid var(--success)",
+            borderRadius: 10, padding: "12px 18px", marginBottom: 16,
+          }}>
+            <CheckCircle2 size={15} style={{ color: "var(--success)", flexShrink: 0 }} />
+            <span className="body-s" style={{ color: "var(--success)", fontWeight: 500 }}>
+              {posted ? "Your job listing is now live." : "Your listing has been updated successfully."}
+            </span>
+          </div>
+        )}
 
         {/* ── Company hero ── */}
         <div style={{
           background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16,
-          padding: "28px 32px", marginBottom: 24,
-          display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20,
+          padding: "clamp(20px,3vw,28px) clamp(16px,3vw,32px)", marginBottom: 16,
+          display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16,
         }}>
-          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", minWidth: 0 }}>
             <div style={{
-              width: 64, height: 64, borderRadius: 14, flexShrink: 0,
+              width: 56, height: 56, borderRadius: 13, flexShrink: 0,
               background: "var(--black)", color: "var(--white)",
               display: "grid", placeItems: "center",
-              fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 24,
+              fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22,
             }}>
               {companyInitial}
             </div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <h1 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 20, color: "var(--text)", margin: 0 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>
+                <h1 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 18, color: "var(--text)", margin: 0 }}>
                   {company?.name ?? "Your company"}
                 </h1>
                 {company?.verified && (
@@ -124,7 +138,7 @@ export default async function EmployerDashboard() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10 }}>
+          <div className="employer-hero-actions">
             {company && (
               <Link href={`/companies/${company.slug}`} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Eye size={13} /> View public page
@@ -137,7 +151,7 @@ export default async function EmployerDashboard() {
         </div>
 
         {/* ── Stats row ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 24 }}>
+        <div className="employer-stats-grid">
           {[
             { label: "Active listings",  value: activeJobs.length.toString(),  icon: <Briefcase size={16} />,  accent: true },
             { label: "Draft",            value: draftJobs.length.toString(),   icon: <FileText size={16} />,   accent: false },
@@ -146,12 +160,12 @@ export default async function EmployerDashboard() {
           ].map(stat => (
             <div key={stat.label} style={{
               background: "var(--surface)", border: `1px solid ${stat.accent ? "var(--accent)" : "var(--border)"}`,
-              borderRadius: 12, padding: "18px 20px",
+              borderRadius: 12, padding: "16px 18px",
             }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <span style={{ color: stat.accent ? "var(--accent)" : "var(--text-muted)", display: "flex" }}>{stat.icon}</span>
+              <div style={{ color: stat.accent ? "var(--accent)" : "var(--text-muted)", display: "flex", marginBottom: 10 }}>
+                {stat.icon}
               </div>
-              <div style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 28, color: stat.accent ? "var(--accent)" : "var(--text)", marginBottom: 4 }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 26, color: stat.accent ? "var(--accent)" : "var(--text)", marginBottom: 3 }}>
                 {stat.value}
               </div>
               <div className="body-s" style={{ color: "var(--text-muted)" }}>{stat.label}</div>
@@ -159,11 +173,39 @@ export default async function EmployerDashboard() {
           ))}
         </div>
 
+        {/* ── Slot balance ── */}
+        <div style={{
+          background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12,
+          padding: "14px clamp(16px,3vw,20px)", marginBottom: 20,
+          display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
+        }}>
+          <ShoppingBag size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 18, color: "var(--accent)" }}>{employer.standardSlots}</span>
+            <span className="body-s" style={{ color: "var(--text-muted)" }}>standard slots</span>
+          </div>
+          <div className="employer-slot-divider" />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 18, color: "var(--accent)" }}>{employer.featuredSlots}</span>
+            <span className="body-s" style={{ color: "var(--text-muted)" }}>featured slots</span>
+          </div>
+          <div className="employer-slot-actions">
+            {(employer.standardSlots > 0 || employer.featuredSlots > 0) && (
+              <Link href="/post-a-job" className="btn btn-accent btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Plus size={12} /> Post a job
+              </Link>
+            )}
+            <Link href="/buy-credits" className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <ShoppingBag size={12} /> Buy slots
+            </Link>
+          </div>
+        </div>
+
         {/* ── Job listings ── */}
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", marginBottom: 24 }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", marginBottom: 20 }}>
 
           {/* Table header */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px clamp(16px,3vw,24px)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
             <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, margin: 0 }}>Your listings</p>
             <Link href="/post-a-job" className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Plus size={12} /> New listing
@@ -171,24 +213,22 @@ export default async function EmployerDashboard() {
           </div>
 
           {jobs.length === 0 ? (
-            /* Empty state */
-            <div style={{ padding: "60px 24px", textAlign: "center" }}>
+            <div style={{ padding: "52px 24px", textAlign: "center" }}>
               <div style={{ width: 52, height: 52, borderRadius: 12, background: "var(--bg-muted)", display: "grid", placeItems: "center", margin: "0 auto 16px" }}>
                 <Briefcase size={22} style={{ color: "var(--text-subtle)" }} />
               </div>
               <p className="body-s" style={{ fontWeight: 600, marginBottom: 6 }}>No jobs posted yet</p>
-              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>
-                Post your first job to start receiving applications from Cyprus's best tech talent.
+              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20, maxWidth: 320, margin: "0 auto 20px" }}>
+                Post your first job to start receiving applications from Cyprus&apos;s best tech talent.
               </p>
               <Link href="/post-a-job" className="btn btn-accent" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <Plus size={14} /> Post your first job
               </Link>
             </div>
           ) : (
-            /* Jobs list */
             <div>
-              {/* Column headers */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 100px 120px 140px 80px", gap: 16, padding: "10px 24px", borderBottom: "1px solid var(--border)" }}>
+              {/* Column headers — hidden on mobile via CSS */}
+              <div className="employer-job-header-row">
                 {["Role", "Status", "Posted", "Expires", ""].map(h => (
                   <span key={h} className="caption" style={{ color: "var(--text-subtle)" }}>{h}</span>
                 ))}
@@ -199,16 +239,20 @@ export default async function EmployerDashboard() {
                 const isExpiringSoon = job.expiresAt
                   ? new Date(job.expiresAt).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
                   : false;
+                const postedLabel   = job.postedAt ? timeAgo(job.postedAt) : job.createdAt ? timeAgo(job.createdAt) : "—";
+                const expiresLabel  = job.expiresAt
+                  ? new Date(job.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+                  : null;
 
                 return (
-                  <div key={job.id} style={{
-                    display: "grid", gridTemplateColumns: "1fr 100px 120px 140px 80px",
-                    gap: 16, padding: "16px 24px", alignItems: "center",
+                  <div key={job.id} className="employer-job-row" style={{
                     borderBottom: i < jobs.length - 1 ? "1px solid var(--border)" : "none",
                   }}>
-                    {/* Role */}
-                    <div>
-                      <p className="body-s" style={{ fontWeight: 600, marginBottom: 4 }}>{job.title}</p>
+                    {/* Role — always visible */}
+                    <div style={{ minWidth: 0 }}>
+                      <p className="body-s" style={{ fontWeight: 600, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {job.title}
+                      </p>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                         {job.city && (
                           <span className="tag" style={{ fontSize: 10, display: "flex", alignItems: "center", gap: 3 }}>
@@ -222,10 +266,25 @@ export default async function EmployerDashboard() {
                           </span>
                         )}
                       </div>
+                      {/* Mobile-only: status + dates */}
+                      <div className="employer-row-mobile-meta">
+                        <span style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "3px 8px", borderRadius: 5, fontSize: 11,
+                          fontFamily: "var(--font-mono)", fontWeight: 600,
+                          background: st.bg, color: st.color,
+                        }}>
+                          {job.status === "ACTIVE" && <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--success)", display: "block" }} />}
+                          {st.label}
+                        </span>
+                        <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 11 }}>
+                          {postedLabel}{expiresLabel ? ` · exp ${expiresLabel}` : ""}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Status */}
-                    <div>
+                    {/* Status — hidden on mobile */}
+                    <div className="employer-col-hide-mobile">
                       <span style={{
                         display: "inline-flex", alignItems: "center", gap: 5,
                         padding: "4px 10px", borderRadius: 6, fontSize: 11,
@@ -237,28 +296,28 @@ export default async function EmployerDashboard() {
                       </span>
                     </div>
 
-                    {/* Posted */}
-                    <div className="mono-s" style={{ color: "var(--text-subtle)" }}>
-                      {job.postedAt ? timeAgo(job.postedAt) : job.createdAt ? timeAgo(job.createdAt) : "—"}
+                    {/* Posted — hidden on mobile */}
+                    <div className="employer-col-hide-mobile mono-s" style={{ color: "var(--text-subtle)" }}>
+                      {postedLabel}
                     </div>
 
-                    {/* Expires */}
-                    <div className="mono-s" style={{ color: isExpiringSoon && job.status === "ACTIVE" ? "var(--warning)" : "var(--text-subtle)" }}>
+                    {/* Expires — hidden on mobile */}
+                    <div className="employer-col-hide-mobile mono-s" style={{ color: isExpiringSoon && job.status === "ACTIVE" ? "var(--warning)" : "var(--text-subtle)" }}>
                       {job.expiresAt
                         ? isExpiringSoon && job.status === "ACTIVE"
-                          ? `Expires ${timeAgo(job.expiresAt)}`
-                          : new Date(job.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+                          ? `Exp ${timeAgo(job.expiresAt)}`
+                          : expiresLabel
                         : "—"}
                     </div>
 
-                    {/* Actions */}
+                    {/* Actions — always visible */}
                     <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
                       <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
                         <Eye size={13} />
                       </Link>
-                      <button className="btn btn-ghost btn-icon btn-sm" title="Edit listing" disabled>
+                      <Link href={`/employers/jobs/${job.id}/edit`} className="btn btn-ghost btn-icon btn-sm" title="Edit listing">
                         <Edit2 size={13} />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 );
@@ -269,12 +328,12 @@ export default async function EmployerDashboard() {
 
         {/* ── No company warning ── */}
         {!company && (
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "var(--warning-bg)", border: "1px solid #fcd34d", borderRadius: 12, padding: "16px 20px", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 12, background: "var(--warning-bg)", border: "1px solid #fcd34d", borderRadius: 12, padding: "clamp(14px,2vw,16px) clamp(16px,3vw,20px)", marginBottom: 20 }}>
             <AlertCircle size={16} style={{ color: "var(--warning)", flexShrink: 0, marginTop: 1 }} />
             <div>
               <p className="body-s" style={{ fontWeight: 600, color: "#92400e", marginBottom: 4 }}>Complete your company setup</p>
               <p className="body-s" style={{ color: "#92400e", marginBottom: 10 }}>
-                You haven't linked a company to your account yet. Complete onboarding to post jobs.
+                You haven&apos;t linked a company to your account yet. Complete onboarding to post jobs.
               </p>
               <Link href="/employers/onboarding" className="btn btn-outline btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 Complete setup <ChevronRight size={12} />
@@ -283,24 +342,25 @@ export default async function EmployerDashboard() {
           </div>
         )}
 
-        {/* ── Upgrade CTA (only for FREE plan) ── */}
-        {employer.plan === "FREE" && (
+        {/* ── Featured slots CTA ── */}
+        {employer.featuredSlots === 0 && (
           <div style={{
-            border: "1px solid var(--accent)", borderRadius: 12, padding: "20px 24px",
+            border: "1px solid var(--accent)", borderRadius: 12,
+            padding: "clamp(16px,2vw,20px) clamp(16px,3vw,24px)",
             background: "var(--accent-soft)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
             flexWrap: "wrap", gap: 16,
           }}>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>
-                Upgrade to Featured for 2× visibility
+                Get featured listings for 2× visibility
               </p>
               <p className="body-s" style={{ color: "var(--text-muted)" }}>
-                Featured listings are pinned to the top of search results for 30 days.
+                Featured listings are pinned to the top of search results with a FEATURED badge.
               </p>
             </div>
-            <Link href="/post-a-job#pricing" className="btn btn-accent" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              Upgrade listing <ChevronRight size={13} />
+            <Link href="/buy-credits" className="btn btn-accent" style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+              Buy featured slots <ChevronRight size={13} />
             </Link>
           </div>
         )}
