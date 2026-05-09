@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   LogOut, LayoutDashboard, ChevronDown, ChevronRight, Menu, X,
-  Briefcase, MapPin, Clock, ArrowRight,
+  Briefcase, MapPin, Clock, ArrowRight, Zap, Star,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
@@ -109,6 +109,7 @@ export function Nav() {
   const router   = useRouter();
   const [user,    setUser]    = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [slots,   setSlots]   = useState<{ standardSlots: number; featuredSlots: number } | null>(null);
   const [jobsOpen,       setJobsOpen]       = useState(false);
   const [mobileOpen,     setMobileOpen]     = useState(false);
   const [mobileJobsOpen, setMobileJobsOpen] = useState(false);
@@ -122,13 +123,26 @@ export function Nav() {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       setLoading(false);
+      if (data.user) fetchSlots();
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => {
       setUser(s?.user ?? null);
       setLoading(false);
+      if (s?.user) fetchSlots();
+      else setSlots(null);
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  async function fetchSlots() {
+    try {
+      const res = await fetch("/api/employers/slots");
+      if (res.ok) setSlots(await res.json());
+      else setSlots(null);
+    } catch {
+      setSlots(null);
+    }
+  }
 
   /* Close menus on route change */
   useEffect(() => {
@@ -210,6 +224,31 @@ export function Nav() {
           <div className="nav-links-desktop" style={{ alignItems: "center", gap: 8, flexShrink: 0 }}>
             {!loading && user ? (
               <>
+                {slots && (
+                  <Link
+                    href="/buy-credits"
+                    title="Your listing slot balance"
+                    style={{
+                      display:        "flex",
+                      alignItems:     "center",
+                      gap:            8,
+                      padding:        "4px 10px",
+                      background:     "var(--accent-soft)",
+                      border:         "1px solid var(--accent)",
+                      borderRadius:   99,
+                      textDecoration: "none",
+                      flexShrink:     0,
+                    }}
+                  >
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)" }}>
+                      <Zap size={11} />{slots.standardSlots}
+                    </span>
+                    <span style={{ width: 1, height: 12, background: "var(--accent)", opacity: 0.4 }} />
+                    <span style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)" }}>
+                      <Star size={11} />{slots.featuredSlots}
+                    </span>
+                  </Link>
+                )}
                 <Link href="/dashboard" className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <LayoutDashboard size={13} /> Dashboard
                 </Link>
@@ -332,6 +371,30 @@ export function Nav() {
           <div style={{ paddingTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
             {!loading && user ? (
               <>
+                {slots && (
+                  <Link
+                    href="/buy-credits"
+                    style={{
+                      display:        "flex",
+                      alignItems:     "center",
+                      justifyContent: "center",
+                      gap:            12,
+                      padding:        "10px 16px",
+                      background:     "var(--accent-soft)",
+                      border:         "1px solid var(--accent)",
+                      borderRadius:   8,
+                      textDecoration: "none",
+                    }}
+                  >
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--accent)" }}>
+                      <Zap size={13} />{slots.standardSlots} standard
+                    </span>
+                    <span style={{ width: 1, height: 14, background: "var(--accent)", opacity: 0.4 }} />
+                    <span style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--accent)" }}>
+                      <Star size={13} />{slots.featuredSlots} featured
+                    </span>
+                  </Link>
+                )}
                 <Link href="/dashboard" className="btn btn-primary" style={{ justifyContent: "center" }}>
                   <LayoutDashboard size={15} /> Dashboard
                 </Link>
