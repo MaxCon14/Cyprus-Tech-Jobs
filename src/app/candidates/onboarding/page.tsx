@@ -17,6 +17,7 @@ import {
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CvUpload } from "@/components/candidates/CvUpload";
 import { CITIES } from "@/lib/placeholder-data";
+import { Select } from "@/components/ui/Select";
 import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
 import { Confetti } from "@/components/onboarding/Confetti";
@@ -210,10 +211,13 @@ function Step3Location({ state, dispatch }: { state: CandidateWizardState; dispa
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <select className="select" value={state.city} onChange={(e) => dispatch({ type: "SET_FIELD", field: "city", value: e.target.value })} style={{ fontSize: 15 }}>
-            <option value="">Any city in Cyprus</option>
-            {CITIES.filter((c) => c !== "Remote").map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <Select
+            name="city"
+            placeholder="Any city in Cyprus"
+            value={state.city}
+            onChange={val => dispatch({ type: "SET_FIELD", field: "city", value: val })}
+            options={CITIES.filter(c => c !== "Remote").map(c => ({ label: c, value: c }))}
+          />
           <p className="body-s" style={{ color: "var(--text-subtle)" }}>Leave blank to see jobs across all Cyprus cities.</p>
         </div>
       )}

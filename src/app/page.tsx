@@ -3,6 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
+import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { buildWebSiteSchema } from "@/lib/schema";
 import { JobAlertForm } from "@/components/alerts/JobAlertForm";
@@ -113,15 +114,19 @@ export default async function HomePage() {
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
               <input className="input" type="text" name="search" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
             </div>
-            <div style={{ position: "relative", flex: "0 0 160px" }}>
-              <MapPin size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", zIndex: 1 }} />
-              <select className="select" name="city" style={{ paddingLeft: 38 }}>
-                <option value="">All locations</option>
-                <option value="Limassol">Limassol</option>
-                <option value="Nicosia">Nicosia</option>
-                <option value="Larnaca">Larnaca</option>
-                <option value="Paphos">Paphos</option>
-              </select>
+            <div style={{ flex: "0 0 170px" }}>
+              <Select
+                name="city"
+                placeholder="All locations"
+                icon={<MapPin size={14} />}
+                options={[
+                  { label: "All locations", value: "" },
+                  { label: "Limassol",      value: "Limassol" },
+                  { label: "Nicosia",       value: "Nicosia" },
+                  { label: "Larnaca",       value: "Larnaca" },
+                  { label: "Paphos",        value: "Paphos" },
+                ]}
+              />
             </div>
             <button type="submit" className="btn btn-accent">Search</button>
           </form>

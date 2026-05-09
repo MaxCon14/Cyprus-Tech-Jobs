@@ -7,6 +7,7 @@ import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CvUpload } from "@/components/candidates/CvUpload";
 import { CITIES } from "@/lib/placeholder-data";
+import { Select } from "@/components/ui/Select";
 
 // ─── Profile section ─────────────────────────────────────────────────────────
 
@@ -522,10 +523,13 @@ export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
         {/* City */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <label className="body-s" style={{ fontWeight: 500, color: "var(--text)" }}>City</label>
-          <select className="input" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
-            <option value="">Any city</option>
-            {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <Select
+            name="city"
+            placeholder="Any city"
+            value={form.city}
+            onChange={val => setForm(f => ({ ...f, city: val }))}
+            options={CITIES.map(c => ({ label: c, value: c }))}
+          />
         </div>
 
         {/* Experience level */}

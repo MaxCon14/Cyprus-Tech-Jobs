@@ -15,6 +15,7 @@ import {
   type EmployerWizardAction,
 } from "@/lib/onboarding-types";
 import { CITIES } from "@/lib/placeholder-data";
+import { Select } from "@/components/ui/Select";
 import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
@@ -192,10 +193,13 @@ function Step2Company({ state, dispatch }: { state: EmployerWizardState; dispatc
         </Field>
 
         <Field label="City">
-          <select className="select" value={state.city} onChange={(e) => dispatch({ type: "SET_FIELD", field: "city", value: e.target.value })}>
-            <option value="">Select city…</option>
-            {CITIES.filter((c) => c !== "Remote").map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <Select
+            name="city"
+            placeholder="Select city…"
+            value={state.city}
+            onChange={val => dispatch({ type: "SET_FIELD", field: "city", value: val })}
+            options={CITIES.filter(c => c !== "Remote").map(c => ({ label: c, value: c }))}
+          />
         </Field>
 
         <Field label="Company size">

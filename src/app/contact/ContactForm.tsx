@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send, Check } from "lucide-react";
+import { Select } from "@/components/ui/Select";
 
 type Step = "idle" | "loading" | "done" | "error";
 
@@ -98,16 +99,13 @@ export function ContactForm() {
         <label className="mono-s" style={{ color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
           Subject
         </label>
-        <select
-          className="select"
+        <Select
+          name="subject"
+          placeholder="Select a topic…"
           value={subject}
-          onChange={e => setSubject(e.target.value)}
-        >
-          <option value="">Select a topic…</option>
-          {SUBJECTS.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+          onChange={val => setSubject(val)}
+          options={SUBJECTS.map(s => ({ label: s, value: s }))}
+        />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
