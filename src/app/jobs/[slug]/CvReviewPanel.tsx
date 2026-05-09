@@ -1,7 +1,8 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useRef, useState } from "react";
-import { Upload, X, FileText, CheckCircle, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { Upload, X, FileText, CheckCircle, AlertCircle, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 
 interface ReviewResult {
@@ -58,17 +59,28 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
     if (f) pickFile(f);
   }
 
-  async function analyse() {
-    if (!file) return;
+  async function analyse(cvUrl?: string) {
     setLoading(true);
     setError(null);
 
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("jobSlug", jobSlug);
-
     try {
-      const res = await fetch("/api/cv-review", { method: "POST", body: fd });
+      let res: Response;
+
+      if (cvUrl) {
+        // Analyse the saved CV by URL — no file upload needed
+        res = await fetch("/api/cv-review", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ jobSlug, cvUrl }),
+        });
+      } else {
+        if (!file) return;
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("jobSlug", jobSlug);
+        res = await fetch("/api/cv-review", { method: "POST", body: fd });
+      }
+
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong. Please try again.");
@@ -95,10 +107,10 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
         Review my CV for this role
       </button>
 
-      {/* Overlay */}
-      {open && (
+      {/* Overlay — rendered via portal so it always sits above the sticky nav */}
+      {open && createPortal(
         <div
-          style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}
+          style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end", justifyContent: "flex-end" }}
           onClick={(e) => { if (e.target === e.currentTarget) close(); }}
         >
           {/* Backdrop */}
@@ -135,18 +147,25 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
                     Upload your CV and we'll score it against this job's requirements, highlight your strengths, and suggest improvements.
                   </p>
 
-                  {/* Saved CV shortcut */}
+                  {/* Saved CV — one-click analyse */}
                   {savedCvUrl && !file && (
-                    <div style={{ background: "var(--accent-soft)", border: "1px solid var(--pink-200)", borderRadius: 10, padding: "14px 16px", marginBottom: 16 }}>
-                      <p className="body-s" style={{ fontWeight: 600, color: "var(--accent)", marginBottom: 6 }}>You have a saved CV</p>
-                      <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 10 }}>
-                        Your profile has a CV on file. You can use that or upload a different version below.
+                    <div style={{ background: "var(--accent-soft)", border: "1px solid var(--pink-200)", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
+                      <p className="body-s" style={{ fontWeight: 600, color: "var(--accent)", marginBottom: 4 }}>You have a saved CV</p>
+                      <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.5 }}>
+                        Use your profile CV for instant analysis, or upload a different version below.
                       </p>
-                      <a href={savedCvUrl.startsWith("http") ? savedCvUrl : `https://${savedCvUrl}`}
-                        target="_blank" rel="noopener noreferrer"
-                        className="btn btn-accent btn-sm" style={{ textDecoration: "none" }}>
-                        Open saved CV <ArrowRight size={12} />
-                      </a>
+                      <button
+                        type="button"
+                        onClick={() => analyse(savedCvUrl)}
+                        disabled={loading}
+                        className="btn btn-accent btn-sm"
+                        style={{ width: "100%", justifyContent: "center" }}
+                      >
+                        {loading
+                          ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Analysing…</>
+                          : <><Sparkles size={13} /> Analyse my saved CV</>
+                        }
+                      </button>
                     </div>
                   )}
 
@@ -197,7 +216,7 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
 
                   <button
                     type="button"
-                    onClick={analyse}
+                    onClick={() => analyse()}
                     disabled={!file || loading}
                     className="btn btn-accent btn-lg"
                     style={{ width: "100%", justifyContent: "center" }}
@@ -218,7 +237,8 @@ export function CvReviewPanel({ jobSlug, jobTitle, savedCvUrl }: Props) {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
