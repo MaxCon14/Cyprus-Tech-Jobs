@@ -6,6 +6,8 @@ import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { buildWebSiteSchema } from "@/lib/schema";
 import { JobAlertForm } from "@/components/alerts/JobAlertForm";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -65,6 +67,21 @@ export default async function HomePage() {
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
+
+  let savedJobIds: string[] | undefined;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data: candidate } = await supabaseAdmin
+        .from("candidates").select("id").eq("email", user.email).single();
+      if (candidate) {
+        const { data: saved } = await supabaseAdmin
+          .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
+        savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
+      }
+    }
+  } catch { /* non-critical */ }
 
   return (
     <>
@@ -194,7 +211,7 @@ export default async function HomePage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {serialisedJobs.map(job => <JobCard key={job.id} {...job} />)}
+                {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
               </div>
 
               <div style={{ marginTop: 24 }}>
