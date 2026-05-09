@@ -81,9 +81,11 @@ export function JobCard({
           <span className="job-card-company">{company.name}</span>
           {postedAt && <span className="job-card-time">{timeAgo(postedAt)}</span>}
         </div>
-        {savedJobIds !== undefined && (
-          <SaveJobButton jobId={id} initialSaved={savedJobIds.includes(id)} />
-        )}
+        <SaveJobButton
+          jobId={id}
+          initialSaved={savedJobIds?.includes(id) ?? false}
+          isCandidate={savedJobIds !== undefined}
+        />
       </div>
 
       {/* Title */}

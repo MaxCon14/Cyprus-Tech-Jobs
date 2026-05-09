@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/placeholder-data";
 import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle } from "lucide-react";
+import { Select } from "@/components/ui/Select";
 
 type ListingType = "standard" | "featured";
 
@@ -236,51 +237,47 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
             </Field>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <Field label="Category" required error={fieldErrors.category}>
-                <select className="select" name="category" defaultValue="">
-                  <option value="" disabled>Select category</option>
-                  {CATEGORIES.slice(1).map(c => (
-                    <option key={c.slug} value={c.slug}>{c.label}</option>
-                  ))}
-                </select>
+                <Select name="category" placeholder="Select category"
+                  options={CATEGORIES.slice(1).map(c => ({ label: c.label, value: c.slug }))} />
               </Field>
               <Field label="Experience level" required error={fieldErrors.experienceLevel}>
-                <select className="select" name="experienceLevel" defaultValue="">
-                  <option value="" disabled>Select level</option>
-                  <option>Junior</option>
-                  <option>Mid-level</option>
-                  <option>Senior</option>
-                  <option>Lead</option>
-                  <option>Executive</option>
-                </select>
+                <Select name="experienceLevel" placeholder="Select level"
+                  options={[
+                    { label: "Junior",    value: "Junior" },
+                    { label: "Mid-level", value: "Mid-level" },
+                    { label: "Senior",    value: "Senior" },
+                    { label: "Lead",      value: "Lead" },
+                    { label: "Executive", value: "Executive" },
+                  ]} />
               </Field>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <Field label="Work type" required error={fieldErrors.remoteType}>
-                <select className="select" name="remoteType" defaultValue="">
-                  <option value="" disabled>Select work type</option>
-                  <option>Remote</option>
-                  <option>Hybrid</option>
-                  <option>On-site</option>
-                </select>
+                <Select name="remoteType" placeholder="Select work type"
+                  options={[
+                    { label: "Remote",  value: "Remote" },
+                    { label: "Hybrid",  value: "Hybrid" },
+                    { label: "On-site", value: "On-site" },
+                  ]} />
               </Field>
               <Field label="Employment type" required error={fieldErrors.employmentType}>
-                <select className="select" name="employmentType" defaultValue="">
-                  <option value="" disabled>Select type</option>
-                  <option>Full-time</option>
-                  <option>Part-time</option>
-                  <option>Contract</option>
-                  <option>Internship</option>
-                </select>
+                <Select name="employmentType" placeholder="Select type"
+                  options={[
+                    { label: "Full-time",  value: "Full-time" },
+                    { label: "Part-time",  value: "Part-time" },
+                    { label: "Contract",   value: "Contract" },
+                    { label: "Internship", value: "Internship" },
+                  ]} />
               </Field>
             </div>
             <Field label="City">
-              <select className="select" name="city" defaultValue="">
-                <option value="">Select city (optional)</option>
-                <option>Limassol</option>
-                <option>Nicosia</option>
-                <option>Larnaca</option>
-                <option>Paphos</option>
-              </select>
+              <Select name="city" placeholder="Select city (optional)"
+                options={[
+                  { label: "Limassol", value: "Limassol" },
+                  { label: "Nicosia",  value: "Nicosia" },
+                  { label: "Larnaca",  value: "Larnaca" },
+                  { label: "Paphos",   value: "Paphos" },
+                ]} />
             </Field>
             <Field label="Job description" required error={fieldErrors.description}>
               <textarea className="textarea" name="description" placeholder="Describe the role, responsibilities, and what you're looking for…" style={{ minHeight: 200 }} />

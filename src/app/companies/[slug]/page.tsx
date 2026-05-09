@@ -7,7 +7,9 @@ import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { ExternalLink, MapPin, Users, Calendar, ChevronLeft } from "lucide-react";
 import { buildOrganizationSchema, buildBreadcrumbSchema } from "@/lib/schema";
-import { JobAlertForm } from "@/components/alerts/JobAlertForm";
+import { FollowCompanyButton } from "@/components/alerts/FollowCompanyButton";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -28,6 +30,21 @@ export default async function CompanyProfilePage({ params }: Props) {
   if (!co) notFound();
 
   const jobs = co.jobs.map(j => serialiseJob({ ...j, company: co, tags: j.tags }));
+
+  let savedJobIds: string[] | undefined;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data: candidate } = await supabaseAdmin
+        .from("candidates").select("id").eq("email", user.email).single();
+      if (candidate) {
+        const { data: saved } = await supabaseAdmin
+          .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
+        savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
+      }
+    }
+  } catch { /* non-critical */ }
 
   const orgSchema        = buildOrganizationSchema(co);
   const breadcrumbSchema = buildBreadcrumbSchema([
@@ -119,7 +136,7 @@ export default async function CompanyProfilePage({ params }: Props) {
 
             {jobs.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {jobs.map(j => <JobCard key={j.id} {...j} />)}
+                {jobs.map(j => <JobCard key={j.id} {...j} savedJobIds={savedJobIds} />)}
               </div>
             ) : (
               <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "clamp(24px, 4vw, 40px)", textAlign: "center", background: "var(--surface)" }}>
@@ -151,7 +168,7 @@ export default async function CompanyProfilePage({ params }: Props) {
 
             <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
               <h3 className="h3" style={{ marginBottom: 12 }}>Get alerts for {co.name}</h3>
-              <JobAlertForm companyName={co.name} />
+              <FollowCompanyButton companyId={co.id} companyName={co.name} />
             </div>
           </aside>
         </div>

@@ -55,6 +55,7 @@ export function Footer() {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
                 ["About",            "/about"],
+                ["FAQ",              "/faq"],
                 ["Privacy policy",   "/privacy"],
                 ["Terms of service", "/terms"],
                 ["Contact",          "/contact"],

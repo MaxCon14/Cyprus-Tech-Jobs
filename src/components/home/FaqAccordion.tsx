@@ -2,10 +2,11 @@
 
 import { useState, useRef } from "react";
 import { ChevronDown } from "lucide-react";
+import type { ReactNode } from "react";
 
-type FaqItem = { q: string; a: string };
+type FaqItem = { q: string; a: string | ReactNode };
 
-function FaqRow({ q, a, isOpen, onToggle }: { q: string; a: string; isOpen: boolean; onToggle: () => void }) {
+function FaqRow({ q, a, isOpen, onToggle }: { q: string; a: string | ReactNode; isOpen: boolean; onToggle: () => void }) {
   const innerRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -25,7 +26,7 @@ function FaqRow({ q, a, isOpen, onToggle }: { q: string; a: string; isOpen: bool
         }}
       >
         <div ref={innerRef} className="faq-body">
-          <p className="body" style={{ color: "var(--text-muted)", lineHeight: 1.75 }}>{a}</p>
+          <div className="body" style={{ color: "var(--text-muted)", lineHeight: 1.75 }}>{a}</div>
         </div>
       </div>
     </div>

@@ -40,20 +40,28 @@ export default async function JobDetailPage({ params }: Props) {
   const similar    = similarRaw.map(serialiseJob);
   const salary     = formatSalary(job.salaryMin, job.salaryMax);
 
-  // Check if the visitor is a logged-in candidate with a saved CV
+  // Check if the visitor is a logged-in candidate (for CV review + saved jobs)
+  let isCandidate  = false;
   let savedCvUrl: string | null = null;
+  let savedJobIds: string[] | undefined;
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user?.email) {
-      const { data } = await supabaseAdmin
+      const { data: candidate } = await supabaseAdmin
         .from("candidates")
-        .select("cvUrl")
+        .select("id, cvUrl")
         .eq("email", user.email)
         .single();
-      savedCvUrl = data?.cvUrl ?? null;
+      if (candidate) {
+        isCandidate = true;
+        savedCvUrl  = candidate.cvUrl ?? null;
+        const { data: saved } = await supabaseAdmin
+          .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
+        savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
+      }
     }
-  } catch { /* non-critical — continue without saved CV */ }
+  } catch { /* non-critical */ }
 
   const metaItems = [
     { icon: <MapPin size={14} />,     label: job.city ?? "Cyprus" },
@@ -197,7 +205,7 @@ export default async function JobDetailPage({ params }: Props) {
             {isActive ? (
               <>
                 <ApplyButton jobId={job.id} applyUrl={job.applyUrl ?? "#"} companyName={job.company.name} />
-                <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} savedCvUrl={savedCvUrl} />
+                <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} isCandidate={isCandidate} savedCvUrl={savedCvUrl} />
               </>
             ) : (
               <>
@@ -270,7 +278,7 @@ export default async function JobDetailPage({ params }: Props) {
             <Link href="/jobs" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none" }}>VIEW ALL →</Link>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {similar.map(j => <JobCard key={j.id} {...j} />)}
+            {similar.map(j => <JobCard key={j.id} {...j} savedJobIds={savedJobIds} />)}
           </div>
         </div>
       )}

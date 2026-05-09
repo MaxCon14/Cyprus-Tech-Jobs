@@ -3,9 +3,12 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
+import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { buildWebSiteSchema } from "@/lib/schema";
 import { JobAlertForm } from "@/components/alerts/JobAlertForm";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 export const dynamic = "force-dynamic";
 
 /* ── FAQ data ── */
@@ -66,6 +69,21 @@ export default async function HomePage() {
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
 
+  let savedJobIds: string[] | undefined;
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email) {
+      const { data: candidate } = await supabaseAdmin
+        .from("candidates").select("id").eq("email", user.email).single();
+      if (candidate) {
+        const { data: saved } = await supabaseAdmin
+          .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
+        savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
+      }
+    }
+  } catch { /* non-critical */ }
+
   return (
     <>
       <script
@@ -96,15 +114,19 @@ export default async function HomePage() {
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
               <input className="input" type="text" name="search" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
             </div>
-            <div style={{ position: "relative", flex: "0 0 160px" }}>
-              <MapPin size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", zIndex: 1 }} />
-              <select className="select" name="city" style={{ paddingLeft: 38 }}>
-                <option value="">All locations</option>
-                <option value="Limassol">Limassol</option>
-                <option value="Nicosia">Nicosia</option>
-                <option value="Larnaca">Larnaca</option>
-                <option value="Paphos">Paphos</option>
-              </select>
+            <div style={{ flex: "0 0 170px" }}>
+              <Select
+                name="city"
+                placeholder="All locations"
+                icon={<MapPin size={14} />}
+                options={[
+                  { label: "All locations", value: "" },
+                  { label: "Limassol",      value: "Limassol" },
+                  { label: "Nicosia",       value: "Nicosia" },
+                  { label: "Larnaca",       value: "Larnaca" },
+                  { label: "Paphos",        value: "Paphos" },
+                ]}
+              />
             </div>
             <button type="submit" className="btn btn-accent">Search</button>
           </form>
@@ -194,7 +216,7 @@ export default async function HomePage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {serialisedJobs.map(job => <JobCard key={job.id} {...job} />)}
+                {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
               </div>
 
               <div style={{ marginTop: 24 }}>
@@ -323,7 +345,9 @@ export default async function HomePage() {
                 <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center", boxShadow: "0 0 40px rgba(255,61,127,0.45)" }}>
                   Create free candidate account →
                 </Link>
-                <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ justifyContent: "center", color: "rgba(255,255,255,0.4)" }}>
+                <Link href="/jobs" style={{ justifyContent: "center", display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, color: "rgba(255,255,255,0.45)", fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none", transition: "color 150ms ease" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.75)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}>
                   Browse jobs without an account
                 </Link>
               </div>

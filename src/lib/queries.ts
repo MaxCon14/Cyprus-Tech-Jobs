@@ -199,20 +199,22 @@ export async function createJobAlert({
   remoteType?: string;
   city?: string;
 }) {
-  return prisma.jobAlert.upsert({
+  const existing = await prisma.jobAlert.findFirst({
     where: {
-      email_categoryId_remoteType: {
-        email,
-        categoryId: categoryId ?? "",
-        remoteType: (remoteType ?? "") as never,
-      },
-    },
-    update: {},
-    create: {
       email,
-      categoryId: categoryId ?? undefined,
-      remoteType: remoteType as never | undefined,
-      city,
+      categoryId: categoryId ?? null,
+      remoteType: (remoteType ?? null) as never,
+      companyId:  null,
+    },
+  });
+  if (existing) return existing;
+  return prisma.jobAlert.create({
+    data: {
+      email,
+      categoryId: categoryId ?? null,
+      remoteType: (remoteType ?? null) as never,
+      city: city ?? null,
+      confirmed: true,
     },
   });
 }
