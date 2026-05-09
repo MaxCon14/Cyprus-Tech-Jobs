@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection, SkillsSection, CvSection } from "./ProfileEditor";
+import { MyAlertsCard } from "@/components/alerts/MyAlertsCard";
 import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -251,6 +252,7 @@ export default async function CandidateDashboardPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <SavedJobsCard jobs={savedJobs} />
             <AppliedJobsCard jobs={appliedJobs} />
+            <MyAlertsCard />
             <LinksSection candidate={c} />
             <PreferencesSection candidate={c} />
             <AlertSection candidate={c} />

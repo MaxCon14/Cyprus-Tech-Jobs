@@ -5,8 +5,8 @@ import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-const DAILY_THRESHOLD  = 23 * 60 * 60 * 1000;  // 23 h in ms
-const WEEKLY_THRESHOLD = 6  * 24 * 60 * 60 * 1000; // 6 d in ms
+const DAILY_THRESHOLD  = 23 * 60 * 60 * 1000;
+const WEEKLY_THRESHOLD = 6  * 24 * 60 * 60 * 1000;
 
 export async function GET(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -28,35 +28,31 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  let sent  = 0;
+  // Resolve company names for company-specific alerts
+  const companyIds = [...new Set(alerts.map(a => a.companyId).filter(Boolean) as string[])];
+  const companies  = companyIds.length
+    ? await prisma.company.findMany({ where: { id: { in: companyIds } }, select: { id: true, name: true } })
+    : [];
+  const companyMap = Object.fromEntries(companies.map(c => [c.id, c.name]));
+
+  let sent    = 0;
   let skipped = 0;
 
   for (const alert of alerts) {
-    const sinceDate = alert.lastSentAt ?? new Date(0);
+    const sinceDate  = alert.lastSentAt ?? new Date(0);
+    const companyName = alert.companyId ? (companyMap[alert.companyId] ?? null) : null;
 
     const where: Prisma.JobWhereInput = {
       status:    "ACTIVE",
       createdAt: { gt: sinceDate },
     };
 
-    if (alert.categoryId) {
-      where.category = { slug: alert.categoryId };
-    }
-    if (alert.remoteType) {
-      where.remoteType = alert.remoteType;
-    }
-    if (alert.city) {
-      where.city = alert.city;
-    }
-    if (alert.experienceLevel) {
-      where.experienceLevel = alert.experienceLevel;
-    }
-    if (alert.salaryMin) {
-      where.salaryMin = { gte: alert.salaryMin };
-    }
-    if (alert.companyId) {
-      where.companyId = alert.companyId;
-    }
+    if (alert.categoryId)      where.category      = { slug: alert.categoryId };
+    if (alert.remoteType)      where.remoteType     = alert.remoteType;
+    if (alert.city)            where.city           = alert.city;
+    if (alert.experienceLevel) where.experienceLevel = alert.experienceLevel;
+    if (alert.salaryMin)       where.salaryMin       = { gte: alert.salaryMin };
+    if (alert.companyId)       where.companyId       = alert.companyId;
 
     const jobs = await prisma.job.findMany({
       where,
@@ -74,13 +70,14 @@ export async function GET(req: NextRequest) {
       take: 10,
     });
 
-    if (jobs.length === 0) {
-      skipped++;
-      continue;
-    }
+    if (jobs.length === 0) { skipped++; continue; }
 
-    const emailHtml = buildAlertEmail(
-      jobs.map(j => ({
+    const subject = companyName
+      ? `${jobs.length} new role${jobs.length !== 1 ? "s" : ""} at ${companyName} — CyprusTech.Jobs`
+      : `${jobs.length} new tech job${jobs.length !== 1 ? "s" : ""} in Cyprus — CyprusTech.Jobs`;
+
+    const emailHtml = buildAlertEmail({
+      jobs: jobs.map(j => ({
         title:          j.title,
         slug:           j.slug,
         companyName:    j.company.name,
@@ -88,16 +85,18 @@ export async function GET(req: NextRequest) {
         remoteType:     j.remoteType,
         salaryMin:      j.salaryMin,
         salaryMax:      j.salaryMax,
-        salaryCurrency: j.salaryCurrency,
+        salaryCurrency: j.salaryCurrency ?? "EUR",
       })),
-      alert.firstName,
-    ).replace("{{TOKEN}}", alert.token);
+      firstName:   alert.firstName,
+      token:       alert.token,
+      companyName,
+    });
 
     try {
       await getResend().emails.send({
         from:    `${FROM_NAME} <${FROM_EMAIL}>`,
         to:      alert.email,
-        subject: `${jobs.length} new tech job${jobs.length !== 1 ? "s" : ""} in Cyprus — CyprusTech.Jobs`,
+        subject,
         html:    emailHtml,
       });
 

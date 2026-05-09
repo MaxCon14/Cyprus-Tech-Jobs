@@ -91,21 +91,36 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
+  // ID-based delete (from dashboard — no email required, auth verified server-side)
+  if (typeof body.alertId === "string" && body.alertId) {
+    const { createSupabaseServerClient } = await import("@/lib/supabase/server");
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    try {
+      await prisma.jobAlert.deleteMany({
+        where: { id: body.alertId, email: user.email.toLowerCase() },
+      });
+      return NextResponse.json({ ok: true });
+    } catch (err) {
+      console.error("[candidates/alert DELETE by id]", err);
+      return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
+    }
+  }
+
+  // Email-based delete (from FollowCompanyButton — no session required)
   const email     = typeof body.email     === "string" ? body.email.trim().toLowerCase() : "";
   const companyId = typeof body.companyId === "string" ? body.companyId : null;
 
   if (!email) {
-    return NextResponse.json({ error: "email is required." }, { status: 422 });
+    return NextResponse.json({ error: "email or alertId is required." }, { status: 422 });
   }
 
   try {
     await prisma.jobAlert.deleteMany({
-      where: {
-        email,
-        companyId: companyId ?? null,
-      },
+      where: { email, companyId: companyId ?? null },
     });
-
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[candidates/alert DELETE]", err);
