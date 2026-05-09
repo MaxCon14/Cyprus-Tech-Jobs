@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Bell, Check } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { Select } from "@/components/ui/Select";
 
 interface Category {
   slug:  string;
@@ -115,16 +116,13 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
 
       {/* Category — only shown on general form (not company-specific) */}
       {categories.length > 0 && !companyName && (
-        <select
-          className="select"
+        <Select
+          name="category"
+          placeholder="All categories"
           value={category}
-          onChange={e => setCategory(e.target.value)}
-        >
-          <option value="">All categories</option>
-          {categories.map(cat => (
-            <option key={cat.slug} value={cat.slug}>{cat.label}</option>
-          ))}
-        </select>
+          onChange={val => setCategory(val)}
+          options={categories.map(cat => ({ label: cat.label, value: cat.slug }))}
+        />
       )}
 
       {/* Frequency toggle */}
