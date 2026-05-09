@@ -11,7 +11,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CompaniesPage() {
-  const companies  = await getCompanies();
+  let companies: Awaited<ReturnType<typeof getCompanies>> = [];
+  try {
+    companies = await getCompanies();
+  } catch { /* DB temporarily unreachable */ }
   const featured   = companies.filter(c => c.featured);
 
   return (
