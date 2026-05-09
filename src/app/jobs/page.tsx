@@ -83,11 +83,17 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     salary,
   };
 
-  const [jobs, filteredTotal, categories] = await Promise.all([
-    getJobs({ ...filters, take: PAGE_SIZE, skip: (pageNum - 1) * PAGE_SIZE }),
-    getJobCount(filters),
-    getCategoriesWithCount(),
-  ]);
+  let jobs: Awaited<ReturnType<typeof getJobs>> = [];
+  let filteredTotal = 0;
+  let categories: Awaited<ReturnType<typeof getCategoriesWithCount>> = [];
+
+  try {
+    [jobs, filteredTotal, categories] = await Promise.all([
+      getJobs({ ...filters, take: PAGE_SIZE, skip: (pageNum - 1) * PAGE_SIZE }),
+      getJobCount(filters),
+      getCategoriesWithCount(),
+    ]);
+  } catch { /* DB temporarily unreachable — render with empty state */ }
 
   let savedJobIds: string[] | undefined;
   if (user?.email) {

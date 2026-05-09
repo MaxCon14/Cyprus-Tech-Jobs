@@ -60,11 +60,17 @@ const CATEGORY_GRID = [
 ];
 
 export default async function HomePage() {
-  const [jobs, companies, categories] = await Promise.all([
-    getJobs({ take: 5 }),
-    getCompanies({ featured: true }),
-    getCategoriesWithCount(),
-  ]);
+  let jobs: Awaited<ReturnType<typeof getJobs>> = [];
+  let companies: Awaited<ReturnType<typeof getCompanies>> = [];
+  let categories: Awaited<ReturnType<typeof getCategoriesWithCount>> = [];
+
+  try {
+    [jobs, companies, categories] = await Promise.all([
+      getJobs({ take: 5 }),
+      getCompanies({ featured: true }),
+      getCategoriesWithCount(),
+    ]);
+  } catch { /* DB temporarily unreachable — render with empty data */ }
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
