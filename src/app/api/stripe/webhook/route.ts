@@ -17,26 +17,28 @@ export async function POST(req: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
-    const session  = event.data.object as Stripe.Checkout.Session;
-    const meta     = session.metadata ?? {};
+    const session = event.data.object as Stripe.Checkout.Session;
+    const meta    = session.metadata ?? {};
 
     if (meta.type === "slot_purchase") {
-      const { slotType, quantity, employerId } = meta;
-      const qty = parseInt(quantity ?? "0", 10);
+      const { employerId } = meta;
+      const standardQty    = parseInt(meta.standardQty ?? "0", 10);
+      const featuredQty    = parseInt(meta.featuredQty  ?? "0", 10);
 
-      if (!employerId || !slotType || !qty) {
+      if (!employerId || (standardQty + featuredQty === 0)) {
         console.error("[stripe/webhook] missing slot_purchase metadata", meta);
         return NextResponse.json({ ok: true });
       }
 
       await prisma.employer.update({
         where: { id: employerId },
-        data: slotType === "standard"
-          ? { standardSlots: { increment: qty } }
-          : { featuredSlots: { increment: qty } },
+        data: {
+          ...(standardQty > 0 && { standardSlots: { increment: standardQty } }),
+          ...(featuredQty  > 0 && { featuredSlots:  { increment: featuredQty  } }),
+        },
       });
 
-      console.log(`[stripe/webhook] Added ${qty} ${slotType} slots to employer ${employerId}`);
+      console.log(`[stripe/webhook] Added ${standardQty} standard + ${featuredQty} featured slots to employer ${employerId}`);
     }
   }
 
