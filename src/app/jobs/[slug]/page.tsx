@@ -156,14 +156,16 @@ export default async function JobDetailPage({ params }: Props) {
           </div>
 
           {/* Skills */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
-            <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {job.tags.map(t => (
-                <SkillTag key={t.tag.name} name={t.tag.name} size="md" />
-              ))}
+          {job.tags.length > 0 && (
+            <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
+              <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {job.tags.map(t => (
+                  <SkillTag key={t.tag.name} name={t.tag.name} size="md" />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Description */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, background: "var(--surface)" }}>
