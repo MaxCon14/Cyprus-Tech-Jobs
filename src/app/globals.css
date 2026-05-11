@@ -897,7 +897,19 @@ body {
   flex: 1;
   padding: 16px 18px;
   min-width: 180px;
-  min-height: 310px;
+}
+
+.nav-flyout-sections-stack {
+  display: grid;
+}
+.nav-flyout-section-items {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  pointer-events: none;
+}
+.nav-flyout-section-items.active {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .nav-dropdown-heading {
