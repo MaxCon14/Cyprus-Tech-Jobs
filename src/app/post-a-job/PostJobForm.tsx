@@ -29,6 +29,7 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
   const defaultType: ListingType = featuredSlots > 0 ? "featured" : "standard";
 
   const [listingType, setListingType] = useState<ListingType>(defaultType);
+  const [remoteType,  setRemoteType]  = useState("");
   const [loading, setLoading]         = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -254,6 +255,7 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <Field label="Work type" required error={fieldErrors.remoteType}>
                 <Select name="remoteType" placeholder="Select work type"
+                  onChange={setRemoteType}
                   options={[
                     { label: "Remote",  value: "Remote" },
                     { label: "Hybrid",  value: "Hybrid" },
@@ -270,15 +272,17 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
                   ]} />
               </Field>
             </div>
-            <Field label="City">
-              <Select name="city" placeholder="Select city (optional)"
-                options={[
-                  { label: "Limassol", value: "Limassol" },
-                  { label: "Nicosia",  value: "Nicosia" },
-                  { label: "Larnaca",  value: "Larnaca" },
-                  { label: "Paphos",   value: "Paphos" },
-                ]} />
-            </Field>
+            {remoteType !== "Remote" && (
+              <Field label="City">
+                <Select name="city" placeholder="Select city (optional)"
+                  options={[
+                    { label: "Limassol", value: "Limassol" },
+                    { label: "Nicosia",  value: "Nicosia" },
+                    { label: "Larnaca",  value: "Larnaca" },
+                    { label: "Paphos",   value: "Paphos" },
+                  ]} />
+              </Field>
+            )}
             <Field label="Job description" required error={fieldErrors.description}>
               <textarea className="textarea" name="description" placeholder="Describe the role, responsibilities, and what you're looking for…" style={{ minHeight: 200 }} />
               <span className="mono-s" style={{ color: "var(--text-subtle)" }}>MARKDOWN SUPPORTED</span>
