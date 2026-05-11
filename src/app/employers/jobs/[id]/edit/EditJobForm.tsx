@@ -48,6 +48,7 @@ function validate(form: FormData): FormErrors {
 
 export function EditJobForm({ job, categories }: { job: JobData; categories: Category[] }) {
   const router = useRouter();
+  const [remoteType,  setRemoteType]  = useState(job.remoteType);
   const [loading,     setLoading]     = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -145,6 +146,7 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
                 name="remoteType"
                 placeholder="Select work type"
                 defaultValue={job.remoteType}
+                onChange={setRemoteType}
                 options={[
                   { label: "Remote",  value: "REMOTE"  },
                   { label: "Hybrid",  value: "HYBRID"  },
@@ -167,19 +169,21 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
               />
             </Field>
           </div>
-          <Field label="City">
-            <Select
-              name="city"
-              placeholder="Select city (optional)"
-              defaultValue={job.city}
-              options={[
-                { label: "Limassol", value: "Limassol" },
-                { label: "Nicosia",  value: "Nicosia"  },
-                { label: "Larnaca",  value: "Larnaca"  },
-                { label: "Paphos",   value: "Paphos"   },
-              ]}
-            />
-          </Field>
+          {remoteType !== "REMOTE" && (
+            <Field label="City">
+              <Select
+                name="city"
+                placeholder="Select city (optional)"
+                defaultValue={job.city}
+                options={[
+                  { label: "Limassol", value: "Limassol" },
+                  { label: "Nicosia",  value: "Nicosia"  },
+                  { label: "Larnaca",  value: "Larnaca"  },
+                  { label: "Paphos",   value: "Paphos"   },
+                ]}
+              />
+            </Field>
+          )}
           <Field label="Job description" required error={fieldErrors.description}>
             <textarea className="textarea" name="description" defaultValue={job.description} style={{ minHeight: 200 }} />
             <span className="mono-s" style={{ color: "var(--text-subtle)" }}>MARKDOWN SUPPORTED</span>
