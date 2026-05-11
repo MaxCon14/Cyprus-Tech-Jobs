@@ -351,9 +351,7 @@ export default async function HomePage() {
                 <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center", boxShadow: "0 0 40px rgba(255,61,127,0.45)" }}>
                   Create free candidate account →
                 </Link>
-                <Link href="/jobs" style={{ justifyContent: "center", display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, color: "rgba(255,255,255,0.45)", fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none", transition: "color 150ms ease" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.75)")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}>
+                <Link href="/jobs" className="link-subtle-hover" style={{ justifyContent: "center", display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
                   Browse jobs without an account
                 </Link>
               </div>
