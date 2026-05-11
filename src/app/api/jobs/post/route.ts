@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Employer account not found." }, { status: 404 });
   }
 
-  let body: Record<string, string | number | undefined>;
+  let body: Record<string, string | number | boolean | null | undefined>;
   try {
     body = await req.json();
   } catch {
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
     employmentType,
     city,
     description,
+    salaryDisclosed,
     salaryMin,
     salaryMax,
     applyUrl,
@@ -159,8 +160,9 @@ export async function POST(req: NextRequest) {
           employmentType:  (EMPLOYMENT_TYPE_MAP[employmentType as string] ?? "FULL_TIME") as never,
           experienceLevel: (EXPERIENCE_LEVEL_MAP[experienceLevel as string] ?? "MID") as never,
           city:            (city as string | undefined)?.trim() || undefined,
-          salaryMin:       salaryMin ? Number(salaryMin) : undefined,
-          salaryMax:       salaryMax ? Number(salaryMax) : undefined,
+          salaryDisclosed: salaryDisclosed !== false,
+          salaryMin:       salaryDisclosed !== false && salaryMin ? Number(salaryMin) : undefined,
+          salaryMax:       salaryDisclosed !== false && salaryMax ? Number(salaryMax) : undefined,
           applyUrl:        (applyUrl as string | undefined)?.trim() || undefined,
           applyEmail:      (applyEmail as string | undefined)?.trim() || undefined,
         },

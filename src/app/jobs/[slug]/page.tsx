@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isActive = job.status === "ACTIVE";
   return {
     title: `${job.title} at ${job.company.name}${isActive ? "" : " (Closed)"}`,
-    description: `${job.title} at ${job.company.name} in ${job.city}. ${formatSalary(job.salaryMin, job.salaryMax)} · ${remoteLabel(job.remoteType)}`,
+    description: `${job.title} at ${job.company.name} in ${job.city}. ${job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) ?? "" : "Salary undisclosed"} · ${remoteLabel(job.remoteType)}`,
     // Non-active jobs: tell Google to stop indexing and remove from Jobs results
     ...(!isActive && { robots: { index: false, follow: false } }),
   };
@@ -38,7 +38,7 @@ export default async function JobDetailPage({ params }: Props) {
 
   const similarRaw = await getSimilarJobs(job.id, job.categoryId, 3);
   const similar    = similarRaw.map(serialiseJob);
-  const salary     = formatSalary(job.salaryMin, job.salaryMax);
+  const salary     = job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) : null;
 
   // Check if the visitor is a logged-in candidate (for CV review + saved jobs)
   let isCandidate  = false;
@@ -196,10 +196,12 @@ export default async function JobDetailPage({ params }: Props) {
 
           {/* Apply card */}
           <div style={{ border: `1px solid ${isActive ? "var(--border)" : "var(--border)"}`, borderRadius: 10, padding: 24, background: "var(--surface)" }}>
-            {salary && (
+            {(salary || !job.salaryDisclosed) && (
               <div style={{ marginBottom: 16 }}>
                 <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>ANNUAL SALARY</div>
-                <div className="mono-l" style={{ color: isActive ? "var(--accent)" : "var(--text-muted)", fontSize: 20 }}>{salary}</div>
+                <div className="mono-l" style={{ color: salary ? (isActive ? "var(--accent)" : "var(--text-muted)") : "var(--text-subtle)", fontSize: 20 }}>
+                  {salary ?? "Undisclosed"}
+                </div>
               </div>
             )}
             {isActive ? (

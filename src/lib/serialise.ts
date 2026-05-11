@@ -12,6 +12,7 @@ type PrismaJob = {
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string;
+  salaryDisclosed: boolean;
   featured: boolean;
   postedAt: Date | null;
   company: { name: string; slug: string; logoUrl: string | null; website: string | null };
@@ -20,18 +21,19 @@ type PrismaJob = {
 
 export function serialiseJob(job: PrismaJob) {
   return {
-    id:             job.id,
-    slug:           job.slug,
-    title:          job.title,
-    city:           job.city,
-    remoteType:     job.remoteType,
-    employmentType: job.employmentType,
-    experienceLevel:job.experienceLevel,
-    salaryMin:      job.salaryMin,
-    salaryMax:      job.salaryMax,
-    salaryCurrency: job.salaryCurrency,
-    featured:       job.featured,
-    postedAt:       job.postedAt?.toISOString() ?? null,
+    id:              job.id,
+    slug:            job.slug,
+    title:           job.title,
+    city:            job.city,
+    remoteType:      job.remoteType,
+    employmentType:  job.employmentType,
+    experienceLevel: job.experienceLevel,
+    salaryMin:       job.salaryMin,
+    salaryMax:       job.salaryMax,
+    salaryCurrency:  job.salaryCurrency,
+    salaryDisclosed: job.salaryDisclosed,
+    featured:        job.featured,
+    postedAt:        job.postedAt?.toISOString() ?? null,
     company: {
       name:    job.company.name,
       slug:    job.company.slug,
