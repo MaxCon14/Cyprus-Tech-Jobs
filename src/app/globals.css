@@ -897,6 +897,7 @@ body {
   flex: 1;
   padding: 16px 18px;
   min-width: 180px;
+  min-height: 310px;
 }
 
 .nav-dropdown-heading {
