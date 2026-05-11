@@ -43,9 +43,10 @@ export default async function EditJobPage({
     employmentType: job.employmentType as string,
     experienceLevel:job.experienceLevel as string,
     city:           job.city ?? "",
-    salaryMin:      job.salaryMin ?? "",
-    salaryMax:      job.salaryMax ?? "",
-    applyUrl:       job.applyUrl ?? "",
+    salaryMin:       job.salaryMin ?? "",
+    salaryMax:       job.salaryMax ?? "",
+    salaryDisclosed: job.salaryDisclosed,
+    applyUrl:        job.applyUrl ?? "",
     applyEmail:     job.applyEmail ?? "",
   };
 

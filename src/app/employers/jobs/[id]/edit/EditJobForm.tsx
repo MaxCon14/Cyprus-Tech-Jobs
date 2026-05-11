@@ -19,6 +19,7 @@ interface JobData {
   city: string;
   salaryMin: number | string;
   salaryMax: number | string;
+  salaryDisclosed: boolean;
   applyUrl: string;
   applyEmail: string;
 }
@@ -48,8 +49,9 @@ function validate(form: FormData): FormErrors {
 
 export function EditJobForm({ job, categories }: { job: JobData; categories: Category[] }) {
   const router = useRouter();
-  const [remoteType,  setRemoteType]  = useState(job.remoteType);
-  const [loading,     setLoading]     = useState(false);
+  const [remoteType,      setRemoteType]      = useState(job.remoteType);
+  const [salaryDisclosed, setSalaryDisclosed] = useState(job.salaryDisclosed);
+  const [loading,         setLoading]         = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
@@ -76,8 +78,9 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
       employmentType:  form.get("employmentType"),
       experienceLevel: form.get("experienceLevel"),
       city:            form.get("city"),
-      salaryMin:       form.get("salaryMin") || undefined,
-      salaryMax:       form.get("salaryMax") || undefined,
+      salaryDisclosed,
+      salaryMin:       salaryDisclosed ? (form.get("salaryMin") || undefined) : null,
+      salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
       applyUrl:        form.get("applyUrl"),
       applyEmail:      form.get("applyEmail"),
     };
@@ -191,17 +194,48 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
         </FormSection>
 
         <FormSection icon={<Star size={14} />} title="Salary & apply">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <Field label="Salary min (€/year)">
-              <input className="input" name="salaryMin" type="number" defaultValue={job.salaryMin} placeholder="e.g. 60000" />
-            </Field>
-            <Field label="Salary max (€/year)">
-              <input className="input" name="salaryMax" type="number" defaultValue={job.salaryMax} placeholder="e.g. 85000" />
-            </Field>
+          {/* Salary disclosure toggle */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--bg-alt)", border: "1px solid var(--border)", borderRadius: 8 }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, marginBottom: 2 }}>Show salary range</div>
+              <div className="body-s" style={{ color: "var(--text-muted)" }}>
+                {salaryDisclosed ? "Candidates will see the salary range" : "Salary will appear as Undisclosed"}
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={salaryDisclosed}
+              onClick={() => setSalaryDisclosed(v => !v)}
+              style={{
+                width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", flexShrink: 0,
+                background: salaryDisclosed ? "var(--accent)" : "var(--border-strong)",
+                position: "relative", transition: "background 150ms",
+              }}
+            >
+              <span style={{
+                position: "absolute", top: 3, left: salaryDisclosed ? 23 : 3,
+                width: 18, height: 18, borderRadius: "50%", background: "var(--white)",
+                transition: "left 150ms", display: "block",
+              }} />
+            </button>
           </div>
-          <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
-            LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
-          </p>
+
+          {salaryDisclosed && (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <Field label="Salary min (€/year)">
+                  <input className="input" name="salaryMin" type="number" defaultValue={job.salaryMin} placeholder="e.g. 60000" />
+                </Field>
+                <Field label="Salary max (€/year)">
+                  <input className="input" name="salaryMax" type="number" defaultValue={job.salaryMax} placeholder="e.g. 85000" />
+                </Field>
+              </div>
+              <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
+                LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
+              </p>
+            </>
+          )}
           <Field label="Application URL or email" required error={fieldErrors.applyUrl}>
             <input className="input" name="applyUrl" type="text" defaultValue={job.applyUrl || job.applyEmail} placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" />
             <input type="hidden" name="applyEmail" value="" />

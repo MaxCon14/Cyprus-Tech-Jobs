@@ -33,7 +33,7 @@ export async function PATCH(
     return NextResponse.json({ error: "Job not found." }, { status: 404 });
   }
 
-  let body: Record<string, string | number | undefined>;
+  let body: Record<string, string | number | boolean | null | undefined>;
   try {
     body = await req.json();
   } catch {
@@ -43,7 +43,7 @@ export async function PATCH(
   const {
     title, description, categorySlug,
     remoteType, employmentType, experienceLevel,
-    city, salaryMin, salaryMax, applyUrl, applyEmail,
+    city, salaryDisclosed, salaryMin, salaryMax, applyUrl, applyEmail,
   } = body;
 
   const errors: string[] = [];
@@ -75,8 +75,9 @@ export async function PATCH(
         employmentType:  employmentType  as never,
         experienceLevel: experienceLevel as never,
         city:            (city as string | undefined)?.trim() || undefined,
-        salaryMin:       salaryMin ? Number(salaryMin) : null,
-        salaryMax:       salaryMax ? Number(salaryMax) : null,
+        salaryDisclosed: salaryDisclosed !== false,
+        salaryMin:       salaryDisclosed !== false && salaryMin ? Number(salaryMin) : null,
+        salaryMax:       salaryDisclosed !== false && salaryMax ? Number(salaryMax) : null,
         applyUrl:        (applyUrl    as string | undefined)?.trim() || undefined,
         applyEmail:      (applyEmail  as string | undefined)?.trim() || undefined,
       },

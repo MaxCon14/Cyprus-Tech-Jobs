@@ -43,6 +43,7 @@ type JobCardProps = {
   salaryMin?: number | null;
   salaryMax?: number | null;
   salaryCurrency?: string;
+  salaryDisclosed?: boolean;
   featured?: boolean;
   postedAt?: Date | string | null;
   tags?: { name: string }[];
@@ -61,12 +62,13 @@ export function JobCard({
   salaryMin,
   salaryMax,
   salaryCurrency = "EUR",
+  salaryDisclosed = true,
   featured,
   postedAt,
   tags = [],
   savedJobIds,
 }: JobCardProps) {
-  const salary = formatSalary(salaryMin, salaryMax, salaryCurrency);
+  const salary = salaryDisclosed ? formatSalary(salaryMin, salaryMax, salaryCurrency) : null;
   const empLabel = employmentType.replace("_", "-").replace(/\b\w/g, (c) => c.toUpperCase());
   const expLabel = experienceLevel.charAt(0) + experienceLevel.slice(1).toLowerCase();
 
@@ -110,12 +112,16 @@ export function JobCard({
 
       {/* Footer: salary + apply */}
       <div className="job-card-footer">
-        {salary && (
+        {salary ? (
           <div className="job-card-salary">
             <strong>{salary}</strong>
             <span className="job-card-salary-period"> / yr</span>
           </div>
-        )}
+        ) : !salaryDisclosed ? (
+          <div className="job-card-salary" style={{ color: "var(--text-subtle)" }}>
+            <strong>Undisclosed</strong>
+          </div>
+        ) : null}
         <button className="btn btn-accent job-card-apply">Apply for this role →</button>
       </div>
     </Link>

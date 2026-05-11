@@ -104,9 +104,10 @@ model Job {
   slug            String          @unique
   title           String
   description     String
-  salaryMin       Int?
-  salaryMax       Int?
-  salaryCurrency  String          @default("EUR")
+  salaryMin        Int?
+  salaryMax        Int?
+  salaryCurrency   String          @default("EUR")
+  salaryDisclosed  Boolean         @default(true)
   city            String?
   remoteType      RemoteType      @default(ON_SITE)
   employmentType  EmploymentType  @default(FULL_TIME)

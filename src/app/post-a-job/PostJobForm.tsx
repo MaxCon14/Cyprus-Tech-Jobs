@@ -28,9 +28,10 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
   const hasSlots        = standardSlots > 0 || featuredSlots > 0;
   const defaultType: ListingType = featuredSlots > 0 ? "featured" : "standard";
 
-  const [listingType, setListingType] = useState<ListingType>(defaultType);
-  const [remoteType,  setRemoteType]  = useState("");
-  const [loading, setLoading]         = useState(false);
+  const [listingType,      setListingType]      = useState<ListingType>(defaultType);
+  const [remoteType,       setRemoteType]       = useState("");
+  const [salaryDisclosed,  setSalaryDisclosed]  = useState(true);
+  const [loading, setLoading]                   = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
@@ -74,8 +75,9 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
       employmentType:     form.get("employmentType"),
       city:               form.get("city"),
       description:        form.get("description"),
-      salaryMin:          form.get("salaryMin"),
-      salaryMax:          form.get("salaryMax"),
+      salaryDisclosed,
+      salaryMin:          salaryDisclosed ? form.get("salaryMin") : null,
+      salaryMax:          salaryDisclosed ? form.get("salaryMax") : null,
       applyUrl:           form.get("applyUrl"),
       applyEmail:         form.get("applyEmail"),
     };
@@ -290,17 +292,48 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
           </FormSection>
 
           <FormSection icon={<Star size={14} />} title="Salary & apply">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <Field label="Salary min (€/year)">
-                <input className="input" name="salaryMin" type="number" placeholder="e.g. 60000" />
-              </Field>
-              <Field label="Salary max (€/year)">
-                <input className="input" name="salaryMax" type="number" placeholder="e.g. 85000" />
-              </Field>
+            {/* Salary disclosure toggle */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--bg-alt)", border: "1px solid var(--border)", borderRadius: 8 }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, marginBottom: 2 }}>Show salary range</div>
+                <div className="body-s" style={{ color: "var(--text-muted)" }}>
+                  {salaryDisclosed ? "Candidates will see the salary range" : "Salary will appear as Undisclosed"}
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={salaryDisclosed}
+                onClick={() => setSalaryDisclosed(v => !v)}
+                style={{
+                  width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", flexShrink: 0,
+                  background: salaryDisclosed ? "var(--accent)" : "var(--border-strong)",
+                  position: "relative", transition: "background 150ms",
+                }}
+              >
+                <span style={{
+                  position: "absolute", top: 3, left: salaryDisclosed ? 23 : 3,
+                  width: 18, height: 18, borderRadius: "50%", background: "var(--white)",
+                  transition: "left 150ms", display: "block",
+                }} />
+              </button>
             </div>
-            <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
-              LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
-            </p>
+
+            {salaryDisclosed && (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <Field label="Salary min (€/year)">
+                    <input className="input" name="salaryMin" type="number" placeholder="e.g. 60000" />
+                  </Field>
+                  <Field label="Salary max (€/year)">
+                    <input className="input" name="salaryMax" type="number" placeholder="e.g. 85000" />
+                  </Field>
+                </div>
+                <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
+                  LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
+                </p>
+              </>
+            )}
             <Field label="Application URL or email" required error={fieldErrors.applyUrl}>
               <input className="input" name="applyUrl" type="text" placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" />
             </Field>
