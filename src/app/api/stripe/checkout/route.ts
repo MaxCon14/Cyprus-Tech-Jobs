@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getStripe } from "@/lib/stripe";
 
 const PRICING = {
-  standard: { base: 999, extra: 500 },  // cents
+  standard: { base: 999,  extra: 500  },
   featured:  { base: 1499, extra: 1000 },
 } as const;
 
@@ -15,21 +15,23 @@ function calcAmountCents(qty: number, type: SlotType): number {
 }
 
 export async function POST(req: NextRequest) {
-  let body: { quantity?: number; slotType?: string; employerId?: string };
+  let body: {
+    standardQty?: number;
+    featuredQty?: number;
+    employerId?: string;
+  };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  const { quantity, slotType, employerId } = body;
-  const qty = typeof quantity === "number" ? quantity : parseInt(String(quantity ?? "0"), 10);
+  const { employerId } = body;
+  const standardQty = Math.max(0, Math.min(50, Number(body.standardQty ?? 0)));
+  const featuredQty  = Math.max(0, Math.min(50, Number(body.featuredQty  ?? 0)));
 
-  if (!slotType || (slotType !== "standard" && slotType !== "featured")) {
-    return NextResponse.json({ error: "Invalid slot type." }, { status: 400 });
-  }
-  if (!qty || qty < 1 || qty > 50) {
-    return NextResponse.json({ error: "Quantity must be between 1 and 50." }, { status: 400 });
+  if (standardQty + featuredQty === 0) {
+    return NextResponse.json({ error: "Select at least one slot to purchase." }, { status: 400 });
   }
   if (!employerId) {
     return NextResponse.json({ error: "Employer ID required." }, { status: 400 });
@@ -40,22 +42,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Employer not found." }, { status: 404 });
   }
 
-  const amountCents = calcAmountCents(qty, slotType);
-  const label       = `${qty} ${slotType.charAt(0).toUpperCase() + slotType.slice(1)} Listing Slot${qty > 1 ? "s" : ""}`;
-  const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const lineItems = [];
+
+  if (standardQty > 0) {
+    lineItems.push({
+      price_data: {
+        currency:     "eur",
+        unit_amount:  calcAmountCents(standardQty, "standard"),
+        product_data: {
+          name: `${standardQty} Standard Listing Slot${standardQty > 1 ? "s" : ""}`,
+        },
+      },
+      quantity: 1,
+    });
+  }
+
+  if (featuredQty > 0) {
+    lineItems.push({
+      price_data: {
+        currency:     "eur",
+        unit_amount:  calcAmountCents(featuredQty, "featured"),
+        product_data: {
+          name: `${featuredQty} Featured Listing Slot${featuredQty > 1 ? "s" : ""}`,
+        },
+      },
+      quantity: 1,
+    });
+  }
 
   try {
     const session = await getStripe().checkout.sessions.create({
-      mode: "payment",
-      line_items: [{
-        price_data: {
-          currency:     "eur",
-          unit_amount:  amountCents,
-          product_data: { name: label },
-        },
-        quantity: 1,
-      }],
-      metadata:    { type: "slot_purchase", slotType, quantity: String(qty), employerId },
+      mode:       "payment",
+      line_items: lineItems,
+      metadata: {
+        type:        "slot_purchase",
+        employerId,
+        standardQty: String(standardQty),
+        featuredQty:  String(featuredQty),
+      },
       success_url: `${appUrl}/buy-credits/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${appUrl}/buy-credits`,
     });
