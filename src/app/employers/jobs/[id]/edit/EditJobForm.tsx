@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Star, Building2, Loader2, AlertCircle, Check } from "lucide-react";
 import { Select } from "@/components/ui/Select";
@@ -54,6 +54,13 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
   const [loading,         setLoading]         = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [isDirty,         setIsDirty]         = useState(false);
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -97,6 +104,7 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
         setLoading(false);
         return;
       }
+      setIsDirty(false);
       router.push(`/employers/dashboard?edited=1`);
     } catch {
       setServerError("Network error. Please try again.");
@@ -113,7 +121,7 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)} noValidate style={{ display: "flex", flexDirection: "column", gap: 0 }}>
 
         <FormSection icon={<Zap size={14} />} title="Job details">
           <Field label="Job title" required error={fieldErrors.title}>
@@ -206,7 +214,7 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
               type="button"
               role="switch"
               aria-checked={salaryDisclosed}
-              onClick={() => setSalaryDisclosed(v => !v)}
+              onClick={() => { setSalaryDisclosed(v => !v); setIsDirty(true); }}
               style={{
                 width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", flexShrink: 0,
                 background: salaryDisclosed ? "var(--accent)" : "var(--border-strong)",
@@ -257,7 +265,10 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
           <button
             type="button"
             className="btn btn-outline btn-lg"
-            onClick={() => router.push("/employers/dashboard")}
+            onClick={() => {
+              if (isDirty && !window.confirm("You have unsaved changes. Leave without saving?")) return;
+              router.push("/employers/dashboard");
+            }}
             style={{ display: "flex", alignItems: "center", gap: 8 }}
           >
             Cancel
