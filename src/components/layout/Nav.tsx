@@ -90,22 +90,11 @@ function JobsDropdown({ onClose }: { onClose: () => void }) {
             {FLYOUT_SECTIONS.find(s => s.key === active)?.icon}
             {FLYOUT_SECTIONS.find(s => s.key === active)?.label}
           </div>
-          {/* All sections rendered in a grid stack — invisible ones still hold their space,
-              so the container height is always the tallest section's natural height. */}
-          <div className="nav-flyout-sections-stack">
-            {(Object.keys(FLYOUT_ITEMS) as FlyoutSection[]).map(section => (
-              <div
-                key={section}
-                className={`nav-flyout-section-items${section === active ? " active" : ""}`}
-              >
-                {FLYOUT_ITEMS[section].map(item => (
-                  <Link key={item.href} href={item.href} className="nav-dropdown-item" onClick={onClose}>
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            ))}
-          </div>
+          {FLYOUT_ITEMS[active].map(item => (
+            <Link key={item.href} href={item.href} className="nav-dropdown-item" onClick={onClose}>
+              {item.label}
+            </Link>
+          ))}
         </div>
 
       </div>
