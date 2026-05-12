@@ -477,6 +477,7 @@ export default function EmployerOnboardingPage() {
           name: state.name, email: state.email, companyName: state.companyName,
           website: state.website, city: state.city, size: state.size,
           description: state.description, techStack: state.techStack,
+          logoUrl: state.logoUrl || undefined,
         }),
       });
       const data = await res.json();
