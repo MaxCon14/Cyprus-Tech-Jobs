@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { CheckCircle2, Briefcase, ShoppingBag } from "lucide-react";
+import { getStripe } from "@/lib/stripe";
+import { fulfillSlotPurchase } from "@/lib/stripe-fulfill";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Slots Added — CyprusTech.Jobs" };
@@ -10,6 +12,30 @@ export default async function BuyCreditsSuccessPage({
   searchParams: Promise<{ session_id?: string }>;
 }) {
   const { session_id } = await searchParams;
+
+  // Server-side fallback: credit slots if the webhook hasn't fired yet
+  if (session_id) {
+    try {
+      const session = await getStripe().checkout.sessions.retrieve(session_id);
+      const meta    = session.metadata ?? {};
+
+      if (
+        session.payment_status === "paid" &&
+        meta.type === "slot_purchase" &&
+        meta.employerId
+      ) {
+        await fulfillSlotPurchase({
+          sessionId:   session.id,
+          employerId:  meta.employerId,
+          standardQty: parseInt(meta.standardQty ?? "0", 10),
+          featuredQty: parseInt(meta.featuredQty  ?? "0", 10),
+        });
+      }
+    } catch (err) {
+      // Non-fatal — webhook may have already processed this or session_id is invalid
+      console.error("[buy-credits/success] fallback fulfillment error:", err);
+    }
+  }
 
   return (
     <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(40px,6vw,80px) var(--page-padding-x)" }}>
