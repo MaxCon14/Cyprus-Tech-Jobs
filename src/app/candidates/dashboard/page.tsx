@@ -7,7 +7,6 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection, SkillsSection, CvSection } from "./ProfileEditor";
 import { MyAlertsCard } from "@/components/alerts/MyAlertsCard";
-import { SignOutClient } from "./SignOutClient";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
 import { remoteLabel, formatSalary, timeAgo } from "@/lib/utils";
@@ -123,25 +122,6 @@ export default async function CandidateDashboardPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-
-      {/* ── Top nav ── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 20,
-        background: "var(--surface)", borderBottom: "1px solid var(--border)",
-        padding: "0 24px",
-      }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{initials}</span>
-            </div>
-            <span className="body-s dashboard-header-name" style={{ color: "var(--text-muted)" }}>{c.firstName ?? c.email}</span>
-            <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
-            <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
-            <SignOutClient />
-          </div>
-        </div>
-      </header>
 
       <div className="dashboard-page-padding" style={{ maxWidth: 1100, margin: "0 auto" }}>
 
