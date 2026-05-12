@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       salaryMin:       typeof body.salaryMin === "number" && body.salaryMin > 0 ? body.salaryMin : null,
       categories:      Array.isArray(body.categories) ? body.categories : [],
       alertFrequency:  body.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY",
+      headline:        typeof body.headline === "string" ? body.headline.trim() || null : null,
       bio:             typeof body.bio === "string" ? body.bio.trim() || null : null,
       avatarUrl:       typeof body.avatarUrl === "string" ? body.avatarUrl.trim() || null : null,
       skills:          Array.isArray(body.skills) ? body.skills.slice(0, 10) : [],

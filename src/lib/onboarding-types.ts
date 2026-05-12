@@ -166,6 +166,7 @@ export interface CandidateWizardState {
   firstName: string;
   lastName: string;
   email: string;
+  headline: string;
   bio: string;
   avatarUrl: string;
   githubUrl: string;
@@ -206,6 +207,7 @@ export function initialCandidateState(): CandidateWizardState {
     firstName: "",
     lastName: "",
     email: "",
+    headline: "",
     bio: "",
     avatarUrl: "",
     githubUrl: "",

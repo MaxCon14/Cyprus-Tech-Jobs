@@ -28,7 +28,7 @@ const LS_KEY = "cyprustechjobs:candidate-draft";
 
 const PERSIST_FIELDS = [
   "categories", "remoteType", "city", "experienceLevel", "salaryMin",
-  "skills", "alertFrequency", "firstName", "lastName", "email", "bio",
+  "skills", "alertFrequency", "firstName", "lastName", "email", "headline", "bio",
   "githubUrl", "linkedinUrl", "portfolioUrl",
   "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl", "cvUrl",
 ] as const;
@@ -434,6 +434,15 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
           <FieldError error={state.errors.email} touched={state.touched.email} />
         </Field>
 
+        {/* Headline */}
+        <Field label="Professional headline (optional)">
+          <input className="input" type="text" value={state.headline}
+            placeholder="Senior React Developer · Open to remote"
+            maxLength={100}
+            onChange={(e) => dispatch({ type: "SET_FIELD", field: "headline", value: e.target.value })} />
+          <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "right" }}>{state.headline.length}/100</p>
+        </Field>
+
         {/* Bio */}
         <Field label="Bio (optional)">
           <textarea className="input" value={state.bio} placeholder="A short intro about you and what you're looking for…"
@@ -729,6 +738,7 @@ export default function CandidateOnboardingPage() {
           salaryMin: state.salaryMin ? parseInt(state.salaryMin, 10) : null,
           skills: state.skills,
           alertFrequency: state.alertFrequency,
+          headline: state.headline || null,
           bio: state.bio || null,
           avatarUrl: state.avatarUrl || null,
           githubUrl: state.githubUrl || null,
