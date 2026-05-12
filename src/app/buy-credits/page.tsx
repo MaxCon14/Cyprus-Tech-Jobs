@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { CreditSelector } from "./CreditSelector";
 
@@ -21,7 +22,9 @@ export default async function BuyCreditsPage() {
 
   const employer = await prisma.employer.findUnique({ where: { email: user.email } });
   if (!employer) {
-    redirect("/employers/onboarding");
+    const { data: candidate } = await supabaseAdmin
+      .from("candidates").select("id").eq("email", user.email).single();
+    redirect(candidate ? "/candidates/dashboard" : "/employers/onboarding");
   }
 
   const { standardSlots, featuredSlots } = employer;
