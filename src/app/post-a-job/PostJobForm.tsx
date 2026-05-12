@@ -9,8 +9,11 @@ import { Select } from "@/components/ui/Select";
 type ListingType = "standard" | "featured";
 
 interface Props {
-  standardSlots: number;
-  featuredSlots: number;
+  standardSlots:       number;
+  featuredSlots:       number;
+  companyName:         string;
+  companyWebsite:      string;
+  companyDescription:  string;
 }
 
 interface FormErrors {
@@ -24,7 +27,7 @@ interface FormErrors {
   applyUrl?:        string;
 }
 
-export function PostJobForm({ standardSlots, featuredSlots }: Props) {
+export function PostJobForm({ standardSlots, featuredSlots, companyName, companyWebsite, companyDescription }: Props) {
   const hasSlots        = standardSlots > 0 || featuredSlots > 0;
   const defaultType: ListingType = featuredSlots > 0 ? "featured" : "standard";
 
@@ -223,14 +226,14 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
           <FormSection icon={<Building2 size={14} />} title="Company details">
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <Field label="Company name" required error={fieldErrors.companyName}>
-                <input className="input" name="companyName" type="text" placeholder="e.g. Acme Technologies" />
+                <input className="input" name="companyName" type="text" placeholder="e.g. Acme Technologies" defaultValue={companyName} />
               </Field>
               <Field label="Company website">
-                <input className="input" name="companyWebsite" type="url" placeholder="https://yourcompany.com" />
+                <input className="input" name="companyWebsite" type="url" placeholder="https://yourcompany.com" defaultValue={companyWebsite} />
               </Field>
             </div>
             <Field label="Company description">
-              <textarea className="textarea" name="companyDescription" placeholder="Brief description of your company…" style={{ minHeight: 80 }} />
+              <textarea className="textarea" name="companyDescription" placeholder="Brief description of your company…" style={{ minHeight: 80 }} defaultValue={companyDescription} />
             </Field>
           </FormSection>
 
