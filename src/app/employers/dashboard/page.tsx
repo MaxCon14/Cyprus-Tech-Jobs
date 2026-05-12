@@ -27,10 +27,10 @@ const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }>
   CLOSED:  { bg: "var(--bg-muted)",     color: "var(--text-subtle)", label: "Closed"  },
 };
 
-type SearchParams = Promise<{ posted?: string; edited?: string }>;
+type SearchParams = Promise<{ posted?: string; edited?: string; drafted?: string; "drafted-edit"?: string }>;
 
 export default async function EmployerDashboard({ searchParams }: { searchParams: SearchParams }) {
-  const { posted, edited } = await searchParams;
+  const { posted, edited, drafted, "drafted-edit": draftedEdit } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) redirect("/login");
@@ -85,16 +85,25 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
       <div className="employer-page-inner">
 
         {/* ── Success banner ── */}
-        {(posted || edited) && (
+        {(posted || edited || drafted || draftedEdit) && (
           <div style={{
             display: "flex", alignItems: "center", gap: 10,
-            background: "var(--success-bg)", border: "1px solid var(--success)",
+            background: drafted || draftedEdit ? "var(--bg-alt)" : "var(--success-bg)",
+            border: `1px solid ${drafted || draftedEdit ? "var(--border)" : "var(--success)"}`,
             borderRadius: 10, padding: "12px 18px", marginBottom: 16,
           }}>
-            <CheckCircle2 size={15} style={{ color: "var(--success)", flexShrink: 0 }} />
-            <span className="body-s" style={{ color: "var(--success)", fontWeight: 500 }}>
-              {posted ? "Your job listing is now live." : "Your listing has been updated successfully."}
+            <CheckCircle2 size={15} style={{ color: drafted || draftedEdit ? "var(--text-muted)" : "var(--success)", flexShrink: 0 }} />
+            <span className="body-s" style={{ color: drafted || draftedEdit ? "var(--text-muted)" : "var(--success)", fontWeight: 500 }}>
+              {posted       ? "Your job listing is now live."
+               : edited     ? "Your listing has been updated successfully."
+               : draftedEdit ? "Draft saved."
+               :               "Draft saved — no slot used. Edit and publish when ready."}
             </span>
+            {drafted && (
+              <Link href="/post-a-job" className="btn btn-outline btn-sm" style={{ marginLeft: "auto", flexShrink: 0 }}>
+                Continue editing
+              </Link>
+            )}
           </div>
         )}
 
@@ -333,10 +342,16 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
                           initialStatus={job.status as "ACTIVE" | "PAUSED"}
                         />
                       )}
-                      <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
-                        <Eye size={13} />
-                      </Link>
-                      <Link href={`/employers/jobs/${job.id}/edit`} className="btn btn-ghost btn-icon btn-sm" title="Edit listing">
+                      {job.status !== "DRAFT" && (
+                        <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
+                          <Eye size={13} />
+                        </Link>
+                      )}
+                      <Link
+                        href={`/employers/jobs/${job.id}/edit`}
+                        className="btn btn-ghost btn-icon btn-sm"
+                        title={job.status === "DRAFT" ? "Edit & publish draft" : "Edit listing"}
+                      >
                         <Edit2 size={13} />
                       </Link>
                     </div>

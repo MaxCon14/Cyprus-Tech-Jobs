@@ -2,26 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Star, Building2, Loader2, AlertCircle, Check } from "lucide-react";
+import { Zap, Star, Building2, Loader2, AlertCircle, Check, Rocket, ShoppingBag } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 
 interface Category { label: string; slug: string }
 
 interface JobData {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  categorySlug: string;
-  remoteType: string;
-  employmentType: string;
+  id:              string;
+  slug:            string;
+  title:           string;
+  description:     string;
+  categorySlug:    string;
+  remoteType:      string;
+  employmentType:  string;
   experienceLevel: string;
-  city: string;
-  salaryMin: number | string;
-  salaryMax: number | string;
+  city:            string;
+  salaryMin:       number | string;
+  salaryMax:       number | string;
   salaryDisclosed: boolean;
-  applyUrl: string;
-  applyEmail: string;
+  applyUrl:        string;
+  applyEmail:      string;
 }
 
 interface FormErrors {
@@ -34,6 +34,8 @@ interface FormErrors {
   applyUrl?:        string;
 }
 
+type ListingType = "standard" | "featured";
+
 function validate(form: FormData, applyMethod: "url" | "email"): FormErrors {
   const errs: FormErrors = {};
   if (!String(form.get("title")          ?? "").trim()) errs.title           = "Job title is required.";
@@ -41,28 +43,61 @@ function validate(form: FormData, applyMethod: "url" | "email"): FormErrors {
   if (!form.get("experienceLevel"))                     errs.experienceLevel = "Please select an experience level.";
   if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
   if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
-  if (!String(form.get("description")   ?? "").trim()) errs.description     = "Job description is required.";
+  if (!String(form.get("description")    ?? "").trim()) errs.description     = "Job description is required.";
   if (applyMethod === "url"   && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
   if (applyMethod === "email" && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
   return errs;
 }
 
-export function EditJobForm({ job, categories }: { job: JobData; categories: Category[] }) {
+interface Props {
+  job:           JobData;
+  categories:    Category[];
+  isDraft?:      boolean;
+  standardSlots?: number;
+  featuredSlots?: number;
+}
+
+export function EditJobForm({ job, categories, isDraft = false, standardSlots = 0, featuredSlots = 0 }: Props) {
   const router = useRouter();
   const [remoteType,      setRemoteType]      = useState(job.remoteType);
   const [salaryDisclosed, setSalaryDisclosed] = useState(job.salaryDisclosed);
   const [applyMethod,     setApplyMethod]     = useState<"url" | "email">(job.applyEmail && !job.applyUrl ? "email" : "url");
   const [loading,         setLoading]         = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [publishLoading,  setPublishLoading]  = useState(false);
+  const [serverError,     setServerError]     = useState<string | null>(null);
+  const [publishError,    setPublishError]    = useState<string | null>(null);
+  const [fieldErrors,     setFieldErrors]     = useState<FormErrors>({});
   const [isDirty,         setIsDirty]         = useState(false);
+  const [listingType,     setListingType]     = useState<ListingType>(featuredSlots > 0 ? "featured" : "standard");
 
+  const hasSlots = standardSlots > 0 || featuredSlots > 0;
+
+  // Warn before leaving with unsaved changes (only for live jobs)
   useEffect(() => {
+    if (isDraft) return;
     const handler = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [isDirty]);
+  }, [isDirty, isDraft]);
 
+  function buildBody(form: FormData) {
+    return {
+      title:           form.get("title"),
+      description:     form.get("description"),
+      categorySlug:    form.get("categorySlug"),
+      remoteType:      form.get("remoteType"),
+      employmentType:  form.get("employmentType"),
+      experienceLevel: form.get("experienceLevel"),
+      city:            form.get("city"),
+      salaryDisclosed,
+      salaryMin:       salaryDisclosed ? (form.get("salaryMin") || undefined) : null,
+      salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
+      applyUrl:        form.get("applyUrl"),
+      applyEmail:      form.get("applyEmail"),
+    };
+  }
+
+  // Save changes (ACTIVE/PAUSED) or save draft fields (DRAFT)
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setServerError(null);
@@ -78,26 +113,11 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
     setFieldErrors({});
     setLoading(true);
 
-    const body = {
-      title:           form.get("title"),
-      description:     form.get("description"),
-      categorySlug:    form.get("categorySlug"),
-      remoteType:      form.get("remoteType"),
-      employmentType:  form.get("employmentType"),
-      experienceLevel: form.get("experienceLevel"),
-      city:            form.get("city"),
-      salaryDisclosed,
-      salaryMin:       salaryDisclosed ? (form.get("salaryMin") || undefined) : null,
-      salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
-      applyUrl:        form.get("applyUrl"),
-      applyEmail:      form.get("applyEmail"),
-    };
-
     try {
       const res  = await fetch(`/api/jobs/${job.id}`, {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(body),
+        body:    JSON.stringify(buildBody(form)),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -106,10 +126,69 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
         return;
       }
       setIsDirty(false);
-      router.push(`/employers/dashboard?edited=1`);
+      if (isDraft) {
+        router.push("/employers/dashboard?drafted-edit=1");
+      } else {
+        router.push("/employers/dashboard?edited=1");
+      }
     } catch {
       setServerError("Network error. Please try again.");
       setLoading(false);
+    }
+  }
+
+  // Publish draft → ACTIVE (reads from saved job prop — employer must save draft first)
+  async function handlePublish() {
+    setPublishError(null);
+
+    const errs: FormErrors = {};
+    if (!job.title?.trim())       errs.title           = "Job title is required. Save your draft first.";
+    if (!job.categorySlug)        errs.category        = "Category is required. Save your draft first.";
+    if (!job.experienceLevel)     errs.experienceLevel = "Experience level is required.";
+    if (!job.remoteType)          errs.remoteType      = "Work type is required.";
+    if (!job.employmentType)      errs.employmentType  = "Employment type is required.";
+    if (!job.description?.trim()) errs.description     = "Job description is required. Save your draft first.";
+    if (!job.applyUrl?.trim() && !job.applyEmail?.trim())
+      errs.applyUrl = "Application URL or email is required. Save your draft first.";
+
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      document.getElementsByName(Object.keys(errs)[0])[0]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    setPublishLoading(true);
+
+    try {
+      const res  = await fetch(`/api/jobs/${job.id}/publish`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          listingType,
+          title:           job.title,
+          description:     job.description,
+          categorySlug:    job.categorySlug,
+          remoteType:      job.remoteType,
+          employmentType:  job.employmentType,
+          experienceLevel: job.experienceLevel,
+          city:            job.city || undefined,
+          salaryDisclosed: job.salaryDisclosed,
+          salaryMin:       job.salaryDisclosed ? job.salaryMin || undefined : null,
+          salaryMax:       job.salaryDisclosed ? job.salaryMax || undefined : null,
+          applyUrl:        job.applyUrl  || undefined,
+          applyEmail:      job.applyEmail || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPublishError(data.error ?? (data.errors?.[0]) ?? "Something went wrong.");
+        setPublishLoading(false);
+        return;
+      }
+      router.push(`/employers/dashboard?posted=${data.jobSlug}`);
+    } catch {
+      setPublishError("Network error. Please try again.");
+      setPublishLoading(false);
     }
   }
 
@@ -273,31 +352,143 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
           </div>
         </FormSection>
 
-        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-          <button
-            type="submit"
-            className="btn btn-accent btn-lg"
-            disabled={loading}
-            style={{ flex: 1, justifyContent: "center", display: "flex", alignItems: "center", gap: 8 }}
-          >
-            {loading
-              ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Saving…</>
-              : <><Check size={16} /> Save changes — live immediately</>
-            }
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline btn-lg"
-            onClick={() => {
-              if (isDirty && !window.confirm("You have unsaved changes. Leave without saving?")) return;
-              router.push("/employers/dashboard");
-            }}
-            style={{ display: "flex", alignItems: "center", gap: 8 }}
-          >
-            Cancel
-          </button>
-        </div>
+        {/* ── Save/cancel row for live jobs ── */}
+        {!isDraft && (
+          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            <button
+              type="submit"
+              className="btn btn-accent btn-lg"
+              disabled={loading}
+              style={{ flex: 1, justifyContent: "center", display: "flex", alignItems: "center", gap: 8 }}
+            >
+              {loading
+                ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Saving…</>
+                : <><Check size={16} /> Save changes — live immediately</>
+              }
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline btn-lg"
+              onClick={() => {
+                if (isDirty && !window.confirm("You have unsaved changes. Leave without saving?")) return;
+                router.push("/employers/dashboard");
+              }}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {/* ── Save draft button for draft jobs ── */}
+        {isDraft && (
+          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            <button
+              type="submit"
+              className="btn btn-outline btn-lg"
+              disabled={loading}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}
+            >
+              {loading
+                ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Saving…</>
+                : "Save draft"
+              }
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-lg"
+              onClick={() => router.push("/employers/dashboard")}
+              style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-muted)" }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </form>
+
+      {/* ── Publish section (draft only) ── */}
+      {isDraft && (
+        <div style={{ border: "1px solid var(--accent)", borderRadius: 12, padding: 24, marginTop: 24, background: "var(--accent-soft)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+            <Rocket size={16} style={{ color: "var(--accent)" }} />
+            <h3 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, margin: 0, color: "var(--accent)" }}>
+              Ready to go live?
+            </h3>
+          </div>
+          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>
+            Save your draft first, then choose a listing type and publish. Uses 1 slot.
+          </p>
+
+          {/* Listing type selector */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            {([
+              { id: "standard" as ListingType, label: "Standard", slots: standardSlots, icon: <Zap size={14} /> },
+              { id: "featured" as ListingType, label: "Featured",  slots: featuredSlots, icon: <Star size={14} /> },
+            ] as const).map(opt => {
+              const isSelected  = listingType === opt.id;
+              const hasThisSlot = opt.slots > 0;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  disabled={!hasThisSlot}
+                  onClick={() => hasThisSlot && setListingType(opt.id)}
+                  style={{
+                    all: "unset", boxSizing: "border-box",
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "10px 14px", borderRadius: 8,
+                    border:      isSelected ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                    background:  isSelected ? "var(--surface)" : "var(--bg-alt)",
+                    cursor:      hasThisSlot ? "pointer" : "not-allowed",
+                    opacity:     hasThisSlot ? 1 : 0.45,
+                  }}
+                >
+                  <span style={{ color: isSelected ? "var(--accent)" : "var(--text-muted)" }}>{opt.icon}</span>
+                  <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: isSelected ? "var(--accent)" : "var(--text)" }}>
+                    {opt.label}
+                  </span>
+                  <span className="mono-s" style={{ color: "var(--text-subtle)", marginLeft: "auto" }}>
+                    {opt.slots} left
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {publishError && (
+            <div style={{ background: "var(--error-bg)", border: "1px solid var(--error)", borderRadius: 8, padding: "10px 14px", marginBottom: 14, display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <AlertCircle size={13} style={{ color: "var(--error)", flexShrink: 0, marginTop: 1 }} />
+              <span className="body-s" style={{ color: "var(--error)" }}>{publishError}</span>
+            </div>
+          )}
+
+          {!hasSlots ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <ShoppingBag size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+              <span className="body-s" style={{ color: "var(--text-muted)" }}>
+                No slots available. <a href="/buy-credits" style={{ color: "var(--accent)", textDecoration: "underline" }}>Buy slots →</a>
+              </span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handlePublish}
+              disabled={publishLoading}
+              className="btn btn-accent btn-lg"
+              style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", gap: 8 }}
+            >
+              {publishLoading
+                ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Publishing…</>
+                : <><Rocket size={15} /> Publish {listingType === "featured" ? "Featured" : "Standard"} listing — goes live now</>
+              }
+            </button>
+          )}
+
+          <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 10 }}>
+            USES 1 {listingType.toUpperCase()} SLOT · LIVE INSTANTLY · 30 ACTIVE DAYS
+          </p>
+        </div>
+      )}
     </div>
   );
 }
