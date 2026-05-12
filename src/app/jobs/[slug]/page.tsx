@@ -208,7 +208,7 @@ export default async function JobDetailPage({ params }: Props) {
             )}
             {isActive ? (
               <>
-                <ApplyButton jobId={job.id} applyUrl={job.applyUrl ?? "#"} companyName={job.company.name} />
+                <ApplyButton jobId={job.id} applyUrl={job.applyUrl ?? undefined} applyEmail={job.applyEmail ?? undefined} companyName={job.company.name} />
                 <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} isCandidate={isCandidate} savedCvUrl={savedCvUrl} />
               </>
             ) : (
