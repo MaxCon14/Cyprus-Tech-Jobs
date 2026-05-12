@@ -12,7 +12,6 @@ import {
   CheckCircle2, AlertCircle, FileText, ShoppingBag, PauseCircle,
 } from "lucide-react";
 import type { Metadata } from "next";
-import { SignOutClient } from "./SignOutClient";
 import { JobVisibilityToggle } from "./JobVisibilityToggle";
 
 export const metadata: Metadata = {
@@ -55,32 +54,6 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
-
-      {/* ── Top nav ── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 20,
-        background: "var(--surface)", borderBottom: "1px solid var(--border)",
-        padding: "0 clamp(16px,3vw,24px)",
-      }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden" }}>
-              {company?.logoUrl
-                ? <img src={company.logoUrl} alt={company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{companyInitial}</span>
-              }
-            </div>
-            <span className="body-s employer-nav-company-name" style={{ color: "var(--text-muted)" }}>
-              {company?.name ?? employer.name ?? "Employer"}
-            </span>
-            <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
-            <Link href="/post-a-job" className="btn btn-accent btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Plus size={13} /> Post a job
-            </Link>
-            <SignOutClient />
-          </div>
-        </div>
-      </header>
 
       <div className="employer-page-inner">
 

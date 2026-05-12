@@ -2,21 +2,6 @@ export default function EmployerDashboardLoading() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
 
-      {/* ── Top nav ── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 20,
-        background: "var(--surface)", borderBottom: "1px solid var(--border)",
-        padding: "0 clamp(16px,3vw,24px)",
-      }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10 }}>
-          <div className="skeleton" style={{ width: 28, height: 28, borderRadius: 6 }} />
-          <div className="skeleton" style={{ width: 90, height: 14, borderRadius: 4 }} />
-          <div style={{ width: 1, height: 16, background: "var(--border-strong)", margin: "0 2px" }} />
-          <div className="skeleton" style={{ width: 84, height: 30, borderRadius: 8 }} />
-          <div className="skeleton" style={{ width: 68, height: 30, borderRadius: 8 }} />
-        </div>
-      </header>
-
       <div className="employer-page-inner">
 
         {/* ── Company hero ── */}
