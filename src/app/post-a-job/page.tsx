@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { PostJobForm } from "./PostJobForm";
 
@@ -22,7 +23,9 @@ export default async function PostAJobPage() {
     include: { company: true },
   });
   if (!employer) {
-    redirect("/employers/onboarding");
+    const { data: candidate } = await supabaseAdmin
+      .from("candidates").select("id").eq("email", user.email).single();
+    redirect(candidate ? "/candidates/dashboard" : "/employers/onboarding");
   }
 
   return (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown>;
@@ -12,6 +13,15 @@ export async function POST(req: NextRequest) {
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "Valid email is required." }, { status: 422 });
+  }
+
+  // Block employer emails from creating candidate accounts
+  const existingEmployer = await prisma.employer.findUnique({ where: { email }, select: { id: true } });
+  if (existingEmployer) {
+    return NextResponse.json(
+      { error: "This email is registered as an employer account and cannot be used for a job seeker account." },
+      { status: 409 },
+    );
   }
 
   // Return existing candidate if already signed up

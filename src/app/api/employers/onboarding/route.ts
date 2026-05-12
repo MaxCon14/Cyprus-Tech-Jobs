@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { slugify } from "@/lib/utils";
 
 function validateBody(body: Record<string, unknown>): string | null {
@@ -34,6 +35,16 @@ export async function POST(req: NextRequest) {
   try {
     const existing = await prisma.employer.findUnique({ where: { email } });
     if (existing) return NextResponse.json({ employerId: existing.id, exists: true }, { status: 200 });
+
+    // Block candidate emails from creating employer accounts
+    const { data: candidate } = await supabaseAdmin
+      .from("candidates").select("id").eq("email", email).single();
+    if (candidate) {
+      return NextResponse.json(
+        { error: "This email is registered as a job seeker account and cannot be used for an employer account." },
+        { status: 409 },
+      );
+    }
 
     const baseSlug = slugify(companyName);
     const existingCompany = await prisma.company.findUnique({ where: { slug: baseSlug } });
