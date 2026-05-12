@@ -117,7 +117,7 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
                     <CheckCircle2 size={10} /> Verified
                   </span>
                 )}
-                <span className="tag tag-outline" style={{ fontSize: 11 }}>{employer.plan}</span>
+
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {company?.city && (
