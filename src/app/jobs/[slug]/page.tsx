@@ -41,22 +41,36 @@ export default async function JobDetailPage({ params }: Props) {
   const similar    = similarRaw.map(serialiseJob);
   const salary     = job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) : null;
 
-  // Check if the visitor is a logged-in candidate (for CV review + saved jobs)
+  // Check if the visitor is a logged-in candidate (for CV review + saved jobs + in-app apply)
   let isCandidate  = false;
   let savedCvUrl: string | null = null;
   let savedJobIds: string[] | undefined;
+  let candidateId: string | undefined;
+  let candidateName: string | undefined;
+  let candidateEmail: string | undefined;
+  let candidateHeadline: string | undefined;
+  let candidateCity: string | undefined;
+  let candidateExperienceLevel: string | undefined;
+  let candidateSkills: string[] | undefined;
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user?.email) {
       const { data: candidate } = await supabaseAdmin
         .from("candidates")
-        .select("id, cvUrl")
+        .select("id, cvUrl, firstName, lastName, email, headline, city, experienceLevel, skills")
         .eq("email", user.email)
         .single();
       if (candidate) {
-        isCandidate = true;
-        savedCvUrl  = candidate.cvUrl ?? null;
+        isCandidate           = true;
+        savedCvUrl            = candidate.cvUrl ?? null;
+        candidateId           = candidate.id;
+        candidateEmail        = candidate.email;
+        candidateName         = [candidate.firstName, candidate.lastName].filter(Boolean).join(" ") || candidate.email;
+        candidateHeadline     = candidate.headline ?? undefined;
+        candidateCity         = candidate.city ?? undefined;
+        candidateExperienceLevel = candidate.experienceLevel ?? undefined;
+        candidateSkills       = candidate.skills ?? [];
         const { data: saved } = await supabaseAdmin
           .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
         savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
@@ -232,7 +246,21 @@ export default async function JobDetailPage({ params }: Props) {
             )}
             {isActive ? (
               <>
-                <ApplyButton jobId={job.id} applyUrl={job.applyUrl ?? undefined} applyEmail={job.applyEmail ?? undefined} companyName={job.company.name} />
+                <ApplyButton
+                  jobId={job.id}
+                  applyType={job.applyType ?? "URL"}
+                  applyUrl={job.applyUrl ?? undefined}
+                  applyEmail={job.applyEmail ?? undefined}
+                  companyName={job.company.name}
+                  candidateId={candidateId}
+                  candidateName={candidateName}
+                  candidateEmail={candidateEmail}
+                  candidateHeadline={candidateHeadline}
+                  candidateCity={candidateCity}
+                  candidateExperienceLevel={candidateExperienceLevel}
+                  candidateSkills={candidateSkills}
+                  cvUrl={savedCvUrl ?? undefined}
+                />
                 <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} isCandidate={isCandidate} savedCvUrl={savedCvUrl} />
               </>
             ) : (
