@@ -38,6 +38,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Valid email is required." }, { status: 422 });
   }
 
+  // Employers must not subscribe to job alerts
+  const employer = await prisma.employer.findUnique({ where: { email }, select: { id: true } });
+  if (employer) {
+    return NextResponse.json({ error: "Employers cannot subscribe to job alerts." }, { status: 403 });
+  }
+
   const categoryId      = typeof body.categoryId === "string" ? body.categoryId : null;
   const companyId       = typeof body.companyId  === "string" ? body.companyId  : null;
   const remoteType      = typeof body.remoteType === "string" ? (body.remoteType as RemoteType) : null;

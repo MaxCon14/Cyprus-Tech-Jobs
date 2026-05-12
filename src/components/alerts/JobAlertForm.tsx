@@ -20,23 +20,37 @@ interface Props {
 type Step = "idle" | "loading" | "done" | "error";
 
 export function JobAlertForm({ categories = [], defaultCategorySlug, companyName, companyId }: Props) {
-  const [email,       setEmail]       = useState("");
+  const [email,        setEmail]        = useState("");
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
-  const [category,    setCategory]    = useState(defaultCategorySlug ?? "");
-  const [freq,        setFreq]        = useState<"DAILY" | "WEEKLY">("WEEKLY");
-  const [step,        setStep]        = useState<Step>("idle");
-  const [err,         setErr]         = useState("");
+  const [isEmployer,   setIsEmployer]   = useState(false);
+  const [category,     setCategory]     = useState(defaultCategorySlug ?? "");
+  const [freq,         setFreq]         = useState<"DAILY" | "WEEKLY">("WEEKLY");
+  const [step,         setStep]         = useState<Step>("idle");
+  const [err,          setErr]          = useState("");
 
   useEffect(() => {
     createSupabaseBrowserClient()
       .auth.getSession()
-      .then(({ data: { session } }) => {
-        if (session?.user?.email) setSessionEmail(session.user.email);
+      .then(async ({ data: { session } }) => {
+        const email = session?.user?.email;
+        if (!email) return;
+        setSessionEmail(email);
+        const res = await fetch("/api/employers/check-email", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ email }),
+        }).catch(() => null);
+        if (res?.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data.exists) setIsEmployer(true);
+        }
       });
   }, []);
 
   const effectiveEmail = sessionEmail ?? email;
   const isLoggedIn     = sessionEmail !== null;
+
+  if (isEmployer) return null;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -18,6 +18,7 @@ export function FollowCompanyButton({ companyId, companyName }: Props) {
   const [followState, setFollowState] = useState<FollowState>("loading");
   const [freq,        setFreq]        = useState<"DAILY" | "WEEKLY">("WEEKLY");
   const [userEmail,   setUserEmail]   = useState("");
+  const [isEmployer,  setIsEmployer]  = useState(false);
   const [busy,        setBusy]        = useState(false);
 
   useEffect(() => {
@@ -34,6 +35,17 @@ export function FollowCompanyButton({ companyId, companyName }: Props) {
       const email = session.user.email;
       setUserEmail(email);
       setAuthState("authenticated");
+
+      // Check employer status — employers cannot follow companies for alerts
+      const empRes = await fetch("/api/employers/check-email", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email }),
+      }).catch(() => null);
+      if (empRes?.ok) {
+        const empData = await empRes.json().catch(() => ({}));
+        if (empData.exists) { setIsEmployer(true); return; }
+      }
 
       const res = await fetch(
         `/api/candidates/alert?email=${encodeURIComponent(email)}&companyId=${encodeURIComponent(companyId)}`
@@ -81,6 +93,8 @@ export function FollowCompanyButton({ companyId, companyName }: Props) {
       });
     }
   }
+
+  if (isEmployer) return null;
 
   if (authState === "loading" || (authState === "authenticated" && followState === "loading")) {
     return (
