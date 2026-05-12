@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
   ACTIVE:  { bg: "var(--success-bg)",   color: "var(--success)",     label: "Active"  },
-  PAUSED:  { bg: "var(--warning-bg)",   color: "var(--warning)",     label: "Paused"  },
+  PAUSED:  { bg: "var(--warning-bg)",   color: "var(--warning)",     label: "Inactive" },
   DRAFT:   { bg: "var(--bg-muted)",     color: "var(--text-muted)",  label: "Draft"   },
   EXPIRED: { bg: "var(--error-bg)",     color: "var(--error)",       label: "Expired" },
   CLOSED:  { bg: "var(--bg-muted)",     color: "var(--text-subtle)", label: "Closed"  },
@@ -172,7 +172,7 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
         <div className="employer-stats-grid">
           {[
             { label: "Active listings",  value: activeJobs.length.toString(),  icon: <Briefcase    size={16} />, accent: true  },
-            { label: "Paused",           value: pausedJobs.length.toString(),  icon: <PauseCircle  size={16} />, accent: false },
+            { label: "Inactive",          value: pausedJobs.length.toString(),  icon: <PauseCircle  size={16} />, accent: false },
             { label: "Draft",            value: draftJobs.length.toString(),   icon: <FileText     size={16} />, accent: false },
             { label: "Expired / closed", value: expiredJobs.length.toString(), icon: <Clock        size={16} />, accent: false },
           ].map(stat => (
