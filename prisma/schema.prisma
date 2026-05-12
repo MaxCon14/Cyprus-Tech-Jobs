@@ -171,6 +171,21 @@ model Employer {
 }
 
 // ─────────────────────────────────────────────
+// SLOT PURCHASES (idempotency log for Stripe payments)
+// ─────────────────────────────────────────────
+
+model SlotPurchase {
+  id          String   @id @default(cuid())
+  sessionId   String   @unique
+  employerId  String
+  standardQty Int
+  featuredQty Int
+  createdAt   DateTime @default(now())
+
+  @@map("slot_purchases")
+}
+
+// ─────────────────────────────────────────────
 // JOB ALERTS (candidates subscribe, no account needed)
 // ─────────────────────────────────────────────
 
