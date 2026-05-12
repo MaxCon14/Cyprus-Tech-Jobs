@@ -13,6 +13,7 @@ import {
   TECH_STACK_OPTIONS,
   type CandidateWizardState,
   type CandidateWizardAction,
+  type PositionDraft,
 } from "@/lib/onboarding-types";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CvUpload } from "@/components/candidates/CvUpload";
@@ -492,23 +493,13 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
 
 // ─── Step 8: Experience ───────────────────────────────────────────────────────
 
-interface PositionDraft {
-  id: string;
-  title: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-}
-
 const emptyDraft = (): PositionDraft => ({
   id: Math.random().toString(36).slice(2),
   title: "", company: "", startDate: "", endDate: "", current: false, description: "",
 });
 
-function Step8Experience() {
-  const [positions, setPositions] = useState<PositionDraft[]>([]);
+function Step8Experience({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+  const positions = state.positions;
   const [form, setForm] = useState<PositionDraft>(emptyDraft());
   const [adding, setAdding] = useState(false);
 
@@ -517,12 +508,13 @@ function Step8Experience() {
 
   const addPosition = () => {
     if (!form.title.trim() || !form.company.trim()) return;
-    setPositions((p) => [...p, form]);
+    dispatch({ type: "SET_POSITIONS", value: [...positions, form] });
     setForm(emptyDraft());
     setAdding(false);
   };
 
-  const remove = (id: string) => setPositions((p) => p.filter((x) => x.id !== id));
+  const remove = (id: string) =>
+    dispatch({ type: "SET_POSITIONS", value: positions.filter((x) => x.id !== id) });
 
   return (
     <div>
@@ -713,7 +705,27 @@ export default function CandidateOnboardingPage() {
       handleSubmit();
       return;
     }
+    if (state.step === 8 && state.candidateId && state.positions.length > 0) {
+      handleSavePositions();
+      return;
+    }
     startTransition(() => dispatch({ type: "NEXT_STEP" }));
+  };
+
+  const handleSavePositions = async () => {
+    dispatch({ type: "SET_SUBMITTING", value: true });
+    try {
+      await fetch("/api/candidates/onboarding/positions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId: state.candidateId, positions: state.positions }),
+      });
+    } catch {
+      // Non-fatal — user can add experience from dashboard
+    } finally {
+      dispatch({ type: "SET_SUBMITTING", value: false });
+      startTransition(() => dispatch({ type: "NEXT_STEP" }));
+    }
   };
 
   const handleBack = () => startTransition(() => dispatch({ type: "PREV_STEP" }));
@@ -801,7 +813,7 @@ export default function CandidateOnboardingPage() {
         {state.step === 5 && <Step5Skills state={state} dispatch={dispatch} />}
         {state.step === 6 && <Step6Alerts state={state} dispatch={dispatch} />}
         {state.step === 7 && <Step7Profile state={state} dispatch={dispatch} onNext={handleNext} />}
-        {state.step === 8 && <Step8Experience />}
+        {state.step === 8 && <Step8Experience state={state} dispatch={dispatch} />}
         {state.step === 9 && <Step9Done state={state} />}
       </StepSlide>
 

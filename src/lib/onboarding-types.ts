@@ -143,6 +143,16 @@ export function employerReducer(
 
 export type CandidateWizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
+export interface PositionDraft {
+  id: string;
+  title: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
+  description: string;
+}
+
 export interface CandidateWizardState {
   step: CandidateWizardStep;
   direction: WizardDirection;
@@ -177,6 +187,8 @@ export interface CandidateWizardState {
   twitterUrl: string;
   mediumUrl: string;
   cvUrl: string;
+  // Step 8 — work experience
+  positions: PositionDraft[];
 }
 
 export type CandidateWizardAction =
@@ -187,6 +199,7 @@ export type CandidateWizardAction =
   | { type: "PREV_STEP" }
   | { type: "SET_SUBMITTING"; value: boolean }
   | { type: "SET_CANDIDATE_ID"; id: string }
+  | { type: "SET_POSITIONS"; value: PositionDraft[] }
   | { type: "RESET" };
 
 export function initialCandidateState(): CandidateWizardState {
@@ -218,6 +231,7 @@ export function initialCandidateState(): CandidateWizardState {
     twitterUrl: "",
     mediumUrl: "",
     cvUrl: "",
+    positions: [],
   };
 }
 
@@ -286,6 +300,9 @@ export function candidateReducer(
 
     case "SET_CANDIDATE_ID":
       return { ...state, candidateId: action.id };
+
+    case "SET_POSITIONS":
+      return { ...state, positions: action.value };
 
     case "RESET":
       return initialCandidateState();
