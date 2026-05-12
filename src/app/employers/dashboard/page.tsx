@@ -9,20 +9,22 @@ import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import {
   Plus, Eye, Edit2, Briefcase, Building2,
   ExternalLink, MapPin, Clock, ChevronRight,
-  CheckCircle2, AlertCircle, FileText, ShoppingBag,
+  CheckCircle2, AlertCircle, FileText, ShoppingBag, PauseCircle,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { SignOutClient } from "./SignOutClient";
+import { JobVisibilityToggle } from "./JobVisibilityToggle";
 
 export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Jobs",
 };
 
 const STATUS_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  ACTIVE:  { bg: "var(--success-bg)",  color: "var(--success)",  label: "Active"  },
-  DRAFT:   { bg: "var(--bg-muted)",    color: "var(--text-muted)", label: "Draft" },
-  EXPIRED: { bg: "var(--error-bg)",    color: "var(--error)",    label: "Expired" },
-  CLOSED:  { bg: "var(--bg-muted)",    color: "var(--text-subtle)", label: "Closed" },
+  ACTIVE:  { bg: "var(--success-bg)",   color: "var(--success)",     label: "Active"  },
+  PAUSED:  { bg: "var(--warning-bg)",   color: "var(--warning)",     label: "Paused"  },
+  DRAFT:   { bg: "var(--bg-muted)",     color: "var(--text-muted)",  label: "Draft"   },
+  EXPIRED: { bg: "var(--error-bg)",     color: "var(--error)",       label: "Expired" },
+  CLOSED:  { bg: "var(--bg-muted)",     color: "var(--text-subtle)", label: "Closed"  },
 };
 
 type SearchParams = Promise<{ posted?: string; edited?: string }>;
@@ -45,6 +47,7 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
   const jobs    = company?.jobs ?? [];
 
   const activeJobs  = jobs.filter(j => j.status === "ACTIVE");
+  const pausedJobs  = jobs.filter(j => j.status === "PAUSED");
   const draftJobs   = jobs.filter(j => j.status === "DRAFT");
   const expiredJobs = jobs.filter(j => j.status === "EXPIRED" || j.status === "CLOSED");
 
@@ -159,10 +162,10 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
         {/* ── Stats row ── */}
         <div className="employer-stats-grid">
           {[
-            { label: "Active listings",  value: activeJobs.length.toString(),  icon: <Briefcase size={16} />,  accent: true },
-            { label: "Draft",            value: draftJobs.length.toString(),   icon: <FileText size={16} />,   accent: false },
-            { label: "Expired / closed", value: expiredJobs.length.toString(), icon: <Clock size={16} />,     accent: false },
-            { label: "Total posted",     value: jobs.length.toString(),        icon: <Building2 size={16} />, accent: false },
+            { label: "Active listings",  value: activeJobs.length.toString(),  icon: <Briefcase    size={16} />, accent: true  },
+            { label: "Paused",           value: pausedJobs.length.toString(),  icon: <PauseCircle  size={16} />, accent: false },
+            { label: "Draft",            value: draftJobs.length.toString(),   icon: <FileText     size={16} />, accent: false },
+            { label: "Expired / closed", value: expiredJobs.length.toString(), icon: <Clock        size={16} />, accent: false },
           ].map(stat => (
             <div key={stat.label} style={{
               background: "var(--surface)", border: `1px solid ${stat.accent ? "var(--accent)" : "var(--border)"}`,
@@ -235,20 +238,28 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
             <div>
               {/* Column headers — hidden on mobile via CSS */}
               <div className="employer-job-header-row">
-                {["Role", "Status", "Posted", "Expires", ""].map(h => (
+                {["Role", "Status", "Posted", "Days left", ""].map(h => (
                   <span key={h} className="caption" style={{ color: "var(--text-subtle)" }}>{h}</span>
                 ))}
               </div>
 
               {jobs.map((job, i) => {
-                const st = STATUS_STYLE[job.status] ?? STATUS_STYLE.CLOSED;
-                const isExpiringSoon = job.expiresAt
-                  ? new Date(job.expiresAt).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000
-                  : false;
-                const postedLabel   = job.postedAt ? timeAgo(job.postedAt) : job.createdAt ? timeAgo(job.createdAt) : "—";
-                const expiresLabel  = job.expiresAt
-                  ? new Date(job.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
-                  : null;
+                const st          = STATUS_STYLE[job.status] ?? STATUS_STYLE.CLOSED;
+                const postedLabel = job.postedAt ? timeAgo(job.postedAt) : job.createdAt ? timeAgo(job.createdAt) : "—";
+
+                // Counter-based days remaining (used for ACTIVE and PAUSED)
+                const activeDaysLeft   = Math.max(0, 30 - job.activeDays);
+                const inactiveDaysLeft = Math.max(0, 30 - job.inactiveDays);
+                const isActiveLow      = job.status === "ACTIVE" && activeDaysLeft <= 7;
+                const isInactiveLow    = job.status === "PAUSED" && inactiveDaysLeft <= 7;
+
+                const daysLabel = job.status === "ACTIVE" || job.status === "PAUSED"
+                  ? job.status === "PAUSED"
+                    ? `${activeDaysLeft}d active · ${inactiveDaysLeft}d idle`
+                    : `${activeDaysLeft}d left`
+                  : "—";
+
+                const canToggle = job.status === "ACTIVE" || job.status === "PAUSED";
 
                 return (
                   <div key={job.id} className="employer-job-row" style={{
@@ -272,7 +283,7 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
                           </span>
                         )}
                       </div>
-                      {/* Mobile-only: status + dates */}
+                      {/* Mobile-only: status + days */}
                       <div className="employer-row-mobile-meta">
                         <span style={{
                           display: "inline-flex", alignItems: "center", gap: 4,
@@ -284,7 +295,7 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
                           {st.label}
                         </span>
                         <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 11 }}>
-                          {postedLabel}{expiresLabel ? ` · exp ${expiresLabel}` : ""}
+                          {postedLabel}{daysLabel !== "—" ? ` · ${daysLabel}` : ""}
                         </span>
                       </div>
                     </div>
@@ -307,17 +318,21 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
                       {postedLabel}
                     </div>
 
-                    {/* Expires — hidden on mobile */}
-                    <div className="employer-col-hide-mobile mono-s" style={{ color: isExpiringSoon && job.status === "ACTIVE" ? "var(--warning)" : "var(--text-subtle)" }}>
-                      {job.expiresAt
-                        ? isExpiringSoon && job.status === "ACTIVE"
-                          ? `Exp ${timeAgo(job.expiresAt)}`
-                          : expiresLabel
-                        : "—"}
+                    {/* Days remaining — hidden on mobile */}
+                    <div className="employer-col-hide-mobile mono-s" style={{
+                      color: isActiveLow || isInactiveLow ? "var(--warning)" : "var(--text-subtle)",
+                    }}>
+                      {daysLabel}
                     </div>
 
                     {/* Actions — always visible */}
                     <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                      {canToggle && (
+                        <JobVisibilityToggle
+                          jobId={job.id}
+                          initialStatus={job.status as "ACTIVE" | "PAUSED"}
+                        />
+                      )}
                       <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
                         <Eye size={13} />
                       </Link>
