@@ -1,31 +1,30 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
 interface Props {
   jobId: string;
-  applyUrl: string;
+  applyUrl?: string;
+  applyEmail?: string;
   companyName: string;
 }
 
-export function ApplyButton({ jobId, applyUrl, companyName }: Props) {
-  const recorded = useRef(false);
+function ensureAbsoluteUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
 
-  // Record on first mount so the button appears ready immediately
-  useEffect(() => {
-    if (recorded.current) return;
-    recorded.current = true;
-  }, []);
-
+export function ApplyButton({ jobId, applyUrl, applyEmail, companyName }: Props) {
   function handleClick() {
-    // Fire-and-forget — don't block navigation
     fetch("/api/candidates/applied-jobs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jobId }),
     }).catch(() => {/* non-critical */});
 
-    window.open(applyUrl, "_blank", "noopener,noreferrer");
+    if (applyEmail && !applyUrl) {
+      window.location.href = `mailto:${applyEmail}`;
+    } else if (applyUrl) {
+      window.open(ensureAbsoluteUrl(applyUrl), "_blank", "noopener,noreferrer");
+    }
   }
 
   return (

@@ -34,6 +34,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
   const [listingType,      setListingType]      = useState<ListingType>(defaultType);
   const [remoteType,       setRemoteType]       = useState("");
   const [salaryDisclosed,  setSalaryDisclosed]  = useState(true);
+  const [applyMethod,      setApplyMethod]      = useState<"url" | "email">("url");
   const [loading, setLoading]                   = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -47,7 +48,8 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
     if (!form.get("remoteType"))                           errs.remoteType      = "Please select a work type.";
     if (!form.get("employmentType"))                       errs.employmentType  = "Please select an employment type.";
     if (!String(form.get("description") ?? "").trim())     errs.description     = "Job description is required.";
-    if (!String(form.get("applyUrl") ?? "").trim())        errs.applyUrl        = "Application URL or email is required.";
+    if (applyMethod === "url" && !String(form.get("applyUrl") ?? "").trim())   errs.applyUrl = "Application URL is required.";
+    if (applyMethod === "email" && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
     return errs;
   }
 
@@ -337,9 +339,31 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                 </p>
               </>
             )}
-            <Field label="Application URL or email" required error={fieldErrors.applyUrl}>
-              <input className="input" name="applyUrl" type="text" placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" />
-            </Field>
+            <div>
+              <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
+                How should candidates apply? <span style={{ color: "var(--accent)" }}>*</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                {(["url", "email"] as const).map(method => (
+                  <button key={method} type="button" onClick={() => setApplyMethod(method)}
+                    style={{ padding: "10px 14px", borderRadius: 8, border: `1.5px solid ${applyMethod === method ? "var(--accent)" : "var(--border)"}`, background: applyMethod === method ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: applyMethod === method ? "var(--accent)" : "var(--text-muted)", transition: "all 120ms" }}>
+                    {method === "url" ? "🔗 Redirect to URL" : "✉️ Via email"}
+                  </button>
+                ))}
+              </div>
+              {applyMethod === "url" ? (
+                <Field label="Application URL" required error={fieldErrors.applyUrl}>
+                  <input className="input" name="applyUrl" type="text" placeholder="yourcompany.com/careers/apply" />
+                  <input type="hidden" name="applyEmail" value="" />
+                  <span className="mono-s" style={{ color: "var(--text-subtle)" }}>NO NEED TO ADD HTTPS:// — WE HANDLE THAT</span>
+                </Field>
+              ) : (
+                <Field label="HR email address" required error={fieldErrors.applyUrl}>
+                  <input className="input" name="applyEmail" type="email" placeholder="jobs@yourcompany.com" />
+                  <input type="hidden" name="applyUrl" value="" />
+                </Field>
+              )}
+            </div>
           </FormSection>
 
           <div style={{ marginTop: 8 }}>

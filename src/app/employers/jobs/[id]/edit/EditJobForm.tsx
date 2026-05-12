@@ -34,7 +34,7 @@ interface FormErrors {
   applyUrl?:        string;
 }
 
-function validate(form: FormData): FormErrors {
+function validate(form: FormData, applyMethod: "url" | "email"): FormErrors {
   const errs: FormErrors = {};
   if (!String(form.get("title")          ?? "").trim()) errs.title           = "Job title is required.";
   if (!form.get("categorySlug"))                        errs.category        = "Please select a category.";
@@ -42,8 +42,8 @@ function validate(form: FormData): FormErrors {
   if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
   if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
   if (!String(form.get("description")   ?? "").trim()) errs.description     = "Job description is required.";
-  if (!String(form.get("applyUrl")      ?? "").trim() &&
-      !String(form.get("applyEmail")    ?? "").trim()) errs.applyUrl        = "Application URL or email is required.";
+  if (applyMethod === "url"   && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
+  if (applyMethod === "email" && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
   return errs;
 }
 
@@ -51,6 +51,7 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
   const router = useRouter();
   const [remoteType,      setRemoteType]      = useState(job.remoteType);
   const [salaryDisclosed, setSalaryDisclosed] = useState(job.salaryDisclosed);
+  const [applyMethod,     setApplyMethod]     = useState<"url" | "email">(job.applyEmail && !job.applyUrl ? "email" : "url");
   const [loading,         setLoading]         = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
@@ -67,7 +68,7 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
     setServerError(null);
 
     const form   = new FormData(e.currentTarget);
-    const errors = validate(form);
+    const errors = validate(form, applyMethod);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       const firstKey = Object.keys(errors)[0];
@@ -244,10 +245,32 @@ export function EditJobForm({ job, categories }: { job: JobData; categories: Cat
               </p>
             </>
           )}
-          <Field label="Application URL or email" required error={fieldErrors.applyUrl}>
-            <input className="input" name="applyUrl" type="text" defaultValue={job.applyUrl || job.applyEmail} placeholder="https://yourcompany.com/apply or jobs@yourcompany.com" />
-            <input type="hidden" name="applyEmail" value="" />
-          </Field>
+          <div>
+            <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
+              How should candidates apply? <span style={{ color: "var(--accent)" }}>*</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+              {(["url", "email"] as const).map(method => (
+                <button key={method} type="button"
+                  onClick={() => { setApplyMethod(method); setIsDirty(true); }}
+                  style={{ padding: "10px 14px", borderRadius: 8, border: `1.5px solid ${applyMethod === method ? "var(--accent)" : "var(--border)"}`, background: applyMethod === method ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: applyMethod === method ? "var(--accent)" : "var(--text-muted)", transition: "all 120ms" }}>
+                  {method === "url" ? "🔗 Redirect to URL" : "✉️ Via email"}
+                </button>
+              ))}
+            </div>
+            {applyMethod === "url" ? (
+              <Field label="Application URL" required error={fieldErrors.applyUrl}>
+                <input className="input" name="applyUrl" type="text" defaultValue={job.applyUrl} placeholder="yourcompany.com/careers/apply" />
+                <input type="hidden" name="applyEmail" value="" />
+                <span className="mono-s" style={{ color: "var(--text-subtle)" }}>NO NEED TO ADD HTTPS:// — WE HANDLE THAT</span>
+              </Field>
+            ) : (
+              <Field label="HR email address" required error={fieldErrors.applyUrl}>
+                <input className="input" name="applyEmail" type="email" defaultValue={job.applyEmail} placeholder="jobs@yourcompany.com" />
+                <input type="hidden" name="applyUrl" value="" />
+              </Field>
+            )}
+          </div>
         </FormSection>
 
         <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
