@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell } from "lucide-react";
+import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell, ChevronDown } from "lucide-react";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";

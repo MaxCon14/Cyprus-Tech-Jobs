@@ -113,6 +113,7 @@ model Job {
   remoteType      RemoteType      @default(ON_SITE)
   employmentType  EmploymentType  @default(FULL_TIME)
   experienceLevel ExperienceLevel @default(MID)
+  applyType       String          @default("URL")
   applyUrl        String?
   applyEmail      String?
   featured        Boolean         @default(false)

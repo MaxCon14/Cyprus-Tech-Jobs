@@ -100,6 +100,7 @@ export async function POST(req: NextRequest) {
         salaryDisclosed,
         salaryMin:       salaryDisclosed && body.salaryMin ? Number(body.salaryMin) : undefined,
         salaryMax:       salaryDisclosed && body.salaryMax ? Number(body.salaryMax) : undefined,
+        applyType:       ["URL", "EMAIL", "IN_APP"].includes(body.applyType as string) ? (body.applyType as string) : "URL",
         applyUrl:        (body.applyUrl   as string | undefined)?.trim() || undefined,
         applyEmail:      (body.applyEmail as string | undefined)?.trim() || undefined,
       },

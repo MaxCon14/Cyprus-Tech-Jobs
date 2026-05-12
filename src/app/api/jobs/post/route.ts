@@ -76,9 +76,12 @@ export async function POST(req: NextRequest) {
     salaryDisclosed,
     salaryMin,
     salaryMax,
+    applyType,
     applyUrl,
     applyEmail,
   } = body;
+
+  const resolvedApplyType = ["URL", "EMAIL", "IN_APP"].includes(applyType as string) ? (applyType as string) : "URL";
 
   // Validate
   const errors: string[] = [];
@@ -90,7 +93,8 @@ export async function POST(req: NextRequest) {
   if (!remoteType) errors.push("Work type is required.");
   if (!employmentType) errors.push("Employment type is required.");
   if (!(description as string)?.trim()) errors.push("Job description is required.");
-  if (!(applyUrl as string)?.trim() && !(applyEmail as string)?.trim()) errors.push("Application URL or email is required.");
+  if (resolvedApplyType === "URL"   && !(applyUrl   as string)?.trim()) errors.push("Application URL is required.");
+  if (resolvedApplyType === "EMAIL" && !(applyEmail as string)?.trim()) errors.push("HR email address is required.");
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
   // Check slot availability
@@ -163,8 +167,9 @@ export async function POST(req: NextRequest) {
           salaryDisclosed: salaryDisclosed !== false,
           salaryMin:       salaryDisclosed !== false && salaryMin ? Number(salaryMin) : undefined,
           salaryMax:       salaryDisclosed !== false && salaryMax ? Number(salaryMax) : undefined,
-          applyUrl:        (applyUrl as string | undefined)?.trim() || undefined,
-          applyEmail:      (applyEmail as string | undefined)?.trim() || undefined,
+          applyType:       resolvedApplyType,
+          applyUrl:        resolvedApplyType === "URL"   ? (applyUrl   as string | undefined)?.trim() || undefined : undefined,
+          applyEmail:      resolvedApplyType === "EMAIL" ? (applyEmail as string | undefined)?.trim() || undefined : undefined,
         },
       }),
     ]);

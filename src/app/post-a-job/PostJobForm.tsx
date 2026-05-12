@@ -38,7 +38,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
   const [listingType,     setListingType]     = useState<ListingType>(defaultType);
   const [remoteType,      setRemoteType]      = useState("");
   const [salaryDisclosed, setSalaryDisclosed] = useState(true);
-  const [applyMethod,     setApplyMethod]     = useState<"url" | "email">("url");
+  const [applyMethod,     setApplyMethod]     = useState<"url" | "email" | "in_app">("in_app");
   const [loading,         setLoading]         = useState(false);
   const [draftLoading,    setDraftLoading]    = useState(false);
   const [serverError,     setServerError]     = useState<string | null>(null);
@@ -75,8 +75,8 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
     if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
     if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
     if (!String(form.get("description")    ?? "").trim()) errs.description     = "Job description is required.";
-    if (applyMethod === "url"   && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
-    if (applyMethod === "email" && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
+    if (applyMethod === "url"    && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
+    if (applyMethod === "email"  && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
     return errs;
   }
 
@@ -96,8 +96,9 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
       salaryDisclosed,
       salaryMin:          salaryDisclosed ? form.get("salaryMin")  : null,
       salaryMax:          salaryDisclosed ? form.get("salaryMax")  : null,
-      applyUrl:           form.get("applyUrl"),
-      applyEmail:         form.get("applyEmail"),
+      applyType:          applyMethod === "in_app" ? "IN_APP" : applyMethod === "email" ? "EMAIL" : "URL",
+      applyUrl:           applyMethod === "url"    ? form.get("applyUrl")   : null,
+      applyEmail:         applyMethod === "email"  ? form.get("applyEmail") : null,
     };
   }
 
@@ -466,7 +467,33 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                 <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
                   How should candidates apply? <span style={{ color: "var(--accent)" }}>*</span>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+
+                {/* In-app — recommended, full-width */}
+                <button
+                  type="button"
+                  onClick={() => { setApplyMethod("in_app"); setIsDirty(true); }}
+                  style={{
+                    width: "100%", padding: "14px 18px", borderRadius: 8, marginBottom: 10,
+                    border: `2px solid ${applyMethod === "in_app" ? "var(--accent)" : "var(--border)"}`,
+                    background: applyMethod === "in_app" ? "var(--accent-soft)" : "var(--surface)",
+                    cursor: "pointer", textAlign: "left", transition: "all 120ms",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: applyMethod === "in_app" ? "var(--accent)" : "var(--text)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
+                      📥 In-app applications
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "var(--white)", padding: "2px 7px", borderRadius: 4 }}>RECOMMENDED</span>
+                    </div>
+                    <div className="body-s" style={{ color: "var(--text-muted)" }}>
+                      Candidates apply directly on CyprusTech.Jobs. You receive rich profiles, CVs, and cover letters in your dashboard.
+                    </div>
+                  </div>
+                  {applyMethod === "in_app" && <Check size={16} style={{ color: "var(--accent)", flexShrink: 0, marginLeft: 12 }} />}
+                </button>
+
+                {/* URL + Email — side by side */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: applyMethod !== "in_app" ? 14 : 0 }}>
                   {(["url", "email"] as const).map(method => (
                     <button key={method} type="button"
                       onClick={() => { setApplyMethod(method); setIsDirty(true); }}
@@ -475,17 +502,22 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                     </button>
                   ))}
                 </div>
-                {applyMethod === "url" ? (
+
+                {applyMethod === "url" && (
                   <Field label="Application URL" required error={fieldErrors.applyUrl}>
                     <input className="input" name="applyUrl" type="text" placeholder="yourcompany.com/careers/apply" />
-                    <input type="hidden" name="applyEmail" value="" />
                     <span className="mono-s" style={{ color: "var(--text-subtle)" }}>NO NEED TO ADD HTTPS:// — WE HANDLE THAT</span>
                   </Field>
-                ) : (
+                )}
+                {applyMethod === "email" && (
                   <Field label="HR email address" required error={fieldErrors.applyUrl}>
                     <input className="input" name="applyEmail" type="email" placeholder="jobs@yourcompany.com" />
-                    <input type="hidden" name="applyUrl" value="" />
                   </Field>
+                )}
+                {applyMethod === "in_app" && (
+                  <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4 }}>
+                    NO SETUP NEEDED · APPLICATIONS ARRIVE IN YOUR DASHBOARD AUTOMATICALLY
+                  </p>
                 )}
               </div>
             </FormSection>

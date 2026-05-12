@@ -9,10 +9,12 @@ import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import {
   Plus, Eye, Edit2, Briefcase, Building2,
   ExternalLink, MapPin, Clock, ChevronRight,
-  CheckCircle2, AlertCircle, FileText, ShoppingBag, PauseCircle,
+  CheckCircle2, AlertCircle, FileText, ShoppingBag, PauseCircle, Inbox,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { JobVisibilityToggle } from "./JobVisibilityToggle";
+import { ApplicationsPanel } from "./ApplicationsPanel";
+import type { ApplicationRow } from "./ApplicationsPanel";
 
 export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Jobs",
@@ -44,6 +46,33 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
 
   const company = employer.company;
   const jobs    = company?.jobs ?? [];
+
+  // Fetch in-app applications for all this employer's jobs
+  const inAppJobIds = jobs.filter(j => j.applyType === "IN_APP").map(j => j.id);
+  let applications: ApplicationRow[] = [];
+  if (inAppJobIds.length > 0) {
+    const { data: appRows } = await supabaseAdmin
+      .from("job_applications")
+      .select("*")
+      .in("jobId", inAppJobIds)
+      .order("appliedAt", { ascending: false });
+
+    if (appRows) {
+      const jobMap = Object.fromEntries(jobs.map(j => [j.id, j]));
+      applications = (appRows as ApplicationRow[]).map(a => ({
+        ...a,
+        jobTitle: jobMap[a.jobId]?.title ?? "Unknown job",
+        jobSlug:  jobMap[a.jobId]?.slug  ?? "",
+        candidateSkills: Array.isArray(a.candidateSkills) ? a.candidateSkills : [],
+      }));
+    }
+  }
+
+  // Application count per job for badge display
+  const appCountByJob: Record<string, number> = {};
+  for (const a of applications) {
+    appCountByJob[a.jobId] = (appCountByJob[a.jobId] ?? 0) + 1;
+  }
 
   const activeJobs  = jobs.filter(j => j.status === "ACTIVE");
   const pausedJobs  = jobs.filter(j => j.status === "PAUSED");
@@ -307,6 +336,24 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
                       {daysLabel}
                     </div>
 
+                    {/* Application count badge (IN_APP jobs only) */}
+                    {job.applyType === "IN_APP" && (
+                      <div className="employer-col-hide-mobile" style={{ display: "flex", alignItems: "center" }}>
+                        {(appCountByJob[job.id] ?? 0) > 0 ? (
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", gap: 4,
+                            padding: "3px 8px", borderRadius: 5, fontSize: 10,
+                            fontFamily: "var(--font-mono)", fontWeight: 700,
+                            background: "var(--accent-soft)", color: "var(--accent)",
+                          }}>
+                            <Inbox size={10} /> {appCountByJob[job.id]} applied
+                          </span>
+                        ) : (
+                          <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>0 applied</span>
+                        )}
+                      </div>
+                    )}
+
                     {/* Actions — always visible */}
                     <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
                       {canToggle && (
@@ -334,6 +381,33 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
             </div>
           )}
         </div>
+
+        {/* ── In-app applications panel ── */}
+        {inAppJobIds.length > 0 && (
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px clamp(16px,3vw,24px)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <Inbox size={15} style={{ color: "var(--accent)" }} />
+                <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, margin: 0 }}>Applications</p>
+                {applications.length > 0 && (
+                  <span style={{
+                    fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
+                    color: "var(--accent)", background: "var(--accent-soft)",
+                    padding: "2px 8px", borderRadius: 99,
+                  }}>
+                    {applications.length}
+                  </span>
+                )}
+              </div>
+              <span className="mono-s" style={{ color: "var(--text-subtle)" }}>
+                {applications.filter(a => a.status === "PENDING").length > 0
+                  ? `${applications.filter(a => a.status === "PENDING").length} NEW`
+                  : "ALL REVIEWED"}
+              </span>
+            </div>
+            <ApplicationsPanel initialApplications={applications} />
+          </div>
+        )}
 
         {/* ── No company warning ── */}
         {!company && (
