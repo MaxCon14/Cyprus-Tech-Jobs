@@ -61,8 +61,11 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
       }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", height: 56, display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{companyInitial}</span>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--accent-soft)", border: "1.5px solid var(--accent)", display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden" }}>
+              {company?.logoUrl
+                ? <img src={company.logoUrl} alt={company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 11, color: "var(--accent)" }}>{companyInitial}</span>
+              }
             </div>
             <span className="body-s employer-nav-company-name" style={{ color: "var(--text-muted)" }}>
               {company?.name ?? employer.name ?? "Employer"}
@@ -102,10 +105,13 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
             <div style={{
               width: 56, height: 56, borderRadius: 13, flexShrink: 0,
               background: "var(--black)", color: "var(--white)",
-              display: "grid", placeItems: "center",
+              display: "grid", placeItems: "center", overflow: "hidden",
               fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22,
             }}>
-              {companyInitial}
+              {company?.logoUrl
+                ? <img src={company.logoUrl} alt={company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : companyInitial
+              }
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5, flexWrap: "wrap" }}>

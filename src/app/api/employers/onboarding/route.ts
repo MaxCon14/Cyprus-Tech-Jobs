@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
   const size        = typeof body.size === "string" ? body.size : undefined;
   const description = typeof body.description === "string" ? body.description.trim() : undefined;
   const techStack   = Array.isArray(body.techStack) ? (body.techStack as string[]) : [];
+  const logoUrl     = typeof body.logoUrl === "string" && body.logoUrl ? body.logoUrl : undefined;
 
   try {
     const existing = await prisma.employer.findUnique({ where: { email } });
@@ -40,13 +41,14 @@ export async function POST(req: NextRequest) {
 
     const company = await prisma.company.upsert({
       where: { slug },
-      create: { name: companyName, slug, website, city, size, description, techStack },
+      create: { name: companyName, slug, website, city, size, description, techStack, logoUrl },
       update: {
         description: description ?? undefined,
         techStack: techStack.length > 0 ? techStack : undefined,
         website: website ?? undefined,
         city: city ?? undefined,
         size: size ?? undefined,
+        logoUrl: logoUrl ?? undefined,
       },
     });
 
