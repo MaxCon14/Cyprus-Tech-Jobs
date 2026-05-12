@@ -17,7 +17,10 @@ export default async function PostAJobPage() {
     redirect("/login");
   }
 
-  const employer = await prisma.employer.findUnique({ where: { email: user.email } });
+  const employer = await prisma.employer.findUnique({
+    where:   { email: user.email },
+    include: { company: true },
+  });
   if (!employer) {
     redirect("/employers/onboarding");
   }
@@ -44,6 +47,9 @@ export default async function PostAJobPage() {
         <PostJobForm
           standardSlots={employer.standardSlots}
           featuredSlots={employer.featuredSlots}
+          companyName={employer.company?.name ?? ""}
+          companyWebsite={employer.company?.website ?? ""}
+          companyDescription={employer.company?.description ?? ""}
         />
       </div>
     </div>
