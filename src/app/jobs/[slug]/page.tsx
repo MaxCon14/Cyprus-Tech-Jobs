@@ -23,8 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const job = await getJobBySlug(slug);
   if (!job) return {};
   const isActive = job.status === "ACTIVE";
+  const suffix   = job.status === "PAUSED" ? " (Paused)" : job.status !== "ACTIVE" ? " (Closed)" : "";
   return {
-    title: `${job.title} at ${job.company.name}${isActive ? "" : " (Closed)"}`,
+    title: `${job.title} at ${job.company.name}${suffix}`,
     description: `${job.title} at ${job.company.name} in ${job.city}. ${job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) ?? "" : "Salary undisclosed"} · ${remoteLabel(job.remoteType)}`,
     // Non-active jobs: tell Google to stop indexing and remove from Jobs results
     ...(!isActive && { robots: { index: false, follow: false } }),
@@ -73,6 +74,7 @@ export default async function JobDetailPage({ params }: Props) {
   const descBlocks = job.description.split("\n\n");
   const jobUrl     = `https://cyprustech.careers/jobs/${job.slug}`;
   const isActive   = job.status === "ACTIVE";
+  const isPaused   = job.status === "PAUSED";
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Jobs", path: "/jobs" },
@@ -94,8 +96,30 @@ export default async function JobDetailPage({ params }: Props) {
       />
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
-      {/* Closed banner */}
-      {!isActive && (
+      {/* Paused banner */}
+      {isPaused && (
+        <div style={{
+          background: "var(--warning-bg)", border: "1px solid #fcd34d",
+          borderRadius: 10, padding: "14px 20px", marginBottom: 24,
+          display: "flex", alignItems: "center", gap: 12,
+        }}>
+          <Clock size={15} style={{ color: "var(--warning)", flexShrink: 0 }} />
+          <div>
+            <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: "var(--text)" }}>
+              This listing is temporarily paused.
+            </span>
+            <span className="body-s" style={{ color: "var(--text-muted)", marginLeft: 8 }}>
+              The employer has hidden it — check back soon.
+            </span>
+          </div>
+          <Link href="/jobs" className="btn btn-outline btn-sm" style={{ marginLeft: "auto", flexShrink: 0 }}>
+            Browse open jobs
+          </Link>
+        </div>
+      )}
+
+      {/* Closed / expired banner */}
+      {!isActive && !isPaused && (
         <div style={{
           background: "var(--bg-muted)", border: "1px solid var(--border)",
           borderRadius: 10, padding: "14px 20px", marginBottom: 24,
