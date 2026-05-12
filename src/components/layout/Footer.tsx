@@ -1,6 +1,82 @@
 import Link from "next/link";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { prisma } from "@/lib/prisma";
 
-export function Footer() {
+type Role = "candidate" | "employer" | "guest";
+
+async function getRole(): Promise<Role> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) return "guest";
+
+    const employer = await prisma.employer.findUnique({
+      where: { email: user.email },
+      select: { id: true },
+    });
+    if (employer) return "employer";
+
+    const { data: candidate } = await supabaseAdmin
+      .from("candidates").select("id").eq("email", user.email).single();
+    if (candidate) return "candidate";
+  } catch {
+    // Non-fatal — fall back to guest links
+  }
+  return "guest";
+}
+
+const CANDIDATE_LINKS = [
+  ["Browse jobs",    "/jobs"],
+  ["My dashboard",   "/candidates/dashboard"],
+  ["Companies",      "/companies"],
+  ["Salary guide",   "/salary-guide"],
+  ["Job alerts",     "/jobs#alerts"],
+] as const;
+
+const EMPLOYER_LINKS = [
+  ["Post a job",        "/post-a-job"],
+  ["My dashboard",      "/employers/dashboard"],
+  ["Buy listing slots", "/buy-credits"],
+  ["Pricing",           "/post-a-job#pricing"],
+] as const;
+
+const GUEST_CANDIDATE_LINKS = [
+  ["Browse jobs",   "/jobs"],
+  ["Companies",     "/companies"],
+  ["Salary guide",  "/salary-guide"],
+  ["Job alerts",    "/jobs#alerts"],
+] as const;
+
+const GUEST_EMPLOYER_LINKS = [
+  ["Post a job",         "/post-a-job"],
+  ["Employer dashboard", "/employers/dashboard"],
+  ["Pricing",            "/post-a-job#pricing"],
+] as const;
+
+const COMPANY_LINKS = [
+  ["About",            "/about"],
+  ["FAQ",              "/faq"],
+  ["Privacy policy",   "/privacy"],
+  ["Terms of service", "/terms"],
+  ["Contact",          "/contact"],
+] as const;
+
+function FooterLinks({ links }: { links: readonly (readonly [string, string])[] }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {links.map(([label, href]) => (
+        <Link key={href} href={href} style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
+          {label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export async function Footer() {
+  const role = await getRole();
+
   return (
     <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(32px, 5vw, 48px) var(--page-padding-x)", marginTop: "auto" }}>
       <div className="page-container">
@@ -16,55 +92,46 @@ export function Footer() {
             </p>
           </div>
 
-          {/* For candidates */}
-          <div>
-            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For candidates</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[
-                ["Browse jobs",   "/jobs"],
-                ["Companies",     "/companies"],
-                ["Salary guide",  "/salary-guide"],
-                ["Job alerts",    "/jobs#alerts"],
-              ].map(([label, href]) => (
-                <Link key={href} href={href} style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
+          {/* Role-specific middle columns */}
+          {role === "candidate" && (
+            <>
+              <div>
+                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For you</div>
+                <FooterLinks links={CANDIDATE_LINKS} />
+              </div>
+              {/* Empty fourth column — keeps grid balanced */}
+              <div />
+            </>
+          )}
 
-          {/* For employers */}
-          <div>
-            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For employers</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[
-                ["Post a job",          "/post-a-job"],
-                ["Employer dashboard",  "/employers/dashboard"],
-                ["Pricing",             "/post-a-job#pricing"],
-              ].map(([label, href]) => (
-                <Link key={href} href={href} style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
+          {role === "employer" && (
+            <>
+              <div>
+                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For you</div>
+                <FooterLinks links={EMPLOYER_LINKS} />
+              </div>
+              {/* Empty fourth column */}
+              <div />
+            </>
+          )}
 
-          {/* Company */}
+          {role === "guest" && (
+            <>
+              <div>
+                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For candidates</div>
+                <FooterLinks links={GUEST_CANDIDATE_LINKS} />
+              </div>
+              <div>
+                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For employers</div>
+                <FooterLinks links={GUEST_EMPLOYER_LINKS} />
+              </div>
+            </>
+          )}
+
+          {/* Company — always shown */}
           <div>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Company</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[
-                ["About",            "/about"],
-                ["FAQ",              "/faq"],
-                ["Privacy policy",   "/privacy"],
-                ["Terms of service", "/terms"],
-                ["Contact",          "/contact"],
-              ].map(([label, href]) => (
-                <Link key={href} href={href} style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}>
-                  {label}
-                </Link>
-              ))}
-            </div>
+            <FooterLinks links={COMPANY_LINKS} />
           </div>
         </div>
 
