@@ -173,13 +173,10 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
           </div>
         </div>
 
-        {/* ── Stats filter cards + filtered job list ── */}
-        <JobListingsPanel jobs={serializedJobs} appCountByJob={appCountByJob} />
-
         {/* ── Slot balance ── */}
         <div style={{
           background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12,
-          padding: "14px clamp(16px,3vw,20px)", marginBottom: 20,
+          padding: "14px clamp(16px,3vw,20px)", marginBottom: 16,
           display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap",
         }}>
           <ShoppingBag size={15} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
@@ -193,16 +190,14 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
             <span className="body-s" style={{ color: "var(--text-muted)" }}>featured slots</span>
           </div>
           <div className="employer-slot-actions">
-            {(employer.standardSlots > 0 || employer.featuredSlots > 0) && (
-              <Link href="/post-a-job" className="btn btn-accent btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <Plus size={12} /> Post a job
-              </Link>
-            )}
             <Link href="/buy-credits" className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <ShoppingBag size={12} /> Buy slots
             </Link>
           </div>
         </div>
+
+        {/* ── Stats filter cards + filtered job list ── */}
+        <JobListingsPanel jobs={serializedJobs} appCountByJob={appCountByJob} />
 
         {/* ── In-app applications panel ── */}
         {inAppJobIds.length > 0 && (
