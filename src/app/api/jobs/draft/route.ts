@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
         applyType:       ["URL", "EMAIL", "IN_APP"].includes(body.applyType as string) ? (body.applyType as string) : "URL",
         applyUrl:        (body.applyUrl   as string | undefined)?.trim() || undefined,
         applyEmail:      (body.applyEmail as string | undefined)?.trim() || undefined,
+        coverLetter:     ["REQUIRED", "OPTIONAL", "NONE"].includes(body.coverLetter as string) ? (body.coverLetter as string) : "OPTIONAL",
       },
     });
 

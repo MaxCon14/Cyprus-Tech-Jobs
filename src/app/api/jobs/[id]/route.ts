@@ -44,6 +44,7 @@ export async function PATCH(
     title, description, categorySlug,
     remoteType, employmentType, experienceLevel,
     city, salaryDisclosed, salaryMin, salaryMax, applyUrl, applyEmail,
+    coverLetter,
     tags: rawTags,
   } = body;
 
@@ -81,6 +82,7 @@ export async function PATCH(
         salaryMax:       salaryDisclosed !== false && salaryMax ? Number(salaryMax) : null,
         applyUrl:        (applyUrl    as string | undefined)?.trim() || undefined,
         applyEmail:      (applyEmail  as string | undefined)?.trim() || undefined,
+        coverLetter:     ["REQUIRED", "OPTIONAL", "NONE"].includes(coverLetter as string) ? (coverLetter as string) : "OPTIONAL",
       },
     });
 

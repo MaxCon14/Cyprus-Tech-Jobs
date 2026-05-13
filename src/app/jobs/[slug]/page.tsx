@@ -259,6 +259,7 @@ export default async function JobDetailPage({ params }: Props) {
                   applyUrl={job.applyUrl ?? undefined}
                   applyEmail={job.applyEmail ?? undefined}
                   companyName={job.company.name}
+                  coverLetterPolicy={(job.coverLetter ?? "OPTIONAL") as "REQUIRED" | "OPTIONAL" | "NONE"}
                   candidateId={candidateId}
                   candidateName={candidateName}
                   candidateEmail={candidateEmail}

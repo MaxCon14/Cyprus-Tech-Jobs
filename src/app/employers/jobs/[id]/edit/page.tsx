@@ -52,6 +52,7 @@ export default async function EditJobPage({
     salaryDisclosed: job.salaryDisclosed,
     applyUrl:        job.applyUrl   ?? "",
     applyEmail:      job.applyEmail ?? "",
+    coverLetter:     (job.coverLetter as string) ?? "OPTIONAL",
   };
 
   const allTags    = allTagRows.map(t => t.name);

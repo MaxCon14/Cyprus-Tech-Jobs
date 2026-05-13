@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
     applyType,
     applyUrl,
     applyEmail,
+    coverLetter,
   } = body;
 
   const resolvedApplyType = ["URL", "EMAIL", "IN_APP"].includes(applyType as string) ? (applyType as string) : "URL";
@@ -170,6 +171,7 @@ export async function POST(req: NextRequest) {
           applyType:       resolvedApplyType,
           applyUrl:        resolvedApplyType === "URL"   ? (applyUrl   as string | undefined)?.trim() || undefined : undefined,
           applyEmail:      resolvedApplyType === "EMAIL" ? (applyEmail as string | undefined)?.trim() || undefined : undefined,
+          coverLetter:     ["REQUIRED", "OPTIONAL", "NONE"].includes(coverLetter as string) ? (coverLetter as string) : "OPTIONAL",
         },
       }),
     ]);
