@@ -84,7 +84,8 @@ export default async function JobDetailPage({ params }: Props) {
     { icon: <Clock size={14} />,      label: job.employmentType.replace("_", " ") },
   ];
 
-  const descBlocks = job.description.split("\n\n");
+  const descIsHtml  = job.description.trimStart().startsWith("<");
+  const descBlocks  = descIsHtml ? [] : job.description.split("\n\n");
   const jobUrl     = `https://cyprustech.careers/jobs/${job.slug}`;
   const isActive   = job.status === "ACTIVE";
   const isPaused   = job.status === "PAUSED";
@@ -210,26 +211,30 @@ export default async function JobDetailPage({ params }: Props) {
           {/* Description */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, background: "var(--surface)" }}>
             <h2 className="h2" style={{ marginBottom: 20 }}>About the role</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {descBlocks.map((block, i) => {
-                if (block.startsWith("**") && block.endsWith("**")) {
-                  return <h3 key={i} className="h3" style={{ marginTop: 8 }}>{block.replace(/\*\*/g, "")}</h3>;
-                }
-                if (block.startsWith("- ")) {
-                  return (
-                    <ul key={i} style={{ display: "flex", flexDirection: "column", gap: 8, paddingLeft: 0, listStyle: "none" }}>
-                      {block.split("\n").map((line, j) => (
-                        <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--accent)", marginTop: 8, flexShrink: 0 }} />
-                          <span className="body">{line.replace(/^- /, "")}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  );
-                }
-                return <p key={i} className="body" style={{ color: "var(--text-muted)" }}>{block}</p>;
-              })}
-            </div>
+            {descIsHtml ? (
+              <div className="job-desc" dangerouslySetInnerHTML={{ __html: job.description }} />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {descBlocks.map((block, i) => {
+                  if (block.startsWith("**") && block.endsWith("**")) {
+                    return <h3 key={i} className="h3" style={{ marginTop: 8 }}>{block.replace(/\*\*/g, "")}</h3>;
+                  }
+                  if (block.startsWith("- ")) {
+                    return (
+                      <ul key={i} style={{ display: "flex", flexDirection: "column", gap: 8, paddingLeft: 0, listStyle: "none" }}>
+                        {block.split("\n").map((line, j) => (
+                          <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--accent)", marginTop: 8, flexShrink: 0 }} />
+                            <span className="body">{line.replace(/^- /, "")}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  }
+                  return <p key={i} className="body" style={{ color: "var(--text-muted)" }}>{block}</p>;
+                })}
+              </div>
+            )}
           </div>
         </div>
 
