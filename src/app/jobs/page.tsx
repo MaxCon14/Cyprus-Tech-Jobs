@@ -93,7 +93,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       getJobCount(filters),
       getCategoriesWithCount(),
     ]);
-  } catch { /* DB temporarily unreachable — render with empty state */ }
+  } catch (err) { console.error("[jobs] DB error:", err); }
 
   let savedJobIds: string[] | undefined;
   if (user?.email) {

@@ -70,7 +70,7 @@ export default async function HomePage() {
       getCompanies({ featured: true }),
       getCategoriesWithCount(),
     ]);
-  } catch { /* DB temporarily unreachable — render with empty data */ }
+  } catch (err) { console.error("[home] DB error:", err); }
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
