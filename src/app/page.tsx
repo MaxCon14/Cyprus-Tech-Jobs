@@ -76,6 +76,7 @@ export default async function HomePage() {
   const totalJobs      = categories[0]?.count ?? 0;
 
   let savedJobIds: string[] | undefined;
+  let isCandidate = false;
   try {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -83,6 +84,7 @@ export default async function HomePage() {
       const { data: candidate } = await supabaseAdmin
         .from("candidates").select("id").eq("email", user.email).single();
       if (candidate) {
+        isCandidate = true;
         const { data: saved } = await supabaseAdmin
           .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
         savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
@@ -306,7 +308,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── CANDIDATE CTA ── */}
-      <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)" }}>
+      {!isCandidate && <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)" }}>
         <div className="page-container">
           <div style={{
             background: "var(--black)", borderRadius: 24,
@@ -358,7 +360,7 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ── FAQ ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
