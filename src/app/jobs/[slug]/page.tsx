@@ -170,8 +170,11 @@ export default async function JobDetailPage({ params }: Props) {
           {/* Header card */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
             <div className="job-header-inner">
-              <div style={{ width: 64, height: 64, borderRadius: 10, flexShrink: 0, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, border: "1px solid var(--border)" }}>
-                {job.company.name.charAt(0)}
+              <div style={{ width: 64, height: 64, borderRadius: 10, flexShrink: 0, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, border: "1px solid var(--border)", overflow: "hidden" }}>
+                {job.company.logoUrl
+                  ? <img src={job.company.logoUrl} alt={job.company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : job.company.name.charAt(0)
+                }
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
@@ -308,8 +311,11 @@ export default async function JobDetailPage({ params }: Props) {
           {/* Company snippet */}
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
-                {job.company.name.charAt(0)}
+              <div style={{ width: 36, height: 36, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0, overflow: "hidden" }}>
+                {job.company.logoUrl
+                  ? <img src={job.company.logoUrl} alt={job.company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : job.company.name.charAt(0)
+                }
               </div>
               <div>
                 <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{job.company.name}</div>
