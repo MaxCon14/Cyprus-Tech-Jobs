@@ -37,6 +37,7 @@ const CITIES = ["Limassol", "Nicosia", "Larnaca", "Paphos", "Remote"];
 const staticLinks = [
   { href: "/companies",    label: "Companies" },
   { href: "/salary-guide", label: "Salary guide" },
+  { href: "/blog",         label: "Blog" },
 ];
 
 /* ── Jobs Dropdown — desktop flyout ──────────────────────────────────────── */
