@@ -4,6 +4,26 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Star, Building2, Loader2, AlertCircle, Check, Rocket, ShoppingBag } from "lucide-react";
 import { Select } from "@/components/ui/Select";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
+
+// Converts old plain-text descriptions (custom markdown) to HTML for the editor.
+// HTML descriptions (new format, starts with "<") are passed through unchanged.
+function descriptionToHtml(text: string): string {
+  if (!text) return "";
+  if (text.trimStart().startsWith("<")) return text; // already HTML
+  return text.split("\n\n").map(block => {
+    if (block.startsWith("**") && block.endsWith("**")) {
+      return `<h2>${block.slice(2, -2)}</h2>`;
+    }
+    if (block.startsWith("- ")) {
+      const items = block.split("\n")
+        .map(l => `<li>${l.replace(/^- /, "")}</li>`)
+        .join("");
+      return `<ul>${items}</ul>`;
+    }
+    return `<p>${block.replace(/\n/g, "<br>")}</p>`;
+  }).join("");
+}
 
 interface Category { label: string; slug: string }
 
@@ -43,7 +63,7 @@ function validate(form: FormData, applyMethod: "url" | "email"): FormErrors {
   if (!form.get("experienceLevel"))                     errs.experienceLevel = "Please select an experience level.";
   if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
   if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
-  if (!String(form.get("description")    ?? "").trim()) errs.description     = "Job description is required.";
+  if (!String(form.get("description")    ?? "").replace(/<[^>]*>/g, "").trim()) errs.description = "Job description is required.";
   if (applyMethod === "url"   && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
   if (applyMethod === "email" && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
   return errs;
@@ -276,8 +296,11 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
             </Field>
           )}
           <Field label="Job description" required error={fieldErrors.description}>
-            <textarea className="textarea" name="description" defaultValue={job.description} style={{ minHeight: 200 }} />
-            <span className="mono-s" style={{ color: "var(--text-subtle)" }}>MARKDOWN SUPPORTED</span>
+            <RichTextEditor
+              name="description"
+              initialContent={descriptionToHtml(job.description)}
+              error={fieldErrors.description}
+            />
           </Field>
         </FormSection>
 

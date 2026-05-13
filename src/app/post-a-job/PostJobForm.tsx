@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CATEGORIES } from "@/lib/placeholder-data";
 import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, FileText } from "lucide-react";
 import { Select } from "@/components/ui/Select";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 
 type ListingType = "standard" | "featured";
 
@@ -74,7 +75,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
     if (!form.get("experienceLevel"))                     errs.experienceLevel = "Please select an experience level.";
     if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
     if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
-    if (!String(form.get("description")    ?? "").trim()) errs.description     = "Job description is required.";
+    if (!String(form.get("description")    ?? "").replace(/<[^>]*>/g, "").trim()) errs.description = "Job description is required.";
     if (applyMethod === "url"    && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
     if (applyMethod === "email"  && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
     return errs;
@@ -414,7 +415,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                 </Field>
               )}
               <Field label="Job description" required error={fieldErrors.description}>
-                <textarea className="textarea" name="description" placeholder="Describe the role, responsibilities, and what you're looking for…" style={{ minHeight: 200 }} />
+                <RichTextEditor name="description" error={fieldErrors.description} />
                 <span className="mono-s" style={{ color: "var(--text-subtle)" }}>MARKDOWN SUPPORTED</span>
               </Field>
             </FormSection>
