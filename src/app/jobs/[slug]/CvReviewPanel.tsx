@@ -160,6 +160,12 @@ export function CvReviewPanel({ jobSlug, jobTitle, isCandidate, savedCvUrl }: Pr
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong. Please try again.");
+      } else if (
+        typeof data.score !== "number" ||
+        !Array.isArray(data.strengths) ||
+        !Array.isArray(data.improvements)
+      ) {
+        setError("Received an unexpected response. Please try again.");
       } else {
         setResult(data as ReviewResult);
       }
@@ -422,7 +428,7 @@ function ImprovementRow({ item }: { item: Improvement }) {
       {open && (
         <div style={{ marginLeft: 25, marginTop: 10, background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 8, padding: "12px 14px" }}>
           <p className="body-s" style={{ color: "#78350f", margin: 0, lineHeight: 1.7 }}>
-            💡 {item.tip}
+            💡 {item.tip || "Review this section and add specific examples, measurable results, or relevant technologies to strengthen your application."}
           </p>
         </div>
       )}
