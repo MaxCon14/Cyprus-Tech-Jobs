@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Zap, Star, Building2, Loader2, AlertCircle, Check, Rocket, ShoppingBag } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
 // Converts old plain-text descriptions (custom markdown) to HTML for the editor.
 // HTML descriptions (new format, starts with "<") are passed through unchanged.
@@ -70,14 +71,16 @@ function validate(form: FormData, applyMethod: "url" | "email"): FormErrors {
 }
 
 interface Props {
-  job:           JobData;
-  categories:    Category[];
-  isDraft?:      boolean;
+  job:            JobData;
+  categories:     Category[];
+  isDraft?:       boolean;
   standardSlots?: number;
   featuredSlots?: number;
+  allTags:        string[];
+  initialTags:    string[];
 }
 
-export function EditJobForm({ job, categories, isDraft = false, standardSlots = 0, featuredSlots = 0 }: Props) {
+export function EditJobForm({ job, categories, isDraft = false, standardSlots = 0, featuredSlots = 0, allTags, initialTags }: Props) {
   const router = useRouter();
   const [remoteType,      setRemoteType]      = useState(job.remoteType);
   const [salaryDisclosed, setSalaryDisclosed] = useState(job.salaryDisclosed);
@@ -109,6 +112,7 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
       employmentType:  form.get("employmentType"),
       experienceLevel: form.get("experienceLevel"),
       city:            form.get("city"),
+      tags:            form.get("tags"),
       salaryDisclosed,
       salaryMin:       salaryDisclosed ? (form.get("salaryMin") || undefined) : null,
       salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
@@ -302,6 +306,13 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
               error={fieldErrors.description}
             />
           </Field>
+        </FormSection>
+
+        <FormSection icon={<Check size={14} />} title="Skills & technologies">
+          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14, marginTop: -4 }}>
+            Select the skills and technologies required for this role. Candidates will be matched based on these tags.
+          </p>
+          <SkillTagSelector name="tags" allTags={allTags} initialSelected={initialTags} />
         </FormSection>
 
         <FormSection icon={<Star size={14} />} title="Salary & apply">

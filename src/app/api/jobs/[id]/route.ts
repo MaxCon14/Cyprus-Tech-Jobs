@@ -44,6 +44,7 @@ export async function PATCH(
     title, description, categorySlug,
     remoteType, employmentType, experienceLevel,
     city, salaryDisclosed, salaryMin, salaryMax, applyUrl, applyEmail,
+    tags: rawTags,
   } = body;
 
   const errors: string[] = [];
@@ -82,6 +83,20 @@ export async function PATCH(
         applyEmail:      (applyEmail  as string | undefined)?.trim() || undefined,
       },
     });
+
+    // Replace skill tags
+    const tagNames = (() => {
+      try { return JSON.parse(rawTags as string) as string[]; } catch { return []; }
+    })();
+    await prisma.jobTag.deleteMany({ where: { jobId: id } });
+    if (tagNames.length > 0) {
+      const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
+      await prisma.jobTag.createMany({
+        data: tagRecords.map(t => ({ jobId: id, tagId: t.id })),
+        skipDuplicates: true,
+      });
+    }
+
     return NextResponse.json({ jobSlug: updated.slug });
   } catch (err) {
     console.error("[jobs/patch]", err);
