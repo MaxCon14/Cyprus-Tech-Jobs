@@ -116,6 +116,7 @@ model Job {
   applyType       String          @default("URL")
   applyUrl        String?
   applyEmail      String?
+  coverLetter     String          @default("OPTIONAL")
   featured        Boolean         @default(false)
   status          JobStatus       @default(DRAFT)
   activeDays      Int             @default(0)

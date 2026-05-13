@@ -27,8 +27,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const jobId      = typeof body.jobId      === "string" ? body.jobId.trim()      : null;
+  const jobId       = typeof body.jobId       === "string" ? body.jobId.trim()       : null;
   const coverLetter = typeof body.coverLetter === "string" ? body.coverLetter.trim() : null;
+  const customCvUrl = typeof body.cvUrl       === "string" ? body.cvUrl.trim()       : null;
 
   if (!jobId) {
     return NextResponse.json({ error: "Job ID is required." }, { status: 422 });
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
   // Verify job exists, is active, and uses in-app applications
   const job = await prisma.job.findUnique({
     where: { id: jobId },
-    select: { id: true, status: true, applyType: true, company: { select: { name: true } } },
+    select: { id: true, status: true, applyType: true, coverLetter: true, company: { select: { name: true } } },
   });
 
   if (!job) {
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "This job does not use in-app applications." }, { status: 409 });
   }
 
+  const coverLetterPolicy = (job.coverLetter ?? "OPTIONAL") as "REQUIRED" | "OPTIONAL" | "NONE";
+  if (coverLetterPolicy === "REQUIRED" && !coverLetter) {
+    return NextResponse.json({ error: "A cover letter is required for this role." }, { status: 422 });
+  }
+
   const candidateName = [candidate.firstName, candidate.lastName].filter(Boolean).join(" ") || candidate.email;
 
   // Insert application — upsert to handle duplicate submits gracefully
@@ -59,7 +65,7 @@ export async function POST(req: NextRequest) {
       jobId,
       candidateId:              candidate.id,
       coverLetter:              coverLetter || null,
-      cvUrl:                    candidate.cvUrl ?? null,
+      cvUrl:                    customCvUrl || candidate.cvUrl || null,
       status:                   "PENDING",
       candidateName,
       candidateHeadline:        candidate.headline ?? null,

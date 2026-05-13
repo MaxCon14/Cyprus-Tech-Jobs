@@ -43,6 +43,7 @@ interface JobData {
   salaryDisclosed: boolean;
   applyUrl:        string;
   applyEmail:      string;
+  coverLetter?:    string;
 }
 
 interface FormErrors {
@@ -82,9 +83,12 @@ interface Props {
 
 export function EditJobForm({ job, categories, isDraft = false, standardSlots = 0, featuredSlots = 0, allTags, initialTags }: Props) {
   const router = useRouter();
-  const [remoteType,      setRemoteType]      = useState(job.remoteType);
-  const [salaryDisclosed, setSalaryDisclosed] = useState(job.salaryDisclosed);
-  const [applyMethod,     setApplyMethod]     = useState<"url" | "email">(job.applyEmail && !job.applyUrl ? "email" : "url");
+  const [remoteType,        setRemoteType]        = useState(job.remoteType);
+  const [salaryDisclosed,   setSalaryDisclosed]   = useState(job.salaryDisclosed);
+  const [applyMethod,       setApplyMethod]       = useState<"url" | "email">(job.applyEmail && !job.applyUrl ? "email" : "url");
+  const [coverLetterPolicy, setCoverLetterPolicy] = useState<"OPTIONAL" | "REQUIRED" | "NONE">(
+    (job.coverLetter as "OPTIONAL" | "REQUIRED" | "NONE") ?? "OPTIONAL"
+  );
   const [loading,         setLoading]         = useState(false);
   const [publishLoading,  setPublishLoading]  = useState(false);
   const [serverError,     setServerError]     = useState<string | null>(null);
@@ -118,6 +122,7 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
       salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
       applyUrl:        form.get("applyUrl"),
       applyEmail:      form.get("applyEmail"),
+      coverLetter:     coverLetterPolicy,
     };
   }
 
@@ -383,6 +388,37 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
                 <input type="hidden" name="applyUrl" value="" />
               </Field>
             )}
+          </div>
+
+          {/* Cover letter policy */}
+          <div>
+            <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
+              Cover letter requirement
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              {([
+                { value: "OPTIONAL" as const, label: "Optional",   desc: "Candidates can include one" },
+                { value: "REQUIRED" as const, label: "Required",   desc: "Must submit a cover letter" },
+                { value: "NONE"     as const, label: "Not needed", desc: "No cover letter shown" },
+              ]).map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => { setCoverLetterPolicy(opt.value); setIsDirty(true); }}
+                  style={{
+                    padding: "10px 12px", borderRadius: 8, textAlign: "left",
+                    border: `1.5px solid ${coverLetterPolicy === opt.value ? "var(--accent)" : "var(--border)"}`,
+                    background: coverLetterPolicy === opt.value ? "var(--accent-soft)" : "var(--surface)",
+                    cursor: "pointer", transition: "all 120ms",
+                  }}
+                >
+                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 12, color: coverLetterPolicy === opt.value ? "var(--accent)" : "var(--text)", marginBottom: 2 }}>
+                    {opt.label}
+                  </div>
+                  <div className="body-s" style={{ color: "var(--text-muted)", fontSize: 11 }}>{opt.desc}</div>
+                </button>
+              ))}
+            </div>
           </div>
         </FormSection>
 
