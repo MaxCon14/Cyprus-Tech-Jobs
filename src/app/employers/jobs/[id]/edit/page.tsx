@@ -26,7 +26,10 @@ export default async function EditJobPage({
   });
   if (!employer) redirect("/employers/onboarding");
 
-  const job = await getJobById(id);
+  const [job, allTagRows] = await Promise.all([
+    getJobById(id),
+    prisma.tag.findMany({ orderBy: { name: "asc" } }),
+  ]);
   if (!job || (employer.company && job.companyId !== employer.company.id)) {
     redirect("/employers/dashboard");
   }
@@ -50,6 +53,9 @@ export default async function EditJobPage({
     applyUrl:        job.applyUrl   ?? "",
     applyEmail:      job.applyEmail ?? "",
   };
+
+  const allTags    = allTagRows.map(t => t.name);
+  const initialTags = job.tags.map(jt => jt.tag.name);
 
   const pageTitle = isDraft ? "Edit draft" : "Edit listing";
   const pageDesc  = isDraft
@@ -76,6 +82,8 @@ export default async function EditJobPage({
           isDraft={isDraft}
           standardSlots={employer.standardSlots}
           featuredSlots={employer.featuredSlots}
+          allTags={allTags}
+          initialTags={initialTags}
         />
       </div>
     </div>

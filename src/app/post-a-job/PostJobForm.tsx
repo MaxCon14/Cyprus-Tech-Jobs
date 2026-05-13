@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/placeholder-data";
 import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, FileText } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
 type ListingType = "standard" | "featured";
 
@@ -16,6 +17,7 @@ interface Props {
   companyName:        string;
   companyWebsite:     string;
   companyDescription: string;
+  allTags:            string[];
 }
 
 interface FormErrors {
@@ -29,7 +31,7 @@ interface FormErrors {
   applyUrl?:        string;
 }
 
-export function PostJobForm({ standardSlots, featuredSlots, companyName, companyWebsite, companyDescription }: Props) {
+export function PostJobForm({ standardSlots, featuredSlots, companyName, companyWebsite, companyDescription, allTags }: Props) {
   const hasSlots       = standardSlots > 0 || featuredSlots > 0;
   const defaultType: ListingType = featuredSlots > 0 ? "featured" : "standard";
 
@@ -94,6 +96,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
       employmentType:     form.get("employmentType"),
       city:               form.get("city"),
       description:        form.get("description"),
+      tags:               form.get("tags"),
       salaryDisclosed,
       salaryMin:          salaryDisclosed ? form.get("salaryMin")  : null,
       salaryMax:          salaryDisclosed ? form.get("salaryMax")  : null,
@@ -418,6 +421,13 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                 <RichTextEditor name="description" error={fieldErrors.description} />
                 <span className="mono-s" style={{ color: "var(--text-subtle)" }}>MARKDOWN SUPPORTED</span>
               </Field>
+            </FormSection>
+
+            <FormSection icon={<Check size={14} />} title="Skills & technologies">
+              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14, marginTop: -4 }}>
+                Select the skills and technologies required for this role. Candidates will be matched based on these tags.
+              </p>
+              <SkillTagSelector name="tags" allTags={allTags} />
             </FormSection>
 
             <FormSection icon={<Star size={14} />} title="Salary & apply">

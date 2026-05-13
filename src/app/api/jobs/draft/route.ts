@@ -106,6 +106,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Link selected skill tags to the draft
+    const tagNames = (() => {
+      try { return JSON.parse(body.tags as string) as string[]; } catch { return []; }
+    })();
+    if (tagNames.length > 0) {
+      const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
+      await prisma.jobTag.createMany({
+        data: tagRecords.map(t => ({ jobId: job.id, tagId: t.id })),
+        skipDuplicates: true,
+      });
+    }
+
     return NextResponse.json({ jobId: job.id, jobSlug: job.slug }, { status: 201 });
   } catch (err) {
     console.error("[jobs/draft POST]", err);

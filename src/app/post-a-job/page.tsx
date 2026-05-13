@@ -18,15 +18,17 @@ export default async function PostAJobPage() {
     redirect("/login");
   }
 
-  const employer = await prisma.employer.findUnique({
-    where:   { email: user.email },
-    include: { company: true },
-  });
+  const [employer, allTagRows] = await Promise.all([
+    prisma.employer.findUnique({ where: { email: user.email }, include: { company: true } }),
+    prisma.tag.findMany({ orderBy: { name: "asc" } }),
+  ]);
   if (!employer) {
     const { data: candidate } = await supabaseAdmin
       .from("candidates").select("id").eq("email", user.email).single();
     redirect(candidate ? "/candidates/dashboard" : "/employers/onboarding");
   }
+
+  const allTags = allTagRows.map(t => t.name);
 
   return (
     <div>
@@ -53,6 +55,7 @@ export default async function PostAJobPage() {
           companyName={employer.company?.name ?? ""}
           companyWebsite={employer.company?.website ?? ""}
           companyDescription={employer.company?.description ?? ""}
+          allTags={allTags}
         />
       </div>
     </div>
