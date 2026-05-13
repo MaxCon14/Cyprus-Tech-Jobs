@@ -69,8 +69,11 @@ export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props)
         />
       </div>
 
-      {/* Tag cloud */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      {/* Tag cloud — capped to 3 rows until employer starts searching */}
+      <div style={{
+        display: "flex", flexWrap: "wrap", gap: 6,
+        ...(search.trim() ? {} : { maxHeight: 90, overflow: "hidden" }),
+      }}>
         {filtered.map(tag => {
           const sel = selected.includes(tag);
           return (
