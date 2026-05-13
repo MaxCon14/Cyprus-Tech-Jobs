@@ -1402,3 +1402,19 @@ details[open] .faq-chevron {
 .job-desc ul li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 9px; }
 .job-desc ol { padding-left: 20px; margin: 6px 0 14px; display: flex; flex-direction: column; gap: 6px; list-style: decimal; }
 .job-desc ol li { font-size: 15px; line-height: 1.65; color: var(--text-muted); }
+
+/* ── CV review loading animation ──────────────────────────────────────────── */
+@keyframes cv-bounce {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes cv-star-rotate {
+  0%, 100% { transform: rotate(-14deg); }
+  50%       { transform: rotate(14deg); }
+}
+.cv-logo-bounce { animation: cv-bounce 2.2s ease-in-out infinite; }
+.cv-star-rotate {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cv-star-rotate 1.7s ease-in-out infinite;
+}
