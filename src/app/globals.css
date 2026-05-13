@@ -1376,6 +1376,7 @@ details[open] .faq-chevron {
 }
 
 /* Editor prose styles */
+.rte-content h1 { font: 700 22px/28px var(--font-sans); letter-spacing: -0.02em; color: var(--text); margin: 24px 0 10px; }
 .rte-content h2 { font: 600 18px/24px var(--font-sans); letter-spacing: -0.01em; color: var(--text); margin: 20px 0 8px; }
 .rte-content h3 { font: 600 15px/22px var(--font-sans); color: var(--text); margin: 16px 0 6px; }
 .rte-content p  { margin: 0 0 10px; color: var(--text-muted); }
@@ -1389,6 +1390,7 @@ details[open] .faq-chevron {
 .rte-content li + li { margin-top: 2px; }
 
 /* Rendered job description (public listing page) */
+.job-desc h1 { font: 700 21px/28px var(--font-sans); letter-spacing: -0.02em; color: var(--text); margin: 28px 0 10px; }
 .job-desc h2 { font: 600 17px/24px var(--font-sans); letter-spacing: -0.01em; color: var(--text); margin: 24px 0 8px; }
 .job-desc h3 { font: 600 14px/20px var(--font-sans); color: var(--text); margin: 18px 0 6px; }
 .job-desc p  { font-size: 15px; line-height: 1.75; color: var(--text-muted); margin: 0 0 12px; }
