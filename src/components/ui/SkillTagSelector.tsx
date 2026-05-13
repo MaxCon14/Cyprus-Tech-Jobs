@@ -2,11 +2,32 @@
 
 import { useState, useMemo } from "react";
 import { X, Search } from "lucide-react";
+import { SKILL_ICONS } from "@/components/jobs/SkillTag";
 
 interface Props {
   name:             string;
   allTags:          string[];
   initialSelected?: string[];
+}
+
+function TagIcon({ name, white = false }: { name: string; white?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const slug = SKILL_ICONS[name];
+  if (!slug || failed) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`https://cdn.simpleicons.org/${slug}`}
+      alt=""
+      width={12}
+      height={12}
+      style={{
+        width: 12, height: 12, objectFit: "contain", flexShrink: 0,
+        ...(white ? { filter: "brightness(0) invert(1)" } : {}),
+      }}
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props) {
@@ -43,7 +64,9 @@ export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props)
                 border: "none", cursor: "pointer",
               }}
             >
-              {tag} <X size={10} />
+              <TagIcon name={tag} white />
+              {tag}
+              <X size={10} />
             </button>
           ))}
         </div>
@@ -82,7 +105,7 @@ export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props)
               type="button"
               onClick={() => toggle(tag)}
               style={{
-                display: "inline-flex", alignItems: "center",
+                display: "inline-flex", alignItems: "center", gap: 5,
                 padding: "5px 12px", borderRadius: 99,
                 background: sel ? "var(--accent-soft)" : "var(--bg-muted)",
                 color:      sel ? "var(--accent)"      : "var(--text-muted)",
@@ -91,6 +114,7 @@ export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props)
                 cursor: "pointer", transition: "background 100ms, border-color 100ms",
               }}
             >
+              <TagIcon name={tag} />
               {tag}
             </button>
           );
