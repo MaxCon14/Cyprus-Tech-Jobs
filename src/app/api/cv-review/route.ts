@@ -4,7 +4,96 @@ import { getJobBySlug } from "@/lib/queries";
 
 export const runtime = "nodejs";
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_BYTES        = 5 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 20_000;
+
+interface ReviewStrength {
+  title:  string;
+  detail: string;
+}
+
+interface ReviewImprovement {
+  title:  string;
+  detail: string;
+  tip:    string;
+}
+
+interface ReviewResult {
+  score:         number;
+  headline:      string;
+  strengths:     ReviewStrength[];
+  improvements:  ReviewImprovement[];
+  encouragement: string;
+}
+
+// ── JSON extraction ────────────────────────────────────────────────────────────
+
+function extractJson(raw: string): unknown {
+  // Strategy 1: direct parse
+  try { return JSON.parse(raw); } catch { /* continue */ }
+
+  // Strategy 2: strip code fences (```json…``` or ```…```)
+  const stripped = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "").trim();
+  try { return JSON.parse(stripped); } catch { /* continue */ }
+
+  // Strategy 3: extract first balanced {…} block from anywhere in text
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch { /* continue */ }
+  }
+
+  throw new Error("Could not extract valid JSON from the AI response.");
+}
+
+// ── Response normalisation ────────────────────────────────────────────────────
+
+const DEFAULT_TIP =
+  "Review this section of your CV and add specific examples, measurable achievements, or relevant technologies. Concrete, quantified details are far more compelling to hiring managers than general statements.";
+
+function str(v: unknown, fallback: string): string {
+  return typeof v === "string" && v.trim() ? v.trim() : fallback;
+}
+
+function normalizeResult(raw: unknown): ReviewResult {
+  const obj = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
+
+  const score = typeof obj.score === "number"
+    ? Math.max(0, Math.min(100, Math.round(obj.score)))
+    : 50;
+
+  const strengths: ReviewStrength[] = (Array.isArray(obj.strengths) ? obj.strengths : [])
+    .map((s: unknown) => {
+      const item = (typeof s === "object" && s !== null ? s : {}) as Record<string, unknown>;
+      return {
+        title:  str(item.title,  "Strength identified"),
+        detail: str(item.detail, "The AI found a positive match here."),
+      };
+    })
+    .filter(s => s.title && s.detail)
+    .slice(0, 5);
+
+  const improvements: ReviewImprovement[] = (Array.isArray(obj.improvements) ? obj.improvements : [])
+    .map((imp: unknown) => {
+      const item = (typeof imp === "object" && imp !== null ? imp : {}) as Record<string, unknown>;
+      return {
+        title:  str(item.title,  "Area to strengthen"),
+        detail: str(item.detail, "Consider reviewing this area of your CV."),
+        tip:    str(item.tip,    DEFAULT_TIP),
+      };
+    })
+    .filter(i => i.title)
+    .slice(0, 5);
+
+  return {
+    score,
+    headline:      str(obj.headline,      "Analysis complete — see details below."),
+    strengths,
+    improvements,
+    encouragement: str(obj.encouragement, "Keep refining your application — you've got this!"),
+  };
+}
+
+// ── Prompt builder ─────────────────────────────────────────────────────────────
 
 async function buildPrompt(jobSlug: string) {
   const job = await getJobBySlug(jobSlug);
@@ -26,7 +115,7 @@ THE CANDIDATE'S CV IS ATTACHED AS A PDF DOCUMENT.
 
 Carefully read the entire CV and assess how well this candidate matches the job above.
 
-Respond ONLY with a valid JSON object in this exact shape — no markdown, no code fences, just raw JSON:
+Respond ONLY with a valid JSON object in this exact shape — no markdown, no code fences, no commentary before or after, just raw JSON starting with { and ending with }:
 {
   "score": <integer 0-100 representing overall match percentage>,
   "headline": "<one upbeat sentence summarising the match, e.g. 'Strong match — a couple of quick additions will seal the deal'>",
@@ -39,7 +128,7 @@ Respond ONLY with a valid JSON object in this exact shape — no markdown, no co
     {
       "title": "<short gap title, 3-6 words>",
       "detail": "<2-3 sentences explaining why this gap matters for this specific role and what the employer is looking for>",
-      "tip": "<specific, actionable advice: exactly what to add, rewrite, or highlight in the CV to close this gap — be concrete and practical>"
+      "tip": "<REQUIRED: specific, actionable advice of at least 2 full sentences — exactly what to add, rewrite, or highlight in the CV to close this gap. Be concrete and practical. This field must never be empty.>"
     },
     { "title": "...", "detail": "...", "tip": "..." },
     { "title": "...", "detail": "...", "tip": "..." }
@@ -47,18 +136,20 @@ Respond ONLY with a valid JSON object in this exact shape — no markdown, no co
   "encouragement": "<one warm, genuine closing sentence that encourages the candidate to apply>"
 }
 
-Guidelines:
-- Score 80-100 for strong matches, 60-79 for good matches with minor gaps, 40-59 for partial matches, below 40 for weak matches
-- Score honestly — a 72 means something; don't round everything to 80
-- Strengths: celebrate real matches — reference actual skills, job titles, or projects you can see in the CV
-- Improvements: frame every gap as a quick win, never as a deficiency ("Adding X would show..." not "You lack X")
-- Tips: be genuinely specific — "Add a bullet point about your experience with X in your Y role" beats "mention more skills"
-- Encouragement: make it warm and human, not generic`;
+CRITICAL RULES — violating these will break the application:
+- Output ONLY the raw JSON object. No text before it, no text after it, no code fences, no backticks.
+- The "tip" field in every improvement MUST contain a specific, actionable recommendation of at least 2 sentences. It must NEVER be empty, null, or a placeholder.
+- Score honestly: 80-100 strong match, 60-79 good match with minor gaps, 40-59 partial match, below 40 weak match. Don't round everything to 80.
+- Strengths: celebrate real matches — reference actual skills, job titles, or projects visible in the CV.
+- Improvements: frame every gap as a quick win ("Adding X would show…" not "You lack X").
+- Tips: be genuinely specific — "Add a bullet point about your experience with X in your Y role" beats "mention more skills".`;
 
   return { job, prompt };
 }
 
-async function runAnalysis(base64: string, prompt: string) {
+// ── Analysis runner ────────────────────────────────────────────────────────────
+
+async function runAnalysis(base64: string, prompt: string): Promise<ReviewResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error("ANTHROPIC_API_KEY is not configured.");
   }
@@ -79,19 +170,14 @@ async function runAnalysis(base64: string, prompt: string) {
     ],
   });
 
-  const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "";
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    const stripped = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-    return JSON.parse(stripped);
-  }
+  const raw    = message.content[0].type === "text" ? message.content[0].text.trim() : "";
+  const parsed = extractJson(raw);
+  return normalizeResult(parsed);
 }
 
 // ── File upload handler ────────────────────────────────────────────────────────
 
-async function handleFileUpload(req: NextRequest) {
+async function handleFileUpload(req: NextRequest): Promise<ReviewResult | NextResponse> {
   const formData = await req.formData();
   const jobSlug  = formData.get("jobSlug");
   const file     = formData.get("file");
@@ -112,22 +198,35 @@ async function handleFileUpload(req: NextRequest) {
   const buffer = await file.arrayBuffer();
   const base64 = Buffer.from(buffer).toString("base64");
 
-  return built.prompt ? runAnalysis(base64, built.prompt) : null;
+  return runAnalysis(base64, built.prompt);
 }
 
 // ── CV URL handler ─────────────────────────────────────────────────────────────
 
-async function handleCvUrl(jobSlug: string, cvUrl: string) {
+async function handleCvUrl(jobSlug: string, cvUrl: string): Promise<ReviewResult | NextResponse> {
   const built = await buildPrompt(jobSlug);
   if (!built) return NextResponse.json({ error: "Job not found." }, { status: 404 });
 
   const url = cvUrl.startsWith("http") ? cvUrl : `https://${cvUrl}`;
-  const res  = await fetch(url);
-  if (!res.ok) {
-    return NextResponse.json({ error: "Could not fetch your saved CV. Please upload it manually." }, { status: 422 });
+
+  let cvRes: Response;
+  try {
+    cvRes = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+  } catch {
+    return NextResponse.json(
+      { error: "Could not fetch your saved CV. Please upload it manually." },
+      { status: 422 }
+    );
   }
 
-  const buffer = await res.arrayBuffer();
+  if (!cvRes.ok) {
+    return NextResponse.json(
+      { error: "Could not fetch your saved CV. Please upload it manually." },
+      { status: 422 }
+    );
+  }
+
+  const buffer = await cvRes.arrayBuffer();
   if (buffer.byteLength > MAX_BYTES) {
     return NextResponse.json({ error: "Saved CV is too large (max 5 MB)." }, { status: 422 });
   }
@@ -142,7 +241,7 @@ export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get("content-type") ?? "";
 
-    let result: unknown;
+    let result: ReviewResult | NextResponse;
 
     if (contentType.includes("application/json")) {
       const body    = await req.json();
@@ -166,7 +265,10 @@ export async function POST(req: NextRequest) {
     console.error("[cv-review]", err);
 
     if (msg.includes("ANTHROPIC_API_KEY")) {
-      return NextResponse.json({ error: "AI service is not configured. Please contact support." }, { status: 503 });
+      return NextResponse.json(
+        { error: "AI service is not configured. Please contact support." },
+        { status: 503 }
+      );
     }
     return NextResponse.json({ error: "Analysis failed. Please try again." }, { status: 500 });
   }
