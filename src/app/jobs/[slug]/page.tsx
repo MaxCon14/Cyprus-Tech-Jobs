@@ -6,7 +6,7 @@ import { getJobBySlug, getSimilarJobs } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
-import { MapPin, Clock, Briefcase, Building2, ExternalLink, ChevronLeft } from "lucide-react";
+import { MapPin, Clock, Briefcase, ExternalLink, ChevronLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
@@ -79,10 +79,9 @@ export default async function JobDetailPage({ params }: Props) {
   } catch { /* non-critical */ }
 
   const metaItems = [
-    { icon: <MapPin size={14} />,     label: job.city ?? "Cyprus" },
+    ...(job.city ? [{ icon: <MapPin size={14} />,    label: job.city }] : []),
     { icon: <Briefcase size={14} />,  label: remoteLabel(job.remoteType) },
     { icon: <Clock size={14} />,      label: job.employmentType.replace("_", " ") },
-    { icon: <Building2 size={14} />,  label: job.company.city ?? "Cyprus" },
   ];
 
   const descBlocks = job.description.split("\n\n");
@@ -289,7 +288,7 @@ export default async function JobDetailPage({ params }: Props) {
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>JOB DETAILS</div>
             {[
               ["Company",    job.company.name],
-              ["Location",   job.city ?? "Cyprus"],
+              ["Location",   job.city ?? "—"],
               ["Work type",  remoteLabel(job.remoteType)],
               ["Employment", job.employmentType.replace("_", " ")],
               ["Level",      job.experienceLevel],
