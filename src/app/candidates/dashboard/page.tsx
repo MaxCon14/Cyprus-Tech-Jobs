@@ -9,7 +9,7 @@ import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, Al
 import { AppliedJobsCard } from "./AppliedJobsCard";
 import { MyAlertsCard } from "@/components/alerts/MyAlertsCard";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
-import { getJobs } from "@/lib/queries";
+import { getMatchingJobsForCandidate } from "@/lib/queries";
 import { remoteLabel, formatSalary, timeAgo } from "@/lib/utils";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import type { Metadata } from "next";
@@ -65,10 +65,10 @@ export default async function CandidateDashboardPage() {
 
   // Fetch matching jobs, saved jobs, and applied jobs in parallel
   const [matchingJobs, savedJobsResult, appliedJobsResult] = await Promise.all([
-    getJobs({
-      remoteType:      c.remoteType  ?? undefined,
-      experienceLevel: c.experienceLevel ?? undefined,
-      take: 3,
+    getMatchingJobsForCandidate({
+      remoteType:      c.remoteType,
+      experienceLevel: c.experienceLevel,
+      categories:      c.categories,
     }),
     supabaseAdmin.from("saved_jobs").select("jobId").eq("candidateId", c.id),
     supabaseAdmin.from("applied_jobs").select("jobId, appliedAt").eq("candidateId", c.id).order("appliedAt", { ascending: false }),
@@ -247,7 +247,7 @@ export default async function CandidateDashboardPage() {
 
 // ─── Matching jobs card ───────────────────────────────────────────────────────
 
-function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> }) {
+function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getMatchingJobsForCandidate>> }) {
   return (
     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderBottom: "1px solid var(--border)" }}>
