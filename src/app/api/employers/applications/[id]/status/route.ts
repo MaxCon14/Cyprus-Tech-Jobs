@@ -3,7 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 
-const VALID_STATUSES = ["PENDING", "REVIEWED", "SHORTLISTED", "REJECTED"];
+const VALID_STATUSES = ["UNREVIEWED", "PENDING", "REVIEWED", "SHORTLISTED", "REJECTED"];
 
 export async function PATCH(
   req: NextRequest,

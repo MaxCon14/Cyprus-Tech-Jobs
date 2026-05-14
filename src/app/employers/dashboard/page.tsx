@@ -7,13 +7,12 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { getEmployerWithCompanyAndJobs } from "@/lib/queries";
 import {
   Plus, Eye, ExternalLink, MapPin, ChevronRight,
-  CheckCircle2, AlertCircle, ShoppingBag, Inbox,
+  CheckCircle2, AlertCircle, ShoppingBag,
 } from "lucide-react";
 import type { Metadata } from "next";
-import { JobListingsPanel } from "./JobListingsPanel";
 import type { SerializedJob } from "./JobListingsPanel";
-import { ApplicationsPanel } from "./ApplicationsPanel";
 import type { ApplicationRow } from "./ApplicationsPanel";
+import { DashboardContent } from "./DashboardContent";
 
 export const metadata: Metadata = {
   title: "Employer Dashboard — CyprusTech.Jobs",
@@ -220,35 +219,13 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
           </div>
         </div>
 
-        {/* ── Stats filter cards + filtered job list ── */}
-        <JobListingsPanel jobs={serializedJobs} appCountByJob={appCountByJob} />
-
-        {/* ── In-app applications panel ── */}
-        {inAppJobIds.length > 0 && (
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", marginBottom: 20 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px clamp(16px,3vw,24px)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Inbox size={15} style={{ color: "var(--accent)" }} />
-                <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, margin: 0 }}>Applications</p>
-                {applications.length > 0 && (
-                  <span style={{
-                    fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
-                    color: "var(--accent)", background: "var(--accent-soft)",
-                    padding: "2px 8px", borderRadius: 99,
-                  }}>
-                    {applications.length}
-                  </span>
-                )}
-              </div>
-              <span className="mono-s" style={{ color: "var(--text-subtle)" }}>
-                {applications.filter(a => a.status === "PENDING").length > 0
-                  ? `${applications.filter(a => a.status === "PENDING").length} NEW`
-                  : "ALL REVIEWED"}
-              </span>
-            </div>
-            <ApplicationsPanel initialApplications={applications} />
-          </div>
-        )}
+        {/* ── Job listings + applications (with cross-filter state) ── */}
+        <DashboardContent
+          jobs={serializedJobs}
+          applications={applications}
+          appCountByJob={appCountByJob}
+          hasInAppJobs={inAppJobIds.length > 0}
+        />
 
         {/* ── No company warning ── */}
         {!company && (

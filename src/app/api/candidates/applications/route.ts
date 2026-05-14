@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     .upsert({
       jobId,
       candidateId:     candidate.id,
-      status:          "PENDING",
+      status:          "UNREVIEWED",
       cvUrl:           customCvUrl || candidate.cvUrl || null,
       coverLetter:     coverLetter  || null,
       coverLetterUrl:  coverLetterUrl || null,
