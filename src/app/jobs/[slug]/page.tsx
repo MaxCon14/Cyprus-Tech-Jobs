@@ -10,7 +10,7 @@ import { MapPin, Clock, Briefcase, ExternalLink, ChevronLeft } from "lucide-reac
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { CvReviewPanel } from "./CvReviewPanel";
-import { ShareButton } from "./ShareButton";
+
 import { ApplyButton } from "./ApplyButton";
 import { SkillTag } from "@/components/jobs/SkillTag";
 import { buildJobPostingSchema, buildBreadcrumbSchema } from "@/lib/schema";
@@ -84,9 +84,8 @@ export default async function JobDetailPage({ params }: Props) {
     { icon: <Clock size={14} />,      label: job.employmentType.replace("_", " ") },
   ];
 
-  const descIsHtml  = job.description.trimStart().startsWith("<");
-  const descBlocks  = descIsHtml ? [] : job.description.split("\n\n");
-  const jobUrl     = `https://cyprustech.careers/jobs/${job.slug}`;
+  const descIsHtml = job.description.trimStart().startsWith("<");
+  const descBlocks = descIsHtml ? [] : job.description.split("\n\n");
   const isActive   = job.status === "ACTIVE";
   const isPaused   = job.status === "PAUSED";
 
@@ -281,12 +280,6 @@ export default async function JobDetailPage({ params }: Props) {
                 </Link>
               </>
             )}
-          </div>
-
-          {/* Share */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "12px 16px", background: "var(--surface)" }}>
-            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>SHARE THIS ROLE</div>
-            <ShareButton url={jobUrl} title={job.title} />
           </div>
 
           {/* Job meta */}
