@@ -251,7 +251,7 @@ export default async function JobDetailPage({ params }: Props) {
               </div>
             )}
             {isActive ? (
-              <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <ApplyButton
                   jobId={job.id}
                   applyType={job.applyType ?? "URL"}
@@ -269,7 +269,7 @@ export default async function JobDetailPage({ params }: Props) {
                   cvUrl={savedCvUrl ?? undefined}
                 />
                 <CvReviewPanel jobSlug={job.slug} jobTitle={job.title} isCandidate={isCandidate} savedCvUrl={savedCvUrl} />
-              </>
+              </div>
             ) : (
               <>
                 <div className="btn btn-outline btn-lg" style={{ width: "100%", justifyContent: "center", opacity: 0.5, cursor: "not-allowed", marginBottom: 10 }}>
