@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ChevronDown, ChevronUp, ScrollText } from "lucide-react";
 
 export interface ApplicationRow {
   id:                       string;
@@ -17,6 +17,7 @@ export interface ApplicationRow {
   candidateSkills:          string[];
   cvUrl:                    string | null;
   coverLetter:              string | null;
+  coverLetterUrl:           string | null;
   status:                   string;
   appliedAt:                string;
   candidateLinkedinUrl:     string | null;
@@ -53,9 +54,11 @@ function ApplicationCard({ app, onStatusChange }: {
   app: ApplicationRow;
   onStatusChange: (id: string, status: string) => void;
 }) {
-  const [updating, setUpdating] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [updating, setUpdating]               = useState(false);
+  const [expanded, setExpanded]               = useState(false);
+  const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   const cfg = STATUS_CONFIG[app.status] ?? STATUS_CONFIG.UNREVIEWED;
+  const hasCoverLetter = !!(app.coverLetter || app.coverLetterUrl);
 
   async function setStatus(status: string) {
     if (updating || status === app.status) return;
@@ -148,7 +151,7 @@ function ApplicationCard({ app, onStatusChange }: {
       </div>
 
       {/* Expand toggle */}
-      {(app.coverLetter || app.cvUrl || app.candidateLinkedinUrl || app.candidateGithubUrl || app.candidatePortfolioUrl) && (
+      {(hasCoverLetter || app.cvUrl || app.candidateLinkedinUrl || app.candidateGithubUrl || app.candidatePortfolioUrl) && (
         <button
           type="button"
           onClick={() => setExpanded(v => !v)}
@@ -165,20 +168,29 @@ function ApplicationCard({ app, onStatusChange }: {
 
       {expanded && (
         <div style={{ padding: "14px 20px 16px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
-          {app.coverLetter && (
-            <div>
-              <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 6 }}>COVER LETTER</p>
-              <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
-                {app.coverLetter}
-              </p>
-            </div>
-          )}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {app.cvUrl && (
               <a href={app.cvUrl} target="_blank" rel="noopener noreferrer"
                 className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <FileText size={12} /> View CV
               </a>
+            )}
+            {hasCoverLetter && (
+              app.coverLetterUrl ? (
+                <a href={app.coverLetterUrl} target="_blank" rel="noopener noreferrer"
+                  className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <ScrollText size={12} /> View Cover Letter
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setCoverLetterOpen(true)}
+                  className="btn btn-outline btn-sm"
+                  style={{ display: "flex", alignItems: "center", gap: 5 }}
+                >
+                  <ScrollText size={12} /> View Cover Letter
+                </button>
+              )
             )}
             {app.candidateLinkedinUrl && (
               <a href={app.candidateLinkedinUrl.startsWith("http") ? app.candidateLinkedinUrl : `https://${app.candidateLinkedinUrl}`}
@@ -252,6 +264,59 @@ function ApplicationCard({ app, onStatusChange }: {
           </button>
         )}
       </div>
+
+      {/* Cover letter modal */}
+      {coverLetterOpen && app.coverLetter && (
+        <div
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(0,0,0,0.55)", backdropFilter: "blur(2px)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+          }}
+          onClick={() => setCoverLetterOpen(false)}
+        >
+          <div
+            style={{
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderRadius: 16, padding: "24px 28px",
+              maxWidth: 580, width: "100%", maxHeight: "80vh",
+              display: "flex", flexDirection: "column", gap: 16,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <p style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, margin: 0, color: "var(--text)" }}>
+                  Cover Letter
+                </p>
+                <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 2 }}>
+                  {app.candidateName || app.candidateEmail}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCoverLetterOpen(false)}
+                style={{
+                  background: "none", border: "1px solid var(--border)",
+                  borderRadius: 8, width: 32, height: 32,
+                  display: "grid", placeItems: "center",
+                  cursor: "pointer", color: "var(--text-muted)", flexShrink: 0,
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              <p className="body-s" style={{
+                color: "var(--text-muted)", lineHeight: 1.8, whiteSpace: "pre-wrap", margin: 0,
+              }}>
+                {app.coverLetter}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
