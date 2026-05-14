@@ -80,7 +80,7 @@ function ApplicationCard({ app, onStatusChange }: {
           background: "var(--accent-soft)", display: "grid", placeItems: "center",
           fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 16, color: "var(--accent)",
         }}>
-          {(app.candidateName || app.candidateEmail)[0].toUpperCase()}
+          {((app.candidateName || app.candidateEmail || "?")?.[0] ?? "?").toUpperCase()}
         </div>
 
         {/* Info */}
