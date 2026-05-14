@@ -109,7 +109,7 @@ function InAppApplyForm({
         <Link href="/login" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
           Sign in to apply →
         </Link>
-        <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
+        <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
           APPLY DIRECTLY ON CYPRUSTECHJOBS
         </p>
       </div>
