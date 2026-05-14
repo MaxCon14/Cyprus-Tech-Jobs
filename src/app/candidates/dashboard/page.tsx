@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection, SkillsSection, CvSection } from "./ProfileEditor";
+import { AppliedJobsCard } from "./AppliedJobsCard";
 import { MyAlertsCard } from "@/components/alerts/MyAlertsCard";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getJobs } from "@/lib/queries";
@@ -14,7 +15,7 @@ import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import type { Metadata } from "next";
 import {
   MapPin, Briefcase, CheckCircle2, Circle, AlertCircle,
-  ExternalLink, ChevronRight, Heart, Send,
+  ExternalLink, ChevronRight, Heart,
 } from "lucide-react";
 
 export const metadata: Metadata = { title: "My dashboard — CyprusTech.Jobs" };
@@ -97,19 +98,19 @@ export default async function CandidateDashboardPage() {
     (appliedJobsResult.data ?? []).map((r: { jobId: string; appliedAt: string }) => [r.jobId, r.appliedAt])
   );
 
-  type AppliedJob = { id: string; slug: string; title: string; city: string | null; companyName: string; appliedAt: string };
+  type AppliedJob = { id: string; slug: string; title: string; city: string | null; companyName: string; appliedAt: string; status: string };
   let appliedJobs: AppliedJob[] = [];
   if (appliedJobIds.length > 0) {
     const { data: jobRows } = await supabaseAdmin
       .from("jobs")
-      .select("id, slug, title, city, company:companies(name)")
-      .in("id", appliedJobIds)
-      .eq("status", "ACTIVE");
-    appliedJobs = (jobRows ?? []).map((j: { id: string; slug: string; title: string; city: string | null; company: { name: string }[] }) => ({
+      .select("id, slug, title, city, status, company:companies(name)")
+      .in("id", appliedJobIds);
+    appliedJobs = (jobRows ?? []).map((j: { id: string; slug: string; title: string; city: string | null; status: string; company: { name: string }[] }) => ({
       id: j.id,
       slug: j.slug,
       title: j.title,
       city: j.city,
+      status: j.status,
       companyName: Array.isArray(j.company) ? (j.company[0]?.name ?? "") : "",
       appliedAt: appliedAtMap[j.id] ?? "",
     }));
@@ -285,51 +286,6 @@ function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getJobs>> 
           </Link>
         ))}
       </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Applied jobs card ────────────────────────────────────────────────────────
-
-function AppliedJobsCard({ jobs }: { jobs: { id: string; slug: string; title: string; city: string | null; companyName: string; appliedAt: string }[] }) {
-  return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Send size={14} style={{ color: "var(--accent)" }} />
-          <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", margin: 0 }}>Applied jobs</p>
-          {jobs.length > 0 && (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent)", background: "var(--accent-soft)", padding: "2px 7px", borderRadius: 99 }}>
-              {jobs.length}
-            </span>
-          )}
-        </div>
-        <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
-      </div>
-      <div style={{ padding: "12px 20px", display: "flex", flexDirection: "column", gap: 0 }}>
-        {jobs.length === 0 ? (
-          <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic", padding: "8px 0" }}>
-            Jobs you apply to will appear here.
-          </p>
-        ) : (
-          jobs.map((job, i) => (
-            <Link key={job.id} href={`/jobs/${job.slug}`}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "12px 0", borderBottom: i < jobs.length - 1 ? "1px solid var(--border)" : "none", textDecoration: "none" }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {job.title}
-                </p>
-                <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-                  {job.companyName}{job.city ? ` · ${job.city}` : ""}
-                </p>
-              </div>
-              <span className="mono-s" style={{ color: "var(--text-subtle)", flexShrink: 0, fontSize: 11 }}>
-                {job.appliedAt ? timeAgo(new Date(job.appliedAt)) : ""}
-              </span>
-            </Link>
-          ))
-        )}
       </div>
     </div>
   );
