@@ -105,3 +105,37 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to update job." }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) {
+    return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const employer = await prisma.employer.findUnique({
+    where:   { email: user.email },
+    include: { company: true },
+  });
+  if (!employer?.company) {
+    return NextResponse.json({ error: "Employer not found." }, { status: 404 });
+  }
+
+  const job = await prisma.job.findUnique({ where: { id } });
+  if (!job || job.companyId !== employer.company.id) {
+    return NextResponse.json({ error: "Job not found." }, { status: 404 });
+  }
+
+  try {
+    await prisma.job.update({ where: { id }, data: { status: "CLOSED" } });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[jobs/delete]", err);
+    return NextResponse.json({ error: "Failed to close job." }, { status: 500 });
+  }
+}
