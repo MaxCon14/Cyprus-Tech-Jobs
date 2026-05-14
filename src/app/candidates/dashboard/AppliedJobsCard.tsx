@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Send, X, ChevronRight } from "lucide-react";
+import { Send, X } from "lucide-react";
 
 export interface AppliedJob {
   id:          string;
@@ -205,7 +205,11 @@ export function AppliedJobsCard({ jobs }: { jobs: AppliedJob[] }) {
               </span>
             )}
           </div>
-          <Link href="/jobs" className="btn btn-ghost btn-sm">Browse jobs</Link>
+          {jobs.length > 0 && (
+            <button type="button" onClick={() => setModalOpen(true)} className="btn btn-ghost btn-sm">
+              View all
+            </button>
+          )}
         </div>
 
         {/* Top 3 list */}
@@ -244,19 +248,6 @@ export function AppliedJobsCard({ jobs }: { jobs: AppliedJob[] }) {
                 </Link>
               ))}
 
-              <button
-                type="button"
-                onClick={() => setModalOpen(true)}
-                style={{
-                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  padding: "12px 0", background: "none", border: "none",
-                  borderTop: "1px solid var(--border)",
-                  cursor: "pointer", color: "var(--accent)",
-                  fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600,
-                }}
-              >
-                View all {jobs.length} application{jobs.length !== 1 ? "s" : ""} <ChevronRight size={13} />
-              </button>
             </>
           )}
         </div>
