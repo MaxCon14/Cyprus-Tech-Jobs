@@ -50,12 +50,36 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
 
     if (appRows) {
       const jobMap = Object.fromEntries(jobs.map(j => [j.id, j]));
-      applications = (appRows as ApplicationRow[]).map(a => ({
-        ...a,
-        jobTitle: jobMap[a.jobId]?.title ?? "Unknown job",
-        jobSlug:  jobMap[a.jobId]?.slug  ?? "",
-        candidateSkills: Array.isArray(a.candidateSkills) ? a.candidateSkills : [],
-      }));
+
+      const candidateIds = [...new Set((appRows as any[]).map((a: any) => a.candidateId).filter(Boolean))];
+      let candidateMap: Record<string, any> = {};
+      if (candidateIds.length > 0) {
+        const { data: candidates } = await supabaseAdmin
+          .from("candidates")
+          .select("id, email, firstName, lastName, headline, city, experienceLevel, skills, linkedinUrl, githubUrl, portfolioUrl")
+          .in("id", candidateIds);
+        if (candidates) {
+          candidateMap = Object.fromEntries((candidates as any[]).map((c: any) => [c.id, c]));
+        }
+      }
+
+      applications = (appRows as any[]).map(a => {
+        const candidate = candidateMap[a.candidateId];
+        return {
+          ...a,
+          jobTitle:                 jobMap[a.jobId]?.title ?? "Unknown job",
+          jobSlug:                  jobMap[a.jobId]?.slug  ?? "",
+          candidateName:            candidate ? (`${candidate.firstName ?? ""} ${candidate.lastName ?? ""}`).trim() || null : null,
+          candidateEmail:           candidate?.email ?? "",
+          candidateHeadline:        candidate?.headline ?? null,
+          candidateCity:            candidate?.city ?? null,
+          candidateExperienceLevel: candidate?.experienceLevel ?? null,
+          candidateSkills:          Array.isArray(candidate?.skills) ? candidate.skills : [],
+          candidateLinkedinUrl:     a.linkedinUrl ?? candidate?.linkedinUrl ?? null,
+          candidateGithubUrl:       candidate?.githubUrl ?? null,
+          candidatePortfolioUrl:    a.portfolioUrl ?? candidate?.portfolioUrl ?? null,
+        } as ApplicationRow;
+      });
     }
   }
 
