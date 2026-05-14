@@ -130,7 +130,9 @@ export function LinksSection({ candidate }: { candidate: CandidateRow }) {
                   style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--text)", textDecoration: "none" }}>
                   <span style={{ color: "var(--text-subtle)", display: "flex" }}>{icon}</span>
                   <span className="body-s">{label}</span>
-                  <span className="mono-s" style={{ color: "var(--accent)", marginLeft: "auto" }}>{val}</span>
+                  <span className="mono-s" style={{ color: "var(--accent)", marginLeft: "auto" }} title={val}>
+                    {val.length > 22 ? val.slice(0, 22) + "…" : val}
+                  </span>
                 </a>
               );
             })}
