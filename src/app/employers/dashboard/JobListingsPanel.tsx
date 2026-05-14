@@ -57,9 +57,13 @@ function countFor(jobs: SerializedJob[], key: FilterKey) {
 export function JobListingsPanel({
   jobs: initialJobs,
   appCountByJob,
+  selectedJobId,
+  onJobSelect,
 }: {
   jobs:          SerializedJob[];
   appCountByJob: Record<string, number>;
+  selectedJobId?: string | null;
+  onJobSelect?:  (jobId: string) => void;
 }) {
   const [filter, setFilter]           = useState<FilterKey>("ACTIVE");
   const [jobs, setJobs]               = useState(initialJobs);
@@ -187,10 +191,21 @@ export function JobListingsPanel({
               const isConfirming = confirmDeleteId === job.id;
               const isDeleting   = deletingId === job.id;
 
+              const isSelected = selectedJobId === job.id;
+
               return (
-                <div key={job.id} className="employer-job-row" style={{
-                  borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none",
-                }}>
+                <div
+                  key={job.id}
+                  className="employer-job-row"
+                  onClick={() => onJobSelect?.(job.id)}
+                  style={{
+                    borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none",
+                    cursor: onJobSelect ? "pointer" : undefined,
+                    background: isSelected ? "var(--accent-soft)" : undefined,
+                    borderLeft: isSelected ? "3px solid var(--accent)" : "3px solid transparent",
+                    transition: "background 120ms",
+                  }}
+                >
                   {/* Role */}
                   <div style={{ minWidth: 0 }}>
                     <p className="body-s" style={{ fontWeight: 600, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -272,7 +287,10 @@ export function JobListingsPanel({
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: "flex", gap: 4, justifyContent: "flex-end", alignItems: "center" }}>
+                  <div
+                    style={{ display: "flex", gap: 4, justifyContent: "flex-end", alignItems: "center" }}
+                    onClick={e => e.stopPropagation()}
+                  >
                     {isConfirming ? (
                       <>
                         <span className="mono-s" style={{ fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap" }}>Close?</span>
