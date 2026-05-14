@@ -52,13 +52,27 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
 
       const candidateIds = [...new Set((appRows as any[]).map((a: any) => a.candidateId).filter(Boolean))];
       let candidateMap: Record<string, any> = {};
+      let positionsMap: Record<string, any[]> = {};
       if (candidateIds.length > 0) {
-        const { data: candidates } = await supabaseAdmin
-          .from("candidates")
-          .select("id, email, firstName, lastName, headline, city, experienceLevel, skills, linkedinUrl, githubUrl, portfolioUrl")
-          .in("id", candidateIds);
+        const [{ data: candidates }, { data: positions }] = await Promise.all([
+          supabaseAdmin
+            .from("candidates")
+            .select("id, email, firstName, lastName, headline, city, experienceLevel, skills, linkedinUrl, githubUrl, portfolioUrl")
+            .in("id", candidateIds),
+          supabaseAdmin
+            .from("candidate_positions")
+            .select("id, candidateId, title, company, startDate, endDate, current, description")
+            .in("candidateId", candidateIds)
+            .order("startDate", { ascending: false }),
+        ]);
         if (candidates) {
           candidateMap = Object.fromEntries((candidates as any[]).map((c: any) => [c.id, c]));
+        }
+        if (positions) {
+          for (const p of positions as any[]) {
+            if (!positionsMap[p.candidateId]) positionsMap[p.candidateId] = [];
+            positionsMap[p.candidateId].push(p);
+          }
         }
       }
 
@@ -77,6 +91,7 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
           candidateLinkedinUrl:     a.linkedinUrl ?? candidate?.linkedinUrl ?? null,
           candidateGithubUrl:       candidate?.githubUrl ?? null,
           candidatePortfolioUrl:    a.portfolioUrl ?? candidate?.portfolioUrl ?? null,
+          candidatePositions:       positionsMap[a.candidateId] ?? [],
         } as ApplicationRow;
       });
     }

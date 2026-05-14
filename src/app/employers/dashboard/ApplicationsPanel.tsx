@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ChevronDown, ChevronUp, ScrollText } from "lucide-react";
+import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ChevronDown, ChevronUp, ScrollText, Briefcase, ChevronRight } from "lucide-react";
 
 export interface ApplicationRow {
   id:                       string;
@@ -23,6 +23,17 @@ export interface ApplicationRow {
   candidateLinkedinUrl:     string | null;
   candidateGithubUrl:       string | null;
   candidatePortfolioUrl:    string | null;
+  candidatePositions:       CandidatePosition[];
+}
+
+export interface CandidatePosition {
+  id:          string;
+  title:       string;
+  company:     string;
+  startDate:   string | null;
+  endDate:     string | null;
+  current:     boolean;
+  description: string | null;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; icon: React.ReactNode }> = {
@@ -50,6 +61,117 @@ function timeAgo(iso: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDate(d: string | null) {
+  if (!d) return "";
+  const [y, m] = d.split("-");
+  const month = MONTHS[parseInt(m, 10) - 1];
+  return month ? `${month} ${y}` : y;
+}
+
+function WorkExperienceModal({ positions, candidateName, onClose }: {
+  positions:     CandidatePosition[];
+  candidateName: string;
+  onClose:       () => void;
+}) {
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  function toggle(id: string) {
+    setOpenIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0, zIndex: 9999,
+        background: "rgba(0,0,0,0.55)", backdropFilter: "blur(2px)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "var(--surface)", border: "1px solid var(--border)",
+          borderRadius: 16, padding: "24px 28px",
+          maxWidth: 560, width: "100%", maxHeight: "80vh",
+          display: "flex", flexDirection: "column", gap: 20,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 15, margin: 0, color: "var(--text)" }}>
+              Work Experience
+            </p>
+            <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 2 }}>{candidateName}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              background: "none", border: "1px solid var(--border)",
+              borderRadius: 8, width: 32, height: 32,
+              display: "grid", placeItems: "center",
+              cursor: "pointer", color: "var(--text-muted)", flexShrink: 0,
+            }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+
+        {/* Positions list */}
+        <div style={{ overflowY: "auto", display: "flex", flexDirection: "column" }}>
+          {positions.map((pos, i) => {
+            const isOpen  = openIds.has(pos.id);
+            const dateRange = [fmtDate(pos.startDate), pos.current ? "Present" : fmtDate(pos.endDate)].filter(Boolean).join(" – ");
+            return (
+              <div key={pos.id} style={{ borderBottom: i < positions.length - 1 ? "1px solid var(--border)" : "none" }}>
+                <button
+                  type="button"
+                  onClick={() => toggle(pos.id)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center", gap: 10,
+                    padding: "14px 0", background: "none", border: "none",
+                    cursor: "pointer", textAlign: "left",
+                  }}
+                >
+                  <span style={{
+                    color: "var(--text-subtle)", flexShrink: 0, display: "flex",
+                    transition: "transform 150ms",
+                    transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+                  }}>
+                    <ChevronRight size={14} />
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span className="body-s" style={{ fontWeight: 700, color: "var(--text)", display: "block" }}>{pos.title}</span>
+                    <span className="body-s" style={{ color: "var(--text-muted)" }}>{pos.company}</span>
+                    {dateRange && (
+                      <span className="mono-s" style={{ color: "var(--text-subtle)", display: "block", marginTop: 2 }}>{dateRange}</span>
+                    )}
+                  </span>
+                </button>
+                {isOpen && (
+                  <div style={{ paddingBottom: 14, paddingLeft: 24 }}>
+                    {pos.description
+                      ? <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.7 }}>{pos.description}</p>
+                      : <p className="body-s" style={{ color: "var(--text-subtle)", fontStyle: "italic" }}>No description added.</p>
+                    }
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ApplicationCard({ app, onStatusChange }: {
   app: ApplicationRow;
   onStatusChange: (id: string, status: string) => void;
@@ -57,8 +179,10 @@ function ApplicationCard({ app, onStatusChange }: {
   const [updating, setUpdating]               = useState(false);
   const [expanded, setExpanded]               = useState(false);
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [experienceOpen, setExperienceOpen]   = useState(false);
   const cfg = STATUS_CONFIG[app.status] ?? STATUS_CONFIG.UNREVIEWED;
   const hasCoverLetter = !!(app.coverLetter || app.coverLetterUrl);
+  const hasExperience  = app.candidatePositions?.length > 0;
 
   async function setStatus(status: string) {
     if (updating || status === app.status) return;
@@ -151,7 +275,7 @@ function ApplicationCard({ app, onStatusChange }: {
       </div>
 
       {/* Expand toggle */}
-      {(hasCoverLetter || app.cvUrl || app.candidateLinkedinUrl || app.candidateGithubUrl || app.candidatePortfolioUrl) && (
+      {(hasCoverLetter || hasExperience || app.cvUrl || app.candidateLinkedinUrl || app.candidateGithubUrl || app.candidatePortfolioUrl) && (
         <button
           type="button"
           onClick={() => setExpanded(v => !v)}
@@ -191,6 +315,16 @@ function ApplicationCard({ app, onStatusChange }: {
                   <ScrollText size={12} /> View Cover Letter
                 </button>
               )
+            )}
+            {hasExperience && (
+              <button
+                type="button"
+                onClick={() => setExperienceOpen(true)}
+                className="btn btn-outline btn-sm"
+                style={{ display: "flex", alignItems: "center", gap: 5 }}
+              >
+                <Briefcase size={12} /> Work Experience
+              </button>
             )}
             {app.candidateLinkedinUrl && (
               <a href={app.candidateLinkedinUrl.startsWith("http") ? app.candidateLinkedinUrl : `https://${app.candidateLinkedinUrl}`}
@@ -264,6 +398,15 @@ function ApplicationCard({ app, onStatusChange }: {
           </button>
         )}
       </div>
+
+      {/* Work experience modal */}
+      {experienceOpen && (
+        <WorkExperienceModal
+          positions={app.candidatePositions}
+          candidateName={app.candidateName || app.candidateEmail}
+          onClose={() => setExperienceOpen(false)}
+        />
+      )}
 
       {/* Cover letter modal */}
       {coverLetterOpen && app.coverLetter && (
