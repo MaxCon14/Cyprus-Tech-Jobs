@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Briefcase, PauseCircle, FileText, Clock,
-  MapPin, Eye, Edit2, Inbox, Plus,
+  MapPin, Eye, Edit2, Inbox, Plus, Trash2, Check, X,
 } from "lucide-react";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { JobVisibilityToggle } from "./JobVisibilityToggle";
@@ -55,19 +55,35 @@ function countFor(jobs: SerializedJob[], key: FilterKey) {
 // ── Panel ──────────────────────────────────────────────────────────────────────
 
 export function JobListingsPanel({
-  jobs,
+  jobs: initialJobs,
   appCountByJob,
 }: {
   jobs:          SerializedJob[];
   appCountByJob: Record<string, number>;
 }) {
-  const [filter, setFilter] = useState<FilterKey>("ACTIVE");
+  const [filter, setFilter]           = useState<FilterKey>("ACTIVE");
+  const [jobs, setJobs]               = useState(initialJobs);
+  const [confirmDeleteId, setConfirm] = useState<string | null>(null);
+  const [deletingId, setDeleting]     = useState<string | null>(null);
 
   const filtered = jobs.filter(j =>
     filter === "EXPIRED"
       ? j.status === "EXPIRED" || j.status === "CLOSED"
       : j.status === filter
   );
+
+  async function handleDelete(jobId: string) {
+    setDeleting(jobId);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}`, { method: "DELETE" });
+      if (res.ok) {
+        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: "CLOSED" } : j));
+      }
+    } finally {
+      setDeleting(null);
+      setConfirm(null);
+    }
+  }
 
   return (
     <>
@@ -144,7 +160,7 @@ export function JobListingsPanel({
           <div>
             {/* Column headers */}
             <div className="employer-job-header-row">
-              {["Role", "Status", "Posted", "Days left", ""].map(h => (
+              {["Role", "Status", "Posted", "Days left", "Applicants", ""].map(h => (
                 <span key={h} className="caption" style={{ color: "var(--text-subtle)" }}>{h}</span>
               ))}
             </div>
@@ -166,7 +182,10 @@ export function JobListingsPanel({
                   : `${activeDaysLeft}d left`
                 : "—";
 
-              const canToggle = job.status === "ACTIVE" || job.status === "PAUSED";
+              const canToggle    = job.status === "ACTIVE" || job.status === "PAUSED";
+              const appCount     = appCountByJob[job.id] ?? 0;
+              const isConfirming = confirmDeleteId === job.id;
+              const isDeleting   = deletingId === job.id;
 
               return (
                 <div key={job.id} className="employer-job-row" style={{
@@ -232,44 +251,83 @@ export function JobListingsPanel({
                     {daysLabel}
                   </div>
 
-                  {/* Application badge (IN_APP jobs) */}
-                  {job.applyType === "IN_APP" && (
-                    <div className="employer-col-hide-mobile" style={{ display: "flex", alignItems: "center" }}>
-                      {(appCountByJob[job.id] ?? 0) > 0 ? (
+                  {/* Applicants — hidden on mobile */}
+                  <div className="employer-col-hide-mobile">
+                    {job.applyType === "IN_APP" ? (
+                      appCount > 0 ? (
                         <span style={{
                           display: "inline-flex", alignItems: "center", gap: 4,
                           padding: "3px 8px", borderRadius: 5, fontSize: 10,
                           fontFamily: "var(--font-mono)", fontWeight: 700,
                           background: "var(--accent-soft)", color: "var(--accent)",
                         }}>
-                          <Inbox size={10} /> {appCountByJob[job.id]} applied
+                          <Inbox size={10} /> {appCount}
                         </span>
                       ) : (
-                        <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>0 applied</span>
-                      )}
-                    </div>
-                  )}
+                        <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>0</span>
+                      )
+                    ) : (
+                      <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>—</span>
+                    )}
+                  </div>
 
                   {/* Actions */}
-                  <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
-                    {canToggle && (
-                      <JobVisibilityToggle
-                        jobId={job.id}
-                        initialStatus={job.status as "ACTIVE" | "PAUSED"}
-                      />
+                  <div style={{ display: "flex", gap: 4, justifyContent: "flex-end", alignItems: "center" }}>
+                    {isConfirming ? (
+                      <>
+                        <span className="mono-s" style={{ fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap" }}>Close?</span>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-icon btn-sm"
+                          title="Confirm close"
+                          disabled={isDeleting}
+                          onClick={() => handleDelete(job.id)}
+                          style={{ color: "var(--error)" }}
+                        >
+                          <Check size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-icon btn-sm"
+                          title="Cancel"
+                          onClick={() => setConfirm(null)}
+                        >
+                          <X size={13} />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {canToggle && (
+                          <JobVisibilityToggle
+                            jobId={job.id}
+                            initialStatus={job.status as "ACTIVE" | "PAUSED"}
+                          />
+                        )}
+                        {job.status !== "DRAFT" && (
+                          <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
+                            <Eye size={13} />
+                          </Link>
+                        )}
+                        <Link
+                          href={`/employers/jobs/${job.id}/edit`}
+                          className="btn btn-ghost btn-icon btn-sm"
+                          title={job.status === "DRAFT" ? "Edit & publish draft" : "Edit listing"}
+                        >
+                          <Edit2 size={13} />
+                        </Link>
+                        {job.status !== "CLOSED" && job.status !== "EXPIRED" && (
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-icon btn-sm"
+                            title="Close position"
+                            onClick={() => setConfirm(job.id)}
+                            style={{ color: "var(--text-subtle)" }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </>
                     )}
-                    {job.status !== "DRAFT" && (
-                      <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
-                        <Eye size={13} />
-                      </Link>
-                    )}
-                    <Link
-                      href={`/employers/jobs/${job.id}/edit`}
-                      className="btn btn-ghost btn-icon btn-sm"
-                      title={job.status === "DRAFT" ? "Edit & publish draft" : "Edit listing"}
-                    >
-                      <Edit2 size={13} />
-                    </Link>
                   </div>
                 </div>
               );
