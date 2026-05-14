@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Code2, Link2, Globe, AtSign, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell, ChevronDown } from "lucide-react";
+import { Globe, Save, Loader2, Plus, Trash2, ExternalLink, Sliders, Bell, ChevronDown } from "lucide-react";
+
+const IconGitHub    = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>;
+const IconLinkedIn  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>;
+const IconDribbble  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 24C5.385 24 0 18.615 0 12S5.385 0 12 0s12 5.385 12 12-5.385 12-12 12zm10.12-10.358c-.35-.11-3.17-.953-6.384-.438 1.34 3.684 1.887 6.684 1.992 7.308 2.3-1.555 3.936-4.02 4.395-6.87zm-6.115 7.808c-.153-.9-.75-4.032-2.19-7.77l-.066.02c-5.79 2.015-7.86 6.017-8.04 6.4 1.73 1.358 3.92 2.166 6.29 2.166 1.42 0 2.77-.29 4-.814zm-11.62-2.073c.232-.4 3.045-5.055 8.332-6.765.135-.045.27-.084.405-.12-.26-.585-.54-1.167-.832-1.74C7.17 11.775 2.206 11.71 1.756 11.7l-.004.312c0 2.633.998 5.037 2.634 6.855zm-2.42-8.955c.46.008 4.683.026 9.477-1.248-1.698-3.018-3.53-5.558-3.8-5.928-2.868 1.35-5.01 3.99-5.676 7.176zM9.6 2.052c.282.38 2.145 2.914 3.822 6 3.645-1.365 5.19-3.44 5.373-3.702-1.81-1.61-4.19-2.586-6.795-2.586-.825 0-1.63.1-2.4.285zm10.335 3.483c-.218.29-1.935 2.493-5.724 4.04.24.49.47.985.68 1.486.08.18.15.36.22.53 3.41-.43 6.8.26 7.14.33-.02-2.42-.88-4.64-2.31-6.386z"/></svg>;
+const IconBehance   = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6.938 4.503c.702 0 1.34.06 1.92.188.577.13 1.07.33 1.485.61.41.28.733.65.96 1.12.225.47.34 1.05.34 1.73 0 .74-.17 1.36-.507 1.86-.338.5-.837.9-1.502 1.22.906.26 1.576.72 2.022 1.37.448.66.665 1.45.665 2.36 0 .75-.13 1.39-.41 1.93-.28.55-.67 1-1.16 1.35-.49.35-1.06.6-1.71.75-.65.16-1.32.24-2.01.24H0V4.51h6.938v-.007zm10.002.507H23v1.52h-6.06V5.01zM3.59 7.963v3.35h3.07c.73 0 1.28-.16 1.66-.48.37-.33.56-.8.56-1.43 0-.65-.2-1.12-.6-1.42-.4-.3-.96-.44-1.75-.44H3.59zm0 5.86v3.84h3.42c.75 0 1.34-.17 1.76-.52.42-.34.63-.87.63-1.59 0-.72-.22-1.24-.67-1.56-.44-.33-1.05-.49-1.83-.49H3.59zm13.35-1.76c-.52 0-.95.14-1.28.43-.33.29-.53.71-.6 1.27h3.72c-.05-.57-.23-1-.55-1.28-.32-.27-.74-.42-1.3-.42zm-3.39 5.73c.53.55 1.27.83 2.2.83.69 0 1.28-.17 1.78-.53.5-.35.8-.72.92-1.11h2.73c-.44 1.38-1.1 2.37-2.01 2.96-.91.6-2.01.9-3.31.9-.9 0-1.71-.14-2.44-.43-.73-.3-1.35-.71-1.86-1.24-.51-.54-.9-1.18-1.17-1.92-.27-.74-.41-1.56-.41-2.44 0-.87.14-1.66.42-2.38.28-.72.67-1.35 1.18-1.87.51-.53 1.12-.93 1.84-1.23.72-.3 1.52-.44 2.41-.44.98 0 1.84.19 2.57.58.73.38 1.33.9 1.8 1.57.47.66.8 1.42.98 2.27.18.85.23 1.74.14 2.66H9.89c.03.73.24 1.3.77 1.85z"/></svg>;
+const IconX         = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>;
+const IconMedium    = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>;
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
@@ -84,13 +91,13 @@ export function ProfileSection({ candidate }: { candidate: CandidateRow }) {
 // ─── Links section ────────────────────────────────────────────────────────────
 
 const LINK_FIELDS = [
-  { key: "githubUrl",    label: "GitHub",    icon: <Code2 size={14} />,       placeholder: "github.com/yourname" },
-  { key: "linkedinUrl", label: "LinkedIn",  icon: <Link2 size={14} />,        placeholder: "linkedin.com/in/yourname" },
-  { key: "portfolioUrl",label: "Portfolio", icon: <Globe size={14} />,        placeholder: "yourportfolio.com" },
-  { key: "dribbbleUrl", label: "Dribbble",  icon: <AtSign size={14} />,       placeholder: "dribbble.com/yourname" },
-  { key: "behanceUrl",  label: "Behance",   icon: <AtSign size={14} />,       placeholder: "behance.net/yourname" },
-  { key: "twitterUrl",  label: "Twitter/X", icon: <AtSign size={14} />,       placeholder: "x.com/yourname" },
-  { key: "mediumUrl",   label: "Medium",    icon: <Globe size={14} />,         placeholder: "medium.com/@yourname" },
+  { key: "githubUrl",    label: "GitHub",    icon: <IconGitHub />,   placeholder: "github.com/yourname" },
+  { key: "linkedinUrl", label: "LinkedIn",  icon: <IconLinkedIn />, placeholder: "linkedin.com/in/yourname" },
+  { key: "portfolioUrl",label: "Portfolio", icon: <Globe size={16} />, placeholder: "yourportfolio.com" },
+  { key: "dribbbleUrl", label: "Dribbble",  icon: <IconDribbble />, placeholder: "dribbble.com/yourname" },
+  { key: "behanceUrl",  label: "Behance",   icon: <IconBehance />,  placeholder: "behance.net/yourname" },
+  { key: "twitterUrl",  label: "Twitter/X", icon: <IconX />,        placeholder: "x.com/yourname" },
+  { key: "mediumUrl",   label: "Medium",    icon: <IconMedium />,   placeholder: "medium.com/@yourname" },
 ] as const;
 
 export function LinksSection({ candidate }: { candidate: CandidateRow }) {
