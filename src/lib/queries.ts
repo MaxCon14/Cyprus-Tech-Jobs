@@ -121,6 +121,52 @@ export async function getJobById(id: string) {
   });
 }
 
+export async function getMatchingJobsForCandidate({
+  remoteType,
+  experienceLevel,
+  categories,
+}: {
+  remoteType?:      string | null;
+  experienceLevel?: string | null;
+  categories?:      string[];
+}, take = 3) {
+  const hasCats = (categories ?? []).length > 0;
+  const catFilter  = hasCats          ? { category: { slug: { in: categories! } } } : null;
+  const expFilter  = experienceLevel  ? { experienceLevel: experienceLevel as never } : null;
+  const remFilter  = remoteType       ? { remoteType: remoteType as never }           : null;
+
+  // Priority waterfall: most specific → broadest
+  const attempts = [
+    catFilter && expFilter && remFilter ? { ...catFilter, ...expFilter, ...remFilter } : null,
+    catFilter && expFilter              ? { ...catFilter, ...expFilter }               : null,
+    catFilter && remFilter              ? { ...catFilter, ...remFilter }               : null,
+    catFilter                           ? { ...catFilter }                             : null,
+    expFilter && remFilter              ? { ...expFilter, ...remFilter }               : null,
+    expFilter                           ? { ...expFilter }                             : null,
+    {},
+  ].filter((f): f is object => f !== null);
+
+  // Deduplicate (e.g. when some signals are null, steps collapse)
+  const seen = new Set<string>();
+  const steps = attempts.filter(f => {
+    const key = JSON.stringify(f);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  for (const extra of steps) {
+    const jobs = await prisma.job.findMany({
+      where:   { status: "ACTIVE", ...extra },
+      include: { company: true, category: true, tags: { include: { tag: true } } },
+      orderBy: [{ featured: "desc" }, { postedAt: "desc" }],
+      take,
+    });
+    if (jobs.length > 0) return jobs;
+  }
+  return [];
+}
+
 // ─── Employer dashboard ────────────────────────────────────────
 
 export async function getEmployerWithCompanyAndJobs(email: string) {
