@@ -8,6 +8,7 @@ interface Props {
   name:             string;
   allTags:          string[];
   initialSelected?: string[];
+  showAll?:         boolean;
 }
 
 function TagIcon({ name, white = false }: { name: string; white?: boolean }) {
@@ -30,7 +31,7 @@ function TagIcon({ name, white = false }: { name: string; white?: boolean }) {
   );
 }
 
-export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props) {
+export function SkillTagSelector({ name, allTags, initialSelected = [], showAll = false }: Props) {
   const [selected, setSelected] = useState<string[]>(initialSelected);
   const [search, setSearch]     = useState("");
 
@@ -92,10 +93,10 @@ export function SkillTagSelector({ name, allTags, initialSelected = [] }: Props)
         />
       </div>
 
-      {/* Tag cloud — capped to 3 rows until employer starts searching */}
+      {/* Tag cloud — capped to 3 rows until user starts searching (unless showAll) */}
       <div style={{
         display: "flex", flexWrap: "wrap", gap: 6,
-        ...(search.trim() ? {} : { maxHeight: 90, overflow: "hidden" }),
+        ...(!showAll && !search.trim() ? { maxHeight: 90, overflow: "hidden" } : {}),
       }}>
         {filtered.map(tag => {
           const sel = selected.includes(tag);
