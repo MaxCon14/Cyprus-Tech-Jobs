@@ -49,10 +49,10 @@ export default function SalaryGuidePage() {
       {/* Key stats */}
       <div className="grid-stats" style={{ marginBottom: 56 }}>
         {[
-          { label: "Median senior engineer", value: "€75,000", sub: "across all disciplines" },
-          { label: "Top paying city",        value: "Limassol", sub: "68% of senior roles" },
-          { label: "Remote salary premium",  value: "+12%",     sub: "vs on-site equivalent" },
-          { label: "YoY salary growth",      value: "+8.4%",    sub: "senior tech roles" },
+          { label: "Median senior engineer", value: "€76,000", sub: "Glassdoor Limassol, Apr 2026" },
+          { label: "Top paying city",        value: "Limassol", sub: "fintech & gaming hub" },
+          { label: "Remote salary premium",  value: "+15%",     sub: "vs on-site equivalent" },
+          { label: "YoY salary growth",      value: "+8.3%",    sub: "tech sector 2024 → 2025" },
         ].map(s => (
           <div key={s.label} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
             <div className="mono-l" style={{ color: "var(--accent)", display: "block", marginBottom: 6 }}>{s.value}</div>
@@ -122,11 +122,11 @@ export default function SalaryGuidePage() {
           <h3 className="h3" style={{ marginBottom: 12 }}>How salaries work in Cyprus</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {[
-              "Salaries are quoted gross (before income tax and social insurance).",
-              "Cyprus has a flat 35% income tax rate above €60,000. There's also a 60-day rule for non-dom residents that can reduce tax significantly.",
-              "Many fintech and gaming companies offer stock options on top of base salary.",
-              "Relocation packages (flights + 1–3 months accommodation) are common for international hires.",
-              "Annual bonus of 10–20% is standard at larger companies like Revolut, Wargaming, and XM.",
+              "All figures are gross annual (before income tax and social insurance contributions).",
+              "New residents earning above €55,000 qualify for a 50% income tax exemption for up to 10 years — making net pay highly competitive with Western Europe.",
+              "Income tax is progressive: 0% up to €19,500, 20% up to €28,000, 25% up to €36,300, 30% up to €60,000, and 35% above €60,000.",
+              "Many fintech and gaming companies offer annual bonuses of 10–20% plus stock options or profit-sharing on top of base salary.",
+              "Relocation packages (flights + 1–3 months accommodation) are standard for international hires at companies like Exness, Wargaming, and JetBrains.",
             ].map((note, i) => (
               <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--accent)", marginTop: 8, flexShrink: 0 }} />
@@ -140,11 +140,11 @@ export default function SalaryGuidePage() {
           <h3 className="h3" style={{ marginBottom: 12 }}>Top-paying companies</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {[
-              { name: "Revolut",    range: "€75K – €130K", city: "Limassol" },
-              { name: "Wargaming",  range: "€70K – €120K", city: "Nicosia" },
-              { name: "eToro",      range: "€65K – €110K", city: "Limassol" },
-              { name: "XM Group",   range: "€55K – €105K", city: "Limassol" },
-              { name: "Exness",     range: "€60K – €100K", city: "Limassol" },
+              { name: "Exness",    range: "€65K – €107K", city: "Limassol" },
+              { name: "Revolut",   range: "€70K – €115K", city: "Limassol" },
+              { name: "eToro",     range: "€65K – €110K", city: "Limassol" },
+              { name: "JetBrains", range: "€60K – €95K",  city: "Limassol" },
+              { name: "Wargaming", range: "€45K – €100K", city: "Nicosia"  },
             ].map(co => (
               <div key={co.name} style={{ display: "flex", justifyContent: "space-between", padding: "11px 0", borderBottom: "1px solid var(--border)", alignItems: "center" }}>
                 <div>
