@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Star, Building2, Check, Loader2, AlertCircle } from "lucide-react";
+import { Zap, Star, Building2, Check, Loader2, AlertCircle, DollarSign, Tag } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
+import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
 interface Category { id: string; name: string }
 
@@ -26,6 +27,8 @@ interface InitialValues {
 
 interface Props {
   categories: Category[];
+  allTags: string[];
+  initialTags?: string[];
   initial?: InitialValues;
   jobId?: string;
 }
@@ -59,7 +62,7 @@ function Field({ label, required, error, hint, children }: {
   );
 }
 
-export function AdminJobForm({ categories, initial, jobId }: Props) {
+export function AdminJobForm({ categories, allTags, initialTags = [], initial, jobId }: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -86,6 +89,7 @@ export function AdminJobForm({ categories, initial, jobId }: Props) {
       description:    String(fd.get("description") ?? ""),
       companyName:    String(fd.get("companyName") ?? "").trim(),
       applyUrl:       String(fd.get("applyUrl") ?? "").trim(),
+      tags:           String(fd.get("tags") ?? "[]"),
       categoryId,
       city:           city || null,
       remoteType,
@@ -201,6 +205,14 @@ export function AdminJobForm({ categories, initial, jobId }: Props) {
         </Field>
       </FormSection>
 
+      {/* ── Skills & technologies ── */}
+      <FormSection icon={<Tag size={14} />} title="Skills & technologies">
+        <p className="body-s" style={{ color: "var(--text-muted)", marginTop: -4 }}>
+          Select the skills and technologies required for this role.
+        </p>
+        <SkillTagSelector name="tags" allTags={allTags} initialSelected={initialTags} />
+      </FormSection>
+
       {/* ── Company ── */}
       <FormSection icon={<Building2 size={14} />} title="Company">
         <Field label="Company name" required hint="A COMPANY PROFILE IS CREATED AUTOMATICALLY IF ONE DOESN'T EXIST YET.">
@@ -220,7 +232,7 @@ export function AdminJobForm({ categories, initial, jobId }: Props) {
       </FormSection>
 
       {/* ── Salary ── */}
-      <FormSection icon={<Star size={14} />} title="Salary">
+      <FormSection icon={<DollarSign size={14} />} title="Salary">
         {/* Toggle */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--bg-alt)", border: "1px solid var(--border)", borderRadius: 8 }}>
           <div>
