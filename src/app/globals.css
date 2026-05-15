@@ -645,6 +645,40 @@ body {
   }
 }
 
+/* Salary guide table */
+.salary-table { display: flex; flex-direction: column; gap: 3px; }
+.salary-table-header {
+  display: grid;
+  grid-template-columns: 180px 1fr 80px 80px 80px 80px;
+  gap: 12px;
+  padding: 10px 20px;
+}
+.salary-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 80px 80px 80px 80px;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  align-items: center;
+}
+.salary-range-value { text-align: right; }
+.salary-level-label { display: none; font-size: 10px; color: var(--text-subtle); font-family: var(--font-mono); letter-spacing: 0.05em; margin-bottom: 2px; }
+
+@media (max-width: 640px) {
+  .salary-table-header { display: none; }
+  .salary-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    padding: 14px;
+  }
+  .salary-category { grid-column: 1 / -1; }
+  .salary-bars     { grid-column: 1 / -1; }
+  .salary-range-value { text-align: left; }
+  .salary-level-label { display: block; }
+}
+
 /* ── 640px: single column, mobile-first ── */
 @media (max-width: 640px) {
   .grid-2,
