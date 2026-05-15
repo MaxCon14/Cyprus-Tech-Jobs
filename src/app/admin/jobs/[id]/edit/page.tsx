@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 export default async function AdminJobEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const [job, categories] = await Promise.all([
-    prisma.job.findUnique({ where: { id }, include: { company: { select: { name: true } } } }),
+  const [job, categories, allTagRows] = await Promise.all([
+    prisma.job.findUnique({ where: { id }, include: { company: { select: { name: true } }, tags: { include: { tag: { select: { name: true } } } } } }),
     prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.tag.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
   ]);
 
   if (!job) notFound();
@@ -24,6 +25,8 @@ export default async function AdminJobEditPage({ params }: { params: Promise<{ i
       </p>
       <AdminJobForm
         categories={categories}
+        allTags={allTagRows.map(t => t.name)}
+        initialTags={job.tags.map(jt => jt.tag.name)}
         jobId={id}
         initial={{
           title:          job.title,

@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const body = await req.json();
   const { title, description, companyName, categoryId, city, remoteType, employmentType,
     experienceLevel, salaryMin, salaryMax, salaryDisclosed, applyUrl,
-    featured, status } = body;
+    featured, status, tags: rawTags } = body;
 
   const data: Record<string, unknown> = {};
   if (title !== undefined)          data.title = title;
@@ -47,6 +47,22 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   const job = await prisma.job.update({ where: { id }, data });
+
+  // Replace skill tags if provided
+  if (rawTags !== undefined) {
+    const tagNames: string[] = (() => {
+      try { return JSON.parse(rawTags as string) as string[]; } catch { return []; }
+    })();
+    await prisma.jobTag.deleteMany({ where: { jobId: id } });
+    if (tagNames.length > 0) {
+      const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
+      await prisma.jobTag.createMany({
+        data: tagRecords.map(t => ({ jobId: id, tagId: t.id })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
   return NextResponse.json(job);
 }
 

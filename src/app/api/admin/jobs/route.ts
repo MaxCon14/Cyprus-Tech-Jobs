@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     title, description, companyName, categoryId, city,
     remoteType, employmentType, experienceLevel,
     salaryMin, salaryMax, salaryDisclosed,
-    applyUrl, featured, status,
+    applyUrl, featured, status, tags: rawTags,
   } = body;
 
   if (!companyName?.trim()) {
@@ -39,26 +39,38 @@ export async function POST(req: NextRequest) {
 
   const job = await prisma.job.create({
     data: {
-      slug:           jobSlug(title),
+      slug:            jobSlug(title),
       title,
       description,
       companyId,
       categoryId,
-      city:           city || null,
+      city:            city || null,
       remoteType,
       employmentType,
       experienceLevel,
-      salaryMin:      salaryMin ?? null,
-      salaryMax:      salaryMax ?? null,
+      salaryMin:       salaryMin ?? null,
+      salaryMax:       salaryMax ?? null,
       salaryDisclosed: salaryDisclosed ?? true,
-      applyType:      "URL",
-      applyUrl:       applyUrl || null,
-      featured:       featured ?? false,
-      status:         status ?? "ACTIVE",
-      postedAt:       status === "ACTIVE" ? new Date() : null,
-      expiresAt:      status === "ACTIVE" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null,
+      applyType:       "URL",
+      applyUrl:        applyUrl || null,
+      featured:        featured ?? false,
+      status:          status ?? "ACTIVE",
+      postedAt:        status === "ACTIVE" ? new Date() : null,
+      expiresAt:       status === "ACTIVE" ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null,
     },
   });
+
+  // Link skill tags
+  const tagNames: string[] = (() => {
+    try { return JSON.parse(rawTags as string) as string[]; } catch { return []; }
+  })();
+  if (tagNames.length > 0) {
+    const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
+    await prisma.jobTag.createMany({
+      data: tagRecords.map(t => ({ jobId: job.id, tagId: t.id })),
+      skipDuplicates: true,
+    });
+  }
 
   return NextResponse.json(job);
 }
