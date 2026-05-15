@@ -129,9 +129,10 @@ model Job {
   companyId  String
   categoryId String
 
-  company  Company  @relation(fields: [companyId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
-  tags     JobTag[]
+  company     Company      @relation(fields: [companyId], references: [id])
+  category    Category     @relation(fields: [categoryId], references: [id])
+  tags        JobTag[]
+  applyClicks ApplyClick[]
 
   @@index([status, postedAt])
   @@index([categoryId])
@@ -168,8 +169,47 @@ model Employer {
 
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
+  blocked   Boolean  @default(false)
 
   @@map("employers")
+}
+
+// ─────────────────────────────────────────────
+// APPLY CLICKS (admin analytics)
+// ─────────────────────────────────────────────
+
+model ApplyClick {
+  id        String   @id @default(cuid())
+  jobId     String
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("apply_clicks")
+}
+
+// ─────────────────────────────────────────────
+// BLOG POSTS (admin-managed)
+// ─────────────────────────────────────────────
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  author      String   @default("CyprusTech.Jobs Editorial")
+  authorRole  String   @default("Editorial")
+  publishedAt DateTime @default(now())
+  readTime    Int      @default(5)
+  category    String
+  tags        String[]
+  content     Json     @default("[]")
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("blog_posts")
 }
 
 // ─────────────────────────────────────────────

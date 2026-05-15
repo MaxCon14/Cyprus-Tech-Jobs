@@ -108,6 +108,7 @@ function JobsDropdown({ onClose }: { onClose: () => void }) {
 export function Nav() {
   const pathname = usePathname();
   const router   = useRouter();
+  if (pathname?.startsWith("/admin")) return null;
   const [user,    setUser]    = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [slots,   setSlots]   = useState<{ standardSlots: number; featuredSlots: number } | null>(null);
