@@ -210,7 +210,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
         <p className="body-s" style={{ color: "var(--text-muted)", marginTop: -4 }}>
           Select the skills and technologies required for this role.
         </p>
-        <SkillTagSelector name="tags" allTags={allTags} initialSelected={initialTags} />
+        <SkillTagSelector name="tags" allTags={allTags} initialSelected={initialTags} showAll />
       </FormSection>
 
       {/* ── Company ── */}
