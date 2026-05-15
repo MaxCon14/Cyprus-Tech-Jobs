@@ -1,15 +1,22 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 import AdminNav from "./_components/AdminNav";
 
 export const metadata = { title: "Admin — CyprusTech.Jobs" };
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Middleware guards all /admin/* routes except /admin/login.
+  // This is a defense-in-depth check only.
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // Middleware redirects unauthenticated users to /admin/login before reaching here,
+  // except for the login page itself. Render children bare for the login page.
   if (!user || user.email !== process.env.ADMIN_EMAIL) {
-    redirect("/login");
+    return <>{children}</>;
   }
 
   return (
