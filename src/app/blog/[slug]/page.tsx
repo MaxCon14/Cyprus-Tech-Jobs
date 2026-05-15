@@ -1,25 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPost, POSTS, type BlogSection } from "@/lib/blog";
+import { getAnyPost, type BlogSection } from "@/lib/blog";
 import { ChevronLeft, Clock, Info, Lightbulb, AlertTriangle } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getAnyPost(slug);
   if (!post) return {};
-  return {
-    title: post.title,
-    description: post.excerpt,
-  };
-}
-
-export function generateStaticParams() {
-  return POSTS.map(p => ({ slug: p.slug }));
+  return { title: post.title, description: post.excerpt };
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
@@ -34,13 +29,16 @@ function formatDate(iso: string) {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getAnyPost(slug);
   if (!post) notFound();
+
+  const { getAllPosts } = await import("@/lib/blog");
+  const allPosts = await getAllPosts();
 
   const catColors = CATEGORY_COLORS[post.category] ?? { bg: "var(--bg-muted)", color: "var(--text-muted)" };
 
   // Related posts (other posts, up to 2)
-  const related = POSTS.filter(p => p.slug !== post.slug).slice(0, 2);
+  const related = allPosts.filter(p => p.slug !== post.slug).slice(0, 2);
 
   // Hide employer CTA for logged-in candidates
   const supabase = await createSupabaseServerClient();

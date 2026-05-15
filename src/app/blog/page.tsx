@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { POSTS } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog";
 import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Blog — Cyprus Tech Jobs Insights",
@@ -17,8 +19,9 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 }
 
-export default function BlogPage() {
-  const [featured, ...rest] = POSTS;
+export default async function BlogPage() {
+  const posts = await getAllPosts();
+  const [featured, ...rest] = posts;
 
   return (
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>

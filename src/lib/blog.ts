@@ -285,3 +285,46 @@ export const POSTS: BlogPost[] = [
 export function getPost(slug: string): BlogPost | undefined {
   return POSTS.find(p => p.slug === slug);
 }
+
+// ── DB-backed blog helpers (for admin-created posts) ─────────────────────────
+
+import { prisma } from "./prisma";
+import type { BlogPost as PrismaBlogPost } from "@prisma/client";
+
+function dbToPost(p: PrismaBlogPost): BlogPost {
+  return {
+    slug:        p.slug,
+    title:       p.title,
+    excerpt:     p.excerpt,
+    author:      p.author,
+    authorRole:  p.authorRole,
+    publishedAt: p.publishedAt.toISOString(),
+    readTime:    p.readTime,
+    category:    p.category,
+    tags:        p.tags,
+    content:     (p.content as unknown as BlogSection[]) ?? [],
+  };
+}
+
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const dbPosts = await prisma.blogPost.findMany({
+    where: { published: true },
+    orderBy: { publishedAt: "desc" },
+  });
+  const dbConverted = dbPosts.map(dbToPost);
+  // Merge: static posts first (they have older publish dates), then DB posts
+  // Deduplicate by slug in case a static post was re-created in DB
+  const dbSlugs = new Set(dbConverted.map(p => p.slug));
+  const staticFiltered = POSTS.filter(p => !dbSlugs.has(p.slug));
+  return [...dbConverted, ...staticFiltered].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+}
+
+export async function getAnyPost(slug: string): Promise<BlogPost | undefined> {
+  // Check DB first (admin posts take precedence)
+  const dbPost = await prisma.blogPost.findUnique({ where: { slug } });
+  if (dbPost?.published) return dbToPost(dbPost);
+  // Fall back to static
+  return getPost(slug);
+}

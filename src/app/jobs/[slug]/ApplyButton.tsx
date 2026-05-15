@@ -32,6 +32,7 @@ function recordApply(jobId: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jobId }),
   }).catch(() => {});
+  fetch(`/api/jobs/${jobId}/track-apply`, { method: "POST" }).catch(() => {});
 }
 
 export function ApplyButton({

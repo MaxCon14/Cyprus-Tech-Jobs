@@ -57,6 +57,8 @@ export async function GET(req: NextRequest) {
   let destination: string;
   if (next) {
     destination = next;
+  } else if (email === process.env.ADMIN_EMAIL) {
+    destination = "/admin/dashboard";
   } else {
     const [employer, { data: candidate }] = await Promise.all([
       prisma.employer.findUnique({ where: { email }, select: { id: true } }),

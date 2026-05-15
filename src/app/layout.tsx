@@ -3,6 +3,7 @@ import { Figtree, Fragment_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
+import { FooterConditional } from "@/components/layout/FooterConditional";
 import { Providers } from "./providers";
 
 const figtree = Figtree({
@@ -50,7 +51,7 @@ export default function RootLayout({
         <Providers>
           <Nav />
           <main className="flex-1">{children}</main>
-          <Footer />
+          <FooterConditional><Footer /></FooterConditional>
         </Providers>
       </body>
     </html>
