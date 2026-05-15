@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 const FAQS = [
   {
     q: "What tech jobs are available in Cyprus?",
-    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Sectors include fintech (Revolut, eToro, XM Group), gaming (Wargaming), and a growing startup ecosystem. CyprusTech.Jobs lists all active roles with verified salaries.",
+    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Key sectors include fintech, forex trading, gaming, and a growing startup ecosystem. CyprusTech.Jobs lists all active roles with verified salaries.",
   },
   {
     q: "What is the average salary for software engineers in Cyprus?",
@@ -23,7 +23,7 @@ const FAQS = [
   },
   {
     q: "Which cities in Cyprus have the most tech jobs?",
-    a: "Limassol is the tech capital of Cyprus, home to major fintech companies like Revolut, eToro, and Exness — accounting for around 68% of all tech roles. Nicosia has a strong gaming cluster, notably Wargaming. Larnaca and Paphos have smaller but growing tech scenes. Many companies also offer fully remote roles open to candidates anywhere in Cyprus.",
+    a: "Limassol is the tech capital of Cyprus, home to the majority of fintech and forex companies — accounting for around 68% of all tech roles. Nicosia has a strong gaming and public-sector tech cluster. Larnaca and Paphos have smaller but growing tech scenes. Many companies also offer fully remote roles open to candidates anywhere in Cyprus.",
   },
   {
     q: "Can foreigners work in tech in Cyprus?",
@@ -31,7 +31,7 @@ const FAQS = [
   },
   {
     q: "What are the top tech companies hiring in Cyprus?",
-    a: "The largest tech employers in Cyprus include Revolut (fintech, Limassol), Wargaming (gaming, Nicosia), eToro (fintech, Limassol), XM Group (trading, Limassol), Exness (fintech, Limassol), and Cablenet. The island also has a fast-growing startup scene with venture-backed companies across SaaS, payments, and crypto.",
+    a: "Cyprus has a strong concentration of fintech, forex, and gaming companies — particularly in Limassol and Nicosia — alongside a fast-growing startup scene with venture-backed companies across SaaS, payments, and crypto. Browse live listings on CyprusTech.Jobs to see which employers are actively hiring.",
   },
   {
     q: "Do Cyprus tech companies offer remote work?",

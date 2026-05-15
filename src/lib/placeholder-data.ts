@@ -391,8 +391,6 @@ export const JOBS = [
   },
 ];
 
-// Sources: Glassdoor (Cyprus/Limassol, 2025–2026), Levels.fyi (Exness, Wargaming, JetBrains, inDriver),
-// Ergazo Cyprus Salary Guide 2026, PayScale Cyprus 2025–2026, Emerald Zebra Workforce Insights 2024/2025.
 // All figures are gross annual EUR. Ranges reflect the tech-sector market (fintech, gaming, SaaS cluster)
 // and will differ from national blended averages that include non-tech employers.
 export const SALARY_DATA = [
