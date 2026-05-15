@@ -4,6 +4,13 @@ import { NextRequest, NextResponse } from "next/server";
 export async function proxy(req: NextRequest) {
   let res = NextResponse.next({ request: req });
 
+  const { pathname } = req.nextUrl;
+
+  // Let the admin login page through without any auth check
+  if (pathname.startsWith("/admin/login")) {
+    return res;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -22,7 +29,13 @@ export async function proxy(req: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { pathname } = req.nextUrl;
+
+  if (pathname.startsWith("/admin")) {
+    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+    return res;
+  }
 
   if (pathname.startsWith("/employers/dashboard") && !user) {
     const loginUrl = new URL("/employers/login", req.url);
@@ -40,5 +53,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/employers/dashboard/:path*", "/candidates/dashboard/:path*"],
+  matcher: ["/admin/:path*", "/employers/dashboard/:path*", "/candidates/dashboard/:path*"],
 };
