@@ -303,7 +303,7 @@ export function ExperienceSection({ candidateId, initialPositions }: { candidate
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <InputField label="Job title" value={form.title} onChange={formField("title")} placeholder="Senior Engineer" required />
-                <InputField label="Company" value={form.company} onChange={formField("company")} placeholder="Wargaming" required />
+                <InputField label="Company" value={form.company} onChange={formField("company")} placeholder="Acme Corp" required />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <InputField label="Start date" value={form.startDate} onChange={formField("startDate")} placeholder="2021-03" type="month" />

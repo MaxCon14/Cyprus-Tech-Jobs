@@ -51,7 +51,7 @@ export default function SalaryGuidePage() {
       {/* Key stats */}
       <div className="grid-stats" style={{ marginBottom: "clamp(32px, 6vw, 56px)" }}>
         {[
-          { label: "Median senior engineer", value: "€76,000", sub: "Glassdoor Limassol, Apr 2026" },
+          { label: "Median senior engineer", value: "€76,000", sub: "Limassol market data, Apr 2026" },
           { label: "Top paying city",        value: "Limassol", sub: "fintech & gaming hub" },
           { label: "Remote salary premium",  value: "+15%",     sub: "vs on-site equivalent" },
           { label: "YoY salary growth",      value: "+8.3%",    sub: "tech sector 2024 → 2025" },
@@ -120,7 +120,7 @@ export default function SalaryGuidePage() {
       </div>
 
       {/* Notes */}
-      <div className="grid-2" style={{ marginBottom: 64 }}>
+      <div style={{ marginBottom: 64 }}>
         <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
           <h3 className="h3" style={{ marginBottom: 12 }}>How salaries work in Cyprus</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -128,8 +128,8 @@ export default function SalaryGuidePage() {
               "All figures are gross annual (before income tax and social insurance contributions).",
               "New residents earning above €55,000 qualify for a 50% income tax exemption for up to 10 years — making net pay highly competitive with Western Europe.",
               "Income tax is progressive: 0% up to €19,500, 20% up to €28,000, 25% up to €36,300, 30% up to €60,000, and 35% above €60,000.",
-              "Many fintech and gaming companies offer annual bonuses of 10–20% plus stock options or profit-sharing on top of base salary.",
-              "Relocation packages (flights + 1–3 months accommodation) are standard for international hires at companies like Exness, Wargaming, and JetBrains.",
+              "Many tech companies offer annual bonuses of 10–20% plus stock options or profit-sharing on top of base salary.",
+              "Relocation packages covering flights and 1–3 months of accommodation are standard practice at major tech employers for international hires.",
             ].map((note, i) => (
               <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                 <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--accent)", marginTop: 8, flexShrink: 0 }} />
@@ -137,30 +137,6 @@ export default function SalaryGuidePage() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
-          <h3 className="h3" style={{ marginBottom: 12 }}>Top-paying companies</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {[
-              { name: "Exness",    range: "€65K – €107K", city: "Limassol" },
-              { name: "Revolut",   range: "€70K – €115K", city: "Limassol" },
-              { name: "eToro",     range: "€65K – €110K", city: "Limassol" },
-              { name: "JetBrains", range: "€60K – €95K",  city: "Limassol" },
-              { name: "Wargaming", range: "€45K – €100K", city: "Nicosia"  },
-            ].map(co => (
-              <div key={co.name} style={{ display: "flex", justifyContent: "space-between", padding: "11px 0", borderBottom: "1px solid var(--border)", alignItems: "center" }}>
-                <div>
-                  <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{co.name}</span>
-                  <span className="mono-s" style={{ color: "var(--text-subtle)", marginLeft: 8 }}>{co.city}</span>
-                </div>
-                <span className="mono-s" style={{ color: "var(--accent)" }}>{co.range}</span>
-              </div>
-            ))}
-          </div>
-          <Link href="/companies" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", display: "block", marginTop: 14 }}>
-            VIEW ALL COMPANIES →
-          </Link>
         </div>
       </div>
 
