@@ -30,12 +30,14 @@ const LEVEL_COLORS: Record<string, string> = {
   lead:   "var(--success)",
 };
 
+const LEVEL_LABELS = ["Junior", "Mid-level", "Senior", "Lead"] as const;
+
 export default function SalaryGuidePage() {
   return (
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 56 }}>
+      <div style={{ marginBottom: "clamp(32px, 6vw, 56px)" }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
           UPDATED APRIL 2026 · BASED ON MARKET DATA
@@ -47,7 +49,7 @@ export default function SalaryGuidePage() {
       </div>
 
       {/* Key stats */}
-      <div className="grid-stats" style={{ marginBottom: 56 }}>
+      <div className="grid-stats" style={{ marginBottom: "clamp(32px, 6vw, 56px)" }}>
         {[
           { label: "Median senior engineer", value: "€76,000", sub: "Glassdoor Limassol, Apr 2026" },
           { label: "Top paying city",        value: "Limassol", sub: "fintech & gaming hub" },
@@ -74,46 +76,47 @@ export default function SalaryGuidePage() {
       </div>
 
       {/* Salary table */}
-      <div style={{ overflowX: "auto", marginBottom: 64 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 640 }}>
-        {/* Table header */}
-        <div style={{ display: "grid", gridTemplateColumns: "180px 1fr 80px 80px 80px 80px", gap: 12, padding: "10px 20px" }}>
-          <span className="caption" style={{ color: "var(--text-subtle)" }}>CATEGORY</span>
-          <span className="caption" style={{ color: "var(--text-subtle)" }}>SALARY RANGE VISUALISATION</span>
-          <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>JUNIOR</span>
-          <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>MID</span>
-          <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>SENIOR</span>
-          <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>LEAD</span>
-        </div>
-
-        {SALARY_DATA.map(row => (
-          <div
-            key={row.category}
-            style={{ display: "grid", gridTemplateColumns: "180px 1fr 80px 80px 80px 80px", gap: 12, padding: "16px 20px", border: "1px solid var(--border)", borderRadius: 10, background: "var(--surface)", alignItems: "center" }}
-          >
-            <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{row.category}</span>
-
-            {/* Stacked bars */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              {(Object.entries({ junior: row.junior, mid: row.mid, senior: row.senior, lead: row.lead }) as [string, { min: number; max: number }][]).map(([level, range]) => (
-                <SalaryBar key={level} min={range.min} max={range.max} color={LEVEL_COLORS[level]} />
-              ))}
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
-                <span className="mono-s" style={{ color: "var(--text-subtle)" }}>€0</span>
-                <span className="mono-s" style={{ color: "var(--text-subtle)" }}>€150K</span>
-              </div>
-            </div>
-
-            {/* Range values */}
-            {([row.junior, row.mid, row.senior, row.lead] as { min: number; max: number }[]).map((range, i) => (
-              <div key={i} style={{ textAlign: "right" }}>
-                <div className="mono-s" style={{ color: "var(--text)", fontWeight: 600 }}>{fmt(range.max)}</div>
-                <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{fmt(range.min)}</div>
-              </div>
-            ))}
+      <div style={{ marginBottom: 64 }}>
+        <div className="salary-table">
+          {/* Table header — hidden on mobile via CSS */}
+          <div className="salary-table-header">
+            <span className="caption" style={{ color: "var(--text-subtle)" }}>CATEGORY</span>
+            <span className="caption" style={{ color: "var(--text-subtle)" }}>SALARY RANGE VISUALISATION</span>
+            <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>JUNIOR</span>
+            <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>MID</span>
+            <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>SENIOR</span>
+            <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "right" }}>LEAD</span>
           </div>
-        ))}
-      </div>
+
+          {SALARY_DATA.map(row => (
+            <div key={row.category} className="salary-row">
+              {/* Category name */}
+              <span className="salary-category" style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>
+                {row.category}
+              </span>
+
+              {/* Stacked bars */}
+              <div className="salary-bars" style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {(Object.entries({ junior: row.junior, mid: row.mid, senior: row.senior, lead: row.lead }) as [string, { min: number; max: number }][]).map(([level, range]) => (
+                  <SalaryBar key={level} min={range.min} max={range.max} color={LEVEL_COLORS[level]} />
+                ))}
+                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+                  <span className="mono-s" style={{ color: "var(--text-subtle)" }}>€0</span>
+                  <span className="mono-s" style={{ color: "var(--text-subtle)" }}>€150K</span>
+                </div>
+              </div>
+
+              {/* Range values — 4 cells, shown as columns on desktop, 2×2 on mobile */}
+              {([row.junior, row.mid, row.senior, row.lead] as { min: number; max: number }[]).map((range, i) => (
+                <div key={i} className="salary-range-value">
+                  <div className="salary-level-label">{LEVEL_LABELS[i].toUpperCase()}</div>
+                  <div className="mono-s" style={{ color: "var(--text)", fontWeight: 600 }}>{fmt(range.max)}</div>
+                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{fmt(range.min)}</div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Notes */}
@@ -162,7 +165,12 @@ export default function SalaryGuidePage() {
       </div>
 
       {/* CTA */}
-      <div style={{ border: "1px solid var(--accent)", borderRadius: 12, padding: 40, background: "var(--accent-soft)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
+      <div className="cta-strip" style={{
+        border: "1px solid var(--accent)", borderRadius: 12,
+        padding: "clamp(24px, 4vw, 40px)",
+        background: "var(--accent-soft)",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 20,
+      }}>
         <div>
           <h2 className="h2" style={{ marginBottom: 6 }}>Ready to find your next role?</h2>
           <p className="body" style={{ color: "var(--text-muted)" }}>Browse jobs with verified salaries — no guessing, no negotiating blind.</p>
