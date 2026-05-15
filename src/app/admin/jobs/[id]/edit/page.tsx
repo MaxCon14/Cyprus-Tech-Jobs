@@ -7,9 +7,8 @@ export const dynamic = "force-dynamic";
 export default async function AdminJobEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const [job, companies, categories] = await Promise.all([
-    prisma.job.findUnique({ where: { id } }),
-    prisma.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+  const [job, categories] = await Promise.all([
+    prisma.job.findUnique({ where: { id }, include: { company: { select: { name: true } } } }),
     prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
 
@@ -17,30 +16,30 @@ export default async function AdminJobEditPage({ params }: { params: Promise<{ i
 
   return (
     <div>
-      <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 24 }}>
+      <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
         Edit job — <span style={{ color: "var(--text-muted)" }}>{job.title}</span>
       </h1>
+      <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 24 }}>
+        Changes go live immediately.
+      </p>
       <AdminJobForm
-        companies={companies}
         categories={categories}
         jobId={id}
         initial={{
-          title: job.title,
-          description: job.description,
-          companyId: job.companyId,
-          categoryId: job.categoryId,
-          city: job.city ?? "",
-          remoteType: job.remoteType,
+          title:          job.title,
+          description:    job.description,
+          companyName:    job.company.name,
+          categoryId:     job.categoryId,
+          city:           job.city ?? "",
+          remoteType:     job.remoteType,
           employmentType: job.employmentType,
           experienceLevel: job.experienceLevel,
-          salaryMin: job.salaryMin?.toString() ?? "",
-          salaryMax: job.salaryMax?.toString() ?? "",
+          salaryMin:      job.salaryMin?.toString() ?? "",
+          salaryMax:      job.salaryMax?.toString() ?? "",
           salaryDisclosed: job.salaryDisclosed,
-          applyType: job.applyType,
-          applyUrl: job.applyUrl ?? "",
-          applyEmail: job.applyEmail ?? "",
-          featured: job.featured,
-          status: job.status,
+          applyUrl:       job.applyUrl ?? "",
+          featured:       job.featured,
+          status:         job.status,
         }}
       />
     </div>
