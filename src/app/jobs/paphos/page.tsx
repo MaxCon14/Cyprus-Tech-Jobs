@@ -1,4 +1,4 @@
-import { CityPage } from "../_shared/CityPage";
+import { CityPage, type CitySearchParams } from "../_shared/CityPage";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -21,10 +21,7 @@ export const metadata: Metadata = {
   },
 };
 
-type Props = { searchParams: Promise<{ page?: string }> };
-
-export default async function PaphosJobsPage({ searchParams }: Props) {
-  const { page } = await searchParams;
-  const pageNum = Math.max(1, parseInt(page ?? "1") || 1);
-  return <CityPage config={CONFIG} pageNum={pageNum} />;
+export default async function PaphosJobsPage({ searchParams }: { searchParams: Promise<CitySearchParams> }) {
+  const params = await searchParams;
+  return <CityPage config={CONFIG} searchParams={params} />;
 }
