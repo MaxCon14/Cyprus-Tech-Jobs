@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/Select";
-import { SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 
 export type CategoryNode = {
   id: string;
@@ -54,7 +54,6 @@ export function FilterBar({ categories, current, cities }: Props) {
   const router  = useRouter();
   const parents = categories.filter(c => c.slug !== "");
 
-  // Resolve initial parent/sub slugs from the URL category param
   const matchedParent = parents.find(
     p => p.slug === current.category || p.children.some(c => c.slug === current.category)
   );
@@ -62,7 +61,7 @@ export function FilterBar({ categories, current, cities }: Props) {
   const initSubSlug    = matchedParent?.children.some(c => c.slug === current.category)
     ? (current.category ?? "") : "";
 
-  // Local pending state — doesn't navigate until Apply is clicked
+  const [search,     setSearch]     = useState(current.search  ?? "");
   const [parentSlug, setParentSlug] = useState(initParentSlug);
   const [subSlug,    setSubSlug]    = useState(initSubSlug);
   const [type,       setType]       = useState(current.type    ?? "");
@@ -72,13 +71,14 @@ export function FilterBar({ categories, current, cities }: Props) {
 
   const selectedParent = parents.find(p => p.slug === parentSlug);
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
-
-  // Resolved category slug to submit (sub takes precedence over parent)
   const resolvedCategory = subSlug || parentSlug || undefined;
+
+  const activeCount = [resolvedCategory, type, level, city, salary, search.trim() || undefined]
+    .filter(Boolean).length;
 
   function apply() {
     const p = new URLSearchParams();
-    if (current.search) p.set("search",   current.search);
+    if (search.trim())    p.set("search",   search.trim());
     if (resolvedCategory) p.set("category", resolvedCategory);
     if (type)   p.set("type",   type);
     if (level)  p.set("level",  level);
@@ -88,8 +88,11 @@ export function FilterBar({ categories, current, cities }: Props) {
     router.push(qs ? `/jobs?${qs}` : "/jobs");
   }
 
-  // Count how many filters are actively set (for button label)
-  const activeCount = [resolvedCategory, type, level, city, salary].filter(Boolean).length;
+  function clear() {
+    setSearch(""); setParentSlug(""); setSubSlug("");
+    setType(""); setLevel(""); setCity(""); setSalary("");
+    router.push("/jobs");
+  }
 
   const cityOptions = [
     { label: "Any city", value: "" },
@@ -107,10 +110,63 @@ export function FilterBar({ categories, current, cities }: Props) {
   ] : [];
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20, alignItems: "flex-start" }}>
+    <aside style={{
+      position: "sticky",
+      top: 24,
+      display: "flex",
+      flexDirection: "column",
+      gap: 0,
+      border: "1px solid var(--border)",
+      borderRadius: 10,
+      overflow: "hidden",
+      background: "var(--surface)",
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: "14px 16px",
+        borderBottom: "1px solid var(--border)",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        background: "var(--bg-alt)",
+      }}>
+        <SlidersHorizontal size={13} style={{ color: "var(--accent)" }} />
+        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13 }}>
+          Filters
+        </span>
+        {activeCount > 0 && (
+          <span style={{
+            marginLeft: "auto",
+            background: "var(--accent)",
+            color: "#fff",
+            fontSize: 11,
+            fontFamily: "var(--font-mono)",
+            borderRadius: 99,
+            padding: "1px 7px",
+          }}>
+            {activeCount}
+          </span>
+        )}
+      </div>
 
-      {/* Parent category */}
-      <div style={{ minWidth: 180, flex: "1 1 180px" }}>
+      {/* Search */}
+      <FilterSection title="Search">
+        <div style={{ position: "relative" }}>
+          <Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
+          <input
+            className="input"
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && apply()}
+            placeholder="Title, company, keyword…"
+            style={{ paddingLeft: 30, fontSize: 13 }}
+          />
+        </div>
+      </FilterSection>
+
+      {/* Category */}
+      <FilterSection title="Category">
         <Select
           name="category-parent"
           value={parentSlug}
@@ -118,75 +174,68 @@ export function FilterBar({ categories, current, cities }: Props) {
           onChange={val => { setParentSlug(val); setSubSlug(""); }}
           options={parentOptions}
         />
-      </div>
-
-      {/* Subcategory — only when parent has children */}
-      {hasChildren && selectedParent && (
-        <div style={{ minWidth: 200, flex: "1 1 200px" }}>
-          <Select
-            name="category-sub"
-            value={subSlug}
-            placeholder={`All ${selectedParent.label}`}
-            onChange={setSubSlug}
-            options={subOptions}
-          />
-        </div>
-      )}
+        {hasChildren && selectedParent && (
+          <div style={{ marginTop: 8 }}>
+            <Select
+              name="category-sub"
+              value={subSlug}
+              placeholder={`All ${selectedParent.label}`}
+              onChange={setSubSlug}
+              options={subOptions}
+            />
+          </div>
+        )}
+      </FilterSection>
 
       {/* Work type */}
-      <div style={{ minWidth: 150, flex: "1 1 150px" }}>
-        <Select
-          name="type"
-          value={type}
-          placeholder="Work type"
-          onChange={setType}
-          options={REMOTE_OPTIONS}
-        />
-      </div>
+      <FilterSection title="Work type">
+        <Select name="type" value={type} placeholder="Any work type" onChange={setType} options={REMOTE_OPTIONS} />
+      </FilterSection>
 
       {/* Experience */}
-      <div style={{ minWidth: 150, flex: "1 1 150px" }}>
-        <Select
-          name="level"
-          value={level}
-          placeholder="Experience"
-          onChange={setLevel}
-          options={EXPERIENCE_OPTIONS}
-        />
-      </div>
+      <FilterSection title="Experience">
+        <Select name="level" value={level} placeholder="Any experience" onChange={setLevel} options={EXPERIENCE_OPTIONS} />
+      </FilterSection>
 
       {/* City */}
-      <div style={{ minWidth: 140, flex: "1 1 140px" }}>
-        <Select
-          name="city"
-          value={city}
-          placeholder="City"
-          onChange={setCity}
-          options={cityOptions}
-        />
-      </div>
+      <FilterSection title="City">
+        <Select name="city" value={city} placeholder="Any city" onChange={setCity} options={cityOptions} />
+      </FilterSection>
 
       {/* Min salary */}
-      <div style={{ minWidth: 140, flex: "1 1 140px" }}>
-        <Select
-          name="salary"
-          value={salary}
-          placeholder="Min salary"
-          onChange={setSalary}
-          options={SALARY_OPTIONS}
-        />
-      </div>
+      <FilterSection title="Min salary" last>
+        <Select name="salary" value={salary} placeholder="Any salary" onChange={setSalary} options={SALARY_OPTIONS} />
+      </FilterSection>
 
-      {/* Apply button */}
-      <button
-        type="button"
-        onClick={apply}
-        className="btn btn-accent"
-        style={{ display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", flexShrink: 0 }}
-      >
-        <SlidersHorizontal size={14} />
-        Apply{activeCount > 0 ? ` (${activeCount})` : ""}
-      </button>
+      {/* Actions */}
+      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <button type="button" onClick={apply} className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
+          Apply filters
+        </button>
+        {activeCount > 0 && (
+          <button type="button" onClick={clear} className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center" }}>
+            Clear all
+          </button>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function FilterSection({ title, children, last = false }: {
+  title: string;
+  children: React.ReactNode;
+  last?: boolean;
+}) {
+  return (
+    <div style={{
+      padding: "14px 16px",
+      borderBottom: last ? "none" : "1px solid var(--border)",
+    }}>
+      <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8, letterSpacing: "0.06em" }}>
+        {title.toUpperCase()}
+      </div>
+      {children}
     </div>
   );
 }
