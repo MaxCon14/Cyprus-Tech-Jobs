@@ -5,7 +5,11 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminJobNewPage() {
   const [categories, allTagRows] = await Promise.all([
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.category.findMany({
+      where:   { parentId: null },
+      orderBy: { name: "asc" },
+      include: { children: { orderBy: { name: "asc" }, select: { id: true, name: true } } },
+    }),
     prisma.tag.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
   ]);
 

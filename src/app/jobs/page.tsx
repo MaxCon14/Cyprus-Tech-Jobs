@@ -4,7 +4,7 @@ import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
-import { FiltersPanel } from "./FiltersPanel";
+import { FilterBar } from "./FilterBar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
@@ -15,42 +15,12 @@ export const metadata: Metadata = {
   description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary.",
 };
 
-const REMOTE_OPTIONS = [
-  { label: "Remote",  value: "REMOTE" },
-  { label: "Hybrid",  value: "HYBRID" },
-  { label: "On-site", value: "ON_SITE" },
-];
-
-const EXPERIENCE_OPTIONS = [
-  { label: "Junior",    value: "JUNIOR" },
-  { label: "Mid-level", value: "MID" },
-  { label: "Senior",    value: "SENIOR" },
-  { label: "Lead",      value: "LEAD" },
-];
-
-const SALARY_OPTIONS = [
-  { label: "€30k+",  value: 30000 },
-  { label: "€50k+",  value: 50000 },
-  { label: "€70k+",  value: 70000 },
-  { label: "€100k+", value: 100000 },
-];
-
 const TYPE_LABELS: Record<string, string> = {
-  FULL_TIME: "Full-time",
-  PART_TIME: "Part-time",
-  CONTRACT:  "Contract",
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  frontend: "Frontend",
-  backend:  "Backend",
-  devops:   "DevOps & Cloud",
-  design:   "UI/UX Design",
-  data:     "Data & Analytics",
-  mobile:   "Mobile",
-  product:  "Product",
-  security: "Security",
-  qa:       "QA & Testing",
+  FULL_TIME:  "Full-time",
+  PART_TIME:  "Part-time",
+  CONTRACT:   "Contract",
+  INTERNSHIP: "Internship",
+  FREELANCE:  "Freelance",
 };
 
 const PAGE_SIZE = 20;
@@ -113,6 +83,13 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   const hasPrev        = pageNum > 1;
   const hasNext        = pageNum * PAGE_SIZE < filteredTotal;
 
+  /* Flat category lookup for label resolution (parents + all children) */
+  const allCatNodes = [
+    ...categories.slice(1),
+    ...categories.slice(1).flatMap(p => p.children),
+  ];
+  function catLabel(slug: string) { return allCatNodes.find(c => c.slug === slug)?.label ?? slug; }
+
   /* Unified URL builder — sets/clears one param, resets page */
   function urlWith(key: string, val: string | undefined) {
     const p = new URLSearchParams();
@@ -144,15 +121,15 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
 
   /* Active filter pills */
   const activeFilters: { label: string; key: string }[] = [];
-  if (search  ) activeFilters.push({ label: `"${search}"`,                                     key: "search" });
-  if (category) activeFilters.push({ label: CATEGORY_LABELS[category] ?? category,             key: "category" });
-  if (type    ) activeFilters.push({ label: TYPE_LABELS[type] ?? type,                         key: "type" });
-  if (city    ) activeFilters.push({ label: city,                                               key: "city" });
-  if (level   ) activeFilters.push({ label: level,                                              key: "level" });
-  if (salary  ) activeFilters.push({ label: `min €${(salary / 1000).toFixed(0)}k`,             key: "salary" });
+  if (search  ) activeFilters.push({ label: `"${search}"`,                          key: "search"   });
+  if (category) activeFilters.push({ label: catLabel(category),                     key: "category" });
+  if (type    ) activeFilters.push({ label: TYPE_LABELS[type] ?? type,              key: "type"     });
+  if (city    ) activeFilters.push({ label: city,                                   key: "city"     });
+  if (level   ) activeFilters.push({ label: level,                                  key: "level"    });
+  if (salary  ) activeFilters.push({ label: `min €${(salary / 1000).toFixed(0)}k`, key: "salary"   });
 
   const pageTitle = category
-    ? `${CATEGORY_LABELS[category] ?? category} Jobs in Cyprus`
+    ? `${catLabel(category)} Jobs in Cyprus`
     : city
       ? `Tech Jobs in ${city}`
       : type
@@ -192,13 +169,13 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         </div>
       )}
 
-      {/* Keyword search — always visible above the grid */}
-      <form action="/jobs" method="GET" style={{ marginBottom: 20, maxWidth: "100%" }}>
-        {category       && <input type="hidden" name="category" value={category} />}
-        {type           && <input type="hidden" name="type"     value={type} />}
-        {city           && <input type="hidden" name="city"     value={city} />}
-        {level          && <input type="hidden" name="level"    value={level} />}
-        {params.salary  && <input type="hidden" name="salary"   value={params.salary} />}
+      {/* Keyword search */}
+      <form action="/jobs" method="GET" style={{ marginBottom: 16, maxWidth: "100%" }}>
+        {category      && <input type="hidden" name="category" value={category} />}
+        {type          && <input type="hidden" name="type"     value={type} />}
+        {city          && <input type="hidden" name="city"     value={city} />}
+        {level         && <input type="hidden" name="level"    value={level} />}
+        {params.salary && <input type="hidden" name="salary"   value={params.salary} />}
         <div style={{ position: "relative", maxWidth: 480 }}>
           <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
           <input
@@ -212,159 +189,71 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         </div>
       </form>
 
-      <div className="layout-sidebar-left">
+      {/* Filter dropdowns */}
+      <FilterBar
+        categories={categories}
+        current={{ category, type, city, level, salary: params.salary, search }}
+        cities={CITIES}
+      />
 
-        {/* Filters sidebar — collapsible on mobile */}
-        <FiltersPanel activeCount={activeFilters.length}>
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-            <FilterSection title="Category">
-              {categories.slice(1).map(cat => (
-                <FilterLink
-                  key={cat.slug}
-                  label={cat.label}
-                  count={cat.count}
-                  href={urlWith("category", category === cat.slug ? undefined : cat.slug)}
-                  active={category === cat.slug}
-                />
-              ))}
-            </FilterSection>
-
-            <FilterSection title="Work type">
-              {REMOTE_OPTIONS.map(o => (
-                <FilterLink
-                  key={o.value}
-                  label={o.label}
-                  href={urlWith("type", type === o.value ? undefined : o.value)}
-                  active={type === o.value}
-                />
-              ))}
-            </FilterSection>
-
-            <FilterSection title="Experience">
-              {EXPERIENCE_OPTIONS.map(o => (
-                <FilterLink
-                  key={o.value}
-                  label={o.label}
-                  href={urlWith("level", level === o.value ? undefined : o.value)}
-                  active={level === o.value}
-                />
-              ))}
-            </FilterSection>
-
-            <FilterSection title="City">
-              {CITIES.map(c => (
-                <FilterLink
-                  key={c}
-                  label={c}
-                  href={urlWith("city", city === c ? undefined : c)}
-                  active={city === c}
-                />
-              ))}
-            </FilterSection>
-
-            <FilterSection title="Min salary" last>
-              {SALARY_OPTIONS.map(o => (
-                <FilterLink
-                  key={o.value}
-                  label={o.label}
-                  href={urlWith("salary", salary === o.value ? undefined : String(o.value))}
-                  active={salary === o.value}
-                />
-              ))}
-            </FilterSection>
-          </div>
-          <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center", marginTop: 10, textDecoration: "none" }}>
-            Clear all filters
-          </Link>
-        </FiltersPanel>
-
-        {/* Job list */}
-        <div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
-            <span className="body-s" style={{ color: "var(--text-muted)" }}>
-              {filteredTotal === 0
-                ? "No jobs found"
-                : <>Showing <strong style={{ color: "var(--text)" }}>{showFrom}–{showTo}</strong> of <strong style={{ color: "var(--text)" }}>{filteredTotal}</strong> {activeFilters.length ? "matching " : ""}jobs</>
-              }
-            </span>
-          </div>
-
-          {/* Category chips */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-            <Link href="/jobs" className={`chip${!category ? " chip-active" : ""}`}>
-              All <span className="chip-count">{totalJobs}</span>
-            </Link>
-            {categories.slice(1).map(cat => (
-              <Link
-                key={cat.slug}
-                href={`/jobs?category=${cat.slug}`}
-                className={`chip${category === cat.slug ? " chip-active" : ""}`}
-              >
-                {cat.label} <span className="chip-count">{cat.count}</span>
-              </Link>
-            ))}
-          </div>
-
-          {serialisedJobs.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "60px 24px" }}>
-              <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 16, marginBottom: 8 }}>No jobs match your filters</div>
-              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>Try removing a filter or browsing all jobs.</p>
-              <Link href="/jobs" className="btn btn-outline">View all jobs</Link>
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {(hasPrev || hasNext) && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, gap: 8 }}>
-              {hasPrev ? (
-                <Link href={pageUrl(pageNum - 1)} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <ChevronLeft size={14} /> Previous
-                </Link>
-              ) : <div />}
-              <span className="mono-s" style={{ color: "var(--text-subtle)" }}>Page {pageNum}</span>
-              {hasNext ? (
-                <Link href={pageUrl(pageNum + 1)} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  Next <ChevronRight size={14} />
-                </Link>
-              ) : <div />}
-            </div>
-          )}
-        </div>
+      {/* Results header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+        <span className="body-s" style={{ color: "var(--text-muted)" }}>
+          {filteredTotal === 0
+            ? "No jobs found"
+            : <>Showing <strong style={{ color: "var(--text)" }}>{showFrom}–{showTo}</strong> of <strong style={{ color: "var(--text)" }}>{filteredTotal}</strong> {activeFilters.length ? "matching " : ""}jobs</>
+          }
+        </span>
       </div>
-    </div>
-  );
-}
 
-function FilterSection({ title, children, last = false }: { title: string; children: React.ReactNode; last?: boolean }) {
-  return (
-    <div style={{ padding: "16px", borderBottom: last ? "none" : "1px solid var(--border)" }}>
-      <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>{title}</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>{children}</div>
-    </div>
-  );
-}
+      {/* Category chips (parent categories only) */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+        <Link href="/jobs" className={`chip${!category ? " chip-active" : ""}`}>
+          All <span className="chip-count">{totalJobs}</span>
+        </Link>
+        {categories.slice(1).map(cat => {
+          const isActive = category === cat.slug || cat.children.some(ch => ch.slug === category);
+          return (
+            <Link
+              key={cat.slug}
+              href={`/jobs?category=${cat.slug}`}
+              className={`chip${isActive ? " chip-active" : ""}`}
+            >
+              {cat.label} <span className="chip-count">{cat.count}</span>
+            </Link>
+          );
+        })}
+      </div>
 
-function FilterLink({ label, count, href, active }: { label: string; count?: number; href: string; active?: boolean }) {
-  return (
-    <Link
-      href={href}
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "5px 8px", borderRadius: 6, textDecoration: "none",
-        background: active ? "var(--accent-soft)" : "transparent",
-        transition: "background 100ms ease",
-      }}
-    >
-      <span className="body-s" style={{ color: active ? "var(--accent)" : "var(--text)", fontWeight: active ? 500 : 400 }}>
-        {label}
-      </span>
-      {count !== undefined && (
-        <span className="mono-s" style={{ color: active ? "var(--accent)" : "var(--text-subtle)" }}>{count}</span>
+      {/* Job list */}
+      {serialisedJobs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 24px" }}>
+          <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 16, marginBottom: 8 }}>No jobs match your filters</div>
+          <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 20 }}>Try removing a filter or browsing all jobs.</p>
+          <Link href="/jobs" className="btn btn-outline">View all jobs</Link>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
+        </div>
       )}
-    </Link>
+
+      {/* Pagination */}
+      {(hasPrev || hasNext) && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 28, gap: 8 }}>
+          {hasPrev ? (
+            <Link href={pageUrl(pageNum - 1)} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <ChevronLeft size={14} /> Previous
+            </Link>
+          ) : <div />}
+          <span className="mono-s" style={{ color: "var(--text-subtle)" }}>Page {pageNum}</span>
+          {hasNext ? (
+            <Link href={pageUrl(pageNum + 1)} className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              Next <ChevronRight size={14} />
+            </Link>
+          ) : <div />}
+        </div>
+      )}
+    </div>
   );
 }

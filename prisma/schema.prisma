@@ -11,12 +11,16 @@ datasource db {
 // ─────────────────────────────────────────────
 
 model Category {
-  id   String @id @default(cuid())
-  name String
-  slug String @unique
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  parentId String?
 
-  jobs Job[]
+  parent   Category?  @relation("SubCategories", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("SubCategories")
+  jobs     Job[]
 
+  @@index([parentId])
   @@map("categories")
 }
 
