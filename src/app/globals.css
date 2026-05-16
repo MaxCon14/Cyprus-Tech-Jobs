@@ -1140,6 +1140,11 @@ details[open] .faq-chevron {
   box-shadow: var(--shadow-md);
 }
 
+.social-icon:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* =====================================================
    MASCOT ANIMATIONS
    ===================================================== */
