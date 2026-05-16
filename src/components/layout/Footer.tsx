@@ -55,12 +55,11 @@ const GUEST_EMPLOYER_LINKS = [
 ] as const;
 
 const CITY_LINKS = [
-  ["Nicosia",   "/jobs/nicosia"   ],
-  ["Limassol",  "/jobs/limassol"  ],
-  ["Larnaca",   "/jobs/larnaca"   ],
-  ["Paphos",    "/jobs/paphos"    ],
-  ["Famagusta", "/jobs/famagusta" ],
-  ["Remote",    "/jobs/remote"    ],
+  ["Nicosia",  "/jobs/nicosia"  ],
+  ["Limassol", "/jobs/limassol" ],
+  ["Larnaca",  "/jobs/larnaca"  ],
+  ["Paphos",   "/jobs/paphos"   ],
+  ["Remote",   "/jobs/remote"   ],
 ] as const;
 
 const COMPANY_LINKS = [
@@ -180,7 +179,7 @@ export async function Footer() {
   return (
     <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(32px, 5vw, 48px) var(--page-padding-x)", marginTop: "auto" }}>
       <div className="page-container">
-        <div className={role === "guest" ? "grid-4" : "grid-3"} style={{ gap: "clamp(24px, 4vw, 32px)", marginBottom: "clamp(32px, 5vw, 48px)" }}>
+        <div className={role === "guest" ? "grid-5" : "grid-4"} style={{ gap: "clamp(24px, 4vw, 32px)", marginBottom: "clamp(32px, 5vw, 48px)" }}>
 
           {/* Brand */}
           <div>
@@ -221,26 +220,16 @@ export async function Footer() {
             </>
           )}
 
+          {/* Jobs by city — always shown */}
+          <div>
+            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Jobs by city</div>
+            <FooterLinks links={CITY_LINKS} />
+          </div>
+
           {/* Company — always shown */}
           <div>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Company</div>
             <FooterLinks links={COMPANY_LINKS} />
-          </div>
-        </div>
-
-        {/* Jobs by city — full-width strip */}
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-          <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Jobs by city</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px" }}>
-            {CITY_LINKS.map(([label, href]) => (
-              <Link
-                key={href}
-                href={href}
-                style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}
-              >
-                {label}
-              </Link>
-            ))}
           </div>
         </div>
 
