@@ -6,7 +6,7 @@ import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
-interface Category { id: string; name: string }
+interface Category { id: string; name: string; children?: { id: string; name: string }[] }
 
 interface InitialValues {
   title?: string;
@@ -67,8 +67,17 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
+  // Resolve initial parent/sub from categoryId
+  const initParentCat = categories.find(c =>
+    c.id === initial?.categoryId || c.children?.some(ch => ch.id === initial?.categoryId)
+  );
+  const initParentId = initParentCat?.id ?? categories[0]?.id ?? "";
+  const initSubId    = initParentCat?.children?.some(ch => ch.id === initial?.categoryId)
+    ? (initial?.categoryId ?? "") : "";
+
   // Controlled select/toggle state
-  const [categoryId,     setCategoryId]     = useState(initial?.categoryId     ?? categories[0]?.id ?? "");
+  const [parentCategoryId, setParentCategoryId] = useState(initParentId);
+  const [subCategoryId,    setSubCategoryId]    = useState(initSubId);
   const [remoteType,     setRemoteType]     = useState(initial?.remoteType     ?? "ON_SITE");
   const [employmentType, setEmploymentType] = useState(initial?.employmentType ?? "FULL_TIME");
   const [experienceLevel,setExperienceLevel]= useState(initial?.experienceLevel?? "MID");
@@ -84,13 +93,15 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
 
     const fd = new FormData(e.currentTarget);
 
+    const resolvedCategoryId = subCategoryId || parentCategoryId;
+
     const payload = {
       title:          String(fd.get("title") ?? "").trim(),
       description:    String(fd.get("description") ?? ""),
       companyName:    String(fd.get("companyName") ?? "").trim(),
       applyUrl:       String(fd.get("applyUrl") ?? "").trim(),
       tags:           String(fd.get("tags") ?? "[]"),
-      categoryId,
+      categoryId:     resolvedCategoryId,
       city:           city || null,
       remoteType,
       employmentType,
@@ -133,13 +144,40 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
           <input className="input" name="title" required defaultValue={initial?.title ?? ""} placeholder="e.g. Senior Backend Engineer" />
         </Field>
 
+        {/* Category — cascading parent → subcategory */}
+        {(() => {
+          const selectedParent  = categories.find(c => c.id === parentCategoryId);
+          const hasChildren     = (selectedParent?.children?.length ?? 0) > 0;
+          return (
+            <div style={{ display: "grid", gridTemplateColumns: hasChildren ? "1fr 1fr" : "1fr", gap: 16 }}>
+              <Field label="Category" required>
+                <Select
+                  name="parentCategoryId"
+                  value={parentCategoryId}
+                  onChange={val => { setParentCategoryId(val); setSubCategoryId(""); }}
+                  options={categories.map(c => ({ label: c.name, value: c.id }))}
+                  placeholder="Select category"
+                />
+              </Field>
+              {hasChildren && selectedParent && (
+                <Field label="Subcategory">
+                  <Select
+                    name="subCategoryId"
+                    value={subCategoryId}
+                    onChange={setSubCategoryId}
+                    placeholder={`All ${selectedParent.name}`}
+                    options={[
+                      { label: `All ${selectedParent.name}`, value: "" },
+                      ...(selectedParent.children ?? []).map(c => ({ label: c.name, value: c.id })),
+                    ]}
+                  />
+                </Field>
+              )}
+            </div>
+          );
+        })()}
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          <Field label="Category" required>
-            <Select name="categoryId" value={categoryId} onChange={setCategoryId}
-              options={categories.map(c => ({ label: c.name, value: c.id }))}
-              placeholder="Select category"
-            />
-          </Field>
           <Field label="Experience level" required>
             <Select name="experienceLevel" value={experienceLevel} onChange={setExperienceLevel}
               options={[

@@ -9,7 +9,11 @@ export default async function AdminJobEditPage({ params }: { params: Promise<{ i
 
   const [job, categories, allTagRows] = await Promise.all([
     prisma.job.findUnique({ where: { id }, include: { company: { select: { name: true } }, tags: { include: { tag: { select: { name: true } } } } } }),
-    prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.category.findMany({
+      where:   { parentId: null },
+      orderBy: { name: "asc" },
+      include: { children: { orderBy: { name: "asc" }, select: { id: true, name: true } } },
+    }),
     prisma.tag.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
   ]);
 

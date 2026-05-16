@@ -24,7 +24,10 @@ export async function getJobs({
   return prisma.job.findMany({
     where: {
       status: "ACTIVE",
-      ...(categorySlug && { category: { slug: categorySlug } }),
+      // Match jobs assigned directly to this category OR to any of its children
+      ...(categorySlug && {
+        category: { OR: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] },
+      }),
       ...(remoteType   && { remoteType: remoteType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city         && { city: { contains: city, mode: "insensitive" } }),
@@ -89,7 +92,9 @@ export async function getJobCount({
   return prisma.job.count({
     where: {
       status: "ACTIVE",
-      ...(categorySlug    && { category: { slug: categorySlug } }),
+      ...(categorySlug    && {
+        category: { OR: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] },
+      }),
       ...(remoteType      && { remoteType: remoteType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city            && { city: { contains: city, mode: "insensitive" } }),
@@ -215,19 +220,28 @@ export async function getCompanyBySlug(slug: string) {
 // ─── Categories ────────────────────────────────────────────────
 
 export async function getCategoriesWithCount() {
-  const categories = await prisma.category.findMany({
-    include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
+  const parents = await prisma.category.findMany({
+    where:   { parentId: null },
+    include: {
+      _count:   { select: { jobs: { where: { status: "ACTIVE" } } } },
+      children: {
+        include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
+        orderBy: { name: "asc" },
+      },
+    },
     orderBy: { name: "asc" },
   });
 
   const total = await getJobCount();
 
   return [
-    { label: "All jobs", slug: "", count: total },
-    ...categories.map(c => ({
-      label: c.name,
-      slug:  c.slug,
-      count: c._count.jobs,
+    { id: "", label: "All jobs", slug: "", count: total, children: [] as { id: string; label: string; slug: string; count: number }[] },
+    ...parents.map(p => ({
+      id:       p.id,
+      label:    p.name,
+      slug:     p.slug,
+      count:    p._count.jobs + p.children.reduce((s, c) => s + c._count.jobs, 0),
+      children: p.children.map(c => ({ id: c.id, label: c.name, slug: c.slug, count: c._count.jobs })),
     })),
   ];
 }

@@ -26,7 +26,7 @@ function descriptionToHtml(text: string): string {
   }).join("");
 }
 
-interface Category { label: string; slug: string }
+interface Category { label: string; slug: string; children?: { label: string; slug: string }[] }
 
 interface JobData {
   id:              string;
@@ -58,10 +58,10 @@ interface FormErrors {
 
 type ListingType = "standard" | "featured";
 
-function validate(form: FormData, applyMethod: "url" | "email"): FormErrors {
+function validate(form: FormData, applyMethod: "url" | "email", categorySlug: string): FormErrors {
   const errs: FormErrors = {};
   if (!String(form.get("title")          ?? "").trim()) errs.title           = "Job title is required.";
-  if (!form.get("categorySlug"))                        errs.category        = "Please select a category.";
+  if (!categorySlug)                                    errs.category        = "Please select a category.";
   if (!form.get("experienceLevel"))                     errs.experienceLevel = "Please select an experience level.";
   if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
   if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
@@ -83,6 +83,17 @@ interface Props {
 
 export function EditJobForm({ job, categories, isDraft = false, standardSlots = 0, featuredSlots = 0, allTags, initialTags }: Props) {
   const router = useRouter();
+
+  // Cascading category state (parent → subcategory)
+  const initParentCat = categories.find(c =>
+    c.slug === job.categorySlug || c.children?.some(ch => ch.slug === job.categorySlug)
+  );
+  const initParentSlug = initParentCat?.slug ?? categories[0]?.slug ?? "";
+  const initSubSlug    = initParentCat?.children?.some(ch => ch.slug === job.categorySlug)
+    ? job.categorySlug : "";
+  const [parentCategorySlug, setParentCategorySlug] = useState(initParentSlug);
+  const [subCategorySlug,    setSubCategorySlug]    = useState(initSubSlug);
+
   const [remoteType,        setRemoteType]        = useState(job.remoteType);
   const [salaryDisclosed,   setSalaryDisclosed]   = useState(job.salaryDisclosed);
   const [applyMethod,       setApplyMethod]       = useState<"url" | "email">(job.applyEmail && !job.applyUrl ? "email" : "url");
@@ -111,7 +122,7 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
     return {
       title:           form.get("title"),
       description:     form.get("description"),
-      categorySlug:    form.get("categorySlug"),
+      categorySlug:    subCategorySlug || parentCategorySlug,
       remoteType:      form.get("remoteType"),
       employmentType:  form.get("employmentType"),
       experienceLevel: form.get("experienceLevel"),
@@ -132,7 +143,7 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
     setServerError(null);
 
     const form   = new FormData(e.currentTarget);
-    const errors = validate(form, applyMethod);
+    const errors = validate(form, applyMethod, subCategorySlug || parentCategorySlug);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       const firstKey = Object.keys(errors)[0];
@@ -236,15 +247,40 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
           <Field label="Job title" required error={fieldErrors.title}>
             <input className="input" name="title" type="text" defaultValue={job.title} />
           </Field>
+          {/* Cascading category: parent → subcategory */}
+          {(() => {
+            const selParent  = categories.find(c => c.slug === parentCategorySlug);
+            const hasSub     = (selParent?.children?.length ?? 0) > 0;
+            return (
+              <div style={{ display: "grid", gridTemplateColumns: hasSub ? "1fr 1fr" : "1fr", gap: 16 }}>
+                <Field label="Category" required error={fieldErrors.category}>
+                  <Select
+                    name="parentCategorySlug"
+                    placeholder="Select category"
+                    value={parentCategorySlug}
+                    onChange={val => { setParentCategorySlug(val); setSubCategorySlug(""); setIsDirty(true); }}
+                    options={categories.map(c => ({ label: c.label, value: c.slug }))}
+                  />
+                </Field>
+                {hasSub && selParent && (
+                  <Field label="Subcategory">
+                    <Select
+                      name="subCategorySlug"
+                      placeholder={`All ${selParent.label}`}
+                      value={subCategorySlug}
+                      onChange={val => { setSubCategorySlug(val); setIsDirty(true); }}
+                      options={[
+                        { label: `All ${selParent.label}`, value: "" },
+                        ...(selParent.children ?? []).map(c => ({ label: c.label, value: c.slug })),
+                      ]}
+                    />
+                  </Field>
+                )}
+              </div>
+            );
+          })()}
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <Field label="Category" required error={fieldErrors.category}>
-              <Select
-                name="categorySlug"
-                placeholder="Select category"
-                defaultValue={job.categorySlug}
-                options={categories.map(c => ({ label: c.label, value: c.slug }))}
-              />
-            </Field>
             <Field label="Experience level" required error={fieldErrors.experienceLevel}>
               <Select
                 name="experienceLevel"
