@@ -9,7 +9,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "Python":         "python",
   "Go":             "go",
   "Rust":           "rust",
-  "Java":           "java",
+  "Java":           "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg",
   "Kotlin":         "kotlin",
   "Swift":          "swift",
   "C++":            "cplusplus",
@@ -19,6 +19,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "Scala":          "scala",
   "Elixir":         "elixir",
   "Dart":           "dart",
+  "Groovy":         "apachegroovy",
   "Solidity":       "solidity",
   "R":              "r",
 
@@ -27,6 +28,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "React Native":   "react",
   "Next.js":        "nextdotjs",
   "Vue.js":         "vuedotjs",
+  "Vue":            "vuedotjs",
   "Nuxt.js":        "nuxtdotjs",
   "Angular":        "angular",
   "Svelte":         "svelte",
@@ -58,6 +60,7 @@ export const SKILL_ICONS: Record<string, string> = {
   /* Mobile */
   "Flutter":        "flutter",
   "Android":        "android",
+  "iOS":            "apple",
 
   /* Databases */
   "PostgreSQL":     "postgresql",
@@ -72,6 +75,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "Snowflake":      "snowflake",
   "BigQuery":       "googlebigquery",
   "Prisma":         "prisma",
+  "Hibernate":      "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/hibernate/hibernate-original.svg",
 
   /* Cloud / DevOps */
   "Docker":         "docker",
@@ -90,6 +94,9 @@ export const SKILL_ICONS: Record<string, string> = {
   "Prometheus":     "prometheus",
   "Grafana":        "grafana",
   "Datadog":        "datadog",
+  "New Relic":      "newrelic",
+  "Vercel":         "vercel",
+  "Helm":           "helm",
 
   /* Data */
   "Kafka":          "apachekafka",
@@ -98,28 +105,48 @@ export const SKILL_ICONS: Record<string, string> = {
   "RabbitMQ":       "rabbitmq",
   "dbt":            "dbt",
 
+  /* Build / Test */
+  "Gradle":         "gradle",
+  "Maven":          "apachemaven",
+  "Selenium":       "selenium",
+  "Cypress":        "cypress",
+  "Jest":           "jest",
+  "Playwright":     "playwright",
+  "Swagger":        "swagger",
+
   /* Tools */
   "Figma":          "figma",
   "Git":            "git",
   "GitHub":         "github",
   "GitLab":         "gitlab",
   "Jira":           "jira",
+  "Confluence":     "confluence",
+  "Bitbucket":      "bitbucket",
+  "Postman":        "postman",
   "OWASP":          "owasp",
 };
 
+/** Returns a full icon URL for a skill name, or null if no icon is available. */
+export function getIconSrc(name: string): string | null {
+  const entry = SKILL_ICONS[name];
+  if (!entry) return null;
+  if (entry.startsWith("https://")) return entry;
+  return `https://cdn.simpleicons.org/${entry}`;
+}
+
 export function SkillTag({ name, size = "sm" }: { name: string; size?: "sm" | "md" }) {
   const [iconFailed, setIconFailed] = useState(false);
-  const slug = SKILL_ICONS[name];
+  const src = getIconSrc(name);
 
   const padding  = size === "md" ? "7px 12px" : undefined;
   const fontSize = size === "md" ? 13 : undefined;
 
   return (
     <span className="tag tag-skill" style={size === "md" ? { padding, fontSize, gap: 7 } : undefined}>
-      {slug && !iconFailed && (
+      {src && !iconFailed && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={`https://cdn.simpleicons.org/${slug}`}
+          src={src}
           alt=""
           className="skill-tag-icon"
           onError={() => setIconFailed(true)}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { X, Search } from "lucide-react";
-import { SKILL_ICONS } from "@/components/jobs/SkillTag";
+import { getIconSrc } from "@/components/jobs/SkillTag";
 
 interface Props {
   name:             string;
@@ -13,12 +13,12 @@ interface Props {
 
 function TagIcon({ name, white = false }: { name: string; white?: boolean }) {
   const [failed, setFailed] = useState(false);
-  const slug = SKILL_ICONS[name];
-  if (!slug || failed) return null;
+  const src = getIconSrc(name);
+  if (!src || failed) return null;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`https://cdn.simpleicons.org/${slug}`}
+      src={src}
       alt=""
       width={12}
       height={12}
