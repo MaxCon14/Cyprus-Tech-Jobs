@@ -113,12 +113,14 @@ model Job {
   remoteType      RemoteType      @default(ON_SITE)
   employmentType  EmploymentType  @default(FULL_TIME)
   experienceLevel ExperienceLevel @default(MID)
-  applyType       String          @default("URL")
-  applyUrl        String?
-  applyEmail      String?
-  coverLetter     String          @default("OPTIONAL")
-  featured        Boolean         @default(false)
-  status          JobStatus       @default(DRAFT)
+  applyType           String          @default("URL")
+  applyUrl            String?
+  applyEmail          String?
+  coverLetter         String          @default("OPTIONAL")
+  featured            Boolean         @default(false)
+  isCurated           Boolean         @default(false)
+  curatedCompanyName  String?
+  status              JobStatus       @default(DRAFT)
   activeDays      Int             @default(0)
   inactiveDays    Int             @default(0)
   postedAt        DateTime?

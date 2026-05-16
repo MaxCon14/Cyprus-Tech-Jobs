@@ -4,18 +4,6 @@ import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
 
 type Params = { params: Promise<{ id: string }> };
 
-function slugify(str: string) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-async function resolveCompany(companyName: string): Promise<string> {
-  const slug = slugify(companyName);
-  const existing = await prisma.company.findUnique({ where: { slug } });
-  if (existing) return existing.id;
-  const created = await prisma.company.create({ data: { name: companyName, slug } });
-  return created.id;
-}
-
 export async function PATCH(req: NextRequest, { params }: Params) {
   if (!await getAdminUser()) return adminUnauthorized();
   const { id } = await params;
@@ -27,7 +15,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const data: Record<string, unknown> = {};
   if (title !== undefined)          data.title = title;
   if (description !== undefined)    data.description = description;
-  if (companyName !== undefined)    data.companyId = await resolveCompany(companyName.trim());
+  if (companyName !== undefined)    data.curatedCompanyName = companyName.trim();
   if (categoryId !== undefined)     data.categoryId = categoryId;
   if (city !== undefined)           data.city = city || null;
   if (remoteType !== undefined)     data.remoteType = remoteType;

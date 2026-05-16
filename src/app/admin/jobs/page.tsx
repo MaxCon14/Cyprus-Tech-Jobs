@@ -25,7 +25,8 @@ export default async function AdminJobsPage() {
         jobs={jobs.map(j => ({
           id: j.id,
           title: j.title,
-          company: { name: j.company.name },
+          isCurated: j.isCurated,
+          companyDisplay: j.isCurated && j.curatedCompanyName ? j.curatedCompanyName : j.company.name,
           category: { name: j.category.name },
           status: j.status,
           _count: { applyClicks: j._count.applyClicks },
