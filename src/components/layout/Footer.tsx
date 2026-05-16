@@ -54,6 +54,15 @@ const GUEST_EMPLOYER_LINKS = [
   ["Pricing",            "/post-a-job#pricing"],
 ] as const;
 
+const CITY_LINKS = [
+  ["Nicosia",   "/jobs/nicosia"   ],
+  ["Limassol",  "/jobs/limassol"  ],
+  ["Larnaca",   "/jobs/larnaca"   ],
+  ["Paphos",    "/jobs/paphos"    ],
+  ["Famagusta", "/jobs/famagusta" ],
+  ["Remote",    "/jobs/remote"    ],
+] as const;
+
 const COMPANY_LINKS = [
   ["About",            "/about"],
   ["FAQ",              "/faq"],
@@ -132,6 +141,22 @@ export async function Footer() {
           <div>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Company</div>
             <FooterLinks links={COMPANY_LINKS} />
+          </div>
+        </div>
+
+        {/* Jobs by city — full-width strip */}
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
+          <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Jobs by city</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 24px" }}>
+            {CITY_LINKS.map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
+                style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-muted)", textDecoration: "none" }}
+              >
+                {label}
+              </Link>
+            ))}
           </div>
         </div>
 
