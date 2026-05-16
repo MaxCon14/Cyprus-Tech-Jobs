@@ -2,7 +2,7 @@ import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
-import { ChevronLeft, ChevronRight, MapPin, Wifi } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -100,15 +100,14 @@ export async function CityPage({ config, pageNum }: Props) {
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
-          <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
             {total} JOBS · UPDATED DAILY
           </div>
-          <h1 className="display-m" style={{ marginBottom: 10 }}>
+          <h1 className="display-m" style={{ marginBottom: 12 }}>
             Tech Jobs in {displayName}
-            {isRemote ? <Wifi size={22} style={{ marginLeft: 10, color: "var(--accent)", verticalAlign: "middle" }} /> : <MapPin size={22} style={{ marginLeft: 10, color: "var(--accent)", verticalAlign: "middle" }} />}
           </h1>
-          <p className="body" style={{ color: "var(--text-muted)", maxWidth: 620, marginBottom: 20 }}>
+          <p className="body" style={{ color: "var(--text-muted)", maxWidth: 560, marginBottom: 20 }}>
             {description}
           </p>
           <Link
@@ -116,7 +115,7 @@ export async function CityPage({ config, pageNum }: Props) {
             className="btn btn-outline btn-sm"
             style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            Filter & search these jobs →
+            Filter &amp; search these jobs →
           </Link>
         </div>
 
