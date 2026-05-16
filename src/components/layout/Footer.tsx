@@ -38,7 +38,6 @@ const EMPLOYER_LINKS = [
   ["Post a job",        "/post-a-job"],
   ["My dashboard",      "/employers/dashboard"],
   ["Buy listing slots", "/buy-credits"],
-  ["Pricing",           "/post-a-job#pricing"],
 ] as const;
 
 const GUEST_CANDIDATE_LINKS = [
@@ -51,7 +50,6 @@ const GUEST_CANDIDATE_LINKS = [
 const GUEST_EMPLOYER_LINKS = [
   ["Post a job",         "/post-a-job"],
   ["Employer dashboard", "/employers/dashboard"],
-  ["Pricing",            "/post-a-job#pricing"],
 ] as const;
 
 const CITY_LINKS = [

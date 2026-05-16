@@ -32,7 +32,13 @@ const JOB_TYPES = [
   { label: "Contract",   value: "CONTRACT" },
 ];
 
-const CITIES = ["Limassol", "Nicosia", "Larnaca", "Paphos", "Remote"];
+const CITIES = [
+  { label: "Limassol", href: "/jobs/limassol" },
+  { label: "Nicosia",  href: "/jobs/nicosia"  },
+  { label: "Larnaca",  href: "/jobs/larnaca"  },
+  { label: "Paphos",   href: "/jobs/paphos"   },
+  { label: "Remote",   href: "/jobs/remote"   },
+];
 
 const staticLinks = [
   { href: "/companies",    label: "Companies" },
@@ -52,7 +58,7 @@ const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNod
 const FLYOUT_ITEMS: Record<FlyoutSection, { label: string; href: string }[]> = {
   category: CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
   type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?type=${t.value}` })),
-  city:     CITIES.map(c =>    ({ label: c,         href: `/jobs?city=${c}` })),
+  city:     CITIES.map(c =>    ({ label: c.label,    href: c.href })),
 };
 
 function JobsDropdown({ onClose }: { onClose: () => void }) {
@@ -345,8 +351,8 @@ export function Nav() {
                 <div className={`mobile-menu-sub${mobileCityOpen ? " open" : ""}`}>
                   <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
                     {CITIES.map(city => (
-                      <Link key={city} href={`/jobs?city=${city}`} className="mobile-menu-link">
-                        {city}
+                      <Link key={city.href} href={city.href} className="mobile-menu-link">
+                        {city.label}
                       </Link>
                     ))}
                   </div>
