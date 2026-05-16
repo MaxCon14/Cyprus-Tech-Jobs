@@ -7,7 +7,8 @@ import { AdminSearchInput } from "./AdminSearchInput";
 
 interface Job {
   id: string; title: string;
-  company: { name: string };
+  isCurated: boolean;
+  companyDisplay: string;
   category: { name: string };
   status: string;
   _count: { applyClicks: number };
@@ -22,7 +23,7 @@ export function JobsTableClient({ jobs }: Props) {
   const filtered = query
     ? jobs.filter(j =>
         j.title.toLowerCase().includes(query.toLowerCase()) ||
-        j.company.name.toLowerCase().includes(query.toLowerCase())
+        j.companyDisplay.toLowerCase().includes(query.toLowerCase())
       )
     : jobs;
 
@@ -43,7 +44,10 @@ export function JobsTableClient({ jobs }: Props) {
             <AdminTd>
               <div style={{ fontWeight: 600, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{j.title}</div>
             </AdminTd>
-            <AdminTd subtle>{j.company.name}</AdminTd>
+            <AdminTd subtle>
+              {j.companyDisplay}
+              {j.isCurated && <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--accent)", background: "var(--accent-soft)", borderRadius: 4, padding: "1px 5px" }}>CURATED</span>}
+            </AdminTd>
             <AdminTd subtle>{j.category.name}</AdminTd>
             <AdminTd><StatusBadge status={j.status} /></AdminTd>
             <AdminTd mono right>{j._count.applyClicks}</AdminTd>
