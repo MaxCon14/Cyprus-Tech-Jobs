@@ -1106,17 +1106,19 @@ body {
 .faq-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 20px 0;
   cursor: pointer;
   list-style: none;
   gap: 16px;
+  text-align: center;
 }
 
 .faq-summary::-webkit-details-marker { display: none; }
 
 .faq-body {
   padding: 0 0 20px;
+  text-align: center;
 }
 
 .faq-chevron {
