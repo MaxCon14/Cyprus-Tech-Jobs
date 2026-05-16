@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/Select";
+import { SlidersHorizontal } from "lucide-react";
 
 export type CategoryNode = {
   id: string;
@@ -49,36 +51,45 @@ const SALARY_OPTIONS = [
 ];
 
 export function FilterBar({ categories, current, cities }: Props) {
-  const router = useRouter();
-  const parents = categories.filter(c => c.slug !== ""); // exclude "All jobs" pseudo-entry
+  const router  = useRouter();
+  const parents = categories.filter(c => c.slug !== "");
 
-  // Decode which parent and subcategory are active from the URL
-  const currentCat = current.category ?? "";
+  // Resolve initial parent/sub slugs from the URL category param
   const matchedParent = parents.find(
-    p => p.slug === currentCat || p.children.some(c => c.slug === currentCat)
+    p => p.slug === current.category || p.children.some(c => c.slug === current.category)
   );
-  const parentSlug = matchedParent?.slug ?? "";
-  const subSlug    = matchedParent?.children.some(c => c.slug === currentCat) ? currentCat : "";
+  const initParentSlug = matchedParent?.slug ?? "";
+  const initSubSlug    = matchedParent?.children.some(c => c.slug === current.category)
+    ? (current.category ?? "") : "";
+
+  // Local pending state — doesn't navigate until Apply is clicked
+  const [parentSlug, setParentSlug] = useState(initParentSlug);
+  const [subSlug,    setSubSlug]    = useState(initSubSlug);
+  const [type,       setType]       = useState(current.type    ?? "");
+  const [level,      setLevel]      = useState(current.level   ?? "");
+  const [city,       setCity]       = useState(current.city    ?? "");
+  const [salary,     setSalary]     = useState(current.salary  ?? "");
+
   const selectedParent = parents.find(p => p.slug === parentSlug);
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
 
-  function buildUrl(overrides: Record<string, string | undefined>) {
-    const base: Record<string, string | undefined> = {
-      search:   current.search,
-      category: current.category,
-      type:     current.type,
-      city:     current.city,
-      level:    current.level,
-      salary:   current.salary,
-    };
-    const merged = { ...base, ...overrides, page: undefined };
+  // Resolved category slug to submit (sub takes precedence over parent)
+  const resolvedCategory = subSlug || parentSlug || undefined;
+
+  function apply() {
     const p = new URLSearchParams();
-    for (const [k, v] of Object.entries(merged)) {
-      if (v) p.set(k, v);
-    }
+    if (current.search) p.set("search",   current.search);
+    if (resolvedCategory) p.set("category", resolvedCategory);
+    if (type)   p.set("type",   type);
+    if (level)  p.set("level",  level);
+    if (city)   p.set("city",   city);
+    if (salary) p.set("salary", salary);
     const qs = p.toString();
-    return qs ? `/jobs?${qs}` : "/jobs";
+    router.push(qs ? `/jobs?${qs}` : "/jobs");
   }
+
+  // Count how many filters are actively set (for button label)
+  const activeCount = [resolvedCategory, type, level, city, salary].filter(Boolean).length;
 
   const cityOptions = [
     { label: "Any city", value: "" },
@@ -91,21 +102,20 @@ export function FilterBar({ categories, current, cities }: Props) {
   ];
 
   const subOptions = selectedParent ? [
-    { label: `All ${selectedParent.label}`, value: parentSlug },
+    { label: `All ${selectedParent.label}`, value: "" },
     ...selectedParent.children.map(c => ({ label: c.label, value: c.slug })),
   ] : [];
 
   return (
-    <div style={{
-      display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20, alignItems: "flex-start",
-    }}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20, alignItems: "flex-start" }}>
+
       {/* Parent category */}
       <div style={{ minWidth: 180, flex: "1 1 180px" }}>
         <Select
           name="category-parent"
           value={parentSlug}
           placeholder="All categories"
-          onChange={val => router.push(buildUrl({ category: val || undefined }))}
+          onChange={val => { setParentSlug(val); setSubSlug(""); }}
           options={parentOptions}
         />
       </div>
@@ -115,8 +125,9 @@ export function FilterBar({ categories, current, cities }: Props) {
         <div style={{ minWidth: 200, flex: "1 1 200px" }}>
           <Select
             name="category-sub"
-            value={subSlug || parentSlug}
-            onChange={val => router.push(buildUrl({ category: val || undefined }))}
+            value={subSlug}
+            placeholder={`All ${selectedParent.label}`}
+            onChange={setSubSlug}
             options={subOptions}
           />
         </div>
@@ -126,9 +137,9 @@ export function FilterBar({ categories, current, cities }: Props) {
       <div style={{ minWidth: 150, flex: "1 1 150px" }}>
         <Select
           name="type"
-          value={current.type ?? ""}
+          value={type}
           placeholder="Work type"
-          onChange={val => router.push(buildUrl({ type: val || undefined }))}
+          onChange={setType}
           options={REMOTE_OPTIONS}
         />
       </div>
@@ -137,9 +148,9 @@ export function FilterBar({ categories, current, cities }: Props) {
       <div style={{ minWidth: 150, flex: "1 1 150px" }}>
         <Select
           name="level"
-          value={current.level ?? ""}
+          value={level}
           placeholder="Experience"
-          onChange={val => router.push(buildUrl({ level: val || undefined }))}
+          onChange={setLevel}
           options={EXPERIENCE_OPTIONS}
         />
       </div>
@@ -148,9 +159,9 @@ export function FilterBar({ categories, current, cities }: Props) {
       <div style={{ minWidth: 140, flex: "1 1 140px" }}>
         <Select
           name="city"
-          value={current.city ?? ""}
+          value={city}
           placeholder="City"
-          onChange={val => router.push(buildUrl({ city: val || undefined }))}
+          onChange={setCity}
           options={cityOptions}
         />
       </div>
@@ -159,12 +170,23 @@ export function FilterBar({ categories, current, cities }: Props) {
       <div style={{ minWidth: 140, flex: "1 1 140px" }}>
         <Select
           name="salary"
-          value={current.salary ?? ""}
+          value={salary}
           placeholder="Min salary"
-          onChange={val => router.push(buildUrl({ salary: val || undefined }))}
+          onChange={setSalary}
           options={SALARY_OPTIONS}
         />
       </div>
+
+      {/* Apply button */}
+      <button
+        type="button"
+        onClick={apply}
+        className="btn btn-accent"
+        style={{ display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", flexShrink: 0 }}
+      >
+        <SlidersHorizontal size={14} />
+        Apply{activeCount > 0 ? ` (${activeCount})` : ""}
+      </button>
     </div>
   );
 }
