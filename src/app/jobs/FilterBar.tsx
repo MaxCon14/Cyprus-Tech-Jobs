@@ -113,12 +113,13 @@ export function FilterBar({ categories, current, cities }: Props) {
     <aside style={{
       position: "sticky",
       top: 24,
+      maxHeight: "calc(100vh - 48px)",
+      overflowY: "auto",
       display: "flex",
       flexDirection: "column",
       gap: 0,
       border: "1px solid var(--border)",
       borderRadius: 10,
-      overflow: "hidden",
       background: "var(--surface)",
     }}>
       {/* Header */}
@@ -207,8 +208,8 @@ export function FilterBar({ categories, current, cities }: Props) {
         <Select name="salary" value={salary} placeholder="Any salary" onChange={setSalary} options={SALARY_OPTIONS} />
       </FilterSection>
 
-      {/* Actions */}
-      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+      {/* Actions — pinned to bottom */}
+      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8, position: "sticky", bottom: 0, background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
         <button type="button" onClick={apply} className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
           Apply filters
         </button>
