@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { X, Search } from "lucide-react";
+import { X, Search, ChevronDown, ChevronUp } from "lucide-react";
 import { getIconSrc } from "@/components/jobs/SkillTag";
+
+const DEFAULT_VISIBLE = 30; // ~3 rows at typical tag widths
 
 interface Props {
   name:             string;
   allTags:          string[];
   initialSelected?: string[];
-  showAll?:         boolean;
+  showAll?:         boolean; // admin: skip the expand/collapse entirely
 }
 
 function TagIcon({ name, white = false }: { name: string; white?: boolean }) {
@@ -33,7 +35,8 @@ function TagIcon({ name, white = false }: { name: string; white?: boolean }) {
 
 export function SkillTagSelector({ name, allTags, initialSelected = [], showAll = false }: Props) {
   const [selected, setSelected] = useState<string[]>(initialSelected);
-  const [search, setSearch]     = useState("");
+  const [search,   setSearch]   = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return allTags;
@@ -41,10 +44,15 @@ export function SkillTagSelector({ name, allTags, initialSelected = [], showAll 
     return allTags.filter(t => t.toLowerCase().includes(q));
   }, [search, allTags]);
 
+  const isSearching    = search.trim().length > 0;
+  const showExpandBtn  = !showAll && !isSearching && filtered.length > DEFAULT_VISIBLE;
+  const visibleTags    = showAll || isSearching || expanded
+    ? filtered
+    : filtered.slice(0, DEFAULT_VISIBLE);
+  const hiddenCount    = filtered.length - DEFAULT_VISIBLE;
+
   function toggle(tag: string) {
-    setSelected(prev =>
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
+    setSelected(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   }
 
   return (
@@ -74,7 +82,7 @@ export function SkillTagSelector({ name, allTags, initialSelected = [], showAll 
       )}
 
       {/* Search input */}
-      <div style={{ position: "relative", marginBottom: 10 }}>
+      <div style={{ position: "relative", marginBottom: 12 }}>
         <Search size={13} style={{
           position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
           color: "var(--text-muted)", pointerEvents: "none",
@@ -93,12 +101,9 @@ export function SkillTagSelector({ name, allTags, initialSelected = [], showAll 
         />
       </div>
 
-      {/* Tag cloud — capped to 3 rows until user starts searching (unless showAll) */}
-      <div style={{
-        display: "flex", flexWrap: "wrap", gap: 6,
-        ...(!showAll && !search.trim() ? { maxHeight: 90, overflow: "hidden" } : {}),
-      }}>
-        {filtered.map(tag => {
+      {/* Tag cloud */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {visibleTags.map(tag => {
           const sel = selected.includes(tag);
           return (
             <button
@@ -127,7 +132,35 @@ export function SkillTagSelector({ name, allTags, initialSelected = [], showAll 
         )}
       </div>
 
-      {/* Hidden input carries selected tags as JSON for form submission */}
+      {/* Show more / less toggle */}
+      {showExpandBtn && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          style={{
+            marginTop: 10, display: "inline-flex", alignItems: "center", gap: 5,
+            fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--accent)",
+            background: "none", border: "none", cursor: "pointer", padding: 0,
+          }}
+        >
+          <ChevronDown size={13} /> Show {hiddenCount} more skills
+        </button>
+      )}
+      {expanded && !showAll && !isSearching && (
+        <button
+          type="button"
+          onClick={() => setExpanded(false)}
+          style={{
+            marginTop: 10, display: "inline-flex", alignItems: "center", gap: 5,
+            fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)",
+            background: "none", border: "none", cursor: "pointer", padding: 0,
+          }}
+        >
+          <ChevronUp size={13} /> Show less
+        </button>
+      )}
+
+      {/* Hidden input carries selected tags as JSON */}
       <input type="hidden" name={name} value={JSON.stringify(selected)} />
     </div>
   );
