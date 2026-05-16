@@ -89,7 +89,7 @@ export async function Footer() {
   return (
     <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(32px, 5vw, 48px) var(--page-padding-x)", marginTop: "auto" }}>
       <div className="page-container">
-        <div className="grid-4" style={{ gap: "clamp(24px, 4vw, 32px)", marginBottom: "clamp(32px, 5vw, 48px)" }}>
+        <div className={role === "guest" ? "grid-4" : "grid-3"} style={{ gap: "clamp(24px, 4vw, 32px)", marginBottom: "clamp(32px, 5vw, 48px)" }}>
 
           {/* Brand */}
           <div>
@@ -103,25 +103,17 @@ export async function Footer() {
 
           {/* Role-specific middle columns */}
           {role === "candidate" && (
-            <>
-              <div>
-                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For you</div>
-                <FooterLinks links={CANDIDATE_LINKS} />
-              </div>
-              {/* Empty fourth column — keeps grid balanced */}
-              <div />
-            </>
+            <div>
+              <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For you</div>
+              <FooterLinks links={CANDIDATE_LINKS} />
+            </div>
           )}
 
           {role === "employer" && (
-            <>
-              <div>
-                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For you</div>
-                <FooterLinks links={EMPLOYER_LINKS} />
-              </div>
-              {/* Empty fourth column */}
-              <div />
-            </>
+            <div>
+              <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>For you</div>
+              <FooterLinks links={EMPLOYER_LINKS} />
+            </div>
           )}
 
           {role === "guest" && (
