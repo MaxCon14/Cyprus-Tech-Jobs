@@ -24,6 +24,12 @@ interface Props {
     search?: string;
   };
   cities: string[];
+  /** Base path for navigation. Defaults to "/jobs". */
+  basePath?: string;
+  /** Hide the city filter (e.g. on city-specific pages). */
+  hideCityFilter?: boolean;
+  /** Hide the work-type filter (e.g. on the Remote page). */
+  hideTypeFilter?: boolean;
 }
 
 const REMOTE_OPTIONS = [
@@ -50,7 +56,7 @@ const SALARY_OPTIONS = [
   { label: "€100k+",     value: "100000" },
 ];
 
-export function FilterBar({ categories, current, cities }: Props) {
+export function FilterBar({ categories, current, cities, basePath = "/jobs", hideCityFilter = false, hideTypeFilter = false }: Props) {
   const router  = useRouter();
   const parents = categories.filter(c => c.slug !== "");
 
@@ -72,24 +78,24 @@ export function FilterBar({ categories, current, cities }: Props) {
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
   const resolvedCategory = subSlug || parentSlug || undefined;
 
-  const activeCount = [resolvedCategory, type, level, city, salary].filter(Boolean).length;
+  const activeCount = [resolvedCategory, !hideTypeFilter && type, level, !hideCityFilter && city, salary].filter(Boolean).length;
 
   function apply() {
     const p = new URLSearchParams();
-    if (current.search)   p.set("search",   current.search);
-    if (resolvedCategory) p.set("category", resolvedCategory);
-    if (type)   p.set("type",   type);
-    if (level)  p.set("level",  level);
-    if (city)   p.set("city",   city);
-    if (salary) p.set("salary", salary);
+    if (current.search)              p.set("search",   current.search);
+    if (resolvedCategory)            p.set("category", resolvedCategory);
+    if (!hideTypeFilter  && type)    p.set("type",     type);
+    if (level)                       p.set("level",    level);
+    if (!hideCityFilter  && city)    p.set("city",     city);
+    if (salary)                      p.set("salary",   salary);
     const qs = p.toString();
-    router.push(qs ? `/jobs?${qs}` : "/jobs");
+    router.push(qs ? `${basePath}?${qs}` : basePath);
   }
 
   function clear() {
     setParentSlug(""); setSubSlug("");
     setType(""); setLevel(""); setCity(""); setSalary("");
-    router.push("/jobs");
+    router.push(basePath);
   }
 
   const cityOptions = [
@@ -171,9 +177,11 @@ export function FilterBar({ categories, current, cities }: Props) {
       </FilterSection>
 
       {/* Work type */}
-      <FilterSection title="Work type">
-        <Select name="type" value={type} placeholder="Any work type" onChange={setType} options={REMOTE_OPTIONS} />
-      </FilterSection>
+      {!hideTypeFilter && (
+        <FilterSection title="Work type">
+          <Select name="type" value={type} placeholder="Any work type" onChange={setType} options={REMOTE_OPTIONS} />
+        </FilterSection>
+      )}
 
       {/* Experience */}
       <FilterSection title="Experience">
@@ -181,9 +189,11 @@ export function FilterBar({ categories, current, cities }: Props) {
       </FilterSection>
 
       {/* City */}
-      <FilterSection title="City">
-        <Select name="city" value={city} placeholder="Any city" onChange={setCity} options={cityOptions} />
-      </FilterSection>
+      {!hideCityFilter && (
+        <FilterSection title="City">
+          <Select name="city" value={city} placeholder="Any city" onChange={setCity} options={cityOptions} />
+        </FilterSection>
+      )}
 
       {/* Min salary */}
       <FilterSection title="Min salary" last>
