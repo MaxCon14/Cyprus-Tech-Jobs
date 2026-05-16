@@ -22,20 +22,25 @@ const fragmentMono = Fragment_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CyprusTech.Jobs — Tech jobs in Cyprus",
+    default: "CyprusTech.Jobs — Tech Jobs in Cyprus",
     template: "%s | CyprusTech.Jobs",
   },
   description:
     "The home for tech jobs in Cyprus. Find roles at the best companies in Limassol, Nicosia, Larnaca and beyond — or post a job to reach Cyprus's top tech talent.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
-  icons: {
-    icon: "/logo.svg",
-    shortcut: "/logo.svg",
-  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers"),
+  icons: { icon: "/logo.svg", shortcut: "/logo.svg" },
   openGraph: {
     siteName: "CyprusTech.Jobs",
     type: "website",
+    locale: "en_CY",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "CyprusTech.Jobs — Tech Jobs in Cyprus" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    site: "@CyprusTechJobs",
+    images: ["/og-image.png"],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

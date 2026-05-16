@@ -5,11 +5,29 @@ import { serialiseJob } from "@/lib/serialise";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
-import { buildWebSiteSchema } from "@/lib/schema";
+import { buildWebSiteSchema, buildFAQSchema } from "@/lib/schema";
 import { JobAlertForm } from "@/components/alerts/JobAlertForm";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "CyprusTech.Jobs — Tech Jobs in Cyprus with Salaries",
+  description: "Find tech jobs in Cyprus with verified salaries. Browse software engineering, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
+  alternates: { canonical: "https://cyprustech.careers" },
+  openGraph: {
+    title: "CyprusTech.Jobs — Tech Jobs in Cyprus with Salaries",
+    description: "Find tech jobs in Cyprus with verified salaries. Browse roles in Limassol, Nicosia, Larnaca and remote.",
+    url: "https://cyprustech.careers",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CyprusTech.Jobs — Tech Jobs in Cyprus",
+    description: "Find tech jobs in Cyprus with verified salaries.",
+  },
+};
 
 /* ── FAQ data ── */
 const FAQS = [
@@ -97,6 +115,10 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildWebSiteSchema()) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQSchema(FAQS.map(f => ({ question: f.q, answer: f.a })))) }}
       />
       {/* ── HERO ── */}
       <section style={{ borderBottom: "1px solid var(--border)", padding: "clamp(48px, 8vw, 80px) 0 clamp(40px, 6vw, 64px)" }}>

@@ -1,10 +1,23 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
+import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
-  title: "FAQ — CyprusTech.Jobs",
-  description: "Frequently asked questions about CyprusTech.Jobs — for job seekers and employers.",
+  title: "FAQ — CyprusTech.Jobs Help & Support",
+  description: "Frequently asked questions about CyprusTech.Jobs for job seekers and employers. Learn how to post a job, apply, set alerts, and more.",
+  alternates: { canonical: "https://cyprustech.careers/faq" },
+  openGraph: {
+    title: "FAQ — CyprusTech.Jobs Help & Support",
+    description: "Frequently asked questions about CyprusTech.Jobs for job seekers and employers.",
+    url: "https://cyprustech.careers/faq",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FAQ — CyprusTech.Jobs",
+    description: "Frequently asked questions about CyprusTech.Jobs for job seekers and employers.",
+  },
 };
 
 const FAQS = [
@@ -97,9 +110,16 @@ const FAQS = [
   },
 ];
 
+const PLAIN_TEXT_FAQS = FAQS.filter(f => typeof f.a === "string") as { q: string; a: string }[];
+
 export default function FAQPage() {
   return (
-    <section style={{ padding: "clamp(48px, 7vw, 80px) 0", background: "var(--bg-alt)", minHeight: "100vh" }}>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQSchema(PLAIN_TEXT_FAQS.map(f => ({ question: f.q, answer: f.a })))) }}
+      />
+      <section style={{ padding: "clamp(48px, 7vw, 80px) 0", background: "var(--bg-alt)", minHeight: "100vh" }}>
       <div className="page-container">
         <div style={{ maxWidth: 780, margin: "0 auto" }}>
 
@@ -120,5 +140,6 @@ export default function FAQPage() {
         </div>
       </div>
     </section>
+    </>
   );
 }

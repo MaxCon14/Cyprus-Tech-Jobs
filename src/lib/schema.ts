@@ -125,6 +125,38 @@ export function buildOrganizationSchema(company: {
   };
 }
 
+export function buildFAQSchema(faqs: { question: string; answer: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": { "@type": "Answer", "text": faq.answer },
+    })),
+  };
+}
+
+export function buildArticleSchema(post: {
+  title: string;
+  excerpt: string;
+  author: string;
+  publishedAt: string | Date;
+  slug: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt,
+    "author": { "@type": "Organization", "name": post.author, "url": BASE_URL },
+    "publisher": { "@type": "Organization", "name": "CyprusTech.Jobs", "url": BASE_URL },
+    "datePublished": new Date(post.publishedAt).toISOString(),
+    "url": `${BASE_URL}/blog/${post.slug}`,
+    "mainEntityOfPage": { "@type": "WebPage", "@id": `${BASE_URL}/blog/${post.slug}` },
+  };
+}
+
 export function buildWebSiteSchema() {
   return {
     "@context": "https://schema.org/",

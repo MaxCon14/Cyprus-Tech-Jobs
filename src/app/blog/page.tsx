@@ -5,8 +5,20 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Blog — Cyprus Tech Jobs Insights",
-  description: "Hiring guides, market insights, and regulatory updates for Cyprus's tech industry.",
+  title: "Cyprus Tech Jobs Blog — Market Insights & Hiring Guides",
+  description: "Hiring guides, salary insights, and market trends for Cyprus's tech industry. Advice for employers and job seekers alike.",
+  alternates: { canonical: "https://cyprustech.careers/blog" },
+  openGraph: {
+    title: "Cyprus Tech Jobs Blog — Market Insights & Hiring Guides",
+    description: "Hiring guides, salary insights, and market trends for Cyprus's tech industry.",
+    url: "https://cyprustech.careers/blog",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cyprus Tech Jobs Blog",
+    description: "Market insights, hiring guides, and salary trends for Cyprus tech.",
+  },
 };
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
