@@ -64,7 +64,7 @@ const CITY_LINKS = [
 ] as const;
 
 const COMPANY_LINKS = [
-  ["About",            "/about"],
+  ["Blog",             "/blog"],
   ["FAQ",              "/faq"],
   ["Privacy policy",   "/privacy"],
   ["Terms of service", "/terms"],
