@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/Select";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 
 export type CategoryNode = {
   id: string;
@@ -61,7 +61,6 @@ export function FilterBar({ categories, current, cities }: Props) {
   const initSubSlug    = matchedParent?.children.some(c => c.slug === current.category)
     ? (current.category ?? "") : "";
 
-  const [search,     setSearch]     = useState(current.search  ?? "");
   const [parentSlug, setParentSlug] = useState(initParentSlug);
   const [subSlug,    setSubSlug]    = useState(initSubSlug);
   const [type,       setType]       = useState(current.type    ?? "");
@@ -73,12 +72,11 @@ export function FilterBar({ categories, current, cities }: Props) {
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
   const resolvedCategory = subSlug || parentSlug || undefined;
 
-  const activeCount = [resolvedCategory, type, level, city, salary, search.trim() || undefined]
-    .filter(Boolean).length;
+  const activeCount = [resolvedCategory, type, level, city, salary].filter(Boolean).length;
 
   function apply() {
     const p = new URLSearchParams();
-    if (search.trim())    p.set("search",   search.trim());
+    if (current.search)   p.set("search",   current.search);
     if (resolvedCategory) p.set("category", resolvedCategory);
     if (type)   p.set("type",   type);
     if (level)  p.set("level",  level);
@@ -89,7 +87,7 @@ export function FilterBar({ categories, current, cities }: Props) {
   }
 
   function clear() {
-    setSearch(""); setParentSlug(""); setSubSlug("");
+    setParentSlug(""); setSubSlug("");
     setType(""); setLevel(""); setCity(""); setSalary("");
     router.push("/jobs");
   }
@@ -149,22 +147,6 @@ export function FilterBar({ categories, current, cities }: Props) {
           </span>
         )}
       </div>
-
-      {/* Search */}
-      <FilterSection title="Search">
-        <div style={{ position: "relative" }}>
-          <Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
-          <input
-            className="input"
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && apply()}
-            placeholder="Title, company, keyword…"
-            style={{ paddingLeft: 30, fontSize: 13 }}
-          />
-        </div>
-      </FilterSection>
 
       {/* Category */}
       <FilterSection title="Category">

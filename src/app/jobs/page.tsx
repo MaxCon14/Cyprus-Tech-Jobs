@@ -3,7 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "./FilterBar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -77,7 +77,6 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   }
 
   const serialisedJobs = jobs.map(serialiseJob);
-  const totalJobs      = categories[0]?.count ?? 0;
   const showFrom       = filteredTotal === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1;
   const showTo         = Math.min(pageNum * PAGE_SIZE, filteredTotal);
   const hasPrev        = pageNum > 1;
@@ -146,6 +145,26 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         </p>
       </div>
 
+      {/* Full-width keyword search */}
+      <form action="/jobs" method="GET" style={{ marginBottom: 28 }}>
+        {category      && <input type="hidden" name="category" value={category} />}
+        {type          && <input type="hidden" name="type"     value={type} />}
+        {city          && <input type="hidden" name="city"     value={city} />}
+        {level         && <input type="hidden" name="level"    value={level} />}
+        {params.salary && <input type="hidden" name="salary"   value={params.salary} />}
+        <div style={{ position: "relative", maxWidth: 600 }}>
+          <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
+          <input
+            className="input"
+            type="text"
+            name="search"
+            defaultValue={search ?? ""}
+            placeholder="Search by title, company, or keyword…"
+            style={{ paddingLeft: 40, paddingBlock: 12, fontSize: 15 }}
+          />
+        </div>
+      </form>
+
       {/* Sidebar + content grid */}
       <div className="layout-sidebar-left" style={{ alignItems: "start" }}>
 
@@ -186,21 +205,6 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
                 : <>Showing <strong style={{ color: "var(--text)" }}>{showFrom}–{showTo}</strong> of <strong style={{ color: "var(--text)" }}>{filteredTotal}</strong> {activeFilters.length ? "matching " : ""}jobs</>
               }
             </span>
-          </div>
-
-          {/* Category chips */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-            <Link href="/jobs" className={`chip${!category ? " chip-active" : ""}`}>
-              All <span className="chip-count">{totalJobs}</span>
-            </Link>
-            {categories.slice(1).map(cat => {
-              const isActive = category === cat.slug || cat.children.some(ch => ch.slug === category);
-              return (
-                <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className={`chip${isActive ? " chip-active" : ""}`}>
-                  {cat.label} <span className="chip-count">{cat.count}</span>
-                </Link>
-              );
-            })}
           </div>
 
           {/* Job list */}
