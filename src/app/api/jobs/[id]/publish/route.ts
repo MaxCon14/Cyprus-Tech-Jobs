@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { notifyGoogle } from "@/lib/google-indexing";
 
 const CATEGORY_NAMES: Record<string, string> = {
   frontend: "Frontend", backend: "Backend", devops: "DevOps & Cloud",
@@ -115,6 +116,9 @@ export async function POST(
         },
       }),
     ]);
+
+    // Notify Google Indexing API — non-blocking
+    void notifyGoogle(updated.slug, "URL_UPDATED");
 
     return NextResponse.json({ jobSlug: updated.slug });
   } catch (err) {

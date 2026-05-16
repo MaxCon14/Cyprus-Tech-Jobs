@@ -18,15 +18,33 @@ import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
   if (!job) return {};
   const isActive = job.status === "ACTIVE";
   const suffix   = job.status === "PAUSED" ? " (Paused)" : job.status !== "ACTIVE" ? " (Closed)" : "";
+  const title    = `${job.title} at ${job.company.name}${suffix}`;
+  const salaryStr = job.salaryDisclosed ? (formatSalary(job.salaryMin, job.salaryMax) ?? "") : "Salary undisclosed";
+  const description = `${job.title} at ${job.company.name} in ${job.city ?? "Cyprus"}. ${salaryStr} · ${remoteLabel(job.remoteType)}`;
+
   return {
-    title: `${job.title} at ${job.company.name}${suffix}`,
-    description: `${job.title} at ${job.company.name} in ${job.city}. ${job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) ?? "" : "Salary undisclosed"} · ${remoteLabel(job.remoteType)}`,
+    title,
+    description,
+    alternates: { canonical: `${BASE_URL}/jobs/${slug}` },
+    openGraph: {
+      title,
+      description,
+      url: `${BASE_URL}/jobs/${slug}`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
     // Non-active jobs: tell Google to stop indexing and remove from Jobs results
     ...(!isActive && { robots: { index: false, follow: false } }),
   };

@@ -25,17 +25,28 @@ interface JobSchemaInput {
   company: {
     name: string;
     website: string | null;
+    logoUrl?: string | null;
   };
 }
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s{2,}/g, " ").trim();
+}
+
 export function buildJobPostingSchema(job: JobSchemaInput) {
-  const isRemote = job.remoteType === "REMOTE";
+  const isRemote  = job.remoteType === "REMOTE";
+  const isHybrid  = job.remoteType === "HYBRID";
+  const plainDesc = job.description.trimStart().startsWith("<")
+    ? stripHtml(job.description)
+    : job.description;
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org/",
     "@type": "JobPosting",
     "title": job.title,
-    "description": job.description,
+    "description": plainDesc,
+    "url": `${BASE_URL}/jobs/${job.slug}`,
+    "directApply": false,
     "identifier": {
       "@type": "PropertyValue",
       "name": "CyprusTechJobs",
@@ -51,6 +62,7 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
           ? job.company.website
           : `https://${job.company.website}`,
       }),
+      ...(job.company.logoUrl && { "logo": job.company.logoUrl }),
     },
     "jobLocation": {
       "@type": "Place",
@@ -63,6 +75,9 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
     ...(isRemote && {
       "jobLocationType": "TELECOMMUTE",
       "applicantLocationRequirements": { "@type": "Country", "name": "Cyprus" },
+    }),
+    ...(isHybrid && {
+      "jobLocationType": "TELECOMMUTE",
     }),
   };
 

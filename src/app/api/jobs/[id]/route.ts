@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { notifyGoogle } from "@/lib/google-indexing";
 
 const CATEGORY_NAMES: Record<string, string> = {
   frontend: "Frontend", backend: "Backend", devops: "DevOps & Cloud",
@@ -99,6 +100,9 @@ export async function PATCH(
       });
     }
 
+    // If the job is active, re-ping Google so updated content gets re-indexed
+    if (job.status === "ACTIVE") void notifyGoogle(updated.slug, "URL_UPDATED");
+
     return NextResponse.json({ jobSlug: updated.slug });
   } catch (err) {
     console.error("[jobs/patch]", err);
@@ -133,6 +137,8 @@ export async function DELETE(
 
   try {
     await prisma.job.update({ where: { id }, data: { status: "CLOSED" } });
+    // Tell Google to remove this URL from Jobs results
+    void notifyGoogle(job.slug, "URL_DELETED");
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[jobs/delete]", err);

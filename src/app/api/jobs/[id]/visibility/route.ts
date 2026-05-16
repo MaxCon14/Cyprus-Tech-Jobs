@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { notifyGoogle } from "@/lib/google-indexing";
 
 export async function PATCH(
   req: NextRequest,
@@ -36,10 +37,14 @@ export async function PATCH(
 
   const newStatus = job.status === "ACTIVE" ? "PAUSED" : "ACTIVE";
 
-  await prisma.job.update({
-    where: { id },
-    data:  { status: newStatus as never },
+  const updated = await prisma.job.update({
+    where:  { id },
+    data:   { status: newStatus as never },
+    select: { slug: true },
   });
+
+  // ACTIVE → tell Google the page is live; PAUSED → remove from Jobs results
+  void notifyGoogle(updated.slug, newStatus === "ACTIVE" ? "URL_UPDATED" : "URL_DELETED");
 
   return NextResponse.json({ status: newStatus });
 }
