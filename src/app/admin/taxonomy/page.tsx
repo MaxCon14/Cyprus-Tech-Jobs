@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface Category { id: string; name: string; slug: string; _count?: { jobs: number } }
+interface Category { id: string; name: string; slug: string; jobCount?: number }
 interface Tag      { id: string; name: string; slug: string }
 
 function TaxonomySection<T extends { id: string; name: string; slug: string }>({
@@ -110,7 +110,8 @@ export default function AdminTaxonomyPage() {
       fetch("/api/admin/categories").then(r => r.json()),
       fetch("/api/admin/tags").then(r => r.json()),
     ]);
-    setCategories(catRes);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setCategories(catRes.map((c: any) => ({ ...c, jobCount: c._count?.jobs ?? 0 })));
     setTags(tagRes);
     setLoading(false);
   }
@@ -126,7 +127,7 @@ export default function AdminTaxonomyPage() {
         <p className="body-s" style={{ color: "var(--text-subtle)" }}>Manage the taxonomy used to organise job listings</p>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-        <TaxonomySection title="Categories" items={categories} endpoint="/api/admin/categories" countKey="_count" />
+        <TaxonomySection title="Categories" items={categories} endpoint="/api/admin/categories" countKey="jobCount" />
         <TaxonomySection title="Tags" items={tags} endpoint="/api/admin/tags" />
       </div>
     </div>
