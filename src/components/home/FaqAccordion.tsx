@@ -12,7 +12,7 @@ function FaqRow({ q, a, isOpen, onToggle }: { q: string; a: string | ReactNode; 
   return (
     <div className="faq-item">
       <button className="faq-summary" onClick={onToggle} aria-expanded={isOpen}>
-        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "clamp(15px, 2vw, 16px)", color: "var(--text)", textAlign: "left" }}>
+        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: "clamp(15px, 2vw, 16px)", color: "var(--text)", textAlign: "center" }}>
           {q}
         </span>
         <ChevronDown size={16} className={`faq-chevron${isOpen ? " open" : ""}`} />
