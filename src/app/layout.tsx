@@ -5,6 +5,7 @@ import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { FooterConditional } from "@/components/layout/FooterConditional";
 import { Providers } from "./providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -58,6 +59,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <FooterConditional><Footer /></FooterConditional>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
