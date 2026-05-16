@@ -6,8 +6,20 @@ import { Search, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Companies Hiring in Cyprus",
-  description: "Browse tech companies hiring in Cyprus. See open roles, company profiles, and culture.",
+  title: "Tech Companies Hiring in Cyprus",
+  description: "Browse tech companies actively hiring in Cyprus. See open roles, company profiles, and culture — from fintech giants to local startups.",
+  alternates: { canonical: "https://cyprustech.careers/companies" },
+  openGraph: {
+    title: "Tech Companies Hiring in Cyprus",
+    description: "Browse tech companies actively hiring in Cyprus — fintech, gaming, SaaS, and more.",
+    url: "https://cyprustech.careers/companies",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tech Companies Hiring in Cyprus",
+    description: "Browse tech companies actively hiring in Cyprus.",
+  },
 };
 
 export default async function CompaniesPage() {

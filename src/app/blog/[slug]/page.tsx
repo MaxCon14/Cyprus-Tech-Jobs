@@ -4,9 +4,12 @@ import { getAnyPost, type BlogSection } from "@/lib/blog";
 import { ChevronLeft, Clock, Info, Lightbulb, AlertTriangle } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { buildArticleSchema, buildBreadcrumbSchema } from "@/lib/schema";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+const BASE_URL = "https://cyprustech.careers";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -14,7 +17,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await getAnyPost(slug);
   if (!post) return {};
-  return { title: post.title, description: post.excerpt };
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: { canonical: `${BASE_URL}/blog/${slug}` },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: `${BASE_URL}/blog/${slug}`,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
+  };
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
@@ -49,7 +67,16 @@ export default async function BlogPostPage({ params }: Props) {
     isCandidate = !!data;
   }
 
+  const articleSchema   = buildArticleSchema({ title: post.title, excerpt: post.excerpt, author: "CyprusTech.Jobs", publishedAt: post.publishedAt, slug });
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: "Blog", path: "/blog" },
+    { name: post.title, path: `/blog/${slug}` },
+  ]);
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Breadcrumb */}
@@ -178,6 +205,7 @@ export default async function BlogPostPage({ params }: Props) {
         </Link>
       </div>}
     </div>
+    </>
   );
 }
 

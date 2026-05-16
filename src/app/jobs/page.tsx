@@ -11,8 +11,20 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Browse Tech Jobs in Cyprus",
-  description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary.",
+  title: "Tech Jobs in Cyprus — Browse All Roles",
+  description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary. Salaries always shown upfront.",
+  alternates: { canonical: "https://cyprustech.careers/jobs" },
+  openGraph: {
+    title: "Tech Jobs in Cyprus — Browse All Roles",
+    description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary.",
+    url: "https://cyprustech.careers/jobs",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tech Jobs in Cyprus — Browse All Roles",
+    description: "Browse all tech jobs in Cyprus. Filter by category, location, and salary.",
+  },
 };
 
 const TYPE_LABELS: Record<string, string> = {

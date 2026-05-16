@@ -6,8 +6,20 @@ import { prisma } from "@/lib/prisma";
 import { PostJobForm } from "./PostJobForm";
 
 export const metadata: Metadata = {
-  title: "Post a Job — Hire Tech Talent in Cyprus",
-  description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live instantly.",
+  title: "Post a Tech Job in Cyprus — Reach 10,000+ Candidates",
+  description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live instantly. No recruiter fees — direct applications only.",
+  alternates: { canonical: "https://cyprustech.careers/post-a-job" },
+  openGraph: {
+    title: "Post a Tech Job in Cyprus — Reach 10,000+ Candidates",
+    description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live instantly.",
+    url: "https://cyprustech.careers/post-a-job",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Post a Tech Job in Cyprus",
+    description: "Reach thousands of active tech candidates in Cyprus. Listings go live instantly.",
+  },
 };
 
 export default async function PostAJobPage() {

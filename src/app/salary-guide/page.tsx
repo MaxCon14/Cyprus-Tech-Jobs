@@ -3,8 +3,20 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cyprus Tech Salary Guide 2026",
-  description: "Salary ranges for tech roles in Cyprus. Frontend, backend, DevOps, data, design and more — by experience level.",
+  title: "Cyprus Tech Salary Guide 2026 — Software Engineer Salaries",
+  description: "Verified salary ranges for tech roles in Cyprus in 2026. Frontend, backend, DevOps, data, and design — by experience level. Based on live job listings.",
+  alternates: { canonical: "https://cyprustech.careers/salary-guide" },
+  openGraph: {
+    title: "Cyprus Tech Salary Guide 2026 — Software Engineer Salaries",
+    description: "Salary ranges for tech roles in Cyprus across all experience levels. Data from live job listings.",
+    url: "https://cyprustech.careers/salary-guide",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cyprus Tech Salary Guide 2026",
+    description: "Salary ranges for tech roles in Cyprus — by experience level.",
+  },
 };
 
 const MAX_SALARY = 150000;
