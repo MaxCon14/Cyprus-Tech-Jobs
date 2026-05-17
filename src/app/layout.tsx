@@ -24,18 +24,18 @@ const fragmentMono = Fragment_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CyprusTech.Jobs — Tech Jobs in Cyprus",
-    template: "%s | CyprusTech.Jobs",
+    default: "CyprusTech.Careers — Tech Jobs in Cyprus",
+    template: "%s | CyprusTech.Careers",
   },
   description:
     "The home for tech jobs in Cyprus. Find roles at the best companies in Limassol, Nicosia, Larnaca and beyond — or post a job to reach Cyprus's top tech talent.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers"),
   icons: { icon: "/logo.svg", shortcut: "/logo.svg" },
   openGraph: {
-    siteName: "CyprusTech.Jobs",
+    siteName: "CyprusTech.Careers",
     type: "website",
     locale: "en_CY",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "CyprusTech.Jobs — Tech Jobs in Cyprus" }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "CyprusTech.Careers — Tech Jobs in Cyprus" }],
   },
   twitter: {
     card: "summary_large_image",

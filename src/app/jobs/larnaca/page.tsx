@@ -11,7 +11,7 @@ const CONFIG = {
 } as const;
 
 export const metadata: Metadata = {
-  title:       "Tech Jobs in Larnaca, Cyprus | CyprusTech.Jobs",
+  title:       "Tech Jobs in Larnaca, Cyprus | CyprusTech.Careers",
   description: "Find the latest software engineering, IT and product jobs in Larnaca, Cyprus. Updated daily with verified salaries.",
   alternates:  { canonical: "https://cyprustech.careers/jobs/larnaca" },
   openGraph: {

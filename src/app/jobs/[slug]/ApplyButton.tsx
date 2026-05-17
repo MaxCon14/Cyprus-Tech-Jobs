@@ -206,7 +206,7 @@ function InAppApplyForm({
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <button onClick={() => setOpen(true)} className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Apply on CyprusTech.Jobs →
+          Apply on CyprusTech.Careers →
         </button>
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
           USES YOUR SAVED PROFILE &amp; CV

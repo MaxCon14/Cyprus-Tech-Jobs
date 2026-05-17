@@ -4,26 +4,26 @@ import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { buildFAQSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
-  title: "FAQ — CyprusTech.Jobs Help & Support",
-  description: "Frequently asked questions about CyprusTech.Jobs for job seekers and employers. Learn how to post a job, apply, set alerts, and more.",
+  title: "FAQ — CyprusTech.Careers Help & Support",
+  description: "Frequently asked questions about CyprusTech.Careers for job seekers and employers. Learn how to post a job, apply, set alerts, and more.",
   alternates: { canonical: "https://cyprustech.careers/faq" },
   openGraph: {
-    title: "FAQ — CyprusTech.Jobs Help & Support",
-    description: "Frequently asked questions about CyprusTech.Jobs for job seekers and employers.",
+    title: "FAQ — CyprusTech.Careers Help & Support",
+    description: "Frequently asked questions about CyprusTech.Careers for job seekers and employers.",
     url: "https://cyprustech.careers/faq",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "FAQ — CyprusTech.Jobs",
-    description: "Frequently asked questions about CyprusTech.Jobs for job seekers and employers.",
+    title: "FAQ — CyprusTech.Careers",
+    description: "Frequently asked questions about CyprusTech.Careers for job seekers and employers.",
   },
 };
 
 const FAQS = [
   // For job seekers
   {
-    q: "Is CyprusTech.Jobs free to use?",
+    q: "Is CyprusTech.Careers free to use?",
     a: "Yes, completely free for candidates. Browsing jobs, saving listings, setting up alerts, and applying are all free with no subscription required.",
   },
   {
@@ -78,7 +78,7 @@ const FAQS = [
   // General
   {
     q: "What kind of jobs are listed?",
-    a: "CyprusTech.Jobs focuses exclusively on technology roles in Cyprus — software engineering, DevOps, design, data, product, QA, security, and more. Both on-site and remote roles are listed.",
+    a: "CyprusTech.Careers focuses exclusively on technology roles in Cyprus — software engineering, DevOps, design, data, product, QA, security, and more. Both on-site and remote roles are listed.",
   },
   {
     q: "How do I report an incorrect or fraudulent listing?",

@@ -11,7 +11,7 @@ export function getResend(): Resend {
 }
 
 export const FROM_EMAIL = "alerts@cyprustech.careers";
-export const FROM_NAME  = "CyprusTech.Jobs";
+export const FROM_NAME  = "CyprusTech.Careers";
 
 const BASE_URL = "https://cyprustech.careers";
 
@@ -149,7 +149,7 @@ export function buildAlertEmail({ jobs, firstName, token, companyName }: BuildAl
         <tr>
           <td style="padding:24px 16px 8px;" align="center">
             <p style="font-family:sans-serif;font-size:12px;color:#9ca3af;margin:0;line-height:1.6;text-align:center;">
-              You're receiving this because you subscribed to job alerts on CyprusTech.Jobs.<br>
+              You're receiving this because you subscribed to job alerts on CyprusTech.Careers.<br>
               <a href="${BASE_URL}/api/candidates/alert/unsubscribe?token=${token}"
                  style="color:#6b7280;text-decoration:underline;">Unsubscribe from this alert</a>
               &nbsp;&middot;&nbsp;

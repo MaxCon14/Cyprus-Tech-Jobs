@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AdminNav from "./_components/AdminNav";
 
-export const metadata = { title: "Admin — CyprusTech.Jobs" };
+export const metadata = { title: "Admin — CyprusTech.Careers" };
 
 export default async function AdminLayout({
   children,

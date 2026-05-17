@@ -104,7 +104,7 @@ export function AdminBlogForm({ initial, postId }: {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [meta, setMeta] = useState<FormData>(initial?.meta ?? {
-    title: "", excerpt: "", author: "CyprusTech.Jobs Editorial",
+    title: "", excerpt: "", author: "CyprusTech.Careers Editorial",
     authorRole: "Editorial", category: "Market Insights", tags: "",
     readTime: "5", published: true,
   });

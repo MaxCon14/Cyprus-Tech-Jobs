@@ -4,7 +4,7 @@ import { getStripe } from "@/lib/stripe";
 import { fulfillSlotPurchase } from "@/lib/stripe-fulfill";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Slots Added — CyprusTech.Jobs" };
+export const metadata: Metadata = { title: "Slots Added — CyprusTech.Careers" };
 
 export default async function BuyCreditsSuccessPage({
   searchParams,

@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   const post = await prisma.blogPost.create({
     data: {
       slug, title, excerpt,
-      author: author ?? "CyprusTech.Jobs Editorial",
+      author: author ?? "CyprusTech.Careers Editorial",
       authorRole: authorRole ?? "Editorial",
       category, tags: tags ?? [],
       readTime: Number(readTime) || 5,

@@ -24,7 +24,7 @@ export default function AdminNav() {
       {/* Brand */}
       <div style={{ padding: "20px 20px 16px" }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10, letterSpacing: "0.12em", marginBottom: 4 }}>ADMIN PANEL</div>
-        <div style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14 }}>CyprusTech.Jobs</div>
+        <div style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14 }}>CyprusTech.Careers</div>
       </div>
 
       <div style={{ width: "100%", height: 1, background: "var(--border)", marginBottom: 8 }} />

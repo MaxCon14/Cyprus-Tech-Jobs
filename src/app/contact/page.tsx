@@ -3,8 +3,8 @@ import { Mail, Clock, MessageSquare } from "lucide-react";
 import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact us — CyprusTech.Jobs",
-  description: "Get in touch with the CyprusTech.Jobs team. We're here to help with any questions about job listings, employer accounts, or the platform.",
+  title: "Contact us — CyprusTech.Careers",
+  description: "Get in touch with the CyprusTech.Careers team. We're here to help with any questions about job listings, employer accounts, or the platform.",
 };
 
 export default function ContactPage() {

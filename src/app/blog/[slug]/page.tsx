@@ -67,7 +67,7 @@ export default async function BlogPostPage({ params }: Props) {
     isCandidate = !!data;
   }
 
-  const articleSchema   = buildArticleSchema({ title: post.title, excerpt: post.excerpt, author: "CyprusTech.Jobs", publishedAt: post.publishedAt, slug });
+  const articleSchema   = buildArticleSchema({ title: post.title, excerpt: post.excerpt, author: "CyprusTech.Careers", publishedAt: post.publishedAt, slug });
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Blog", path: "/blog" },
     { name: post.title, path: `/blog/${slug}` },
@@ -148,7 +148,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 24, background: "var(--surface)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>HIRE IN CYPRUS</div>
             <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
-              Post your role on CyprusTech.Jobs and reach thousands of tech professionals. Listings go live in minutes, with verified salary ranges.
+              Post your role on CyprusTech.Careers and reach thousands of tech professionals. Listings go live in minutes, with verified salary ranges.
             </p>
             <Link href="/post-a-job" className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
               Post a job →

@@ -3,7 +3,7 @@ import { CheckCircle2, ArrowRight, Briefcase } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Job Posted Successfully — CyprusTech.Jobs",
+  title: "Job Posted Successfully — CyprusTech.Careers",
 };
 
 export default async function PostJobSuccessPage({

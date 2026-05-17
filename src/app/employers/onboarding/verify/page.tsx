@@ -3,7 +3,7 @@ import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Verify your email — CyprusTech.Jobs",
+  title: "Verify your email — CyprusTech.Careers",
 };
 
 type Props = { searchParams: Promise<{ success?: string; error?: string }> };

@@ -14,7 +14,7 @@ async function getCuratedCompanyId(): Promise<string> {
   const existing = await prisma.company.findUnique({ where: { slug: "curated" } });
   if (existing) return existing.id;
   const created = await prisma.company.create({
-    data: { name: "CyprusTech.Jobs", slug: "curated" },
+    data: { name: "CyprusTech.Careers", slug: "curated" },
   });
   return created.id;
 }

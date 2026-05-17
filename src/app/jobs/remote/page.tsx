@@ -11,7 +11,7 @@ const CONFIG = {
 } as const;
 
 export const metadata: Metadata = {
-  title:       "Remote Tech Jobs at Cyprus Companies | CyprusTech.Jobs",
+  title:       "Remote Tech Jobs at Cyprus Companies | CyprusTech.Careers",
   description: "Find remote software engineering, design and product jobs at Cyprus-based companies. Work from anywhere. Updated daily with verified salaries.",
   alternates:  { canonical: "https://cyprustech.careers/jobs/remote" },
   openGraph: {

@@ -13,18 +13,18 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "CyprusTech.Jobs — Tech Jobs in Cyprus with Salaries",
+  title: "CyprusTech.Careers — Tech Jobs in Cyprus with Salaries",
   description: "Find tech jobs in Cyprus with verified salaries. Browse software engineering, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
   alternates: { canonical: "https://cyprustech.careers" },
   openGraph: {
-    title: "CyprusTech.Jobs — Tech Jobs in Cyprus with Salaries",
+    title: "CyprusTech.Careers — Tech Jobs in Cyprus with Salaries",
     description: "Find tech jobs in Cyprus with verified salaries. Browse roles in Limassol, Nicosia, Larnaca and remote.",
     url: "https://cyprustech.careers",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CyprusTech.Jobs — Tech Jobs in Cyprus",
+    title: "CyprusTech.Careers — Tech Jobs in Cyprus",
     description: "Find tech jobs in Cyprus with verified salaries.",
   },
 };
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What tech jobs are available in Cyprus?",
-    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Key sectors include fintech, forex trading, gaming, and a growing startup ecosystem. CyprusTech.Jobs lists all active roles with verified salaries.",
+    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Key sectors include fintech, forex trading, gaming, and a growing startup ecosystem. CyprusTech.Careers lists all active roles with verified salaries.",
   },
   {
     q: "What is the average salary for software engineers in Cyprus?",
@@ -49,7 +49,7 @@ const FAQS = [
   },
   {
     q: "What are the top tech companies hiring in Cyprus?",
-    a: "Cyprus has a strong concentration of fintech, forex, and gaming companies — particularly in Limassol and Nicosia — alongside a fast-growing startup scene with venture-backed companies across SaaS, payments, and crypto. Browse live listings on CyprusTech.Jobs to see which employers are actively hiring.",
+    a: "Cyprus has a strong concentration of fintech, forex, and gaming companies — particularly in Limassol and Nicosia — alongside a fast-growing startup scene with venture-backed companies across SaaS, payments, and crypto. Browse live listings on CyprusTech.Careers to see which employers are actively hiring.",
   },
   {
     q: "Do Cyprus tech companies offer remote work?",
@@ -57,7 +57,7 @@ const FAQS = [
   },
   {
     q: "How do I find a software developer job in Cyprus?",
-    a: "Create a free candidate profile on CyprusTech.Jobs, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Our listings always include salaries — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
+    a: "Create a free candidate profile on CyprusTech.Careers, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Our listings always include salaries — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
   },
   {
     q: "What is the cost of living in Cyprus compared to salaries?",

@@ -15,7 +15,7 @@ import type { ApplicationRow } from "./ApplicationsPanel";
 import { DashboardContent } from "./DashboardContent";
 
 export const metadata: Metadata = {
-  title: "Employer Dashboard — CyprusTech.Jobs",
+  title: "Employer Dashboard — CyprusTech.Careers",
 };
 
 type SearchParams = Promise<{ posted?: string; edited?: string; drafted?: string; "drafted-edit"?: string }>;

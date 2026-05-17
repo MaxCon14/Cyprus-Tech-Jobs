@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Unsubscribed — CyprusTech.Jobs" };
+export const metadata: Metadata = { title: "Unsubscribed — CyprusTech.Careers" };
 
 export default function UnsubscribedPage({
   searchParams,

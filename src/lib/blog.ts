@@ -24,7 +24,7 @@ export const POSTS: BlogPost[] = [
     slug:        "limassol-tech-hub-2026",
     title:       "The Rise of Limassol as a Tech Hub: What's Driving It and Who's Hiring",
     excerpt:     "Limassol now accounts for nearly 70% of all tech roles in Cyprus. We break down the industries, the companies, and the economic forces turning a Mediterranean port city into one of Europe's most interesting tech scenes.",
-    author:      "CyprusTech.Jobs Editorial",
+    author:      "CyprusTech.Careers Editorial",
     authorRole:  "Market Research",
     publishedAt: "2026-04-28",
     readTime:    9,
@@ -89,7 +89,7 @@ export const POSTS: BlogPost[] = [
       { type: "paragraph", text: "The risk, as with any concentrated cluster, is that wage inflation and housing costs eventually erode the cost advantage that originally made the city attractive. Limassol's residential market has already seen significant price appreciation. Whether the city can build enough housing and infrastructure to sustain growth without pricing out the mid-level talent it needs is the open question for the next decade." },
       { type: "paragraph", text: "For now, though, the hiring is real, the salaries are strong, and the pipeline of companies looking to establish or expand their Cyprus presence continues to grow." },
 
-      { type: "callout", variant: "tip", text: "Browsing tech roles in Limassol? CyprusTech.Jobs lists every active position with verified salary ranges — no surprises, no salary negotiation theatre. Filter by city, category, or experience level to find what you're looking for." },
+      { type: "callout", variant: "tip", text: "Browsing tech roles in Limassol? CyprusTech.Careers lists every active position with verified salary ranges — no surprises, no salary negotiation theatre. Filter by city, category, or experience level to find what you're looking for." },
     ],
   },
 
@@ -98,7 +98,7 @@ export const POSTS: BlogPost[] = [
     slug:        "attract-tech-talent-cyprus-hiring-guide-2026",
     title:       "How to Attract Tech Talent to Cyprus: A Hiring Guide for 2026",
     excerpt:     "Competing for engineers and data professionals in a global market is hard. This guide covers what tech candidates actually want, what salary benchmarks look like in 2026, how to structure a relocation package, and where to post your roles.",
-    author:      "CyprusTech.Jobs Editorial",
+    author:      "CyprusTech.Careers Editorial",
     authorRole:  "Employer Insights",
     publishedAt: "2026-05-05",
     readTime:    11,
@@ -184,12 +184,12 @@ export const POSTS: BlogPost[] = [
       { type: "h2", text: "Where to Post Your Roles" },
       { type: "paragraph", text: "For Cyprus-specific tech hiring, the most effective channels in 2026 are:" },
       { type: "list", items: [
-        "CyprusTech.Jobs: The only job board dedicated exclusively to tech roles in Cyprus. All listings include salaries. Candidates on the platform are actively looking for Cyprus-based roles — they are not job-board generalists browsing everything.",
+        "CyprusTech.Careers: The only job board dedicated exclusively to tech roles in Cyprus. All listings include salaries. Candidates on the platform are actively looking for Cyprus-based roles — they are not job-board generalists browsing everything.",
         "LinkedIn: Essential for senior roles where you are actively sourcing rather than waiting for inbounds. Cyprus's tech community is well-networked on LinkedIn.",
         "Referrals: In a city as small as Limassol, personal networks matter enormously. Engineering teams at the major employers all know each other. A referral programme that pays meaningfully and quickly consistently outperforms any job board for senior hires.",
         "Tech community channels: The Cyprus Tech community, local meetup groups, and Limassol-based co-working spaces are all useful for reaching passive candidates who are not actively job-hunting.",
       ]},
-      { type: "callout", variant: "tip", text: "Listings on CyprusTech.Jobs go live within minutes. In-app applications mean candidates apply directly through the platform with their full profile — you receive structured data, CV, and cover letter without any email threading." },
+      { type: "callout", variant: "tip", text: "Listings on CyprusTech.Careers go live within minutes. In-app applications mean candidates apply directly through the platform with their full profile — you receive structured data, CV, and cover letter without any email threading." },
 
       { type: "h2", text: "Common Hiring Mistakes to Avoid" },
       { type: "list", items: [
@@ -207,7 +207,7 @@ export const POSTS: BlogPost[] = [
     slug:        "eu-pay-transparency-directive-cyprus-employers",
     title:       "The EU Pay Transparency Directive: What Cyprus Tech Employers Need to Prepare For",
     excerpt:     "Directive 2023/970/EU must be transposed into national law by June 7, 2026. Most Cyprus employers aren't ready. Here's exactly what the directive requires, what the penalties are, and what you need to do before the deadline.",
-    author:      "CyprusTech.Jobs Editorial",
+    author:      "CyprusTech.Careers Editorial",
     authorRole:  "Policy & Regulation",
     publishedAt: "2026-05-12",
     readTime:    10,
@@ -226,7 +226,7 @@ export const POSTS: BlogPost[] = [
 
       { type: "h3", text: "1. Salary Information in Job Postings" },
       { type: "paragraph", text: "Employers must provide information about the starting salary or salary range in every job posting, or before the job interview begins. The range must be based on objective, gender-neutral criteria. Employers cannot ask candidates what they currently earn or what their previous salary was — this prohibition is absolute." },
-      { type: "paragraph", text: "This requirement alone will transform the job advertising landscape in Cyprus, where salary ranges are currently disclosed in fewer than 40% of tech job postings. CyprusTech.Jobs has required salary disclosure on all listings since launch — a policy that predates the directive but is now legally mandated." },
+      { type: "paragraph", text: "This requirement alone will transform the job advertising landscape in Cyprus, where salary ranges are currently disclosed in fewer than 40% of tech job postings. CyprusTech.Careers has required salary disclosure on all listings since launch — a policy that predates the directive but is now legally mandated." },
 
       { type: "h3", text: "2. Right to Pay Information for Employees" },
       { type: "paragraph", text: "Current employees have the right to request information about their individual pay level and the average pay levels for workers doing the same work or work of equal value, broken down by gender. Employers must respond within two months and must inform employees annually of this right." },
@@ -266,7 +266,7 @@ export const POSTS: BlogPost[] = [
       ]},
 
       { type: "h2", text: "The Business Case Beyond Compliance" },
-      { type: "paragraph", text: "It is worth noting that pay transparency, independently of the legal requirement, is consistently associated with better hiring outcomes. CyprusTech.Jobs has required salary disclosure since launch, and the data is clear: job postings with salary ranges receive significantly more applications than those without, and the applications that arrive are better qualified — because candidates who apply know the package works for them." },
+      { type: "paragraph", text: "It is worth noting that pay transparency, independently of the legal requirement, is consistently associated with better hiring outcomes. CyprusTech.Careers has required salary disclosure since launch, and the data is clear: job postings with salary ranges receive significantly more applications than those without, and the applications that arrive are better qualified — because candidates who apply know the package works for them." },
       { type: "paragraph", text: "Pay transparency also reduces the gender pay gap — the very problem the directive is designed to address. When salary bands are published and applied consistently, the individual negotiation dynamics that systematically disadvantage women are removed. Companies that have done this voluntarily report both a narrower pay gap and a better candidate experience." },
       { type: "paragraph", text: "The directive is an opportunity, not just a compliance burden. Companies that treat it as such — using it as a forcing function to build fairer, more structured, more transparent compensation systems — will find that they are better at recruiting and retaining the talent they need in 2026 and beyond." },
 
@@ -277,7 +277,7 @@ export const POSTS: BlogPost[] = [
         "2031 — The smallest mandatory reporting threshold (100–149 employees) comes into force.",
       ]},
 
-      { type: "callout", variant: "tip", text: "CyprusTech.Jobs already requires salary ranges on all job postings — putting you ahead of the directive's most visible requirement today. Post your next role with a salary range and reach candidates who actively filter for transparent employers." },
+      { type: "callout", variant: "tip", text: "CyprusTech.Careers already requires salary ranges on all job postings — putting you ahead of the directive's most visible requirement today. Post your next role with a salary range and reach candidates who actively filter for transparent employers." },
     ],
   },
 ];

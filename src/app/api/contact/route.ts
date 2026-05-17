@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await getResend().emails.send({
-      from:     "CyprusTech.Jobs <noreply@cyprustech.careers>",
+      from:     "CyprusTech.Careers <noreply@cyprustech.careers>",
       to:       "help@cyprustech.careers",
       replyTo: email,
       subject:  emailSubject,
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         <p><strong>Message:</strong></p>
         <p style="white-space:pre-wrap;">${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
         <hr>
-        <p style="color:#6b7280;font-size:12px;">Sent via the CyprusTech.Jobs contact form.</p>
+        <p style="color:#6b7280;font-size:12px;">Sent via the CyprusTech.Careers contact form.</p>
       `,
     });
 

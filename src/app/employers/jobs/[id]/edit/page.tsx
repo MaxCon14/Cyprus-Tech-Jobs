@@ -5,7 +5,7 @@ import { getJobById, getCategoriesWithCount } from "@/lib/queries";
 import { EditJobForm } from "./EditJobForm";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Edit Listing — CyprusTech.Jobs" };
+export const metadata: Metadata = { title: "Edit Listing — CyprusTech.Careers" };
 
 export default async function EditJobPage({
   params,

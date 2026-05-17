@@ -11,7 +11,7 @@ const CONFIG = {
 } as const;
 
 export const metadata: Metadata = {
-  title:       "Tech Jobs in Paphos, Cyprus | CyprusTech.Jobs",
+  title:       "Tech Jobs in Paphos, Cyprus | CyprusTech.Careers",
   description: "Find the latest software engineering, IT and digital jobs in Paphos, Cyprus. Updated daily with verified salaries.",
   alternates:  { canonical: "https://cyprustech.careers/jobs/paphos" },
   openGraph: {

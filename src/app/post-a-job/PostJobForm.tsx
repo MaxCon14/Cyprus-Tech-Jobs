@@ -499,7 +499,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                       <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "var(--white)", padding: "2px 7px", borderRadius: 4 }}>RECOMMENDED</span>
                     </div>
                     <div className="body-s" style={{ color: "var(--text-muted)" }}>
-                      Candidates apply directly on CyprusTech.Jobs. You receive rich profiles, CVs, and cover letters in your dashboard.
+                      Candidates apply directly on CyprusTech.Careers. You receive rich profiles, CVs, and cover letters in your dashboard.
                     </div>
                   </div>
                   {applyMethod === "in_app" && <Check size={16} style={{ color: "var(--accent)", flexShrink: 0, marginLeft: 12 }} />}

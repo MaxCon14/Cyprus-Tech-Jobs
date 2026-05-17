@@ -7,7 +7,7 @@ import { LoginForm } from "./LoginForm";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign in — CyprusTech.Jobs",
+  title: "Sign in — CyprusTech.Careers",
 };
 
 type Props = { searchParams: Promise<{ error?: string }> };

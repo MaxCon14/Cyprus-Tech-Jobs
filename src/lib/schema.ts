@@ -165,7 +165,7 @@ export function buildArticleSchema(post: {
     "headline": post.title,
     "description": post.excerpt,
     "author": { "@type": "Organization", "name": post.author, "url": BASE_URL },
-    "publisher": { "@type": "Organization", "name": "CyprusTech.Jobs", "url": BASE_URL },
+    "publisher": { "@type": "Organization", "name": "CyprusTech.Careers", "url": BASE_URL },
     "datePublished": new Date(post.publishedAt).toISOString(),
     "url": `${BASE_URL}/blog/${post.slug}`,
     "mainEntityOfPage": { "@type": "WebPage", "@id": `${BASE_URL}/blog/${post.slug}` },
@@ -177,7 +177,7 @@ export function buildWebSiteSchema() {
     "@context": "https://schema.org/",
     "@type": "WebSite",
     "url": BASE_URL,
-    "name": "CyprusTech.Jobs",
+    "name": "CyprusTech.Careers",
     "description": "Tech jobs in Cyprus — curated listings with salaries",
     "potentialAction": {
       "@type": "SearchAction",

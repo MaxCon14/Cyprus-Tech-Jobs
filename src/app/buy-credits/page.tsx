@@ -8,8 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { CreditSelector } from "./CreditSelector";
 
 export const metadata: Metadata = {
-  title: "Buy Listing Slots — CyprusTech.Jobs",
-  description: "Purchase standard or featured job listing slots to post roles on CyprusTech.Jobs.",
+  title: "Buy Listing Slots — CyprusTech.Careers",
+  description: "Purchase standard or featured job listing slots to post roles on CyprusTech.Careers.",
 };
 
 export default async function BuyCreditsPage() {

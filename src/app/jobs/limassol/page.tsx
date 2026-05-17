@@ -11,7 +11,7 @@ const CONFIG = {
 } as const;
 
 export const metadata: Metadata = {
-  title:       "Tech Jobs in Limassol, Cyprus | CyprusTech.Jobs",
+  title:       "Tech Jobs in Limassol, Cyprus | CyprusTech.Careers",
   description: "Find the latest software engineering, fintech, design and DevOps jobs in Limassol. Updated daily with verified salaries.",
   alternates:  { canonical: "https://cyprustech.careers/jobs/limassol" },
   openGraph: {

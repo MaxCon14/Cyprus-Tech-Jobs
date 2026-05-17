@@ -73,8 +73,8 @@ export async function GET(req: NextRequest) {
     if (jobs.length === 0) { skipped++; continue; }
 
     const subject = companyName
-      ? `${jobs.length} new role${jobs.length !== 1 ? "s" : ""} at ${companyName} — CyprusTech.Jobs`
-      : `${jobs.length} new tech job${jobs.length !== 1 ? "s" : ""} in Cyprus — CyprusTech.Jobs`;
+      ? `${jobs.length} new role${jobs.length !== 1 ? "s" : ""} at ${companyName} — CyprusTech.Careers`
+      : `${jobs.length} new tech job${jobs.length !== 1 ? "s" : ""} in Cyprus — CyprusTech.Careers`;
 
     const emailHtml = buildAlertEmail({
       jobs: jobs.map(j => ({
