@@ -256,7 +256,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                 ? "Select the type of slot you want to use for this job."
                 : "You have no slots — save as draft now and publish once you buy slots."}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            <div className="grid-2" style={{ gap: 14 }}>
               {([
                 {
                   id:       "standard" as ListingType,
@@ -354,7 +354,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
           >
 
             <FormSection icon={<Building2 size={14} />} title="Company details">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="grid-2">
                 <Field label="Company name" required error={fieldErrors.companyName}>
                   <input className="input" name="companyName" type="text" placeholder="e.g. Acme Technologies" defaultValue={companyName} />
                 </Field>
@@ -371,7 +371,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
               <Field label="Job title" required error={fieldErrors.jobTitle}>
                 <input className="input" name="jobTitle" type="text" placeholder="e.g. Senior Frontend Engineer" />
               </Field>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="grid-2">
                 <Field label="Category" required error={fieldErrors.category}>
                   <Select name="category" placeholder="Select category"
                     options={CATEGORIES.slice(1).map(c => ({ label: c.label, value: c.slug }))} />
@@ -387,7 +387,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                     ]} />
                 </Field>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="grid-2">
                 <Field label="Work type" required error={fieldErrors.remoteType}>
                   <Select name="remoteType" placeholder="Select work type"
                     onChange={v => { setRemoteType(v); setIsDirty(true); }}
@@ -462,7 +462,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
 
               {salaryDisclosed && (
                 <>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div className="grid-2">
                     <Field label="Salary min (€/year)">
                       <input className="input" name="salaryMin" type="number" placeholder="e.g. 60000" />
                     </Field>
@@ -499,14 +499,14 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                       <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "var(--white)", padding: "2px 7px", borderRadius: 4 }}>RECOMMENDED</span>
                     </div>
                     <div className="body-s" style={{ color: "var(--text-muted)" }}>
-                      Candidates apply directly on CyprusTech.Jobs. You receive rich profiles, CVs, and cover letters in your dashboard.
+                      Candidates apply directly on CyprusTech.Careers. You receive rich profiles, CVs, and cover letters in your dashboard.
                     </div>
                   </div>
                   {applyMethod === "in_app" && <Check size={16} style={{ color: "var(--accent)", flexShrink: 0, marginLeft: 12 }} />}
                 </button>
 
                 {/* URL + Email — side by side */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: applyMethod !== "in_app" ? 14 : 0 }}>
+                <div className="grid-2" style={{ gap: 10, marginBottom: applyMethod !== "in_app" ? 14 : 0 }}>
                   {(["url", "email"] as const).map(method => (
                     <button key={method} type="button"
                       onClick={() => { setApplyMethod(method); setIsDirty(true); }}
@@ -540,7 +540,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                   <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
                     Cover letter requirement
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  <div className="grid-3" style={{ gap: 8 }}>
                     {([
                       { value: "OPTIONAL" as const, label: "Optional",  desc: "Candidates can include one" },
                       { value: "REQUIRED" as const, label: "Required",  desc: "Must submit a cover letter" },
@@ -568,7 +568,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
               )}
             </FormSection>
 
-            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+            <div className="btn-group-mobile" style={{ marginTop: 8 }}>
               <button
                 type="submit"
                 className="btn btn-accent btn-lg"

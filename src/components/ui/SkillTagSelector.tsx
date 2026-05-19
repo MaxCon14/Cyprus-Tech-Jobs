@@ -45,7 +45,7 @@ export function SkillTagSelector({ name, allTags, initialSelected = [], showAll 
   }, [search, allTags]);
 
   const isSearching    = search.trim().length > 0;
-  const showExpandBtn  = !showAll && !isSearching && filtered.length > DEFAULT_VISIBLE;
+  const showExpandBtn  = !showAll && !isSearching && !expanded && filtered.length > DEFAULT_VISIBLE;
   const visibleTags    = showAll || isSearching || expanded
     ? filtered
     : filtered.slice(0, DEFAULT_VISIBLE);
