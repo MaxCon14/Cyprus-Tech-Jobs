@@ -26,7 +26,7 @@ export default async function AdminJobsPage() {
           id: j.id,
           title: j.title,
           isCurated: j.isCurated,
-          companyDisplay: j.isCurated && j.curatedCompanyName ? j.curatedCompanyName : j.company.name,
+          companyDisplay: j.curatedCompanyName ?? j.company?.name ?? "—",
           category: { name: j.category.name },
           status: j.status,
           _count: { applyClicks: j._count.applyClicks },

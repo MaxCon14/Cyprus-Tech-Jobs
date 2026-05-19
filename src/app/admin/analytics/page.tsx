@@ -106,7 +106,7 @@ export default async function AdminAnalyticsPage() {
           {topJobs.map(j => (
             <AdminTr key={j.id}>
               <AdminTd><span style={{ fontWeight: 600 }}>{j.title}</span></AdminTd>
-              <AdminTd subtle>{j.company.name}</AdminTd>
+              <AdminTd subtle>{j.company?.name ?? j.curatedCompanyName ?? "—"}</AdminTd>
               <AdminTd subtle>{j.category.name}</AdminTd>
               <AdminTd mono right>{j._count.applyClicks}</AdminTd>
             </AdminTr>

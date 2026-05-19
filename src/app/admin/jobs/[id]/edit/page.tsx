@@ -35,7 +35,7 @@ export default async function AdminJobEditPage({ params }: { params: Promise<{ i
         initial={{
           title:          job.title,
           description:    job.description,
-          companyName:    job.isCurated && job.curatedCompanyName ? job.curatedCompanyName : job.company.name,
+          companyName:    job.curatedCompanyName ?? job.company?.name ?? "",
           categoryId:     job.categoryId,
           city:           job.city ?? "",
           remoteType:     job.remoteType,

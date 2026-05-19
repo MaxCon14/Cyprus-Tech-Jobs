@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       jobs: jobs.map(j => ({
         title:          j.title,
         slug:           j.slug,
-        companyName:    j.company.name,
+        companyName:    j.company?.name ?? j.curatedCompanyName ?? "",
         city:           j.city,
         remoteType:     j.remoteType,
         salaryMin:      j.salaryMin,

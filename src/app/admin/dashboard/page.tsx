@@ -109,7 +109,7 @@ export default async function AdminDashboardPage() {
               }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{j.title}</div>
-                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{j.company.name}</div>
+                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{j.company?.name ?? j.curatedCompanyName ?? "—"}</div>
                 </div>
                 <span style={{
                   fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
@@ -140,7 +140,7 @@ export default async function AdminDashboardPage() {
               }}>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{j.title}</div>
-                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{j.company.name}</div>
+                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{j.company?.name ?? j.curatedCompanyName ?? "—"}</div>
                 </div>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: "var(--accent)", flexShrink: 0, marginLeft: 8 }}>
                   {j._count.applyClicks}
