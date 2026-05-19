@@ -291,17 +291,17 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                       position:    "relative", transition: "border-color 0.15s, background 0.15s",
                     }}
                   >
-                    {isSelected && (
-                      <span style={{ position: "absolute", top: 10, right: 10, width: 18, height: 18, borderRadius: "50%", background: "var(--accent)", display: "grid", placeItems: "center" }}>
-                        <Check size={10} style={{ color: "var(--white)" }} />
-                      </span>
-                    )}
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                       <span style={{ color: isSelected ? "var(--accent)" : "var(--text-muted)" }}>{opt.icon}</span>
                       <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, color: isSelected ? "var(--accent)" : "var(--text)" }}>{opt.label}</span>
                       <span className="mono-s" style={{ color: "var(--text-subtle)", marginLeft: "auto" }}>
                         {opt.slots} slot{opt.slots !== 1 ? "s" : ""}
                       </span>
+                      {isSelected && (
+                        <span style={{ width: 18, height: 18, borderRadius: "50%", background: "var(--accent)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+                          <Check size={10} style={{ color: "var(--white)" }} />
+                        </span>
+                      )}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                       {opt.features.map(f => (
@@ -324,7 +324,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
             </div>
             {hasSlots && (
               <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 10 }}>
-                USING 1 {listingType.toUpperCase()} SLOT · {listingType === "standard" ? standardSlots : featuredSlots} REMAINING AFTER THIS POST
+                USING 1 {listingType.toUpperCase()} SLOT · {(listingType === "standard" ? standardSlots : featuredSlots) - 1} REMAINING AFTER THIS POST
               </p>
             )}
           </div>
