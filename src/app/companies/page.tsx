@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getCompanies } from "@/lib/queries";
 import { Search, ExternalLink } from "lucide-react";
@@ -23,10 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CompaniesPage() {
-  let companies: Awaited<ReturnType<typeof getCompanies>> = [];
-  try {
-    companies = await getCompanies();
-  } catch { /* DB temporarily unreachable */ }
+  notFound();
   const featured   = companies.filter(c => c.featured);
 
   return (

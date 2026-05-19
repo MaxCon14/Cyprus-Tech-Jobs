@@ -16,22 +16,12 @@ type Props = { params: Promise<{ slug: string }> };
 
 const BASE_URL = "https://cyprustech.careers";
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const co = await getCompanyBySlug(slug);
-  if (!co) return {};
-  const title       = `${co.name} — Tech Jobs in Cyprus`;
-  const description = `${co._count.jobs} open tech role${co._count.jobs === 1 ? "" : "s"} at ${co.name}${co.city ? ` in ${co.city}` : " in Cyprus"}. View all jobs and company profile.`;
-  return {
-    title,
-    description,
-    alternates: { canonical: `${BASE_URL}/companies/${slug}` },
-    openGraph: { title, description, url: `${BASE_URL}/companies/${slug}`, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
-  };
+export async function generateMetadata(): Promise<Metadata> {
+  return {};
 }
 
-export default async function CompanyProfilePage({ params }: Props) {
+export default async function CompanyProfilePage() {
+  notFound();
   const { slug } = await params;
   const co = await getCompanyBySlug(slug);
   if (!co) notFound();

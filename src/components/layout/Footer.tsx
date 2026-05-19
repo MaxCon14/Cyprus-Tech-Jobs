@@ -29,7 +29,6 @@ async function getRole(): Promise<Role> {
 const CANDIDATE_LINKS = [
   ["Browse jobs",    "/jobs"],
   ["My dashboard",   "/candidates/dashboard"],
-  ["Companies",      "/companies"],
   ["Salary guide",   "/salary-guide"],
   ["Job alerts",     "/jobs#alerts"],
 ] as const;
@@ -42,7 +41,6 @@ const EMPLOYER_LINKS = [
 
 const GUEST_CANDIDATE_LINKS = [
   ["Browse jobs",   "/jobs"],
-  ["Companies",     "/companies"],
   ["Salary guide",  "/salary-guide"],
   ["Job alerts",    "/jobs#alerts"],
 ] as const;
