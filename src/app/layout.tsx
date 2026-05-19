@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@CyprusTechJobs",
+    site: "@CyprusTechCareers",
     images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },

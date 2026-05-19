@@ -111,7 +111,7 @@ function InAppApplyForm({
           Sign in to apply →
         </Link>
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-          APPLY DIRECTLY ON CYPRUSTECHJOBS
+          APPLY DIRECTLY ON CYPRUSTECHCAREERS
         </p>
       </div>
     );

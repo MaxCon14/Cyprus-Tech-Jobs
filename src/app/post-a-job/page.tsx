@@ -49,7 +49,7 @@ export default async function PostAJobPage() {
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-            POST A JOB · CYPRUSTECHJOBS
+            POST A JOB · CYPRUSTECHCAREERS
           </div>
           <h1 className="display-l" style={{ marginBottom: 8 }}>
             Post a job listing

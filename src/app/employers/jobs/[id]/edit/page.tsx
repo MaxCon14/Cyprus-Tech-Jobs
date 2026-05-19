@@ -69,7 +69,7 @@ export default async function EditJobPage({
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-            {pageTitle.toUpperCase()} · CYPRUSTECHJOBS
+            {pageTitle.toUpperCase()} · CYPRUSTECHCAREERS
           </div>
           <h1 className="display-l" style={{ marginBottom: 8 }}>{job.title}</h1>
           <p className="body-l" style={{ color: "var(--text-muted)" }}>{pageDesc}</p>

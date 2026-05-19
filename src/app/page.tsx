@@ -125,7 +125,7 @@ export default async function HomePage() {
         <div className="page-container">
           <div className="mono-s" style={{ color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 24, height: 1, background: "var(--accent)", display: "inline-block" }} />
-            CYPRUSTECHJOBS · THE HOME FOR TECH JOBS IN CYPRUS
+            CYPRUSTECHCAREERS · THE HOME FOR TECH JOBS IN CYPRUS
           </div>
 
           <h1 className="display-xl" style={{ marginBottom: 16, maxWidth: 780 }}>

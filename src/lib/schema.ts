@@ -49,7 +49,7 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
     "directApply": false,
     "identifier": {
       "@type": "PropertyValue",
-      "name": "CyprusTechJobs",
+      "name": "CyprusTechCareers",
       "value": job.id,
     },
     "datePosted": (job.postedAt ?? job.createdAt).toISOString(),
