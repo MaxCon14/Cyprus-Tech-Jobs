@@ -180,7 +180,7 @@ export async function Footer() {
           {/* Brand */}
           <div>
             <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 15, letterSpacing: "-0.02em", marginBottom: 8, color: "var(--text)" }}>
-              CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
+              CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
             </div>
             <p style={{ fontFamily: "var(--font-sans)", fontSize: 13, lineHeight: 1.6, color: "var(--text-muted)", maxWidth: 220, margin: 0 }}>
               The home for tech jobs in Cyprus. Find your next role or hire great talent.

@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>
-            CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
+            CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
           </div>
           <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", fontSize: 10 }}>
             ADMIN ACCESS

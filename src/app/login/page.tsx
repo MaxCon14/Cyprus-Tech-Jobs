@@ -33,7 +33,7 @@ export default async function LoginPage({ searchParams }: Props) {
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <Link href="/" style={{ textDecoration: "none" }}>
             <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 20, letterSpacing: "-0.5px", color: "var(--text)" }}>
-              CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
+              CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
             </span>
           </Link>
           <h1 className="h1" style={{ marginTop: 20, marginBottom: 10 }}>Welcome back</h1>

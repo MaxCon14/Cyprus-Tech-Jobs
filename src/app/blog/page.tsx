@@ -42,7 +42,7 @@ export default async function BlogPage() {
       <div style={{ marginBottom: 48 }}>
         <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 10, display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-          CYPRUSTECH.JOBS BLOG
+          CYPRUSTECH.CAREERS BLOG
         </div>
         <h1 className="display-m" style={{ marginBottom: 10 }}>Insights for Cyprus tech</h1>
         <p className="body-l" style={{ color: "var(--text-muted)", maxWidth: 540 }}>

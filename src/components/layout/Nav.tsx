@@ -184,7 +184,7 @@ export function Nav() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.svg" alt="CyprusTech.Careers logo" style={{ width: 32, height: 32, flexShrink: 0 }} />
             <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 15, letterSpacing: "-0.02em", color: "var(--text)" }}>
-              CyprusTech<span style={{ color: "var(--accent)" }}>.Jobs</span>
+              CyprusTech<span style={{ color: "var(--accent)" }}>.Careers</span>
             </span>
           </Link>
 

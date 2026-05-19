@@ -101,7 +101,7 @@ export function buildAlertEmail({ jobs, firstName, token, companyName }: BuildAl
           <td style="padding-bottom:20px;" align="center">
             <a href="${BASE_URL}" style="text-decoration:none;">
               <span style="font-family:sans-serif;font-size:20px;font-weight:800;color:#111827;letter-spacing:-0.5px;">
-                CyprusTech<span style="color:#FF3D7F;">.Jobs</span>
+                CyprusTech<span style="color:#FF3D7F;">.Careers</span>
               </span>
             </a>
           </td>
