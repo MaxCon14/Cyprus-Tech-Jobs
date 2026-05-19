@@ -60,14 +60,22 @@ export async function GET(req: NextRequest) {
   } else if (email === process.env.ADMIN_EMAIL) {
     destination = "/admin/dashboard";
   } else {
-    const [employer, { data: candidate }] = await Promise.all([
+    const [employer, { data: candidateRows }] = await Promise.all([
       prisma.employer.findUnique({ where: { email }, select: { id: true } }),
-      supabaseAdmin.from("candidates").select("id").eq("email", email).single(),
+      supabaseAdmin.from("candidates").select("id").eq("email", email).limit(1),
     ]);
-    destination = candidate ? "/candidates/dashboard" : "/employers/dashboard";
+    // Employer takes priority — a user could have both records (e.g. tested as a candidate first)
+    destination = employer
+      ? "/employers/dashboard"
+      : candidateRows && candidateRows.length > 0
+        ? "/candidates/dashboard"
+        : "/employers/dashboard";
   }
 
-  const response = NextResponse.redirect(`${origin}${destination}`);
+  // Always redirect to the configured production domain so magic-link emails
+  // pointing at the Vercel preview URL still land on the right domain.
+  const appOrigin = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || origin;
+  const response = NextResponse.redirect(`${appOrigin}${destination}`);
 
   // Attach session cookies to the redirect so the browser keeps the session
   collectedCookies.forEach(({ name, value, options }) => {
