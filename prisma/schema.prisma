@@ -135,7 +135,7 @@ model Job {
   companyId  String?
   categoryId String
 
-  company     Company?     @relation(fields: [companyId], references: [id])
+  company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
   category    Category     @relation(fields: [categoryId], references: [id])
   tags        JobTag[]
   applyClicks ApplyClick[]
