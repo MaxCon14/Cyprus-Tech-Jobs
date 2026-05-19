@@ -26,7 +26,8 @@ interface JobSchemaInput {
     name: string;
     website: string | null;
     logoUrl?: string | null;
-  };
+  } | null;
+  curatedCompanyName?: string | null;
 }
 
 function stripHtml(html: string): string {
@@ -56,13 +57,13 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
     "employmentType": EMPLOYMENT_TYPE[job.employmentType] ?? "OTHER",
     "hiringOrganization": {
       "@type": "Organization",
-      "name": job.company.name,
-      ...(job.company.website && {
+      "name": job.company?.name ?? job.curatedCompanyName ?? "",
+      ...(job.company?.website && {
         "sameAs": job.company.website.startsWith("http")
           ? job.company.website
           : `https://${job.company.website}`,
       }),
-      ...(job.company.logoUrl && { "logo": job.company.logoUrl }),
+      ...(job.company?.logoUrl && { "logo": job.company.logoUrl }),
     },
     "jobLocation": {
       "@type": "Place",

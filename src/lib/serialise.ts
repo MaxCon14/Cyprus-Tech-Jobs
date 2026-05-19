@@ -17,11 +17,12 @@ type PrismaJob = {
   isCurated: boolean;
   curatedCompanyName: string | null;
   postedAt: Date | null;
-  company: { name: string; slug: string; logoUrl: string | null; website: string | null };
+  company: { name: string; slug: string; logoUrl: string | null; website: string | null; description?: string | null } | null;
   tags: { tag: { name: string } }[];
 };
 
 export function serialiseJob(job: PrismaJob) {
+  const companyName = job.company?.name ?? job.curatedCompanyName ?? "";
   return {
     id:                 job.id,
     slug:               job.slug,
@@ -39,10 +40,11 @@ export function serialiseJob(job: PrismaJob) {
     curatedCompanyName: job.curatedCompanyName,
     postedAt:           job.postedAt?.toISOString() ?? null,
     company: {
-      name:    job.company.name,
-      slug:    job.company.slug,
-      logoUrl: job.company.logoUrl,
-      website: job.company.website,
+      name:        companyName,
+      slug:        job.company?.slug ?? "",
+      logoUrl:     job.company?.logoUrl ?? null,
+      website:     job.company?.website ?? null,
+      description: job.company?.description ?? null,
     },
     tags: job.tags.map(t => ({ name: t.tag.name })),
   };

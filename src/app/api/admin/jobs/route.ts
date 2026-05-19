@@ -10,15 +10,6 @@ function jobSlug(title: string) {
   return slugify(title) + "-" + Date.now().toString(36);
 }
 
-async function getCuratedCompanyId(): Promise<string> {
-  const existing = await prisma.company.findUnique({ where: { slug: "curated" } });
-  if (existing) return existing.id;
-  const created = await prisma.company.create({
-    data: { name: "CyprusTech.Careers", slug: "curated" },
-  });
-  return created.id;
-}
-
 export async function POST(req: NextRequest) {
   if (!await getAdminUser()) return adminUnauthorized();
 
@@ -34,14 +25,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Company name is required" }, { status: 400 });
   }
 
-  const companyId = await getCuratedCompanyId();
-
   const job = await prisma.job.create({
     data: {
       slug:               jobSlug(title),
       title,
       description,
-      companyId,
       isCurated:          true,
       curatedCompanyName: companyName.trim(),
       categoryId,

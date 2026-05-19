@@ -26,9 +26,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!job) return {};
   const isActive = job.status === "ACTIVE";
   const suffix   = job.status === "PAUSED" ? " (Paused)" : job.status !== "ACTIVE" ? " (Closed)" : "";
-  const title    = `${job.title} at ${job.company.name}${suffix}`;
+  const companyName = job.company?.name ?? job.curatedCompanyName ?? "";
+  const title    = `${job.title} at ${companyName}${suffix}`;
   const salaryStr = job.salaryDisclosed ? (formatSalary(job.salaryMin, job.salaryMax) ?? "") : "Salary undisclosed";
-  const description = `${job.title} at ${job.company.name} in ${job.city ?? "Cyprus"}. ${salaryStr} · ${remoteLabel(job.remoteType)}`;
+  const description = `${job.title} at ${companyName} in ${job.city ?? "Cyprus"}. ${salaryStr} · ${remoteLabel(job.remoteType)}`;
 
   return {
     title,
@@ -55,9 +56,10 @@ export default async function JobDetailPage({ params }: Props) {
   const job = await getJobBySlug(slug);
   if (!job) notFound();
 
-  const similarRaw = await getSimilarJobs(job.id, job.categoryId, 3);
-  const similar    = similarRaw.map(serialiseJob);
-  const salary     = job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) : null;
+  const similarRaw  = await getSimilarJobs(job.id, job.categoryId, 3);
+  const similar     = similarRaw.map(serialiseJob);
+  const salary      = job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) : null;
+  const companyName = job.company?.name ?? job.curatedCompanyName ?? "";
 
   // Check if the visitor is a logged-in candidate (for CV review + saved jobs + in-app apply)
   let isCandidate  = false;
@@ -188,17 +190,17 @@ export default async function JobDetailPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
             <div className="job-header-inner">
               <div style={{ width: 64, height: 64, borderRadius: 10, flexShrink: 0, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, border: "1px solid var(--border)", overflow: "hidden" }}>
-                {job.company.logoUrl
-                  ? <img src={job.company.logoUrl} alt={job.company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : job.company.name.charAt(0)
+                {job.company?.logoUrl
+                  ? <img src={job.company.logoUrl} alt={companyName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : companyName.charAt(0)
                 }
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                  <Link href={`/companies/${job.company.slug}`} style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 14, color: "var(--text-muted)", textDecoration: "none" }}>
-                    {job.company.name}
-                  </Link>
-                  {job.company.verified && <span className="tag tag-success" style={{ fontSize: 10 }}>✓ Verified</span>}
+                  <span style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 14, color: "var(--text-muted)" }}>
+                    {companyName}
+                  </span>
+                  {job.isCurated && <span className="tag tag-accent" style={{ fontSize: 10 }}>Curated</span>}
                   {job.postedAt && <span className="mono-s" style={{ color: "var(--text-subtle)" }}>· {timeAgo(job.postedAt)}</span>}
                 </div>
                 <h1 className="h1" style={{ marginBottom: 14 }}>{job.title}</h1>
@@ -304,7 +306,7 @@ export default async function JobDetailPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>JOB DETAILS</div>
             {[
-              ["Company",    job.company.name],
+              ["Company",    companyName],
               ["Location",   job.city ?? "—"],
               ["Work type",  remoteLabel(job.remoteType)],
               ["Employment", job.employmentType.replace("_", " ")],
@@ -316,7 +318,7 @@ export default async function JobDetailPage({ params }: Props) {
                 <span className="mono-s" style={{ color: "var(--text)" }}>{value}</span>
               </div>
             ))}
-            {job.company.website && (
+            {job.company?.website && (
               <a href={`https://${job.company.website}`} target="_blank" rel="noopener noreferrer"
                 style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 14, color: "var(--accent)", fontSize: 12, fontFamily: "var(--font-mono)", textDecoration: "none" }}>
                 <ExternalLink size={11} /> {job.company.website}
@@ -324,27 +326,29 @@ export default async function JobDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* Company snippet */}
-          <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0, overflow: "hidden" }}>
-                {job.company.logoUrl
-                  ? <img src={job.company.logoUrl} alt={job.company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : job.company.name.charAt(0)
-                }
+          {/* Company snippet — only for real employer-linked companies */}
+          {!job.isCurated && job.company?.slug && (
+            <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0, overflow: "hidden" }}>
+                  {job.company.logoUrl
+                    ? <img src={job.company.logoUrl} alt={companyName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : companyName.charAt(0)
+                  }
+                </div>
+                <div>
+                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{companyName}</div>
+                  <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{job.category.name}</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14 }}>{job.company.name}</div>
-                <div className="mono-s" style={{ color: "var(--text-subtle)" }}>{job.category.name}</div>
-              </div>
+              <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14 }}>
+                {job.company.description?.slice(0, 120)}…
+              </p>
+              <Link href={`/companies/${job.company.slug}`} className="btn btn-outline btn-sm" style={{ width: "100%", justifyContent: "center" }}>
+                View company →
+              </Link>
             </div>
-            <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 14 }}>
-              {job.company.description?.slice(0, 120)}…
-            </p>
-            <Link href={`/companies/${job.company.slug}`} className="btn btn-outline btn-sm" style={{ width: "100%", justifyContent: "center" }}>
-              View company →
-            </Link>
-          </div>
+          )}
         </aside>
       </div>
 

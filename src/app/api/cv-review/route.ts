@@ -105,7 +105,7 @@ async function buildPrompt(jobSlug: string) {
 
 JOB DETAILS:
 - Title: ${job.title}
-- Company: ${job.company.name}
+- Company: ${job.company?.name ?? job.curatedCompanyName ?? ""}
 - Experience level: ${job.experienceLevel}
 - Required skills/tech: ${skills}
 - Job description:

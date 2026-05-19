@@ -276,7 +276,7 @@ function MatchingJobsCard({ jobs }: { jobs: Awaited<ReturnType<typeof getMatchin
                 <p className="body-s" style={{ fontWeight: 600, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {job.title}
                 </p>
-                <p className="mono-s" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>{job.company.name}</p>
+                <p className="mono-s" style={{ color: "var(--text-subtle)", marginBottom: 4 }}>{job.company?.name ?? job.curatedCompanyName ?? ""}</p>
                 {(job.salaryMin || job.salaryMax) && (
                   <p className="mono-s" style={{ color: "var(--accent)" }}>{formatSalary(job.salaryMin, job.salaryMax)}</p>
                 )}
