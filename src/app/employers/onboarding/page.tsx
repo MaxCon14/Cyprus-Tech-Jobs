@@ -26,7 +26,7 @@ import { Confetti } from "@/components/onboarding/Confetti";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const supabase = createSupabaseBrowserClient();
-const LS_KEY = "cyprustechjobs:employer-draft";
+const LS_KEY = "cyprustechcareers:employer-draft";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -480,21 +480,39 @@ export default function EmployerOnboardingPage() {
           logoUrl: state.logoUrl || undefined,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        dispatch({ type: "SET_ERRORS", errors: { submit: data.error ?? "Something went wrong." } });
+
+      let data: Record<string, unknown>;
+      try {
+        data = await res.json();
+      } catch {
+        dispatch({ type: "SET_ERRORS", errors: { submit: `Server error (${res.status}). Please try again.` } });
         dispatch({ type: "SET_SUBMITTING", value: false });
         return;
       }
-      await supabase.auth.signInWithOtp({
-        email: state.email,
-        options: { shouldCreateUser: true, emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback` },
-      });
-      dispatch({ type: "SET_EMPLOYER_ID", id: data.employerId });
+
+      if (!res.ok) {
+        dispatch({ type: "SET_ERRORS", errors: { submit: (data.error as string) ?? "Something went wrong." } });
+        dispatch({ type: "SET_SUBMITTING", value: false });
+        return;
+      }
+
+      // OTP is best-effort — account is already created, so don't block on auth failures.
+      try {
+        await supabase.auth.signInWithOtp({
+          email: state.email,
+          options: { shouldCreateUser: true, emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback` },
+        });
+      } catch (otpErr) {
+        console.error("[employer-onboarding] OTP send failed:", otpErr);
+      }
+
+      dispatch({ type: "SET_EMPLOYER_ID", id: data.employerId as string });
       dispatch({ type: "SET_SUBMITTING", value: false });
       dispatch({ type: "NEXT_STEP" });
-    } catch {
-      dispatch({ type: "SET_ERRORS", errors: { submit: "Network error. Please try again." } });
+    } catch (err) {
+      console.error("[employer-onboarding]", err);
+      const msg = err instanceof Error ? err.message : "Network error. Please try again.";
+      dispatch({ type: "SET_ERRORS", errors: { submit: msg } });
       dispatch({ type: "SET_SUBMITTING", value: false });
     }
   };

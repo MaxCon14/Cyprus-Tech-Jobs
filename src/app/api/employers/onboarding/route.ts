@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
     if (existing) return NextResponse.json({ employerId: existing.id, exists: true }, { status: 200 });
 
     // Block candidate emails from creating employer accounts
-    const { data: candidate } = await supabaseAdmin
-      .from("candidates").select("id").eq("email", email).single();
-    if (candidate) {
+    const { data: candidateRows } = await supabaseAdmin
+      .from("candidates").select("id").eq("email", email).limit(1);
+    if (candidateRows && candidateRows.length > 0) {
       return NextResponse.json(
         { error: "This email is registered as a job seeker account and cannot be used for an employer account." },
         { status: 409 },
