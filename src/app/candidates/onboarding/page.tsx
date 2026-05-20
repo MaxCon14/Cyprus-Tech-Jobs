@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, Camera, X, AtSign, Briefcase, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -334,59 +334,6 @@ function Step6Alerts({ state, dispatch }: { state: CandidateWizardState; dispatc
   );
 }
 
-// ─── Avatar upload ────────────────────────────────────────────────────────────
-
-function AvatarUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleFile = (file: File) => {
-    if (file.size > 2 * 1024 * 1024) return; // 2 MB limit
-    const reader = new FileReader();
-    reader.onload = (e) => onChange(e.target?.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-        style={{
-          width: 72, height: 72, borderRadius: "50%", flexShrink: 0,
-          border: "2px dashed var(--border-strong)", background: "var(--bg-muted)",
-          cursor: "pointer", overflow: "hidden", display: "grid", placeItems: "center",
-          transition: "border-color 150ms ease",
-        }}
-      >
-        {value
-          ? <img src={value} alt="Avatar preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          : <Camera size={22} style={{ color: "var(--text-muted)" }} />
-        }
-      </button>
-
-      <div>
-        <p className="body-s" style={{ fontWeight: 500, marginBottom: 4 }}>Profile photo <span style={{ color: "var(--text-subtle)", fontWeight: 400 }}>(optional)</span></p>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button type="button" className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 10px" }} onClick={() => inputRef.current?.click()}>
-            Upload
-          </button>
-          {value && (
-            <button type="button" className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 10px" }} onClick={() => onChange("")}>
-              <X size={12} /> Remove
-            </button>
-          )}
-        </div>
-        <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4 }}>JPG or PNG, max 2 MB</p>
-      </div>
-
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }}
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-    </div>
-  );
-}
-
 // ─── Step 7: Profile / account ────────────────────────────────────────────────
 
 function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
@@ -405,12 +352,6 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
       <StepHeader icon={<User size={20} style={{ color: "var(--accent)" }} />} title="Create your account" subtitle="We'll send you a magic link — no password needed." />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {/* Avatar */}
-        <AvatarUpload
-          value={state.avatarUrl}
-          onChange={(v) => dispatch({ type: "SET_FIELD", field: "avatarUrl", value: v })}
-        />
-
         {/* Name */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <Field label="First name" required>
@@ -807,7 +748,6 @@ export default function CandidateOnboardingPage() {
           alertFrequency: state.alertFrequency,
           headline: state.headline || null,
           bio: state.bio || null,
-          avatarUrl: state.avatarUrl || null,
           githubUrl: state.githubUrl || null,
           linkedinUrl: state.linkedinUrl || null,
           portfolioUrl: state.portfolioUrl || null,
