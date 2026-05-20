@@ -453,22 +453,41 @@ export const TECH_STACK_OPTIONS = [
   "LangChain", "OpenAI API", "pandas", "NumPy", "Jupyter",
   "Apache Spark", "Airflow", "dbt", "MLflow",
 
-  // Design & product
-  "Figma", "Sketch", "Adobe XD", "Framer", "Webflow",
-  "Adobe Photoshop", "Adobe Illustrator",
+  // Design & Creative — Adobe suite
+  "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Adobe After Effects",
+  "Adobe Premiere Pro", "Adobe Lightroom", "Adobe XD", "Adobe Audition", "Adobe Animate",
+  "Adobe Dimension", "Adobe Acrobat", "Adobe Dreamweaver",
+
+  // Design & Creative — Affinity suite
+  "Affinity Designer", "Affinity Photo", "Affinity Publisher",
+
+  // Design & Creative — Other tools
+  "Figma", "Sketch", "Framer", "Webflow", "InVision", "Zeplin", "Marvel", "Canva",
+
+  // 3D, Motion & Game
+  "Blender", "Cinema 4D", "Unity", "Unreal Engine", "DaVinci Resolve", "Spline",
+
+  // Marketing & SEO
+  "Google Analytics", "Google Ads", "HubSpot", "Mailchimp", "Mixpanel", "Amplitude",
+  "Hotjar", "WordPress", "Shopify", "WooCommerce",
+
+  // Productivity & Collaboration
+  "Notion", "Slack", "Linear", "Asana", "Trello", "Monday.com",
+  "Microsoft Office", "Google Workspace",
+
+  // Dev tools & editors
+  "VS Code", "IntelliJ", "Xcode", "Android Studio", "Insomnia", "Postman",
+  "Git", "GitHub", "GitLab", "Bitbucket",
 
   // Security
   "Penetration Testing", "OWASP", "Burp Suite", "SIEM", "ISO 27001", "SOC 2",
-
-  // Version control & collaboration
-  "Git", "GitHub", "GitLab", "Bitbucket",
 
   // Payments & integrations
   "Stripe", "Twilio", "SendGrid", "Auth0", "Clerk",
 
   // Product & methodology
   "Agile/Scrum", "Kanban", "Product Management", "UX Research",
-  "A/B Testing", "SEO", "Google Analytics", "Mixpanel",
+  "A/B Testing", "SEO",
 ];
 
 export const EXPERIENCE_LEVEL_OPTIONS = [

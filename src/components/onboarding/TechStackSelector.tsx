@@ -2,12 +2,13 @@
 
 import { useRef, useState } from "react";
 import { Search, X } from "lucide-react";
+import { getIconSrc } from "@/components/jobs/SkillTag";
 
 const POPULAR = [
   "JavaScript", "TypeScript", "Python", "React", "Node.js",
   "Next.js", "Vue.js", "Go", "Java", "PHP",
-  "PostgreSQL", "MySQL", "MongoDB", "Redis", "AWS",
-  "Docker", "Git", "Figma", "React Native", "Flutter",
+  "PostgreSQL", "AWS", "Docker", "Git", "Figma",
+  "Adobe Photoshop", "Adobe Illustrator", "Blender", "Canva", "Unity",
 ];
 
 interface Props {
@@ -15,6 +16,23 @@ interface Props {
   selected: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
+}
+
+/** Small icon inside a chip — hidden if the image fails to load */
+function ChipIcon({ src }: { src: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  // eslint-disable-next-line @next/next/no-img-element
+  return (
+    <img
+      src={src}
+      alt=""
+      width={12}
+      height={12}
+      style={{ display: "block", flexShrink: 0 }}
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 export function TechStackSelector({ options, selected, onChange, placeholder }: Props) {
@@ -64,6 +82,10 @@ export function TechStackSelector({ options, selected, onChange, placeholder }: 
                 fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--accent)",
               }}
             >
+              {(() => {
+                const src = getIconSrc(tag);
+                return src ? <ChipIcon src={src} /> : null;
+              })()}
               {tag}
               <button
                 type="button"
@@ -90,7 +112,7 @@ export function TechStackSelector({ options, selected, onChange, placeholder }: 
                 disabled={atLimit}
                 onClick={() => add(skill)}
                 style={{
-                  display: "inline-flex", alignItems: "center",
+                  display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "5px 12px",
                   background: "var(--surface)", border: "1px solid var(--border-strong)",
                   borderRadius: "var(--radius-full)",
@@ -112,6 +134,10 @@ export function TechStackSelector({ options, selected, onChange, placeholder }: 
                   (e.currentTarget as HTMLElement).style.background = "var(--surface)";
                 }}
               >
+                {(() => {
+                  const src = getIconSrc(skill);
+                  return src ? <ChipIcon src={src} /> : null;
+                })()}
                 {skill}
               </button>
             ))}
@@ -159,7 +185,7 @@ export function TechStackSelector({ options, selected, onChange, placeholder }: 
                 disabled={atLimit}
                 onClick={() => add(skill)}
                 style={{
-                  display: "inline-flex", alignItems: "center",
+                  display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "5px 12px",
                   background: "var(--surface)", border: "1px solid var(--border-strong)",
                   borderRadius: "var(--radius-full)",
@@ -181,6 +207,10 @@ export function TechStackSelector({ options, selected, onChange, placeholder }: 
                   (e.currentTarget as HTMLElement).style.background = "var(--surface)";
                 }}
               >
+                {(() => {
+                  const src = getIconSrc(skill);
+                  return src ? <ChipIcon src={src} /> : null;
+                })()}
                 {skill}
               </button>
             ))}
