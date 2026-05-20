@@ -395,23 +395,80 @@ export const COMPANY_SIZES = [
 export const TECH_STACK_OPTIONS = [
   // Languages
   "TypeScript", "JavaScript", "Python", "Go", "Rust", "Java", "Kotlin", "Swift",
-  "C#", "C++", "PHP", "Ruby", "Scala", "Elixir", "Dart",
-  // Frontend
-  "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "Tailwind CSS",
-  "GraphQL", "tRPC", "Webpack", "Vite",
-  // Backend
-  "Node.js", "Express", "NestJS", "FastAPI", "Django", "Rails", "Spring Boot",
-  "Gin", "Echo", "Fiber",
-  // Databases
-  "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Cassandra",
-  "DynamoDB", "Supabase", "PlanetScale", "Prisma",
-  // Cloud & DevOps
-  "AWS", "GCP", "Azure", "Docker", "Kubernetes", "Terraform", "Ansible",
-  "GitHub Actions", "CircleCI", "Jenkins", "Datadog", "Grafana",
+  "C#", "C++", "PHP", "Ruby", "Scala", "Elixir", "Dart", "R", "Bash", "Lua",
+  "Haskell", "Clojure", "Groovy", "Objective-C", "MATLAB", "Solidity",
+
+  // Frontend frameworks & libraries
+  "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "SvelteKit",
+  "Astro", "Remix", "Gatsby", "Ember.js", "Alpine.js", "Lit", "Qwik",
+
+  // Styling & UI
+  "Tailwind CSS", "SCSS/Sass", "CSS Modules", "styled-components", "Emotion",
+  "Bootstrap", "Material UI", "Chakra UI", "shadcn/ui", "Radix UI", "Ant Design",
+  "Framer Motion", "Three.js", "WebGL", "D3.js", "Chart.js",
+
+  // Build tools
+  "Vite", "Webpack", "esbuild", "Turbopack", "Rollup", "Parcel",
+
+  // Backend frameworks
+  "Node.js", "Express", "NestJS", "Fastify", "Hono", "Bun", "Deno",
+  "FastAPI", "Django", "Flask", "Rails", "Laravel", "Symfony",
+  "Spring Boot", "Quarkus", "Micronaut", "Ktor",
+  "Gin", "Echo", "Fiber", "Actix", "Axum",
+
+  // API & data fetching
+  "GraphQL", "tRPC", "REST API", "gRPC", "WebSockets", "OpenAPI",
+
+  // Databases & ORMs
+  "PostgreSQL", "MySQL", "SQLite", "MariaDB",
+  "MongoDB", "Redis", "Elasticsearch", "Cassandra",
+  "DynamoDB", "Firestore", "CockroachDB", "ClickHouse",
+  "BigQuery", "Snowflake", "Redshift",
+  "Prisma", "DrizzleORM", "SQLAlchemy", "Hibernate", "TypeORM",
+  "Supabase", "Firebase", "PlanetScale", "Neon",
+
+  // Cloud & infrastructure
+  "AWS", "GCP", "Azure", "Cloudflare",
+  "Vercel", "Netlify", "Railway", "Fly.io", "DigitalOcean", "Heroku",
+
+  // DevOps & containers
+  "Docker", "Kubernetes", "Terraform", "Ansible", "Helm", "ArgoCD",
+  "GitHub Actions", "GitLab CI", "CircleCI", "Jenkins", "Bitbucket Pipelines",
+
+  // Observability
+  "Datadog", "Grafana", "Prometheus", "Sentry", "New Relic", "OpenTelemetry",
+
+  // Messaging & streaming
+  "Kafka", "RabbitMQ", "NATS", "Redis Pub/Sub", "SQS",
+
   // Mobile
-  "React Native", "Flutter", "iOS", "Android",
-  // Other
-  "gRPC", "Kafka", "RabbitMQ", "WebSockets", "Stripe", "Twilio",
+  "React Native", "Flutter", "Expo", "iOS", "Android",
+
+  // Testing
+  "Jest", "Vitest", "Playwright", "Cypress", "Selenium", "pytest",
+  "JUnit", "Mocha", "Testing Library", "Storybook", "k6",
+
+  // AI & data science
+  "TensorFlow", "PyTorch", "scikit-learn", "Keras", "Hugging Face",
+  "LangChain", "OpenAI API", "pandas", "NumPy", "Jupyter",
+  "Apache Spark", "Airflow", "dbt", "MLflow",
+
+  // Design & product
+  "Figma", "Sketch", "Adobe XD", "Framer", "Webflow",
+  "Adobe Photoshop", "Adobe Illustrator",
+
+  // Security
+  "Penetration Testing", "OWASP", "Burp Suite", "SIEM", "ISO 27001", "SOC 2",
+
+  // Version control & collaboration
+  "Git", "GitHub", "GitLab", "Bitbucket",
+
+  // Payments & integrations
+  "Stripe", "Twilio", "SendGrid", "Auth0", "Clerk",
+
+  // Product & methodology
+  "Agile/Scrum", "Kanban", "Product Management", "UX Research",
+  "A/B Testing", "SEO", "Google Analytics", "Mixpanel",
 ];
 
 export const EXPERIENCE_LEVEL_OPTIONS = [
