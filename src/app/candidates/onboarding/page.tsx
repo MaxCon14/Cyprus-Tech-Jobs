@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, Bell, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -30,7 +30,7 @@ const LS_KEY = "cyprustechcareers:candidate-draft";
 
 const PERSIST_FIELDS = [
   "categories", "remoteType", "city", "experienceLevel", "salaryMin",
-  "skills", "alertFrequency", "firstName", "lastName", "email", "headline", "bio",
+  "skills", "firstName", "lastName", "email", "headline", "bio",
   "githubUrl", "linkedinUrl", "portfolioUrl",
   "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl", "cvUrl",
 ] as const;
@@ -300,43 +300,9 @@ function Step5Skills({ state, dispatch }: { state: CandidateWizardState; dispatc
   );
 }
 
-// ─── Step 6: Alert frequency ──────────────────────────────────────────────────
+// ─── Step 6: Profile / account ────────────────────────────────────────────────
 
-function Step6Alerts({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
-  const options = [
-    { value: "DAILY" as const, label: "Daily digest", description: "Get new matching jobs every morning. Best for active job seekers.", icon: <Zap size={20} /> },
-    { value: "WEEKLY" as const, label: "Weekly roundup", description: "A curated summary every Monday. Perfect if you're passively looking.", icon: <Bell size={20} /> },
-  ];
-
-  return (
-    <div>
-      <StepHeader icon={<Bell size={20} style={{ color: "var(--accent)" }} />} title="How often should we alert you?" subtitle="You can change this anytime from your dashboard." />
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {options.map((opt) => {
-          const active = state.alertFrequency === opt.value;
-          return (
-            <button key={opt.value} type="button" onClick={() => dispatch({ type: "SET_FIELD", field: "alertFrequency", value: opt.value })}
-              style={{ display: "flex", alignItems: "center", gap: 18, padding: "20px 24px", borderRadius: "var(--radius-lg)", border: `2px solid ${active ? "var(--accent)" : "var(--border)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", textAlign: "left", transition: "all 150ms ease" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "var(--radius-md)", background: active ? "var(--accent)" : "var(--bg-muted)", display: "grid", placeItems: "center", flexShrink: 0, transition: "background 150ms ease" }}>
-                <span style={{ color: active ? "var(--white)" : "var(--text-muted)" }}>{opt.icon}</span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div className="body-s" style={{ fontWeight: 700, color: active ? "var(--accent)" : "var(--text)", marginBottom: 4 }}>{opt.label}</div>
-                <div className="body-s" style={{ color: "var(--text-muted)" }}>{opt.description}</div>
-              </div>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", border: `2px solid ${active ? "var(--accent)" : "var(--border-strong)"}`, background: active ? "var(--accent)" : "transparent", flexShrink: 0, transition: "all 150ms ease" }} />
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ─── Step 7: Profile / account ────────────────────────────────────────────────
-
-function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
+function Step6Profile({ state, dispatch, onNext }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction>; onNext: () => void }) {
   const socialLinks = [
     { field: "githubUrl",   icon: <Code2 size={14} />,    placeholder: "github.com/yourname" },
     { field: "linkedinUrl", icon: <Link2 size={14} />,    placeholder: "linkedin.com/in/yourname" },
@@ -433,14 +399,14 @@ function Step7Profile({ state, dispatch, onNext }: { state: CandidateWizardState
   );
 }
 
-// ─── Step 8: Experience ───────────────────────────────────────────────────────
+// ─── Step 7: Experience ───────────────────────────────────────────────────────
 
 const emptyDraft = (): PositionDraft => ({
   id: Math.random().toString(36).slice(2),
   title: "", company: "", startDate: "", endDate: "", current: false, description: "",
 });
 
-function Step8Experience({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
   const positions = state.positions;
   const [form, setForm] = useState<PositionDraft>(emptyDraft());
   const [adding, setAdding] = useState(false);
@@ -546,9 +512,9 @@ function Step8Experience({ state, dispatch }: { state: CandidateWizardState; dis
   );
 }
 
-// ─── Step 9: Verify email ─────────────────────────────────────────────────────
+// ─── Step 8: Verify email ─────────────────────────────────────────────────────
 
-function Step9Done({ state, onVerified }: { state: CandidateWizardState; onVerified: () => void }) {
+function Step8Done({ state, onVerified }: { state: CandidateWizardState; onVerified: () => void }) {
   const [code, setCode]           = useState("");
   const [verifying, setVerifying] = useState(false);
   const [codeError, setCodeError] = useState("");
@@ -697,11 +663,11 @@ export default function CandidateOnboardingPage() {
   }, [state]);
 
   const handleNext = () => {
-    if (state.step === 7 && !state.submitting && !state.candidateId) {
+    if (state.step === 6 && !state.submitting && !state.candidateId) {
       handleSubmit();
       return;
     }
-    if (state.step === 8 && state.candidateId && state.positions.length > 0) {
+    if (state.step === 7 && state.candidateId && state.positions.length > 0) {
       handleSavePositions();
       return;
     }
@@ -788,8 +754,8 @@ export default function CandidateOnboardingPage() {
     }
   };
 
-  const isSkippable = state.step === 5 || state.step === 8;
-  const isDone = state.step === 9;
+  const isSkippable = state.step === 5 || state.step === 7;
+  const isDone = state.step === 8;
   const showNav = !isDone;
 
   if (!authChecked) return null;
@@ -802,10 +768,9 @@ export default function CandidateOnboardingPage() {
         {state.step === 3 && <Step3Location state={state} dispatch={dispatch} />}
         {state.step === 4 && <Step4Level state={state} dispatch={dispatch} />}
         {state.step === 5 && <Step5Skills state={state} dispatch={dispatch} />}
-        {state.step === 6 && <Step6Alerts state={state} dispatch={dispatch} />}
-        {state.step === 7 && <Step7Profile state={state} dispatch={dispatch} onNext={handleNext} />}
-        {state.step === 8 && <Step8Experience state={state} dispatch={dispatch} />}
-        {state.step === 9 && <Step9Done state={state} onVerified={() => router.push("/candidates/dashboard")} />}
+        {state.step === 6 && <Step6Profile state={state} dispatch={dispatch} onNext={handleNext} />}
+        {state.step === 7 && <Step7Experience state={state} dispatch={dispatch} />}
+        {state.step === 8 && <Step8Done state={state} onVerified={() => router.push("/candidates/dashboard")} />}
       </StepSlide>
 
       {submitError && (
@@ -827,7 +792,7 @@ export default function CandidateOnboardingPage() {
               </button>
             )}
             <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
-              {state.submitting ? "Saving…" : state.step === 7 ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
+              {state.submitting ? "Saving…" : state.step === 6 ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
             </button>
           </div>
         </div>

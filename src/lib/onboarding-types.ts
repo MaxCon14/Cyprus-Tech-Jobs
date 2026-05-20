@@ -141,7 +141,7 @@ export function employerReducer(
 // CANDIDATE WIZARD
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type CandidateWizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type CandidateWizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export interface PositionDraft {
   id: string;
@@ -240,7 +240,7 @@ export function validateCandidateStep(
   state: CandidateWizardState,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  if (step === 7) {
+  if (step === 6) {
     if (!state.firstName.trim()) errors.firstName = "First name is required.";
     if (!state.email.trim()) {
       errors.email = "Email address is required.";
@@ -286,7 +286,7 @@ export function candidateReducer(
         );
         return { ...state, errors: stepErrors, touched: { ...state.touched, ...allTouched } };
       }
-      const next = Math.min(state.step + 1, 9) as CandidateWizardStep;
+      const next = Math.min(state.step + 1, 8) as CandidateWizardStep;
       return { ...state, step: next, direction: "forward", errors: {} };
     }
 
@@ -383,7 +383,7 @@ export function computeProfileScore(data: ProfileData): {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const EMPLOYER_STEPS = ["Account", "Company", "Profile", "Verify email", "Done"];
-export const CANDIDATE_STEPS = ["Welcome", "Work type", "Location", "Level", "Skills", "Alerts", "Profile", "Experience", "Done"];
+export const CANDIDATE_STEPS = ["Welcome", "Work type", "Location", "Level", "Skills", "Profile", "Experience", "Done"];
 
 export const COMPANY_SIZES = [
   { value: "startup",    label: "Startup",    description: "1–50 people" },
