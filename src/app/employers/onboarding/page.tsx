@@ -391,7 +391,7 @@ function Step4Verify({ state, dispatch, onVerified }: {
 
 function Step5Done({ state }: { state: EmployerWizardState }) {
   const { score, breakdown } = computeProfileScore({
-    emailVerified: false,
+    emailVerified: true,
     description: state.description,
     techStack: state.techStack,
     website: state.website,
@@ -409,8 +409,8 @@ function Step5Done({ state }: { state: EmployerWizardState }) {
           </div>
           <h1 className="h1" style={{ marginBottom: 8 }}>You&apos;re all set, {state.name.split(" ")[0]}!</h1>
           <p className="body" style={{ color: "var(--text-muted)" }}>
-            Your employer account for <strong>{state.companyName}</strong> has been created.
-            Verify your email to unlock full access.
+            Your employer account for <strong>{state.companyName}</strong> is ready.
+            Your email has been verified — you have full access.
           </p>
         </div>
 
