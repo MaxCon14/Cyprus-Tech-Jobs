@@ -40,6 +40,8 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
 
   const [listingType,       setListingType]       = useState<ListingType>(defaultType);
   const [remoteType,        setRemoteType]        = useState("");
+  const [parentCategorySlug, setParentCategorySlug] = useState("");
+  const [subCategorySlug,    setSubCategorySlug]    = useState("");
   const [salaryDisclosed,   setSalaryDisclosed]   = useState(true);
   const [applyMethod,       setApplyMethod]       = useState<"url" | "email" | "in_app">("in_app");
   const [coverLetterPolicy, setCoverLetterPolicy] = useState<"OPTIONAL" | "REQUIRED" | "NONE">("OPTIONAL");
@@ -74,7 +76,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
     const errs: FormErrors = {};
     if (!String(form.get("companyName")    ?? "").trim()) errs.companyName     = "Company name is required.";
     if (!String(form.get("jobTitle")       ?? "").trim()) errs.jobTitle        = "Job title is required.";
-    if (!form.get("category"))                            errs.category        = "Please select a category.";
+    if (!parentCategorySlug)                              errs.category        = "Please select a category.";
     if (!form.get("experienceLevel"))                     errs.experienceLevel = "Please select an experience level.";
     if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
     if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
@@ -91,7 +93,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
       companyWebsite:     form.get("companyWebsite"),
       companyDescription: form.get("companyDescription"),
       jobTitle:           form.get("jobTitle"),
-      category:           form.get("category"),
+      category:           subCategorySlug || parentCategorySlug,
       experienceLevel:    form.get("experienceLevel"),
       remoteType:         form.get("remoteType"),
       employmentType:     form.get("employmentType"),
@@ -371,11 +373,39 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
               <Field label="Job title" required error={fieldErrors.jobTitle}>
                 <input className="input" name="jobTitle" type="text" placeholder="e.g. Senior Frontend Engineer" />
               </Field>
+              {/* Cascading category: parent → subcategory */}
+              {(() => {
+                const selParent = CATEGORIES.find(c => c.slug === parentCategorySlug);
+                const hasSub    = (selParent?.children?.length ?? 0) > 0;
+                return (
+                  <div style={{ display: "grid", gridTemplateColumns: hasSub ? "1fr 1fr" : "1fr", gap: 16 }}>
+                    <Field label="Category" required error={fieldErrors.category}>
+                      <Select
+                        name="parentCategorySlug"
+                        placeholder="Select category"
+                        value={parentCategorySlug}
+                        onChange={val => { setParentCategorySlug(val); setSubCategorySlug(""); setIsDirty(true); }}
+                        options={CATEGORIES.slice(1).map(c => ({ label: c.label, value: c.slug }))}
+                      />
+                    </Field>
+                    {hasSub && selParent && (
+                      <Field label="Subcategory">
+                        <Select
+                          name="subCategorySlug"
+                          placeholder={`All ${selParent.label}`}
+                          value={subCategorySlug}
+                          onChange={val => { setSubCategorySlug(val); setIsDirty(true); }}
+                          options={[
+                            { label: `All ${selParent.label}`, value: "" },
+                            ...(selParent.children ?? []).map(c => ({ label: c.label, value: c.slug })),
+                          ]}
+                        />
+                      </Field>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="grid-2">
-                <Field label="Category" required error={fieldErrors.category}>
-                  <Select name="category" placeholder="Select category"
-                    options={CATEGORIES.slice(1).map(c => ({ label: c.label, value: c.slug }))} />
-                </Field>
                 <Field label="Experience level" required error={fieldErrors.experienceLevel}>
                   <Select name="experienceLevel" placeholder="Select level"
                     options={[

@@ -43,6 +43,7 @@ interface JobData {
   salaryDisclosed: boolean;
   applyUrl:        string;
   applyEmail:      string;
+  applyType?:      string;
   coverLetter?:    string;
 }
 
@@ -58,7 +59,7 @@ interface FormErrors {
 
 type ListingType = "standard" | "featured";
 
-function validate(form: FormData, applyMethod: "url" | "email", categorySlug: string): FormErrors {
+function validate(form: FormData, applyMethod: "url" | "email" | "in_app", categorySlug: string): FormErrors {
   const errs: FormErrors = {};
   if (!String(form.get("title")          ?? "").trim()) errs.title           = "Job title is required.";
   if (!categorySlug)                                    errs.category        = "Please select a category.";
@@ -96,7 +97,9 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
 
   const [remoteType,        setRemoteType]        = useState(job.remoteType);
   const [salaryDisclosed,   setSalaryDisclosed]   = useState(job.salaryDisclosed);
-  const [applyMethod,       setApplyMethod]       = useState<"url" | "email">(job.applyEmail && !job.applyUrl ? "email" : "url");
+  const [applyMethod,       setApplyMethod]       = useState<"url" | "email" | "in_app">(
+    job.applyType === "IN_APP" ? "in_app" : job.applyEmail && !job.applyUrl ? "email" : "url"
+  );
   const [coverLetterPolicy, setCoverLetterPolicy] = useState<"OPTIONAL" | "REQUIRED" | "NONE">(
     (job.coverLetter as "OPTIONAL" | "REQUIRED" | "NONE") ?? "OPTIONAL"
   );
@@ -131,8 +134,9 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
       salaryDisclosed,
       salaryMin:       salaryDisclosed ? (form.get("salaryMin") || undefined) : null,
       salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
-      applyUrl:        form.get("applyUrl"),
-      applyEmail:      form.get("applyEmail"),
+      applyType:       applyMethod === "in_app" ? "IN_APP" : applyMethod === "email" ? "EMAIL" : "URL",
+      applyUrl:        applyMethod === "url"   ? form.get("applyUrl")   : null,
+      applyEmail:      applyMethod === "email" ? form.get("applyEmail") : null,
       coverLetter:     coverLetterPolicy,
     };
   }
@@ -188,7 +192,7 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
     if (!job.remoteType)          errs.remoteType      = "Work type is required.";
     if (!job.employmentType)      errs.employmentType  = "Employment type is required.";
     if (!job.description?.trim()) errs.description     = "Job description is required. Save your draft first.";
-    if (!job.applyUrl?.trim() && !job.applyEmail?.trim())
+    if (!job.applyUrl?.trim() && !job.applyEmail?.trim() && job.applyType !== "IN_APP")
       errs.applyUrl = "Application URL or email is required. Save your draft first.";
 
     if (Object.keys(errs).length > 0) {
@@ -215,7 +219,8 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
           salaryDisclosed: job.salaryDisclosed,
           salaryMin:       job.salaryDisclosed ? job.salaryMin || undefined : null,
           salaryMax:       job.salaryDisclosed ? job.salaryMax || undefined : null,
-          applyUrl:        job.applyUrl  || undefined,
+          applyType:       job.applyType  || undefined,
+          applyUrl:        job.applyUrl   || undefined,
           applyEmail:      job.applyEmail || undefined,
         }),
       });
@@ -403,7 +408,33 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
             <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
               How should candidates apply? <span style={{ color: "var(--accent)" }}>*</span>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+
+            {/* In-app — recommended, full-width */}
+            <button
+              type="button"
+              onClick={() => { setApplyMethod("in_app"); setIsDirty(true); }}
+              style={{
+                width: "100%", padding: "14px 18px", borderRadius: 8, marginBottom: 10,
+                border: `2px solid ${applyMethod === "in_app" ? "var(--accent)" : "var(--border)"}`,
+                background: applyMethod === "in_app" ? "var(--accent-soft)" : "var(--surface)",
+                cursor: "pointer", textAlign: "left", transition: "all 120ms",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: applyMethod === "in_app" ? "var(--accent)" : "var(--text)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
+                  📥 In-app applications
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "var(--white)", padding: "2px 7px", borderRadius: 4 }}>RECOMMENDED</span>
+                </div>
+                <div className="body-s" style={{ color: "var(--text-muted)" }}>
+                  Candidates apply directly on CyprusTech.Careers. You receive rich profiles, CVs, and cover letters in your dashboard.
+                </div>
+              </div>
+              {applyMethod === "in_app" && <Check size={16} style={{ color: "var(--accent)", flexShrink: 0, marginLeft: 12 }} />}
+            </button>
+
+            {/* URL + Email — side by side */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: applyMethod !== "in_app" ? 14 : 0 }}>
               {(["url", "email"] as const).map(method => (
                 <button key={method} type="button"
                   onClick={() => { setApplyMethod(method); setIsDirty(true); }}
@@ -412,17 +443,22 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
                 </button>
               ))}
             </div>
-            {applyMethod === "url" ? (
+
+            {applyMethod === "url" && (
               <Field label="Application URL" required error={fieldErrors.applyUrl}>
                 <input className="input" name="applyUrl" type="text" defaultValue={job.applyUrl} placeholder="yourcompany.com/careers/apply" />
-                <input type="hidden" name="applyEmail" value="" />
                 <span className="mono-s" style={{ color: "var(--text-subtle)" }}>NO NEED TO ADD HTTPS:// — WE HANDLE THAT</span>
               </Field>
-            ) : (
+            )}
+            {applyMethod === "email" && (
               <Field label="HR email address" required error={fieldErrors.applyUrl}>
                 <input className="input" name="applyEmail" type="email" defaultValue={job.applyEmail} placeholder="jobs@yourcompany.com" />
-                <input type="hidden" name="applyUrl" value="" />
               </Field>
+            )}
+            {applyMethod === "in_app" && (
+              <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4 }}>
+                NO SETUP NEEDED · APPLICATIONS ARRIVE IN YOUR DASHBOARD AUTOMATICALLY
+              </p>
             )}
           </div>
 

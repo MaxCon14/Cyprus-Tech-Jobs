@@ -1,16 +1,64 @@
 // Centralised placeholder data — swap each export for a DB query when ready.
 
 export const CATEGORIES = [
-  { label: "All jobs",  slug: "",           count: 248 },
-  { label: "Frontend",  slug: "frontend",   count: 62 },
-  { label: "Backend",   slug: "backend",    count: 48 },
-  { label: "DevOps",    slug: "devops",     count: 24 },
-  { label: "Design",    slug: "design",     count: 18 },
-  { label: "Data",      slug: "data",       count: 15 },
-  { label: "Mobile",    slug: "mobile",     count: 11 },
-  { label: "Product",   slug: "product",    count: 9 },
-  { label: "Security",  slug: "security",   count: 7 },
-  { label: "QA",        slug: "qa",         count: 5 },
+  { label: "All jobs", slug: "", count: 248 },
+  { label: "Frontend", slug: "frontend", count: 62, children: [
+    { label: "React Developer",   slug: "frontend-react"   },
+    { label: "Vue.js Developer",  slug: "frontend-vue"     },
+    { label: "Angular Developer", slug: "frontend-angular" },
+    { label: "Web Developer",     slug: "frontend-web"     },
+    { label: "UI Engineer",       slug: "frontend-ui"      },
+  ]},
+  { label: "Backend", slug: "backend", count: 48, children: [
+    { label: "Node.js Developer", slug: "backend-node"   },
+    { label: "Python Developer",  slug: "backend-python" },
+    { label: "Java Developer",    slug: "backend-java"   },
+    { label: "Go Developer",      slug: "backend-go"     },
+    { label: ".NET Developer",    slug: "backend-dotnet" },
+    { label: "PHP Developer",     slug: "backend-php"    },
+  ]},
+  { label: "DevOps", slug: "devops", count: 24, children: [
+    { label: "Site Reliability Engineer", slug: "devops-sre"      },
+    { label: "Platform Engineer",         slug: "devops-platform" },
+    { label: "Cloud Engineer",            slug: "devops-cloud"    },
+    { label: "Infrastructure Engineer",   slug: "devops-infra"    },
+  ]},
+  { label: "Design", slug: "design", count: 18, children: [
+    { label: "UI/UX Designer",   slug: "design-ux"      },
+    { label: "Product Designer", slug: "design-product" },
+    { label: "Brand Designer",   slug: "design-brand"   },
+    { label: "Motion Designer",  slug: "design-motion"  },
+    { label: "Graphic Designer", slug: "design-graphic" },
+  ]},
+  { label: "Data", slug: "data", count: 15, children: [
+    { label: "Data Engineer",             slug: "data-engineering" },
+    { label: "Data Analyst",              slug: "data-analyst"     },
+    { label: "Data Scientist",            slug: "data-scientist"   },
+    { label: "Machine Learning Engineer", slug: "data-ml"          },
+    { label: "Business Intelligence",     slug: "data-bi"          },
+  ]},
+  { label: "Mobile", slug: "mobile", count: 11, children: [
+    { label: "iOS Developer",          slug: "mobile-ios"     },
+    { label: "Android Developer",      slug: "mobile-android" },
+    { label: "React Native Developer", slug: "mobile-rn"      },
+    { label: "Flutter Developer",      slug: "mobile-flutter" },
+  ]},
+  { label: "Product", slug: "product", count: 9, children: [
+    { label: "Product Manager",  slug: "product-manager" },
+    { label: "Product Owner",    slug: "product-owner"   },
+    { label: "Business Analyst", slug: "product-ba"      },
+  ]},
+  { label: "Security", slug: "security", count: 7, children: [
+    { label: "Application Security", slug: "security-appsec"    },
+    { label: "Penetration Tester",   slug: "security-pentest"   },
+    { label: "DevSecOps",            slug: "security-devsecops" },
+    { label: "Security Analyst",     slug: "security-analyst"   },
+  ]},
+  { label: "QA", slug: "qa", count: 5, children: [
+    { label: "QA Engineer",            slug: "qa-engineer"   },
+    { label: "QA Automation Engineer", slug: "qa-automation" },
+    { label: "Test Lead",              slug: "qa-lead"       },
+  ]},
 ];
 
 export const CITIES = ["Limassol", "Nicosia", "Larnaca", "Paphos", "Remote"];
