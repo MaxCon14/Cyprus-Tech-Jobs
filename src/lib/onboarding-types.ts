@@ -397,10 +397,12 @@ export const TECH_STACK_OPTIONS = [
   "TypeScript", "JavaScript", "Python", "Go", "Rust", "Java", "Kotlin", "Swift",
   "C#", "C++", "PHP", "Ruby", "Scala", "Elixir", "Dart", "R", "Bash", "Lua",
   "Haskell", "Clojure", "Groovy", "Objective-C", "MATLAB", "Solidity",
+  "HTML", "CSS",
 
   // Frontend frameworks & libraries
   "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "SvelteKit",
   "Astro", "Remix", "Gatsby", "Ember.js", "Alpine.js", "Lit", "Qwik",
+  "Redux", "Zustand", "MobX",
 
   // Styling & UI
   "Tailwind CSS", "SCSS/Sass", "CSS Modules", "styled-components", "Emotion",
@@ -417,7 +419,7 @@ export const TECH_STACK_OPTIONS = [
   "Gin", "Echo", "Fiber", "Actix", "Axum",
 
   // API & data fetching
-  "GraphQL", "tRPC", "REST API", "gRPC", "WebSockets", "OpenAPI",
+  "GraphQL", "tRPC", "REST API", "gRPC", "WebSockets", "OpenAPI", "Swagger",
 
   // Databases & ORMs
   "PostgreSQL", "MySQL", "SQLite", "MariaDB",
@@ -430,6 +432,7 @@ export const TECH_STACK_OPTIONS = [
   // Cloud & infrastructure
   "AWS", "GCP", "Azure", "Cloudflare",
   "Vercel", "Netlify", "Railway", "Fly.io", "DigitalOcean", "Heroku",
+  "Linux", "Nginx",
 
   // DevOps & containers
   "Docker", "Kubernetes", "Terraform", "Ansible", "Helm", "ArgoCD",
@@ -472,12 +475,13 @@ export const TECH_STACK_OPTIONS = [
   "Hotjar", "WordPress", "Shopify", "WooCommerce",
 
   // Productivity & Collaboration
-  "Notion", "Slack", "Linear", "Asana", "Trello", "Monday.com",
+  "Notion", "Slack", "Linear", "Jira", "Confluence", "Asana", "Trello", "Monday.com",
   "Microsoft Office", "Google Workspace",
 
   // Dev tools & editors
-  "VS Code", "IntelliJ", "Xcode", "Android Studio", "Insomnia", "Postman",
+  "VS Code", "IntelliJ", "Vim", "Xcode", "Android Studio", "Insomnia", "Postman",
   "Git", "GitHub", "GitLab", "Bitbucket",
+  "Gradle", "Maven",
 
   // Security
   "Penetration Testing", "OWASP", "Burp Suite", "SIEM", "ISO 27001", "SOC 2",

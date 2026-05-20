@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { getJobById, getCategoriesWithCount } from "@/lib/queries";
+import { TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { EditJobForm } from "./EditJobForm";
 import type { Metadata } from "next";
 
@@ -55,7 +56,8 @@ export default async function EditJobPage({
     coverLetter:     (job.coverLetter as string) ?? "OPTIONAL",
   };
 
-  const allTags    = allTagRows.map(t => t.name);
+  const dbTagNames = allTagRows.map(t => t.name);
+  const allTags    = [...new Set([...TECH_STACK_OPTIONS, ...dbTagNames])];
   const initialTags = job.tags.map(jt => jt.tag.name);
 
   const pageTitle = isDraft ? "Edit draft" : "Edit listing";

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { AdminJobForm } from "../../../_components/AdminJobForm";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,7 @@ export default async function AdminJobEditPage({ params }: { params: Promise<{ i
       </p>
       <AdminJobForm
         categories={categories}
-        allTags={allTagRows.map(t => t.name)}
+        allTags={[...new Set([...TECH_STACK_OPTIONS, ...allTagRows.map(t => t.name)])]}
         initialTags={job.tags.map(jt => jt.tag.name)}
         jobId={id}
         initial={{

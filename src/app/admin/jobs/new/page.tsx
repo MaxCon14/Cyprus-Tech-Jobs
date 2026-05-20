@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { AdminJobForm } from "../../_components/AdminJobForm";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export default async function AdminJobNewPage() {
       <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 24 }}>
         Post a job on behalf of a company. Applicants are redirected to the original posting.
       </p>
-      <AdminJobForm categories={categories} allTags={allTagRows.map(t => t.name)} />
+      <AdminJobForm categories={categories} allTags={[...new Set([...TECH_STACK_OPTIONS, ...allTagRows.map(t => t.name)])]} />
     </div>
   );
 }

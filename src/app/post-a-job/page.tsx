@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
+import { TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { PostJobForm } from "./PostJobForm";
 
 export const metadata: Metadata = {
@@ -40,7 +41,8 @@ export default async function PostAJobPage() {
     redirect(candidate ? "/candidates/dashboard" : "/employers/onboarding");
   }
 
-  const allTags = allTagRows.map(t => t.name);
+  const dbTagNames = allTagRows.map(t => t.name);
+  const allTags = [...new Set([...TECH_STACK_OPTIONS, ...dbTagNames])];
 
   return (
     <div>
