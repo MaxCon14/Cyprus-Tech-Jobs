@@ -23,6 +23,7 @@ import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
 import { Confetti } from "@/components/onboarding/Confetti";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { OtpCodeInput } from "@/components/ui/OtpCodeInput";
 
 const supabase = createSupabaseBrowserClient();
 const LS_KEY = "cyprustechcareers:candidate-draft";
@@ -604,37 +605,91 @@ function Step8Experience({ state, dispatch }: { state: CandidateWizardState; dis
   );
 }
 
-// ─── Step 9: Done ─────────────────────────────────────────────────────────────
+// ─── Step 9: Verify email ─────────────────────────────────────────────────────
 
-function Step9Done({ state }: { state: CandidateWizardState }) {
+function Step9Done({ state, onVerified }: { state: CandidateWizardState; onVerified: () => void }) {
+  const [code, setCode]           = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [codeError, setCodeError] = useState("");
+  const [cooldown, setCooldown]   = useState(0);
+  const [resending, setResending] = useState(false);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  // Auto-verify when all 6 digits entered
+  useEffect(() => {
+    if (code.length === 6 && !verifying) handleVerify();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
+
+  const handleVerify = async () => {
+    if (code.length < 6 || verifying) return;
+    setCodeError("");
+    setVerifying(true);
+
+    const { error } = await supabase.auth.verifyOtp({ email: state.email, token: code, type: "email" });
+    if (error) {
+      setCodeError("Incorrect or expired code. Please try again.");
+      setCode("");
+      setVerifying(false);
+      return;
+    }
+
+    await fetch("/api/auth/mark-verified", { method: "POST" }).catch(() => {});
+    onVerified();
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    await supabase.auth.signInWithOtp({ email: state.email, options: { shouldCreateUser: true } });
+    setResending(false);
+    setCooldown(60);
+  };
+
   return (
-    <>
-      <Confetti />
-      <div style={{ textAlign: "center" }}>
-        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--success)", display: "grid", placeItems: "center", margin: "0 auto 20px" }}>
-          <CheckCircle2 size={28} style={{ color: "var(--white)" }} strokeWidth={2} />
-        </div>
-
-        <h1 className="h1" style={{ marginBottom: 10 }}>
-          {state.firstName ? `You're all set, ${state.firstName}!` : "You're all set!"}
-        </h1>
-        <p className="body" style={{ color: "var(--text-muted)", marginBottom: 8 }}>
-          We sent a sign-in link to
-        </p>
-        <div style={{ display: "inline-block", padding: "8px 18px", background: "var(--bg-muted)", borderRadius: "var(--radius-md)", fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 32 }}>
-          {state.email}
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 360, margin: "0 auto" }}>
-          <Link href="/jobs" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-            Browse jobs while you wait <ArrowRight size={15} />
-          </Link>
-          <p className="body-s" style={{ color: "var(--text-subtle)" }}>
-            Click the link in your email to activate your account. Check spam if you don&#39;t see it.
-          </p>
-        </div>
+    <div style={{ textAlign: "center" }}>
+      <h1 className="h1" style={{ marginBottom: 10 }}>
+        Almost there{state.firstName ? `, ${state.firstName}` : ""}!
+      </h1>
+      <p className="body" style={{ color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 8px" }}>
+        We sent a 6-digit code to
+      </p>
+      <div style={{ display: "inline-block", padding: "8px 16px", background: "var(--bg-muted)", borderRadius: 8, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 32 }}>
+        {state.email}
       </div>
-    </>
+
+      <OtpCodeInput value={code} onChange={v => { setCode(v); setCodeError(""); }} disabled={verifying} autoFocus />
+
+      {codeError && (
+        <p className="body-s" style={{ color: "var(--error)", marginTop: 14 }}>{codeError}</p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleVerify}
+        disabled={code.length < 6 || verifying}
+        className="btn btn-accent btn-lg"
+        style={{ width: "100%", maxWidth: 340, justifyContent: "center", marginTop: 24 }}
+      >
+        {verifying ? "Verifying…" : <>Verify &amp; go to dashboard <ArrowRight size={15} /></>}
+      </button>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center", marginTop: 16 }}>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={cooldown > 0 || resending}
+          className="btn btn-ghost btn-sm"
+          style={{ color: "var(--text-subtle)" }}
+        >
+          {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -778,13 +833,9 @@ export default function CandidateOnboardingPage() {
         return;
       }
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       await supabase.auth.signInWithOtp({
         email: state.email,
-        options: {
-          shouldCreateUser: true,
-          emailRedirectTo: `${appUrl}/api/auth/callback?next=/candidates/dashboard`,
-        },
+        options: { shouldCreateUser: true },
       });
 
       dispatch({ type: "SET_CANDIDATE_ID", id: data.candidateId });
@@ -814,7 +865,7 @@ export default function CandidateOnboardingPage() {
         {state.step === 6 && <Step6Alerts state={state} dispatch={dispatch} />}
         {state.step === 7 && <Step7Profile state={state} dispatch={dispatch} onNext={handleNext} />}
         {state.step === 8 && <Step8Experience state={state} dispatch={dispatch} />}
-        {state.step === 9 && <Step9Done state={state} />}
+        {state.step === 9 && <Step9Done state={state} onVerified={() => router.push("/candidates/dashboard")} />}
       </StepSlide>
 
       {submitError && (

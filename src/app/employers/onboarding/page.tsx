@@ -23,6 +23,7 @@ import { ProfileScore } from "@/components/onboarding/ProfileScore";
 import { CompanyPreviewCard } from "@/components/onboarding/CompanyPreviewCard";
 import { LogoUpload } from "@/components/onboarding/LogoUpload";
 import { Confetti } from "@/components/onboarding/Confetti";
+import { OtpCodeInput } from "@/components/ui/OtpCodeInput";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const supabase = createSupabaseBrowserClient();
@@ -295,55 +296,89 @@ function Step3Profile({ state, dispatch }: { state: EmployerWizardState; dispatc
 
 // ─── Step 4 ─────────────────────────────────────────────────────────────────
 
-function Step4Verify({ state, dispatch }: { state: EmployerWizardState; dispatch: React.Dispatch<EmployerWizardAction> }) {
-  const [resent, setResent] = useState(false);
+function Step4Verify({ state, dispatch, onVerified }: {
+  state: EmployerWizardState;
+  dispatch: React.Dispatch<EmployerWizardAction>;
+  onVerified: () => void;
+}) {
+  const [code, setCode]       = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [codeError, setCodeError] = useState("");
+  const [cooldown, setCooldown]   = useState(0);
+  const [resending, setResending] = useState(false);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  // Auto-verify when all 6 digits entered
+  useEffect(() => {
+    if (code.length === 6 && !verifying) handleVerify();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
+
+  const handleVerify = async () => {
+    if (code.length < 6 || verifying) return;
+    setCodeError("");
+    setVerifying(true);
+
+    const { error } = await supabase.auth.verifyOtp({ email: state.email, token: code, type: "email" });
+    if (error) {
+      setCodeError("Incorrect or expired code. Please try again.");
+      setCode("");
+      setVerifying(false);
+      return;
+    }
+
+    await fetch("/api/auth/mark-verified", { method: "POST" }).catch(() => {});
+    onVerified();
+  };
 
   const handleResend = async () => {
-    await supabase.auth.signInWithOtp({
-      email: state.email,
-      options: { shouldCreateUser: true, emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback` },
-    });
-    setResent(true);
-    setTimeout(() => setResent(false), 5000);
+    setResending(true);
+    await supabase.auth.signInWithOtp({ email: state.email, options: { shouldCreateUser: true } });
+    setResending(false);
+    setCooldown(60);
   };
 
   return (
     <div style={{ textAlign: "center" }}>
-      <div style={{ width: 96, height: 72, margin: "0 auto 32px", position: "relative" }}>
-        <div style={{ width: "100%", height: "100%", background: "var(--accent-soft)", borderRadius: 12, border: "2px solid var(--pink-200)", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(135deg, var(--pink-100) 50%, transparent 50%)" }} />
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", background: "linear-gradient(225deg, var(--pink-100) 50%, transparent 50%)" }} />
-          <div style={{ position: "absolute", bottom: 12, left: 16, right: 16, display: "flex", flexDirection: "column", gap: 4 }}>
-            <div style={{ height: 3, background: "var(--pink-200)", borderRadius: 2 }} />
-            <div style={{ height: 3, background: "var(--pink-200)", borderRadius: 2, width: "60%" }} />
-          </div>
-        </div>
-        <div style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "var(--accent)", border: "2px solid var(--white)", display: "grid", placeItems: "center" }}>
-          <span style={{ color: "var(--white)", fontSize: 10, fontWeight: 700 }}>1</span>
-        </div>
-      </div>
-
-      <h1 className="h1" style={{ marginBottom: 12 }}>Check your inbox</h1>
-      <p className="body" style={{ color: "var(--text-muted)", marginBottom: 24, maxWidth: 420, margin: "0 auto 24px" }}>
-        We sent a verification link to
+      <h1 className="h1" style={{ marginBottom: 10 }}>Verify your email</h1>
+      <p className="body" style={{ color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 8px" }}>
+        We sent a 6-digit code to
       </p>
-
-      <div style={{ display: "inline-block", padding: "10px 20px", background: "var(--bg-muted)", borderRadius: "var(--radius-md)", fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--text)", marginBottom: 32 }}>
+      <div style={{ display: "inline-block", padding: "8px 16px", background: "var(--bg-muted)", borderRadius: 8, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 32 }}>
         {state.email}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
-        <p className="body-s" style={{ color: "var(--text-subtle)" }}>
-          Didn&apos;t receive it? Check spam or{" "}
-          <button
-            type="button"
-            style={{ background: "none", border: "none", color: "var(--accent)", cursor: "pointer", fontFamily: "inherit", fontSize: "inherit", padding: 0, textDecoration: "underline" }}
-            onClick={handleResend}
-          >
-            {resent ? "sent! ✓" : "resend the email"}
-          </button>
-          .
-        </p>
+      <OtpCodeInput value={code} onChange={v => { setCode(v); setCodeError(""); }} disabled={verifying} autoFocus />
+
+      {codeError && (
+        <p className="body-s" style={{ color: "var(--error)", marginTop: 14 }}>{codeError}</p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleVerify}
+        disabled={code.length < 6 || verifying}
+        className="btn btn-accent"
+        style={{ width: "100%", justifyContent: "center", marginTop: 24, maxWidth: 340 }}
+      >
+        {verifying ? "Verifying…" : "Verify code"}
+      </button>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center", marginTop: 16 }}>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={cooldown > 0 || resending}
+          className="btn btn-ghost btn-sm"
+          style={{ color: "var(--text-subtle)" }}
+        >
+          {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+        </button>
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => dispatch({ type: "PREV_STEP" })} style={{ color: "var(--text-subtle)" }}>
           ← Wrong email? Go back
         </button>
@@ -500,7 +535,7 @@ export default function EmployerOnboardingPage() {
       try {
         await supabase.auth.signInWithOtp({
           email: state.email,
-          options: { shouldCreateUser: true, emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback` },
+          options: { shouldCreateUser: true },
         });
       } catch (otpErr) {
         console.error("[employer-onboarding] OTP send failed:", otpErr);
@@ -554,7 +589,7 @@ export default function EmployerOnboardingPage() {
         {state.step === 1 && <Step1Account state={state} dispatch={dispatch} onNext={handleNext} />}
         {state.step === 2 && <Step2Company state={state} dispatch={dispatch} />}
         {state.step === 3 && <Step3Profile state={state} dispatch={dispatch} />}
-        {state.step === 4 && <Step4Verify state={state} dispatch={dispatch} />}
+        {state.step === 4 && <Step4Verify state={state} dispatch={dispatch} onVerified={() => startTransition(() => dispatch({ type: "NEXT_STEP" }))} />}
         {state.step === 5 && <Step5Done state={state} />}
       </StepSlide>
 
