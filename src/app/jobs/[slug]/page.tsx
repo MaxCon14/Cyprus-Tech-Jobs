@@ -360,7 +360,7 @@ export default async function JobDetailPage({ params }: Props) {
             <Link href="/jobs" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none" }}>VIEW ALL →</Link>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {similar.map(j => <JobCard key={j.id} {...j} savedJobIds={savedJobIds} />)}
+            {similar.map(j => <JobCard key={j.id} {...j} />)}
           </div>
         </div>
       )}

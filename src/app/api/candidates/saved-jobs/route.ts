@@ -16,7 +16,7 @@ async function getCandidate() {
 
 export async function GET() {
   const candidate = await getCandidate();
-  if (!candidate) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!candidate) return NextResponse.json({ savedJobIds: [], isCandidate: false });
 
   const { data, error } = await supabaseAdmin
     .from("saved_jobs")
@@ -24,7 +24,7 @@ export async function GET() {
     .eq("candidateId", candidate.id);
 
   if (error) return NextResponse.json({ error: "Failed to fetch." }, { status: 500 });
-  return NextResponse.json({ savedJobIds: (data ?? []).map((r) => r.jobId) });
+  return NextResponse.json({ savedJobIds: (data ?? []).map((r) => r.jobId), isCandidate: true });
 }
 
 export async function POST(req: NextRequest) {

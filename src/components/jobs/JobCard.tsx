@@ -5,6 +5,7 @@ import { useState } from "react";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { SaveJobButton } from "./SaveJobButton";
 import { SkillTag } from "./SkillTag";
+import { useSavedJobs } from "./SavedJobsContext";
 
 function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: string | null; website?: string | null }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -23,7 +24,7 @@ function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: strin
     return (
       <div className="job-card-logo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={name} className="job-card-logo-img" onError={() => setImgFailed(true)} />
+        <img src={src} alt={name} width={48} height={48} className="job-card-logo-img" onError={() => setImgFailed(true)} />
       </div>
     );
   }
@@ -62,7 +63,6 @@ type JobCardProps = {
   curatedCompanyName?: string | null;
   postedAt?: Date | string | null;
   tags?: { name: string }[];
-  savedJobIds?: string[];
 };
 
 export function JobCard({
@@ -83,8 +83,8 @@ export function JobCard({
   curatedCompanyName,
   postedAt,
   tags = [],
-  savedJobIds,
 }: JobCardProps) {
+  const { savedJobIds, isCandidate } = useSavedJobs();
   const salary = salaryDisclosed ? formatSalary(salaryMin, salaryMax, salaryCurrency) : null;
   const empLabel = employmentType.replace("_", "-").replace(/\b\w/g, (c) => c.toUpperCase());
   const expLabel = experienceLevel.charAt(0) + experienceLevel.slice(1).toLowerCase();
@@ -105,7 +105,7 @@ export function JobCard({
         <SaveJobButton
           jobId={id}
           initialSaved={savedJobIds?.includes(id) ?? false}
-          isCandidate={savedJobIds !== undefined}
+          isCandidate={isCandidate}
         />
       </div>
 

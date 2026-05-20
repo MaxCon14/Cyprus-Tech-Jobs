@@ -148,6 +148,8 @@ export function SkillTag({ name, size = "sm" }: { name: string; size?: "sm" | "m
         <img
           src={src}
           alt=""
+          width={13}
+          height={13}
           className="skill-tag-icon"
           onError={() => setIconFailed(true)}
         />

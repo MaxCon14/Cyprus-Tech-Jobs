@@ -5,8 +5,6 @@ import { serialiseJob } from "@/lib/serialise";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
 import { CITIES } from "@/lib/placeholder-data";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const PAGE_SIZE = 20;
 const BASE_URL  = "https://cyprustech.careers";
@@ -48,9 +46,6 @@ export async function CityPage({ config, searchParams }: Props) {
   const salary  = searchParams.salary ? parseInt(searchParams.salary) : undefined;
   const pageNum = Math.max(1, parseInt(searchParams.page ?? "1") || 1);
 
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   /* Base city/remote filter + user-selected filters */
   const filters = {
     ...(isRemote ? { remoteType: "REMOTE" as const } : { city }),
@@ -73,17 +68,6 @@ export async function CityPage({ config, searchParams }: Props) {
       getCategoriesWithCount(),
     ]);
   } catch (err) { console.error(`[city-jobs/${slug}] DB error:`, err); }
-
-  let savedJobIds: string[] | undefined;
-  if (user?.email) {
-    const { data: candidate } = await supabaseAdmin
-      .from("candidates").select("id").eq("email", user.email).single();
-    if (candidate) {
-      const { data: saved } = await supabaseAdmin
-        .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
-      savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
-    }
-  }
 
   const serialisedJobs = jobs.map(serialiseJob);
   const showFrom = total === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1;
@@ -259,7 +243,7 @@ export async function CityPage({ config, searchParams }: Props) {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {serialisedJobs.map(job => (
-                  <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />
+                  <JobCard key={job.id} {...job} />
                 ))}
               </div>
             )}

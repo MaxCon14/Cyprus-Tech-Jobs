@@ -5,10 +5,7 @@ import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "./FilterBar";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Tech Jobs in Cyprus — Browse All Roles",
@@ -53,9 +50,6 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   const salary  = params.salary ? parseInt(params.salary) : undefined;
   const pageNum = Math.max(1, parseInt(params.page ?? "1") || 1);
 
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
   const filters = {
     categorySlug:    category,
     remoteType:      type,
@@ -76,17 +70,6 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       getCategoriesWithCount(),
     ]);
   } catch (err) { console.error("[jobs] DB error:", err); }
-
-  let savedJobIds: string[] | undefined;
-  if (user?.email) {
-    const { data: candidate } = await supabaseAdmin
-      .from("candidates").select("id").eq("email", user.email).single();
-    if (candidate) {
-      const { data: saved } = await supabaseAdmin
-        .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
-      savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
-    }
-  }
 
   const serialisedJobs = jobs.map(serialiseJob);
   const showFrom       = filteredTotal === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1;
@@ -228,7 +211,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {serialisedJobs.map(job => <JobCard key={job.id} {...job} savedJobIds={savedJobIds} />)}
+              {serialisedJobs.map(job => <JobCard key={job.id} {...job} />)}
             </div>
           )}
 

@@ -2,12 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAnyPost, type BlogSection } from "@/lib/blog";
 import { ChevronLeft, Clock, Info, Lightbulb, AlertTriangle } from "lucide-react";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
 import { buildArticleSchema, buildBreadcrumbSchema } from "@/lib/schema";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const BASE_URL = "https://cyprustech.careers";
 
@@ -57,15 +55,6 @@ export default async function BlogPostPage({ params }: Props) {
 
   // Related posts (other posts, up to 2)
   const related = allPosts.filter(p => p.slug !== post.slug).slice(0, 2);
-
-  // Hide employer CTA for logged-in candidates
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  let isCandidate = false;
-  if (user?.email) {
-    const { data } = await supabaseAdmin.from("candidates").select("id").eq("email", user.email).maybeSingle();
-    isCandidate = !!data;
-  }
 
   const articleSchema   = buildArticleSchema({ title: post.title, excerpt: post.excerpt, author: "CyprusTech.Careers", publishedAt: post.publishedAt, slug });
   const breadcrumbSchema = buildBreadcrumbSchema([
@@ -189,8 +178,8 @@ export default async function BlogPostPage({ params }: Props) {
         </aside>
       </div>
 
-      {/* Bottom CTA strip — hidden for job seekers */}
-      {!isCandidate && <div style={{
+      {/* Bottom CTA strip */}
+      <div style={{
         marginTop: 64, padding: "clamp(28px, 4vw, 44px)",
         border: "1px solid var(--border)", borderRadius: 12,
         background: "var(--surface-alt)",
@@ -203,7 +192,7 @@ export default async function BlogPostPage({ params }: Props) {
         <Link href="/post-a-job" className="btn btn-accent btn-lg" style={{ flexShrink: 0 }}>
           Post a job →
         </Link>
-      </div>}
+      </div>
     </div>
     </>
   );
