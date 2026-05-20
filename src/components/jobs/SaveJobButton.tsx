@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Heart, X } from "lucide-react";
 import Link from "next/link";
@@ -87,6 +87,13 @@ export function SaveJobButton({
   const [saved,     setSaved]     = useState(initialSaved);
   const [loading,   setLoading]   = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const interactedRef = useRef(false);
+
+  // Sync when context loads (initialSaved goes from false → true for saved jobs).
+  // Skip if the user already clicked the button to avoid overwriting their optimistic state.
+  useEffect(() => {
+    if (!interactedRef.current) setSaved(initialSaved);
+  }, [initialSaved]);
 
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
@@ -98,6 +105,7 @@ export function SaveJobButton({
     }
 
     if (loading) return;
+    interactedRef.current = true;
     setLoading(true);
     const optimistic = !saved;
     setSaved(optimistic);

@@ -61,10 +61,9 @@ export default async function JobDetailPage({ params }: Props) {
   const salary      = job.salaryDisclosed ? formatSalary(job.salaryMin, job.salaryMax) : null;
   const companyName = job.company?.name ?? job.curatedCompanyName ?? "";
 
-  // Check if the visitor is a logged-in candidate (for CV review + saved jobs + in-app apply)
+  // Check if the visitor is a logged-in candidate (for CV review + in-app apply)
   let isCandidate  = false;
   let savedCvUrl: string | null = null;
-  let savedJobIds: string[] | undefined;
   let candidateId: string | undefined;
   let candidateName: string | undefined;
   let candidateEmail: string | undefined;
@@ -91,9 +90,6 @@ export default async function JobDetailPage({ params }: Props) {
         candidateCity         = candidate.city ?? undefined;
         candidateExperienceLevel = candidate.experienceLevel ?? undefined;
         candidateSkills       = candidate.skills ?? [];
-        const { data: saved } = await supabaseAdmin
-          .from("saved_jobs").select("jobId").eq("candidateId", candidate.id);
-        savedJobIds = (saved ?? []).map((r: { jobId: string }) => r.jobId);
       }
     }
   } catch { /* non-critical */ }
