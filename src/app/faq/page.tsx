@@ -123,7 +123,7 @@ export default function FAQPage() {
       <div className="page-container">
         <div style={{ maxWidth: 780, margin: "0 auto" }}>
 
-          <div style={{ textAlign: "center", marginBottom: "clamp(28px, 4vw, 44px)" }}>
+          <div style={{ marginBottom: "clamp(28px, 4vw, 44px)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>FAQ</div>
             <h1 className="display-m" style={{ marginBottom: 12 }}>Frequently asked questions</h1>
             <p className="body" style={{ color: "var(--text-muted)" }}>
