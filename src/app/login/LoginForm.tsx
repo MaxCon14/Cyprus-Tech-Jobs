@@ -26,9 +26,9 @@ export function LoginForm({ authError }: { authError?: string }) {
     return () => clearTimeout(t);
   }, [cooldown]);
 
-  // Auto-verify when all 6 digits are entered
+  // Auto-verify when all 8 digits are entered
   useEffect(() => {
-    if (code.length === 6 && step === "code" && !loading) verifyCode();
+    if (code.length === 8 && step === "code" && !loading) verifyCode();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
@@ -67,7 +67,7 @@ export function LoginForm({ authError }: { authError?: string }) {
   }
 
   async function verifyCode() {
-    if (code.length < 6 || loading) return;
+    if (code.length < 8 || loading) return;
     setError(null);
     setLoading(true);
 
@@ -103,7 +103,7 @@ export function LoginForm({ authError }: { authError?: string }) {
           <div style={{ textAlign: "center", marginBottom: 28 }}>
             <h2 className="h3" style={{ marginBottom: 8 }}>Enter your code</h2>
             <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 4 }}>
-              We sent a 6-digit code to
+              We sent an 8-digit code to
             </p>
             <div style={{ display: "inline-block", padding: "6px 14px", background: "var(--bg-muted)", borderRadius: 8, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)" }}>
               {email}
@@ -119,7 +119,7 @@ export function LoginForm({ authError }: { authError?: string }) {
           <button
             type="button"
             onClick={verifyCode}
-            disabled={code.length < 6 || loading}
+            disabled={code.length < 8 || loading}
             className="btn btn-accent"
             style={{ width: "100%", justifyContent: "center", marginTop: 24 }}
           >

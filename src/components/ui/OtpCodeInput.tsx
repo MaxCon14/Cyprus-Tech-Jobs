@@ -12,7 +12,7 @@ interface Props {
 export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const digits = value.split("").concat(Array(6).fill("")).slice(0, 6);
+  const digits = value.split("").concat(Array(8).fill("")).slice(0, 8);
 
   function focusBox(idx: number) {
     const inputs = containerRef.current?.querySelectorAll("input");
@@ -25,7 +25,7 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
     next[idx] = digit;
     const newVal = next.join("").replace(/\s/g, "");
     onChange(newVal);
-    if (digit && idx < 5) focusBox(idx + 1);
+    if (digit && idx < 7) focusBox(idx + 1);
   }
 
   function handleKey(idx: number, e: KeyboardEvent<HTMLInputElement>) {
@@ -39,7 +39,7 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
       }
     } else if (e.key === "ArrowLeft" && idx > 0) {
       focusBox(idx - 1);
-    } else if (e.key === "ArrowRight" && idx < 5) {
+    } else if (e.key === "ArrowRight" && idx < 7) {
       focusBox(idx + 1);
     }
   }
@@ -53,7 +53,7 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
 
   return (
     <div ref={containerRef} style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: 8 }).map((_, i) => (
         <input
           key={i}
           type="text"

@@ -313,14 +313,14 @@ function Step4Verify({ state, dispatch, onVerified }: {
     return () => clearTimeout(t);
   }, [cooldown]);
 
-  // Auto-verify when all 6 digits entered
+  // Auto-verify when all 8 digits entered
   useEffect(() => {
-    if (code.length === 6 && !verifying) handleVerify();
+    if (code.length === 8 && !verifying) handleVerify();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const handleVerify = async () => {
-    if (code.length < 6 || verifying) return;
+    if (code.length < 8 || verifying) return;
     setCodeError("");
     setVerifying(true);
 
@@ -347,7 +347,7 @@ function Step4Verify({ state, dispatch, onVerified }: {
     <div style={{ textAlign: "center" }}>
       <h1 className="h1" style={{ marginBottom: 10 }}>Verify your email</h1>
       <p className="body" style={{ color: "var(--text-muted)", maxWidth: 400, margin: "0 auto 8px" }}>
-        We sent a 6-digit code to
+        We sent an 8-digit code to
       </p>
       <div style={{ display: "inline-block", padding: "8px 16px", background: "var(--bg-muted)", borderRadius: 8, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)", marginBottom: 32 }}>
         {state.email}
@@ -362,7 +362,7 @@ function Step4Verify({ state, dispatch, onVerified }: {
       <button
         type="button"
         onClick={handleVerify}
-        disabled={code.length < 6 || verifying}
+        disabled={code.length < 8 || verifying}
         className="btn btn-accent"
         style={{ width: "100%", justifyContent: "center", marginTop: 24, maxWidth: 340 }}
       >
