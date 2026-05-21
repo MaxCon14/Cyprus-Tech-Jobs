@@ -29,6 +29,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "Clojure":            "clojure",
   "HTML":               "html5",
   "CSS":                "css3",
+  "Objective-C":        "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/objectivec/objectivec-plain.svg",
 
   /* Frontend */
   "React":              "react",
@@ -48,11 +49,15 @@ export const SKILL_ICONS: Record<string, string> = {
   "Lit":                "lit",
   "Qwik":               "qwik",
   "Redux":              "redux",
+  "Zustand":            "zustand",
+  "MobX":               "mobx",
   "Three.js":           "threedotjs",
   "Tailwind CSS":       "tailwindcss",
   "Sass":               "sass",
   "SCSS/Sass":          "sass",
+  "CSS Modules":        "css3",
   "styled-components":  "styledcomponents",
+  "Emotion":            "styledcomponents",
   "Bootstrap":          "bootstrap",
   "Material UI":        "mui",
   "Chakra UI":          "chakraui",
@@ -62,11 +67,13 @@ export const SKILL_ICONS: Record<string, string> = {
   "Framer Motion":      "framer",
   "D3.js":              "d3dotjs",
   "Chart.js":           "chartdotjs",
+  "WebGL":              "threedotjs",
   "Storybook":          "storybook",
   "Webpack":            "webpack",
   "Vite":               "vite",
   "esbuild":            "esbuild",
-  "Rollup":             "rollupjsdotorg",
+  "Turbopack":          "vercel",
+  "Rollup":             "rollupjs",
   "Parcel":             "parcel",
 
   /* Backend / Frameworks */
@@ -84,9 +91,20 @@ export const SKILL_ICONS: Record<string, string> = {
   "Spring Boot":        "springboot",
   "Spring":             "spring",
   "Quarkus":            "quarkus",
+  "Micronaut":          "micronaut",
+  "Ktor":               "ktor",
+  "Gin":                "go",
+  "Echo":               "go",
+  "Fiber":              "go",
+  "Actix":              "rust",
+  "Axum":               "rust",
   ".NET":               "dotnet",
   "GraphQL":            "graphql",
   "tRPC":               "trpc",
+  "REST API":           "swagger",
+  "gRPC":               "grpc",
+  "WebSockets":         "socketdotio",
+  "OpenAPI":            "openapiinitiative",
   "Bun":                "bun",
   "Deno":               "deno",
 
@@ -117,6 +135,7 @@ export const SKILL_ICONS: Record<string, string> = {
   "Drizzle ORM":        "drizzle",
   "SQLAlchemy":         "sqlalchemy",
   "Hibernate":          "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/hibernate/hibernate-original.svg",
+  "TypeORM":            "typescript",
   "ClickHouse":         "clickhouse",
   "CockroachDB":        "cockroachlabs",
   "PlanetScale":        "planetscale",
@@ -129,7 +148,7 @@ export const SKILL_ICONS: Record<string, string> = {
   /* Cloud */
   "Docker":             "docker",
   "Kubernetes":         "kubernetes",
-  "AWS":                "amazonaws",
+  "AWS":                "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original.svg",
   "Azure":              "microsoftazure",
   "GCP":                "googlecloud",
   "Vercel":             "vercel",
@@ -167,6 +186,9 @@ export const SKILL_ICONS: Record<string, string> = {
   "Apache Spark":       "apachespark",
   "Airflow":            "apacheairflow",
   "RabbitMQ":           "rabbitmq",
+  "NATS":               "nats",
+  "Redis Pub/Sub":      "redis",
+  "SQS":                "amazonaws",
   "dbt":                "dbt",
 
   /* Build / Test */
@@ -178,6 +200,8 @@ export const SKILL_ICONS: Record<string, string> = {
   "Playwright":         "playwright",
   "Mocha":              "mocha",
   "Testing Library":    "testinglibrary",
+  "pytest":             "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pytest/pytest-original.svg",
+  "JUnit":              "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/junit/junit-original.svg",
   "Swagger":            "swagger",
   "Vitest":             "vitest",
   "k6":                 "k6",
@@ -193,6 +217,11 @@ export const SKILL_ICONS: Record<string, string> = {
   "Postman":            "postman",
   "Insomnia":           "insomnia",
   "OWASP":              "owasp",
+  "Burp Suite":         "burpsuite",
+  "Penetration Testing":"kalilinux",
+  "SIEM":               "splunk",
+  "ISO 27001":          "owasp",
+  "SOC 2":              "owasp",
   "VS Code":            "visualstudiocode",
   "Vim":                "vim",
   "IntelliJ":           "intellijidea",
@@ -212,7 +241,7 @@ export const SKILL_ICONS: Record<string, string> = {
 
   /* Design & Creative — Adobe suite */
   "Adobe Photoshop":    "adobephotoshop",
-  "Adobe Illustrator":  "adobeillustrator",
+  "Adobe Illustrator":  "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/illustrator/illustrator-plain.svg",
   "Adobe InDesign":     "adobeindesign",
   "Adobe After Effects":"adobeaftereffects",
   "Adobe Premiere Pro": "adobepremierepro",
@@ -241,9 +270,10 @@ export const SKILL_ICONS: Record<string, string> = {
   /* 3D, Motion & Game */
   "Blender":            "blender",
   "Cinema 4D":          "cinema4d",
-  "Unity":              "unity",
+  "Unity":              "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg",
   "Unreal Engine":      "unrealengine",
   "DaVinci Resolve":    "davinciresolve",
+  "Spline":             "figma",
 
   /* Marketing & Analytics */
   "Google Analytics":   "googleanalytics",
@@ -256,6 +286,8 @@ export const SKILL_ICONS: Record<string, string> = {
   "WordPress":          "wordpress",
   "Shopify":            "shopify",
   "WooCommerce":        "woocommerce",
+  "SEO":                "googlesearchconsole",
+  "A/B Testing":        "googleanalytics",
 
   /* AI & ML */
   "TensorFlow":         "tensorflow",
@@ -274,6 +306,12 @@ export const SKILL_ICONS: Record<string, string> = {
   "Monday.com":         "mondaydotcom",
   "Microsoft Office":   "microsoftoffice",
   "Google Workspace":   "googleworkspace",
+
+  /* Product & Methodology */
+  "Agile/Scrum":        "jira",
+  "Kanban":             "trello",
+  "Product Management": "notion",
+  "UX Research":        "figma",
 };
 
 /** Returns a full icon URL for a skill name, or null if no icon is available. */
