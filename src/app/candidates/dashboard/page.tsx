@@ -8,7 +8,6 @@ import { prisma } from "@/lib/prisma";
 import { ProfileSection, LinksSection, ExperienceSection, PreferencesSection, AlertSection, SkillsSection, CvSection } from "./ProfileEditor";
 import { AppliedJobsCard } from "./AppliedJobsCard";
 import { MyAlertsCard } from "@/components/alerts/MyAlertsCard";
-import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import { getMatchingJobsForCandidate } from "@/lib/queries";
 import { remoteLabel, formatSalary, timeAgo } from "@/lib/utils";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
@@ -119,7 +118,6 @@ export default async function CandidateDashboardPage() {
   }
 
   const displayName = [c.firstName, c.lastName].filter(Boolean).join(" ") || c.email;
-  const initials    = (c.firstName?.[0] ?? c.email[0]).toUpperCase();
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
@@ -137,51 +135,53 @@ export default async function CandidateDashboardPage() {
         )}
 
         {/* ── Profile hero ── */}
-        <div className="dashboard-hero" style={{
+        <div style={{
           background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16,
           padding: "24px", marginBottom: 20,
         }}>
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* Avatar */}
-            <div style={{
-              width: 72, height: 72, borderRadius: 14, flexShrink: 0,
-              background: "var(--accent-soft)", border: "2px solid var(--accent)",
-              display: "grid", placeItems: "center",
-            }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, color: "var(--accent)" }}>{initials}</span>
+          {/* Info */}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+              <h1 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 20, color: "var(--text)", margin: 0 }}>
+                {displayName}
+              </h1>
+              {c.openToWork && (
+                <span className="tag tag-success" style={{ fontSize: 11, padding: "3px 8px" }}>Open to work</span>
+              )}
             </div>
-
-            {/* Info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
-                <h1 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 20, color: "var(--text)", margin: 0 }}>
-                  {displayName}
-                </h1>
-                {c.openToWork && (
-                  <span className="tag tag-success" style={{ fontSize: 11, padding: "3px 8px" }}>Open to work</span>
-                )}
-              </div>
-              <p className="body-s" style={{ color: c.headline ? "var(--text-muted)" : "var(--text-subtle)", marginBottom: 10, fontStyle: c.headline ? "normal" : "italic" }}>
-                {c.headline || "Add a professional headline…"}
-              </p>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {c.city && (
-                  <span className="tag" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <MapPin size={10} /> {c.city}
-                  </span>
-                )}
-                {c.remoteType && <span className="tag tag-outline">{remoteLabel(c.remoteType)}</span>}
-                {c.experienceLevel && <span className="tag tag-outline">{c.experienceLevel}</span>}
-              </div>
+            <p className="body-s" style={{ color: c.headline ? "var(--text-muted)" : "var(--text-subtle)", marginBottom: 10, fontStyle: c.headline ? "normal" : "italic" }}>
+              {c.headline || "Add a professional headline…"}
+            </p>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {c.city && (
+                <span className="tag" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <MapPin size={10} /> {c.city}
+                </span>
+              )}
+              {c.remoteType && <span className="tag tag-outline">{remoteLabel(c.remoteType)}</span>}
+              {c.experienceLevel && <span className="tag tag-outline">{c.experienceLevel}</span>}
             </div>
           </div>
 
-          {/* Completion ring */}
-          <div className="dashboard-hero-ring" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-            <ProfileRing score={completion.pct} size={72} strokeWidth={6} />
-            <span className="caption" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
-              Profile strength
-            </span>
+          {/* Profile strength — horizontal bar */}
+          <div style={{ marginTop: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span className="caption" style={{ color: "var(--text-subtle)", letterSpacing: "0.08em" }}>
+                PROFILE STRENGTH
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: completion.pct < 40 ? "#f59e0b" : completion.pct < 75 ? "var(--accent)" : "#22c55e" }}>
+                {completion.pct}%
+              </span>
+            </div>
+            <div style={{ height: 8, width: "100%", background: "var(--bg-muted)", borderRadius: 99, overflow: "hidden" }}>
+              <div style={{
+                height: "100%",
+                width: `${completion.pct}%`,
+                background: completion.pct < 40 ? "#f59e0b" : completion.pct < 75 ? "var(--accent)" : "#22c55e",
+                borderRadius: 99,
+                transition: "width 600ms cubic-bezier(0.16,1,0.3,1), background 400ms ease",
+              }} />
+            </div>
           </div>
         </div>
 
