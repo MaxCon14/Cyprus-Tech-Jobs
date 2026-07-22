@@ -492,6 +492,12 @@ export default function EmployerOnboardingPage() {
     localStorage.setItem(key, JSON.stringify(persistable));
   }, [state]);
 
+  // Jump to the top on every step change so the user starts each step at the
+  // top of the form instead of the scroll position of the previous step.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [state.step]);
+
   const handleNext = () => {
     if (state.step === 3 && !state.submitting && !state.employerId) {
       handleSubmit();

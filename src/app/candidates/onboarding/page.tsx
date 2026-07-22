@@ -807,6 +807,13 @@ export default function CandidateOnboardingPage() {
     localStorage.setItem(key, JSON.stringify(toSave));
   }, [state]);
 
+  // Jump to the top of the page whenever the step changes — otherwise the
+  // scroll position is inherited from the previous step, which on mobile
+  // leaves users staring at the footer of the next step.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [state.step]);
+
   const handleNext = () => {
     if (state.step === 6 && !state.submitting && !state.candidateId) {
       handleSubmit();

@@ -40,9 +40,13 @@ export function TechStackSelector({ options, selected, onChange, placeholder }: 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const add = (tag: string) => {
+    // Only re-focus the search box if the user was already searching (had a
+    // query). Focusing the input from a bare tap on a chip opens the mobile
+    // keyboard — unwanted friction when picking from Popular.
+    const wasSearching = query.trim().length > 0;
     if (!selected.includes(tag)) onChange([...selected, tag]);
     setQuery("");
-    inputRef.current?.focus();
+    if (wasSearching) inputRef.current?.focus();
   };
 
   const remove = (tag: string) => onChange(selected.filter((t) => t !== tag));
