@@ -46,13 +46,23 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
 
   function handlePaste(e: ClipboardEvent<HTMLInputElement>) {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 8);
     onChange(pasted);
-    focusBox(Math.min(pasted.length, 5));
+    focusBox(Math.min(pasted.length, 7));
   }
 
   return (
-    <div ref={containerRef} style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+    <div
+      ref={containerRef}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(8, minmax(0, 1fr))",
+        gap: "clamp(4px, 1.5vw, 8px)",
+        width: "100%",
+        maxWidth: 424,
+        margin: "0 auto",
+      }}
+    >
       {Array.from({ length: 8 }).map((_, i) => (
         <input
           key={i}
@@ -67,9 +77,15 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
           onPaste={handlePaste}
           onFocus={e => e.target.select()}
           style={{
-            width: 46, height: 54,
+            width: "100%",
+            minWidth: 0,
+            aspectRatio: "46 / 54",
             textAlign: "center",
-            fontSize: 22, fontFamily: "var(--font-mono)", fontWeight: 700, letterSpacing: 0,
+            fontSize: "clamp(16px, 5vw, 22px)",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 700,
+            letterSpacing: 0,
+            padding: 0,
             border: `1.5px solid ${digits[i] ? "var(--accent)" : "var(--border)"}`,
             borderRadius: 10,
             background: digits[i] ? "var(--accent-soft)" : "var(--bg)",
@@ -77,6 +93,7 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
             outline: "none",
             transition: "border-color 150ms, background 150ms",
             caretColor: "var(--accent)",
+            boxSizing: "border-box",
           }}
         />
       ))}
