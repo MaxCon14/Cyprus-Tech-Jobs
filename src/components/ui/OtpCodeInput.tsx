@@ -20,11 +20,24 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
   }
 
   function handleChange(idx: number, raw: string) {
-    const digit = raw.replace(/\D/g, "").slice(-1);
+    const cleaned = raw.replace(/\D/g, "");
+
+    // Multi-digit input (paste, SMS autofill, or hardware keyboard held down):
+    // distribute the digits starting at this box.
+    if (cleaned.length > 1) {
+      const chunk = cleaned.slice(0, 8 - idx);
+      const next = digits.slice();
+      for (let i = 0; i < chunk.length; i++) next[idx + i] = chunk[i];
+      onChange(next.join(""));
+      focusBox(Math.min(idx + chunk.length, 7));
+      return;
+    }
+
+    // Single digit
+    const digit = cleaned.slice(-1);
     const next = digits.slice();
     next[idx] = digit;
-    const newVal = next.join("").replace(/\s/g, "");
-    onChange(newVal);
+    onChange(next.join(""));
     if (digit && idx < 7) focusBox(idx + 1);
   }
 
@@ -68,7 +81,8 @@ export function OtpCodeInput({ value, onChange, disabled, autoFocus }: Props) {
           key={i}
           type="text"
           inputMode="numeric"
-          maxLength={2}
+          autoComplete={i === 0 ? "one-time-code" : "off"}
+          maxLength={8}
           value={digits[i]}
           autoFocus={autoFocus && i === 0}
           disabled={disabled}
