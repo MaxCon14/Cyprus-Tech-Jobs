@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2, Sparkles, Loader2, FileText } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2, Sparkles, Loader2, FileText, Pencil, Check } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -410,22 +410,42 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
   const positions = state.positions;
   const [form, setForm] = useState<PositionDraft>(emptyDraft());
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [autofilling, setAutofilling]     = useState(false);
   const [autofillError, setAutofillError] = useState<string | null>(null);
   const [autofillNotice, setAutofillNotice] = useState<string | null>(null);
 
+  const isEditing = editingId !== null;
+
   const setField = (field: keyof PositionDraft, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
 
-  const addPosition = () => {
-    if (!form.title.trim() || !form.company.trim()) return;
-    dispatch({ type: "SET_POSITIONS", value: [...positions, form] });
+  const resetForm = () => {
     setForm(emptyDraft());
+    setAdding(false);
+    setEditingId(null);
+  };
+
+  const savePosition = () => {
+    if (!form.title.trim() || !form.company.trim()) return;
+    if (isEditing) {
+      dispatch({ type: "SET_POSITIONS", value: positions.map((p) => (p.id === editingId ? { ...form, id: editingId } : p)) });
+    } else {
+      dispatch({ type: "SET_POSITIONS", value: [...positions, form] });
+    }
+    resetForm();
+  };
+
+  const startEditing = (p: PositionDraft) => {
+    setForm({ ...p });
+    setEditingId(p.id);
     setAdding(false);
   };
 
-  const remove = (id: string) =>
+  const remove = (id: string) => {
+    if (id === editingId) resetForm();
     dispatch({ type: "SET_POSITIONS", value: positions.filter((x) => x.id !== id) });
+  };
 
   async function autofillFromCv() {
     if (!state.cvUrl || autofilling) return;
@@ -531,22 +551,32 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
       {/* Saved positions list */}
       {positions.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-          {positions.map((p) => (
-            <div key={p.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "14px 16px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--surface)" }}>
-              <div>
-                <p className="body-s" style={{ fontWeight: 600, color: "var(--text)" }}>{p.title}</p>
-                <p className="body-s" style={{ color: "var(--text-muted)" }}>{p.company}{p.startDate ? ` · ${p.startDate}${p.current ? " – Present" : p.endDate ? ` – ${p.endDate}` : ""}` : ""}</p>
+          {positions.map((p) => {
+            if (p.id === editingId) return null;
+            return (
+              <div key={p.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, padding: "14px 16px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--surface)" }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <p className="body-s" style={{ fontWeight: 600, color: "var(--text)" }}>{p.title}</p>
+                  <p className="body-s" style={{ color: "var(--text-muted)" }}>{p.company}{p.startDate ? ` · ${p.startDate}${p.current ? " – Present" : p.endDate ? ` – ${p.endDate}` : ""}` : ""}</p>
+                </div>
+                <div style={{ display: "flex", gap: 2, flexShrink: 0 }}>
+                  <button type="button" onClick={() => startEditing(p)} aria-label="Edit position"
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 6, display: "grid", placeItems: "center", borderRadius: 6 }}>
+                    <Pencil size={14} />
+                  </button>
+                  <button type="button" onClick={() => remove(p.id)} aria-label="Delete position"
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 6, display: "grid", placeItems: "center", borderRadius: 6 }}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
-              <button type="button" onClick={() => remove(p.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 4, display: "grid", placeItems: "center" }}>
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Add form */}
-      {adding ? (
+      {/* Add / edit form */}
+      {(adding || isEditing) ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "18px", borderRadius: "var(--radius-md)", border: "1.5px solid var(--accent)", background: "var(--accent-soft)" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <Field label="Job title" required>
@@ -585,11 +615,11 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
           </Field>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button type="button" className="btn btn-accent" onClick={addPosition}
+            <button type="button" className="btn btn-accent" onClick={savePosition}
               disabled={!form.title.trim() || !form.company.trim()}>
-              <Plus size={14} /> Add position
+              {isEditing ? <><Check size={14} /> Save changes</> : <><Plus size={14} /> Add position</>}
             </button>
-            <button type="button" className="btn btn-ghost" onClick={() => { setAdding(false); setForm(emptyDraft()); }}>
+            <button type="button" className="btn btn-ghost" onClick={resetForm}>
               Cancel
             </button>
           </div>
