@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2, Sparkles, Loader2, FileText, Pencil, Check } from "lucide-react";
+import { ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2, Sparkles, Loader2, FileText, Pencil, Check } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -727,7 +727,7 @@ function Step8Done({ state, onVerified }: { state: CandidateWizardState; onVerif
         className="btn btn-accent btn-lg"
         style={{ width: "100%", maxWidth: 340, justifyContent: "center", marginTop: 24 }}
       >
-        {verifying ? "Verifying…" : <>Verify &amp; go to dashboard <ArrowRight size={15} /></>}
+        {verifying ? "Verifying…" : "Verify & go to dashboard"}
       </button>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "center", marginTop: 16 }}>
@@ -944,7 +944,7 @@ export default function CandidateOnboardingPage() {
               </button>
             )}
             <button type="button" className="btn btn-accent btn-lg" onClick={handleNext} disabled={state.submitting} style={{ minWidth: 140, justifyContent: "center" }}>
-              {state.submitting ? "Saving…" : state.step === 6 ? <>Create account <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
+              {state.submitting ? "Saving…" : state.step === 6 ? "Create account" : "Next"}
             </button>
           </div>
         </div>

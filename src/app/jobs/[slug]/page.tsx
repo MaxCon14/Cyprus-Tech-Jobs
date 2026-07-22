@@ -292,7 +292,7 @@ export default async function JobDetailPage({ params }: Props) {
                   Applications closed
                 </div>
                 <Link href="/jobs" className="btn btn-ghost btn-sm" style={{ width: "100%", justifyContent: "center" }}>
-                  Browse open roles →
+                  Browse open roles
                 </Link>
               </>
             )}
@@ -341,7 +341,7 @@ export default async function JobDetailPage({ params }: Props) {
                 {job.company.description?.slice(0, 120)}…
               </p>
               <Link href={`/companies/${job.company.slug}`} className="btn btn-outline btn-sm" style={{ width: "100%", justifyContent: "center" }}>
-                View company →
+                View company
               </Link>
             </div>
           )}
@@ -353,7 +353,6 @@ export default async function JobDetailPage({ params }: Props) {
         <div style={{ marginTop: 64 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <h2 className="h2">Similar roles</h2>
-            <Link href="/jobs" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none" }}>VIEW ALL →</Link>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {similar.map(j => <JobCard key={j.id} {...j} />)}

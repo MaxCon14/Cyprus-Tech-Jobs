@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, ArrowRight, Loader2, RefreshCw } from "lucide-react";
+import { Mail, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -125,7 +125,7 @@ export function LoginForm({ authError }: { authError?: string }) {
           >
             {loading
               ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
-              : <>Verify code <ArrowRight size={14} /></>
+              : "Verify code"
             }
           </button>
 
@@ -179,7 +179,7 @@ export function LoginForm({ authError }: { authError?: string }) {
           {error.includes("No account") && (
             <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
               <Link href="/get-started" style={{ color: "var(--accent)", textDecoration: "none" }}>
-                Create a free account →
+                Create a free account
               </Link>
             </p>
           )}
@@ -189,7 +189,7 @@ export function LoginForm({ authError }: { authError?: string }) {
       <button type="submit" disabled={loading} className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
         {loading
           ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
-          : <>Send code <ArrowRight size={14} /></>
+          : "Send code"
         }
       </button>
     </form>

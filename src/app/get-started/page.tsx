@@ -23,7 +23,7 @@ export default function GetStartedPage() {
       <p className="body-s" style={{ color: "var(--text-subtle)", marginTop: 32 }}>
         Already have an account?{" "}
         <Link href="/login" style={{ color: "var(--accent)", textDecoration: "none" }}>
-          Sign in →
+          Sign in
         </Link>
       </p>
 

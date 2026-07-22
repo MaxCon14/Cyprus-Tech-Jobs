@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
                 className="btn btn-accent"
                 style={{ width: "100%", justifyContent: "center", opacity: loading ? 0.6 : 1 }}
               >
-                {loading ? "Sending…" : "Send sign-in link →"}
+                {loading ? "Sending…" : "Send sign-in link"}
               </button>
             </form>
           )}

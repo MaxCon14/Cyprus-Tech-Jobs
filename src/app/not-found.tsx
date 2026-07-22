@@ -9,7 +9,7 @@ export default function NotFound() {
         This page doesn&apos;t exist — but there are plenty of great tech jobs that do.
       </p>
       <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-        <Link href="/jobs" className="btn btn-accent">Browse jobs →</Link>
+        <Link href="/jobs" className="btn btn-accent">Browse jobs</Link>
         <Link href="/" className="btn btn-outline">Go home</Link>
       </div>
     </div>

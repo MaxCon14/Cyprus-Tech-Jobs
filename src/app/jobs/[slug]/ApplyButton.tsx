@@ -54,7 +54,7 @@ export function ApplyButton({
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <button onClick={handleClick} className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Apply for this role →
+          Apply for this role
         </button>
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
           APPLIES TO {companyName.toUpperCase()} DIRECTLY
@@ -108,7 +108,7 @@ function InAppApplyForm({
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <Link href="/login" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Sign in to apply →
+          Sign in to apply
         </Link>
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
           APPLY DIRECTLY ON CYPRUSTECHCAREERS
@@ -206,7 +206,7 @@ function InAppApplyForm({
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <button onClick={() => setOpen(true)} className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Apply on CyprusTech.Careers →
+          Apply on CyprusTech.Careers
         </button>
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
           USES YOUR SAVED PROFILE &amp; CV
@@ -498,7 +498,7 @@ function InAppApplyForm({
         >
           {submitting
             ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Submitting…</>
-            : "Submit application →"
+            : "Submit application"
           }
         </button>
         <button

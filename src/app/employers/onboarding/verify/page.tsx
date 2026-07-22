@@ -33,7 +33,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <Link href="/post-a-job" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-            Post your first job →
+            Post your first job
           </Link>
           <Link href="/employers/dashboard" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}>
             Go to dashboard

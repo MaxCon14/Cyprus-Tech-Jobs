@@ -55,7 +55,7 @@ export default async function LoginPage({ searchParams }: Props) {
         <p className="body-s" style={{ color: "var(--text-subtle)", textAlign: "center" }}>
           New here?{" "}
           <Link href="/get-started" style={{ color: "var(--accent)", textDecoration: "none" }}>
-            Create an account →
+            Create an account
           </Link>
         </p>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -73,7 +73,7 @@ function RoleCard({
         </ul>
 
         <div style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: accent ? "var(--accent)" : "var(--text-muted)" }}>
-          {cta} <ArrowRight size={14} />
+          {cta}
         </div>
       </div>
     </Link>

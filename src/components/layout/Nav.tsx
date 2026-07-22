@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   LogOut, LayoutDashboard, ChevronDown, ChevronRight, Menu, X,
-  Briefcase, MapPin, Clock, ArrowRight, Zap, Star,
+  Briefcase, MapPin, Clock, Zap, Star,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
@@ -84,7 +84,7 @@ function JobsDropdown({ onClose }: { onClose: () => void }) {
 
           <div style={{ marginTop: "auto", paddingTop: 14, borderTop: "1px solid var(--border)" }}>
             <Link href="/jobs" className="nav-dropdown-cta" onClick={onClose}>
-              Browse all jobs <ArrowRight size={13} />
+              Browse all jobs
             </Link>
           </div>
         </div>
@@ -358,7 +358,7 @@ export function Nav() {
                 </div>
 
                 <Link href="/jobs" className="mobile-menu-link" style={{ fontWeight: 500, color: "var(--accent)", marginTop: 4, display: "block" }}>
-                  Browse all jobs →
+                  Browse all jobs
                 </Link>
               </div>
             </div>

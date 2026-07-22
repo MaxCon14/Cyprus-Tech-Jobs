@@ -316,7 +316,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                     {!hasThisSlot && (
                       <div style={{ marginTop: 10 }}>
                         <Link href="/buy-credits" className="mono-s" style={{ color: "var(--accent)", textDecoration: "underline" }} onClick={e => e.stopPropagation()}>
-                          Buy {opt.label.toLowerCase()} slots →
+                          Buy {opt.label.toLowerCase()} slots
                         </Link>
                       </div>
                     )}
@@ -608,7 +608,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                 {loading
                   ? <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Posting…</>
                   : hasSlots
-                    ? <>Post {listingType === "featured" ? "Featured" : "Standard"} listing →</>
+                    ? `Post ${listingType === "featured" ? "Featured" : "Standard"} listing`
                     : "Buy slots to publish"
                 }
               </button>
@@ -632,7 +632,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
             )}
             {!hasSlots && (
               <p className="mono-s" style={{ color: "var(--text-subtle)", textAlign: "center", marginTop: 10 }}>
-                DRAFT SAVED · NO SLOT NEEDED · <Link href="/buy-credits" className="mono-s" style={{ color: "var(--accent)", textDecoration: "underline" }}>BUY SLOTS →</Link>
+                DRAFT SAVED · NO SLOT NEEDED · <Link href="/buy-credits" className="mono-s" style={{ color: "var(--accent)", textDecoration: "underline" }}>BUY SLOTS</Link>
               </p>
             )}
           </form>

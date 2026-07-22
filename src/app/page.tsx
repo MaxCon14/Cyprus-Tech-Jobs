@@ -221,9 +221,8 @@ export default async function HomePage() {
                 ))}
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <div style={{ marginBottom: 16 }}>
                 <h2 className="h2">Latest jobs</h2>
-                <Link href="/jobs" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none" }}>VIEW ALL →</Link>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -232,7 +231,7 @@ export default async function HomePage() {
 
               <div style={{ marginTop: 24 }}>
                 <Link href="/jobs" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}>
-                  View all {totalJobs} jobs →
+                  View all {totalJobs} jobs
                 </Link>
               </div>
             </div>
@@ -257,7 +256,7 @@ export default async function HomePage() {
                 <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16 }}>
                   Reach thousands of tech professionals actively looking for roles in Cyprus.
                 </p>
-                <Link href="/post-a-job" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>Post a job →</Link>
+                <Link href="/post-a-job" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>Post a job</Link>
               </div>
 
               {/* Market snapshot */}
@@ -275,7 +274,7 @@ export default async function HomePage() {
                   </div>
                 ))}
                 <Link href="/salary-guide" className="mono-s" style={{ color: "var(--accent)", textDecoration: "none", display: "block", marginTop: 14 }}>
-                  FULL SALARY GUIDE →
+                  FULL SALARY GUIDE
                 </Link>
               </div>
             </aside>
@@ -291,7 +290,7 @@ export default async function HomePage() {
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>BROWSE BY CATEGORY</div>
               <h2 className="display-m">Find roles in your speciality</h2>
             </div>
-            <Link href="/jobs" className="btn btn-outline btn-sm">All jobs →</Link>
+            <Link href="/jobs" className="btn btn-outline btn-sm">All jobs</Link>
           </div>
           <div className="grid-4" style={{ gap: "clamp(10px, 2vw, 16px)" }}>
             {CATEGORY_GRID.map(cat => (
@@ -354,7 +353,7 @@ export default async function HomePage() {
               {/* CTA */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 10, maxWidth: 360, margin: "0 auto" }}>
                 <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center", boxShadow: "0 0 40px rgba(255,61,127,0.45)" }}>
-                  Create free candidate account →
+                  Create free candidate account
                 </Link>
                 <Link href="/jobs" className="link-subtle-hover" style={{ justifyContent: "center", display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
                   Browse jobs without an account
@@ -395,7 +394,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="btn-group-mobile">
-              <Link href="/post-a-job" className="btn btn-accent btn-lg">Post a job →</Link>
+              <Link href="/post-a-job" className="btn btn-accent btn-lg">Post a job</Link>
               <Link href="/companies" className="btn btn-outline btn-lg">View companies</Link>
             </div>
           </div>

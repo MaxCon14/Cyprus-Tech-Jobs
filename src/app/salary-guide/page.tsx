@@ -163,7 +163,7 @@ export default function SalaryGuidePage() {
           <h2 className="h2" style={{ marginBottom: 6 }}>Ready to find your next role?</h2>
           <p className="body" style={{ color: "var(--text-muted)" }}>Browse jobs with verified salaries — no guessing, no negotiating blind.</p>
         </div>
-        <Link href="/jobs" className="btn btn-accent btn-lg">Browse jobs →</Link>
+        <Link href="/jobs" className="btn btn-accent btn-lg">Browse jobs</Link>
       </div>
     </div>
   );

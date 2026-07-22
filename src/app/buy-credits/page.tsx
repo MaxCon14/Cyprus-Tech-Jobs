@@ -60,7 +60,7 @@ export default async function BuyCreditsPage() {
               <>
                 <div style={{ width: 1, height: 32, background: "var(--border-strong)" }} />
                 <Link href="/post-a-job" className="btn btn-accent btn-sm">
-                  Post a job →
+                  Post a job
                 </Link>
               </>
             )}

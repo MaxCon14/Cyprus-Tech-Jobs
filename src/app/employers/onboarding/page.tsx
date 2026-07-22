@@ -3,7 +3,7 @@
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, Building2, Mail, Briefcase, CheckCircle2, CheckCircle, Info } from "lucide-react";
+import { ArrowLeft, Building2, Mail, Briefcase, CheckCircle2, CheckCircle, Info } from "lucide-react";
 import {
   employerReducer,
   initialEmployerState,
@@ -421,7 +421,7 @@ function Step5Done({ state }: { state: EmployerWizardState }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <Link href="/post-a-job" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-            Post your first job <ArrowRight size={16} />
+            Post your first job
           </Link>
           <Link href="/employers/dashboard" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}>
             Go to dashboard
@@ -619,7 +619,7 @@ export default function EmployerOnboardingPage() {
             disabled={state.submitting}
             style={{ minWidth: 140, justifyContent: "center" }}
           >
-            {state.submitting ? "Saving…" : isLastInputStep ? <>Continue <ArrowRight size={15} /></> : <>Next <ArrowRight size={15} /></>}
+            {state.submitting ? "Saving…" : isLastInputStep ? "Continue" : "Next"}
           </button>
         </div>
       )}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, ArrowRight, Briefcase } from "lucide-react";
+import { CheckCircle2, Briefcase } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -76,7 +76,7 @@ export default async function PostJobSuccessPage({
             <Briefcase size={14} /> Browse jobs
           </Link>
           <Link href="/employers/dashboard" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            View dashboard <ArrowRight size={14} />
+            View dashboard
           </Link>
         </div>
       </div>

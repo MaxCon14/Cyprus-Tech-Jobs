@@ -608,7 +608,7 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <ShoppingBag size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
               <span className="body-s" style={{ color: "var(--text-muted)" }}>
-                No slots available. <a href="/buy-credits" style={{ color: "var(--accent)", textDecoration: "underline" }}>Buy slots →</a>
+                No slots available. <a href="/buy-credits" style={{ color: "var(--accent)", textDecoration: "underline" }}>Buy slots</a>
               </span>
             </div>
           ) : (

@@ -36,7 +36,7 @@ export default async function AdminBlogPage() {
                   : { label: "Publish",   endpoint: `/api/admin/blog/${p.id}`, method: "PATCH", body: { published: true } },
                 { label: "Delete", endpoint: `/api/admin/blog/${p.id}`, method: "DELETE", confirm: `Delete "${p.title}"?`, destructive: true },
               ]} />
-              <Link href={`/admin/blog/${p.id}/edit`} style={{ display: "inline-block", marginTop: 4, fontSize: 11, color: "var(--text-subtle)", textDecoration: "none" }}>Edit →</Link>
+              <Link href={`/admin/blog/${p.id}/edit`} style={{ display: "inline-block", marginTop: 4, fontSize: 11, color: "var(--text-subtle)", textDecoration: "none" }}>Edit</Link>
             </AdminTd>
           </AdminTr>
         ))}

@@ -141,7 +141,7 @@ export function JobCard({
             <strong>Undisclosed</strong>
           </div>
         ) : null}
-        <button className="btn btn-accent job-card-apply">Apply for this role →</button>
+        <button className="btn btn-accent job-card-apply">Apply for this role</button>
       </div>
     </Link>
   );

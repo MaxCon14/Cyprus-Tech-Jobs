@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <h2 style={{ fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 600 }}>Recent jobs</h2>
-            <Link href="/admin/jobs" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", fontSize: 11 }}>View all →</Link>
+            <Link href="/admin/jobs" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", fontSize: 11 }}>View all</Link>
           </div>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
             {recentJobs.map((j, i) => (
@@ -127,7 +127,7 @@ export default async function AdminDashboardPage() {
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <h2 style={{ fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 600 }}>Top jobs by apply clicks</h2>
-            <Link href="/admin/analytics" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", fontSize: 11 }}>Analytics →</Link>
+            <Link href="/admin/analytics" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", fontSize: 11 }}>Analytics</Link>
           </div>
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
             {topJobsByClicks.length === 0 && (

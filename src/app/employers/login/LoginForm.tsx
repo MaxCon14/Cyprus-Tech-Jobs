@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, ArrowRight, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { Mail, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -167,7 +167,7 @@ export function LoginForm({ error: initialError }: { error?: string }) {
           {error.includes("No employer account") && (
             <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
               <Link href="/employers/onboarding" style={{ color: "var(--accent)", textDecoration: "none" }}>
-                Create an employer account →
+                Create an employer account
               </Link>
             </p>
           )}
@@ -182,7 +182,7 @@ export function LoginForm({ error: initialError }: { error?: string }) {
       >
         {loading
           ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} />
-          : <>Send sign-in link <ArrowRight size={14} /></>}
+          : "Send sign-in link"}
       </button>
     </form>
   );

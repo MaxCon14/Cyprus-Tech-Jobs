@@ -140,7 +140,7 @@ export default async function BlogPostPage({ params }: Props) {
               Post your role on CyprusTech.Careers and reach thousands of tech professionals. Listings go live in minutes, with verified salary ranges.
             </p>
             <Link href="/post-a-job" className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
-              Post a job →
+              Post a job
             </Link>
           </div>
 
@@ -190,7 +190,7 @@ export default async function BlogPostPage({ params }: Props) {
           <p className="body" style={{ color: "var(--text-muted)" }}>Post your role with a verified salary range and get in front of Cyprus's best tech talent.</p>
         </div>
         <Link href="/post-a-job" className="btn btn-accent btn-lg" style={{ flexShrink: 0 }}>
-          Post a job →
+          Post a job
         </Link>
       </div>
     </div>

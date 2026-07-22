@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { useRef, useState } from "react";
 import {
   Upload, X, FileText, CheckCircle, AlertCircle,
-  ArrowRight, Sparkles, ChevronDown, ChevronUp,
+  Sparkles, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { ProfileRing } from "@/components/onboarding/ProfileRing";
 import Link from "next/link";
@@ -372,7 +372,7 @@ function SourcePicker({
             className="btn btn-accent btn-lg"
             style={{ width: "100%", justifyContent: "center", gap: 8 }}
           >
-            Analyse this CV <ArrowRight size={15} />
+            <Sparkles size={15} /> Analyse this CV
           </button>
         </>
       )}

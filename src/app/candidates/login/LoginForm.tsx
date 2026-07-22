@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Mail, ArrowRight, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
+import { Mail, CheckCircle2, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -105,14 +105,14 @@ export function LoginForm() {
           <p className="body-s" style={{ color: "var(--error)", margin: 0 }}>{error}</p>
           {error.includes("No candidate account") && (
             <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
-              <Link href="/candidates/onboarding" style={{ color: "var(--accent)", textDecoration: "none" }}>Create a free account →</Link>
+              <Link href="/candidates/onboarding" style={{ color: "var(--accent)", textDecoration: "none" }}>Create a free account</Link>
             </p>
           )}
         </div>
       )}
 
       <button type="submit" disabled={loading} className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
-        {loading ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} /> : <>Send sign-in link <ArrowRight size={14} /></>}
+        {loading ? <Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} /> : "Send sign-in link"}
       </button>
     </form>
   );
