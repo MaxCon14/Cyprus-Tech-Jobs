@@ -2,7 +2,7 @@
 
 import { useReducer, useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Zap, MapPin, BarChart2, User, Code2, Link2, Globe, CheckCircle2, X, AtSign, Briefcase, Plus, Trash2, Sparkles, Loader2, FileText } from "lucide-react";
 import Link from "next/link";
 import {
   candidateReducer,
@@ -410,6 +410,9 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
   const positions = state.positions;
   const [form, setForm] = useState<PositionDraft>(emptyDraft());
   const [adding, setAdding] = useState(false);
+  const [autofilling, setAutofilling]     = useState(false);
+  const [autofillError, setAutofillError] = useState<string | null>(null);
+  const [autofillNotice, setAutofillNotice] = useState<string | null>(null);
 
   const setField = (field: keyof PositionDraft, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
@@ -424,6 +427,40 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
   const remove = (id: string) =>
     dispatch({ type: "SET_POSITIONS", value: positions.filter((x) => x.id !== id) });
 
+  async function autofillFromCv() {
+    if (!state.cvUrl || autofilling) return;
+    setAutofillError(null);
+    setAutofillNotice(null);
+    setAutofilling(true);
+    try {
+      const res = await fetch("/api/candidates/parse-cv", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ cvUrl: state.cvUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAutofillError(data.error ?? "Couldn't read your CV. Please add positions manually.");
+        return;
+      }
+      const parsed: Omit<PositionDraft, "id">[] = data.positions ?? [];
+      if (parsed.length === 0) {
+        setAutofillError("We couldn't find any work experience in your CV. Please add positions manually.");
+        return;
+      }
+      const withIds: PositionDraft[] = parsed.map((p) => ({
+        ...p,
+        id: Math.random().toString(36).slice(2),
+      }));
+      dispatch({ type: "SET_POSITIONS", value: [...positions, ...withIds] });
+      setAutofillNotice(`Added ${withIds.length} role${withIds.length === 1 ? "" : "s"} from your CV — please double-check the details.`);
+    } catch {
+      setAutofillError("Network error. Please try again.");
+    } finally {
+      setAutofilling(false);
+    }
+  }
+
   return (
     <div>
       <StepHeader
@@ -431,6 +468,65 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
         title="Work experience"
         subtitle="Add your previous roles — or skip and do it later."
       />
+
+      {/* Autofill from CV */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 12,
+        padding: "14px 16px", borderRadius: "var(--radius-md)",
+        border: "1px solid var(--border)",
+        background: state.cvUrl ? "var(--accent-soft)" : "var(--bg-muted)",
+        marginBottom: 16,
+        flexWrap: "wrap",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+          <FileText size={16} style={{ color: state.cvUrl ? "var(--accent)" : "var(--text-subtle)", flexShrink: 0 }} />
+          <div style={{ minWidth: 0 }}>
+            <p className="body-s" style={{ margin: 0, fontWeight: 600, color: "var(--text)" }}>
+              {state.cvUrl ? "Autofill from your CV" : "Upload a CV to autofill"}
+            </p>
+            <p className="body-s" style={{ margin: 0, color: "var(--text-muted)" }}>
+              {state.cvUrl
+                ? "We'll extract your roles — you can edit each one before continuing."
+                : "Go back to the previous step to upload your CV first."}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn btn-accent"
+          onClick={autofillFromCv}
+          disabled={!state.cvUrl || autofilling}
+          style={{ gap: 6, flexShrink: 0 }}
+        >
+          {autofilling ? (
+            <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Reading CV…</>
+          ) : (
+            <><Sparkles size={14} /> Autofill</>
+          )}
+        </button>
+      </div>
+
+      {autofillNotice && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "10px 14px", borderRadius: "var(--radius-md)",
+          border: "1px solid var(--success)", background: "var(--success-bg)",
+          marginBottom: 16,
+        }}>
+          <CheckCircle2 size={14} style={{ color: "var(--success)", flexShrink: 0 }} />
+          <p className="body-s" style={{ margin: 0, color: "var(--success)" }}>{autofillNotice}</p>
+        </div>
+      )}
+
+      {autofillError && (
+        <div style={{
+          padding: "10px 14px", borderRadius: "var(--radius-md)",
+          border: "1px solid var(--error)", background: "var(--error-bg)",
+          marginBottom: 16,
+        }}>
+          <p className="body-s" style={{ margin: 0, color: "var(--error)" }}>{autofillError}</p>
+        </div>
+      )}
 
       {/* Saved positions list */}
       {positions.length > 0 && (
