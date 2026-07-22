@@ -406,6 +406,66 @@ const emptyDraft = (): PositionDraft => ({
   title: "", company: "", startDate: "", endDate: "", current: false, description: "",
 });
 
+function PositionForm({
+  form, setField, onSave, onCancel, isEditing,
+}: {
+  form:      PositionDraft;
+  setField:  (field: keyof PositionDraft, value: string | boolean) => void;
+  onSave:    () => void;
+  onCancel:  () => void;
+  isEditing: boolean;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "18px", borderRadius: "var(--radius-md)", border: "1.5px solid var(--accent)", background: "var(--accent-soft)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <Field label="Job title" required>
+          <input className="input" type="text" value={form.title} placeholder="Senior Engineer"
+            onChange={(e) => setField("title", e.target.value)} autoFocus />
+        </Field>
+        <Field label="Company" required>
+          <input className="input" type="text" value={form.company} placeholder="Acme Corp"
+            onChange={(e) => setField("company", e.target.value)} />
+        </Field>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <Field label="Start date">
+          <input className="input" type="month" value={form.startDate}
+            onChange={(e) => setField("startDate", e.target.value)} />
+        </Field>
+        <Field label="End date">
+          <input className="input" type="month" value={form.endDate}
+            disabled={form.current}
+            onChange={(e) => setField("endDate", e.target.value)} />
+        </Field>
+      </div>
+
+      <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+        <input type="checkbox" checked={form.current}
+          onChange={(e) => { setField("current", e.target.checked); if (e.target.checked) setField("endDate", ""); }} />
+        <span className="body-s">I currently work here</span>
+      </label>
+
+      <Field label="Description (optional)">
+        <textarea className="input" value={form.description} placeholder="What did you build or achieve?"
+          rows={2} maxLength={400}
+          onChange={(e) => setField("description", e.target.value)}
+          style={{ resize: "vertical" }} />
+      </Field>
+
+      <div style={{ display: "flex", gap: 10 }}>
+        <button type="button" className="btn btn-accent" onClick={onSave}
+          disabled={!form.title.trim() || !form.company.trim()}>
+          {isEditing ? <><Check size={14} /> Save changes</> : <><Plus size={14} /> Add position</>}
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
   const positions = state.positions;
   const [form, setForm] = useState<PositionDraft>(emptyDraft());
@@ -548,11 +608,13 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
         </div>
       )}
 
-      {/* Saved positions list */}
+      {/* Saved positions list — each row is either a summary card or the edit form when it's the one being edited */}
       {positions.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
           {positions.map((p) => {
-            if (p.id === editingId) return null;
+            if (p.id === editingId) {
+              return <PositionForm key={p.id} form={form} setField={setField} onSave={savePosition} onCancel={resetForm} isEditing />;
+            }
             return (
               <div key={p.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, padding: "14px 16px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--surface)" }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
@@ -575,56 +637,13 @@ function Step7Experience({ state, dispatch }: { state: CandidateWizardState; dis
         </div>
       )}
 
-      {/* Add / edit form */}
-      {(adding || isEditing) ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "18px", borderRadius: "var(--radius-md)", border: "1.5px solid var(--accent)", background: "var(--accent-soft)" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <Field label="Job title" required>
-              <input className="input" type="text" value={form.title} placeholder="Senior Engineer"
-                onChange={(e) => setField("title", e.target.value)} autoFocus />
-            </Field>
-            <Field label="Company" required>
-              <input className="input" type="text" value={form.company} placeholder="Acme Corp"
-                onChange={(e) => setField("company", e.target.value)} />
-            </Field>
-          </div>
+      {/* Add form (only when explicitly adding — never shown while editing an existing row) */}
+      {adding && !isEditing && (
+        <PositionForm form={form} setField={setField} onSave={savePosition} onCancel={resetForm} isEditing={false} />
+      )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <Field label="Start date">
-              <input className="input" type="month" value={form.startDate}
-                onChange={(e) => setField("startDate", e.target.value)} />
-            </Field>
-            <Field label="End date">
-              <input className="input" type="month" value={form.endDate}
-                disabled={form.current}
-                onChange={(e) => setField("endDate", e.target.value)} />
-            </Field>
-          </div>
-
-          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-            <input type="checkbox" checked={form.current}
-              onChange={(e) => { setField("current", e.target.checked); if (e.target.checked) setField("endDate", ""); }} />
-            <span className="body-s">I currently work here</span>
-          </label>
-
-          <Field label="Description (optional)">
-            <textarea className="input" value={form.description} placeholder="What did you build or achieve?"
-              rows={2} maxLength={400}
-              onChange={(e) => setField("description", e.target.value)}
-              style={{ resize: "vertical" }} />
-          </Field>
-
-          <div style={{ display: "flex", gap: 10 }}>
-            <button type="button" className="btn btn-accent" onClick={savePosition}
-              disabled={!form.title.trim() || !form.company.trim()}>
-              {isEditing ? <><Check size={14} /> Save changes</> : <><Plus size={14} /> Add position</>}
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={resetForm}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
+      {/* "Add a position" button — hidden while any form is open */}
+      {!adding && !isEditing && (
         <button type="button" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}
           onClick={() => setAdding(true)}>
           <Plus size={15} /> Add a position
