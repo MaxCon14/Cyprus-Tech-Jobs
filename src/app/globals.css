@@ -1104,26 +1104,22 @@ body {
 }
 
 .faq-summary {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   width: 100%;
   align-items: center;
+  justify-content: space-between;
   padding: 20px 0;
   cursor: pointer;
   list-style: none;
   gap: 16px;
-  text-align: center;
-}
-
-.faq-summary > :first-child {
-  grid-column: 2;
+  text-align: left;
 }
 
 .faq-summary::-webkit-details-marker { display: none; }
 
 .faq-body {
   padding: 0 0 20px;
-  text-align: center;
+  text-align: left;
 }
 
 .faq-chevron {

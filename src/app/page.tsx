@@ -367,17 +367,15 @@ export default async function HomePage() {
       {/* ── FAQ ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
         <div className="page-container">
-          <div style={{ maxWidth: 780, margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "clamp(28px, 4vw, 44px)" }}>
-              <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>FAQ</div>
-              <h2 className="display-m" style={{ marginBottom: 12 }}>Common questions about Cyprus tech jobs</h2>
-              <p className="body" style={{ color: "var(--text-muted)" }}>
-                Everything you need to know before starting your search.
-              </p>
-            </div>
-
-            <FaqAccordion faqs={FAQS} />
+          <div style={{ textAlign: "center", marginBottom: "clamp(28px, 4vw, 44px)" }}>
+            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>FAQ</div>
+            <h2 className="display-m" style={{ marginBottom: 12 }}>Common questions about Cyprus tech jobs</h2>
+            <p className="body" style={{ color: "var(--text-muted)" }}>
+              Everything you need to know before starting your search.
+            </p>
           </div>
+
+          <FaqAccordion faqs={FAQS} />
         </div>
       </section>
 
