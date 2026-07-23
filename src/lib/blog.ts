@@ -307,11 +307,19 @@ function dbToPost(p: PrismaBlogPost): BlogPost {
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
-  const dbPosts = await prisma.blogPost.findMany({
-    where: { published: true },
-    orderBy: { publishedAt: "desc" },
-  });
-  const dbConverted = dbPosts.map(dbToPost);
+  // The DB only *adds* admin-created posts on top of the static ones. If it's
+  // unreachable (e.g. bad creds at build time) fall back to the static posts
+  // rather than throwing and failing the whole build/render.
+  let dbConverted: BlogPost[] = [];
+  try {
+    const dbPosts = await prisma.blogPost.findMany({
+      where: { published: true },
+      orderBy: { publishedAt: "desc" },
+    });
+    dbConverted = dbPosts.map(dbToPost);
+  } catch (err) {
+    console.error("[blog] DB unavailable, serving static posts only:", err);
+  }
   // Merge: static posts first (they have older publish dates), then DB posts
   // Deduplicate by slug in case a static post was re-created in DB
   const dbSlugs = new Set(dbConverted.map(p => p.slug));
@@ -322,9 +330,14 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 }
 
 export async function getAnyPost(slug: string): Promise<BlogPost | undefined> {
-  // Check DB first (admin posts take precedence)
-  const dbPost = await prisma.blogPost.findUnique({ where: { slug } });
-  if (dbPost?.published) return dbToPost(dbPost);
+  // Check DB first (admin posts take precedence), but never let a DB outage
+  // hide the static posts.
+  try {
+    const dbPost = await prisma.blogPost.findUnique({ where: { slug } });
+    if (dbPost?.published) return dbToPost(dbPost);
+  } catch (err) {
+    console.error("[blog] DB unavailable, falling back to static post:", err);
+  }
   // Fall back to static
   return getPost(slug);
 }
