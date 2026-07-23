@@ -85,8 +85,9 @@ function ApplyModalShell({
             <X size={18} />
           </button>
         </div>
-        {/* Scrollable body */}
-        <div style={{ padding: 20, overflowY: "auto", display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Scrollable body — flex:1 + minHeight:0 lets it shrink below its
+            content height so overflow-y actually scrolls inside the card. */}
+        <div style={{ flex: 1, minHeight: 0, padding: 20, overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 20 }}>
           {children}
         </div>
       </div>
