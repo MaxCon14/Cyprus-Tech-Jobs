@@ -72,7 +72,10 @@ function RoleCard({
           ))}
         </ul>
 
-        <div style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: 6, fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: accent ? "var(--accent)" : "var(--text-muted)" }}>
+        <div
+          className={`btn ${accent ? "btn-accent" : "btn-outline"}`}
+          style={{ marginTop: "auto", width: "100%", justifyContent: "center" }}
+        >
           {cta}
         </div>
       </div>
@@ -110,7 +113,7 @@ export function RoleCards() {
         title="I'm looking for work"
         description="Get personalised job alerts for tech roles in Cyprus."
         perks={SEEKER_PERKS}
-        cta="Set up job alerts"
+        cta="Create job seeker account"
         accent={false}
       />
     </div>
