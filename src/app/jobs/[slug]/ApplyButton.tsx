@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import { CheckCircle2, Loader2, FileText, AlertCircle, Upload } from "lucide-react";
+import { CheckCircle2, Loader2, FileText, AlertCircle, Upload, X } from "lucide-react";
 
 interface Props {
   jobId: string;
@@ -33,6 +34,64 @@ function recordApply(jobId: string) {
     body: JSON.stringify({ jobId }),
   }).catch(() => {});
   fetch(`/api/jobs/${jobId}/track-apply`, { method: "POST" }).catch(() => {});
+}
+
+/** Full-screen centered modal so the application form has room to breathe
+ *  instead of being squished into the job-detail sidebar. */
+function ApplyModalShell({
+  title, onClose, children,
+}: { title: string; onClose: () => void; children: React.ReactNode }) {
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(0,0,0,0.45)",
+        display: "grid", placeItems: "center",
+        padding: "clamp(12px, 4vw, 32px)",
+        overflowY: "auto",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        style={{
+          background: "var(--surface)", borderRadius: 16,
+          border: "1px solid var(--border)",
+          width: "100%", maxWidth: 560, margin: "auto",
+          maxHeight: "90vh", display: "flex", flexDirection: "column",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "18px 20px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
+          <h2 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 17, color: "var(--text)", margin: 0 }}>
+            {title}
+          </h2>
+          <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-subtle)", padding: 4, display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <X size={18} />
+          </button>
+        </div>
+        {/* Scrollable body */}
+        <div style={{ padding: 20, overflowY: "auto", display: "flex", flexDirection: "column", gap: 20 }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ApplyButton({
@@ -202,24 +261,11 @@ function InAppApplyForm({
     }
   }
 
-  if (!open) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <button onClick={() => setOpen(true)} className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Apply on CyprusTech.Careers
-        </button>
-        <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-          USES YOUR SAVED PROFILE &amp; CV
-        </p>
-      </div>
-    );
-  }
-
   const initials = (candidateName ?? candidateEmail ?? "?")
     .split(" ").slice(0, 2).map(w => w[0]?.toUpperCase() ?? "").join("");
 
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+  const formBody = (
+    <>
 
       {/* ── Applying As ── */}
       <div style={{
@@ -510,6 +556,28 @@ function InAppApplyForm({
         </button>
       </div>
 
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Inline trigger in the sidebar */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <button onClick={() => setOpen(true)} className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
+          Apply on CyprusTech.Careers
+        </button>
+        <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
+          USES YOUR SAVED PROFILE &amp; CV
+        </p>
+      </div>
+
+      {/* Full-screen application modal — gives the form room instead of the squished sidebar */}
+      {open && createPortal(
+        <ApplyModalShell title={`Apply to ${companyName}`} onClose={() => setOpen(false)}>
+          {formBody}
+        </ApplyModalShell>,
+        document.body
+      )}
+    </>
   );
 }
