@@ -11,7 +11,7 @@ import { Analytics } from "@vercel/analytics/next";
 const figtree = Figtree({
   variable: "--font-figtree",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -54,6 +54,12 @@ export default function RootLayout({
       className={`${figtree.variable} ${fragmentMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Warm up connections to the third-party icon/logo CDNs so their
+            DNS/TLS handshakes overlap with the initial render. */}
+        <link rel="preconnect" href="https://cdn.simpleicons.org" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google.com" />
+      </head>
       <body className="min-h-screen flex flex-col antialiased" style={{ background: "var(--bg)", color: "var(--text)" }}>
         <Providers>
           <Nav />

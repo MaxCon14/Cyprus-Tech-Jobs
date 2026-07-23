@@ -1,14 +1,15 @@
-"use client";
+// Server component: the card is static markup rendered many times per page,
+// so it stays on the server. Only the two genuinely interactive bits are
+// client islands — SaveJobButton (reads saved state from context itself) and
+// the image fallbacks (CompanyLogoImg / SkillIcon).
 
 import Link from "next/link";
-import { useState } from "react";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
 import { SaveJobButton } from "./SaveJobButton";
 import { SkillTag } from "./SkillTag";
-import { useSavedJobs } from "./SavedJobsContext";
+import { CompanyLogoImg } from "./CompanyLogoImg";
 
 function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: string | null; website?: string | null }) {
-  const [imgFailed, setImgFailed] = useState(false);
   const initial = name.charAt(0).toUpperCase();
 
   const domain = website
@@ -20,14 +21,7 @@ function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: strin
       ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256`
       : null;
 
-  if (src && !imgFailed) {
-    return (
-      <div className="job-card-logo">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={name} width={48} height={48} className="job-card-logo-img" onError={() => setImgFailed(true)} />
-      </div>
-    );
-  }
+  if (src) return <CompanyLogoImg src={src} name={name} initial={initial} />;
 
   return <div className="job-card-logo job-card-logo-fallback">{initial}</div>;
 }
@@ -84,7 +78,6 @@ export function JobCard({
   postedAt,
   tags = [],
 }: JobCardProps) {
-  const { savedJobIds, isCandidate } = useSavedJobs();
   const salary = salaryDisclosed ? formatSalary(salaryMin, salaryMax, salaryCurrency) : null;
   const empLabel = employmentType.replace("_", "-").replace(/\b\w/g, (c) => c.toUpperCase());
   const expLabel = experienceLevel.charAt(0) + experienceLevel.slice(1).toLowerCase();
@@ -102,11 +95,7 @@ export function JobCard({
           <span className="job-card-company">{displayName}</span>
           {postedAt && <span className="job-card-time">{timeAgo(postedAt)}</span>}
         </div>
-        <SaveJobButton
-          jobId={id}
-          initialSaved={savedJobIds?.includes(id) ?? false}
-          isCandidate={isCandidate}
-        />
+        <SaveJobButton jobId={id} />
       </div>
 
       {/* Title */}

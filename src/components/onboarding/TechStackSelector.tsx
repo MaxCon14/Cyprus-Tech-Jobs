@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Search, X } from "lucide-react";
-import { getIconSrc } from "@/components/jobs/SkillTag";
+import { getIconSrc } from "@/lib/skill-icons";
 
 const POPULAR = [
   "JavaScript", "TypeScript", "Python", "React", "Node.js",

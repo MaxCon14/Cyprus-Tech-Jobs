@@ -40,10 +40,28 @@ export async function getJobs({
         ],
       }),
     },
-    include: {
-      company:  true,
-      category: true,
-      tags:     { include: { tag: true } },
+    // Explicit select: the listing only needs card fields. Crucially this
+    // omits the large `description` body column (used only in the search
+    // WHERE clause above, not selected) and the unused `category` relation,
+    // shrinking each row and lowering server render / TTFB.
+    select: {
+      id:                 true,
+      slug:               true,
+      title:              true,
+      city:               true,
+      remoteType:         true,
+      employmentType:     true,
+      experienceLevel:    true,
+      salaryMin:          true,
+      salaryMax:          true,
+      salaryCurrency:     true,
+      salaryDisclosed:    true,
+      featured:           true,
+      isCurated:          true,
+      curatedCompanyName: true,
+      postedAt:           true,
+      company: { select: { name: true, slug: true, logoUrl: true, website: true } },
+      tags:    { select: { tag: { select: { name: true } } } },
     },
     orderBy: [
       { featured: "desc" },
@@ -220,19 +238,21 @@ export async function getCompanyBySlug(slug: string) {
 // ─── Categories ────────────────────────────────────────────────
 
 export async function getCategoriesWithCount() {
-  const parents = await prisma.category.findMany({
-    where:   { parentId: null },
-    include: {
-      _count:   { select: { jobs: { where: { status: "ACTIVE" } } } },
-      children: {
-        include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
-        orderBy: { name: "asc" },
+  // Parallelize the two round-trips instead of awaiting them back-to-back.
+  const [parents, total] = await Promise.all([
+    prisma.category.findMany({
+      where:   { parentId: null },
+      include: {
+        _count:   { select: { jobs: { where: { status: "ACTIVE" } } } },
+        children: {
+          include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
+          orderBy: { name: "asc" },
+        },
       },
-    },
-    orderBy: { name: "asc" },
-  });
-
-  const total = await getJobCount();
+      orderBy: { name: "asc" },
+    }),
+    getJobCount(),
+  ]);
 
   return [
     { id: "", label: "All jobs", slug: "", count: total, children: [] as { id: string; label: string; slug: string; count: number }[] },

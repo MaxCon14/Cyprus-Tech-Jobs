@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Heart, X } from "lucide-react";
 import Link from "next/link";
+import { useSavedJobs } from "./SavedJobsContext";
 
 function GuestModal({ onClose }: { onClose: () => void }) {
   return (
@@ -75,15 +76,10 @@ function GuestModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function SaveJobButton({
-  jobId,
-  initialSaved,
-  isCandidate,
-}: {
-  jobId: string;
-  initialSaved: boolean;
-  isCandidate: boolean;
-}) {
+export function SaveJobButton({ jobId }: { jobId: string }) {
+  const { savedJobIds, isCandidate } = useSavedJobs();
+  const initialSaved = savedJobIds?.includes(jobId) ?? false;
+
   const [saved,     setSaved]     = useState(initialSaved);
   const [loading,   setLoading]   = useState(false);
   const [showModal, setShowModal] = useState(false);

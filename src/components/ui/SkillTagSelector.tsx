@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { X, Search, ChevronDown, ChevronUp } from "lucide-react";
-import { getIconSrc } from "@/components/jobs/SkillTag";
+import { getIconSrc } from "@/lib/skill-icons";
 
 const DEFAULT_VISIBLE = 30; // ~3 rows at typical tag widths
 
