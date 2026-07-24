@@ -44,6 +44,14 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; color: string; 
   REJECTED:   { label: "Rejected",   bg: "var(--error-bg)",     color: "var(--error)",      icon: <X size={11} /> },
 };
 
+// The three decisions an employer makes on a candidate. Color-coded so the
+// choice is legible at a glance: neutral (seen), green (yes), red (no).
+const DECISIONS = [
+  { key: "REVIEWED",    label: "Reviewed",  color: "var(--text-muted)", icon: <CheckCircle2 size={15} /> },
+  { key: "SHORTLISTED", label: "Shortlist", color: "var(--success)",    icon: <Star size={15} /> },
+  { key: "REJECTED",    label: "Reject",    color: "var(--error)",      icon: <X size={15} /> },
+] as const;
+
 type StatusFilter = "ALL" | "UNREVIEWED" | "REVIEWED" | "SHORTLISTED" | "REJECTED";
 
 function isUnreviewed(status: string) {
@@ -223,10 +231,15 @@ function ApplicationCard({ app, onStatusChange }: {
     }
   }
 
+  const unreviewed = isUnreviewed(app.status);
+
   return (
     <div style={{
-      border: "1px solid var(--border)", borderRadius: 12,
-      background: isUnreviewed(app.status) ? "var(--surface)" : "var(--bg-alt)",
+      border: "1px solid var(--border-strong)",
+      borderLeft: unreviewed ? "3px solid var(--accent)" : "1px solid var(--border-strong)",
+      borderRadius: 12,
+      background: "var(--surface)",
+      boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.05)",
       overflow: "hidden",
     }}>
       {/* Header row */}
@@ -270,12 +283,12 @@ function ApplicationCard({ app, onStatusChange }: {
               </div>
             </div>
 
-            {/* Status badge */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            {/* Status badge (read-only indicator; change it in the decision bar below) */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
               <span style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "3px 9px", borderRadius: 5, fontSize: 10,
-                fontFamily: "var(--font-mono)", fontWeight: 700,
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "4px 10px", borderRadius: 999, fontSize: 12,
+                fontFamily: "var(--font-sans)", fontWeight: 600,
                 background: cfg.bg, color: cfg.color,
               }}>
                 {cfg.icon} {cfg.label}
@@ -303,18 +316,22 @@ function ApplicationCard({ app, onStatusChange }: {
         <button
           type="button"
           onClick={() => setExpanded(v => !v)}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "var(--border)"}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "var(--bg-muted)"}
           style={{
             width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             padding: "11px", border: "none", borderTop: "1px solid var(--border)",
             cursor: "pointer",
-            background: expanded ? "var(--bg-alt)" : "var(--accent-soft)",
-            color: "var(--accent)",
+            background: "var(--bg-muted)",
+            color: "var(--text)",
             fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
             transition: "background 120ms",
           }}
         >
           {expanded ? "Hide details" : "View details"}
-          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+          <span style={{ color: "var(--text-muted)", display: "flex" }}>
+            {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+          </span>
         </button>
       )}
 
@@ -380,52 +397,62 @@ function ApplicationCard({ app, onStatusChange }: {
         </div>
       )}
 
-      {/* Action buttons */}
+      {/* Decision bar — the employer sets the candidate's status here */}
       <div style={{
-        padding: "10px 20px 14px", display: "flex", gap: 6, flexWrap: "wrap",
-        borderTop: "1px solid var(--border)", background: "var(--bg-muted)",
+        padding: "12px 20px 14px",
+        borderTop: "1px solid var(--border)", background: "var(--bg-alt)",
       }}>
-        {(["REVIEWED", "SHORTLISTED", "REJECTED"] as const).map(s => {
-          const c = STATUS_CONFIG[s];
-          const active = app.status === s;
-          return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 12, color: "var(--text-muted)" }}>
+            Set status
+          </span>
+          {!unreviewed && (
             <button
-              key={s}
               type="button"
-              disabled={updating || active}
-              onClick={() => setStatus(s)}
+              disabled={updating}
+              onClick={() => setStatus("UNREVIEWED")}
               style={{
-                padding: "5px 12px", borderRadius: 6, fontSize: 11,
-                fontFamily: "var(--font-mono)", fontWeight: 600,
-                border: `1px solid ${active ? c.color : "var(--border)"}`,
-                background: active ? c.bg : "var(--surface)",
-                color: active ? c.color : "var(--text-muted)",
-                cursor: active || updating ? "default" : "pointer",
-                opacity: updating ? 0.6 : 1,
-                display: "flex", alignItems: "center", gap: 4,
-                transition: "all 120ms",
+                background: "none", border: "none", padding: 0,
+                cursor: updating ? "default" : "pointer",
+                fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
+                color: "var(--text-subtle)", textDecoration: "underline",
               }}
             >
-              {c.icon} {c.label}
+              Move back to unreviewed
             </button>
-          );
-        })}
-        {!isUnreviewed(app.status) && (
-          <button
-            type="button"
-            disabled={updating}
-            onClick={() => setStatus("UNREVIEWED")}
-            style={{
-              padding: "5px 12px", borderRadius: 6, fontSize: 11,
-              fontFamily: "var(--font-mono)", fontWeight: 600,
-              border: "1px solid var(--border)", background: "var(--surface)",
-              color: "var(--text-subtle)", cursor: updating ? "default" : "pointer",
-              opacity: updating ? 0.6 : 1,
-            }}
-          >
-            Reset
-          </button>
-        )}
+          )}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+          {DECISIONS.map(d => {
+            const active = app.status === d.key;
+            return (
+              <button
+                key={d.key}
+                type="button"
+                disabled={updating}
+                onClick={() => setStatus(d.key)}
+                onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = d.color; if (!active) (e.currentTarget as HTMLElement).style.color = "var(--white)"; }}
+                onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "var(--surface)"; (e.currentTarget as HTMLElement).style.color = d.color; } }}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "10px 10px", borderRadius: 9,
+                  fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
+                  border: `1.5px solid ${d.color}`,
+                  background: active ? d.color : "var(--surface)",
+                  color: active ? "var(--white)" : d.color,
+                  cursor: updating ? "default" : "pointer",
+                  opacity: updating && !active ? 0.55 : 1,
+                  transition: "background 120ms, color 120ms",
+                  minWidth: 0,
+                }}
+              >
+                {d.icon}
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{d.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Work experience modal */}
@@ -536,9 +563,9 @@ export function ApplicationsPanel({
   }
 
   return (
-    <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 16, background: "var(--bg-alt)" }}>
 
-      {/* Status filter tabs */}
+      {/* Status filter tabs — switch which applicants are shown */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         {STATUS_FILTERS.map(f => {
           const active = statusFilter === f.key;
@@ -549,22 +576,23 @@ export function ApplicationsPanel({
               type="button"
               onClick={() => setStatusFilter(f.key)}
               style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "5px 12px", borderRadius: 6, fontSize: 11,
-                fontFamily: "var(--font-mono)", fontWeight: 600, cursor: "pointer",
-                border: `1px solid ${active ? "var(--accent)" : "var(--border)"}`,
-                background: active ? "var(--accent-soft)" : "var(--surface)",
-                color: active ? "var(--accent)" : "var(--text-muted)",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "7px 13px", borderRadius: 8, fontSize: 13,
+                fontFamily: "var(--font-sans)", fontWeight: 600, cursor: "pointer",
+                border: `1px solid ${active ? "var(--accent)" : "var(--border-strong)"}`,
+                background: active ? "var(--accent)" : "var(--surface)",
+                color: active ? "var(--white)" : "var(--text-muted)",
                 transition: "all 120ms",
               }}
             >
               {f.label}
               <span style={{
-                minWidth: 16, textAlign: "center",
-                padding: "1px 4px", borderRadius: 4,
-                background: active ? "var(--accent)" : "var(--bg-muted)",
+                minWidth: 18, textAlign: "center",
+                padding: "1px 6px", borderRadius: 999,
+                fontFamily: "var(--font-mono)",
+                background: active ? "rgba(255,255,255,0.25)" : "var(--bg-muted)",
                 color: active ? "var(--white)" : "var(--text-subtle)",
-                fontSize: 10,
+                fontSize: 11, fontWeight: 700,
               }}>
                 {count}
               </span>
