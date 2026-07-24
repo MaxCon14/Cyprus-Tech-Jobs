@@ -3,7 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import {
-  Search, MapPin, Bell, UserPlus, Zap, Target,
+  Search, MapPin, Bell, UserPlus, Zap,
   Code2, Server, Cloud, PenTool, BarChart2, Smartphone, Layers, ShieldCheck,
 } from "lucide-react";
 import { Select } from "@/components/ui/Select";
@@ -354,22 +354,30 @@ export default async function HomePage() {
                 Build your profile.<br />Let the right jobs<br />find you.
               </h2>
 
-              {/* Feature bullets */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 420, margin: "0 auto 40px" }}>
+              {/* Feature tiles — each benefit in its own box. A leading icon
+                  column would introduce a second axis and fight the centred
+                  text, so the tile itself does the work of setting them apart.
+                  auto-fit collapses 2×2 to a single column on narrow screens. */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, margin: "0 auto 40px" }}>
                 {[
                   "Upload your CV and get AI-powered match scores",
                   "Personalised job alerts — daily or weekly",
                   "Save your preferences, salary expectations, and work type",
                   "Free forever for candidates",
                 ].map(item => (
-                  <div key={item} style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 10 }}>
-                    {/* flex-start (not center) so the dot tracks the first line
-                        when the label wraps to two lines on narrow screens */}
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,61,127,0.2)", border: "1px solid rgba(255,61,127,0.4)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
-                      <Target size={10} style={{ color: "#FF3D7F" }} />
-                    </div>
-                    <span style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.55, fontFamily: "var(--font-sans)" }}>{item}</span>
-                  </div>
+                  <div key={item} style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    borderRadius: 12,
+                    padding: "18px 16px",
+                    minHeight: 76,
+                    display: "grid",
+                    placeItems: "center",
+                    fontFamily: "var(--font-sans)",
+                    fontSize: 13.5,
+                    lineHeight: 1.5,
+                    color: "rgba(255,255,255,0.80)",
+                  }}>{item}</div>
                 ))}
               </div>
 
