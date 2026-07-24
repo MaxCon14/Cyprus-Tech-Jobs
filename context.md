@@ -5,22 +5,32 @@ Read this first if you're picking up the project in a new chat.
 
 ---
 
-## ⚠️ Critical: branches & production
+## Branches & production
 
-- **Working branch (has ALL current work): `claude/connect-database-7OQd6`.**
-- **`main` is STALE** — ~43 commits behind. It still has the *old magic-link
-  login* and none of this session's work. Do NOT branch new work off `main`.
-- Vercel deploys **production from a `claude/*` branch, not `main`.** During this
-  session, pushes to `claude/connect-database-7OQd6` appeared on production.
-- **Incident:** a separate chat branched off stale `main`
-  (`claude/compact-card-layout-92qmqy`) and deployed it, which rolled production
-  back ~43 commits and brought back the broken magic-link login. Fix = point
-  Vercel Production Branch back to `claude/connect-database-7OQd6` and redeploy.
-- **Recommendation:** merge `claude/connect-database-7OQd6` → `main` and make
-  `main` the production branch, so "production" is one obvious place. (Not done
-  yet — pending user decision.)
+- **`main` is the source of truth and the production branch.** It holds all the
+  work that used to live only on `claude/connect-database-7OQd6` (that branch was
+  fast-forward merged into `main`; the two are identical).
+- Vercel **Settings → Environments → Production → Branch Tracking** is set to
+  `main`, so every push to `main` creates a Production Deployment automatically.
+  "Auto-assign Custom Production Domains" is enabled, which keeps
+  `cyprustech.careers` / `www.cyprustech.careers` attached to each new deploy.
 
-**Golden rule for new work: branch from `claude/connect-database-7OQd6`, not `main`.**
+**Golden rule for new work: branch from `main`.**
+
+### History — why this section used to say the opposite
+
+Production previously tracked a stale `claude/*` branch while all real work
+happened on another, so every production release had to be promoted by hand in
+the Vercel dashboard. That setup caused an incident: a separate chat branched off
+stale `main` (`claude/compact-card-layout-92qmqy`) and promoted it, rolling
+production back ~43 commits and restoring the broken magic-link login. It was
+resolved by promoting the correct build, merging the work into `main`, and
+pointing Branch Tracking at `main`. The manual-promotion step is no longer
+needed — don't reintroduce it.
+
+Stale branches left over from that period (`claude/analyze-design-system-Y5y44`,
+`claude/compact-card-layout-92qmqy`, `claude/connect-database-MZ1XL`) are far
+behind `main` and should not be built on.
 
 ---
 
@@ -150,21 +160,23 @@ Reliability:
 
 ## Open items / TODO
 
-1. **Restore production**: point Vercel Production Branch to
-   `claude/connect-database-7OQd6` and redeploy (see top section).
-2. **Decide** whether to merge `claude/connect-database-7OQd6` → `main` and make
-   `main` the production branch (recommended, avoids repeat of the incident).
-3. Redeploy so the `dub1` region pin takes effect; re-check FCP/LCP in Vercel
-   Speed Insights afterward.
-4. Confirm Stripe end-to-end with a test-mode card (`4242 4242 4242 4242`) once
+1. Re-check FCP/LCP in Vercel Speed Insights. The `dub1` region pin is now live
+   in production (deployments report `regions: ["dub1"]`), so the transatlantic
+   DB round-trips should be gone — the numbers just need confirming.
+2. Confirm Stripe end-to-end with a test-mode card (`4242 4242 4242 4242`) once
    real keys are in Vercel; there's a dev-only `/api/stripe/test-credits`
    endpoint (blocked in production) for local testing without Stripe.
+3. Delete the stale `claude/*` branches listed above so nothing branches off them
+   by mistake.
+
+**Done since this file was first written:** production restored, work merged into
+`main`, Branch Tracking pointed at `main`, `dub1` pin live.
 
 ---
 
 ## Working agreements
 
-- Develop on `claude/connect-database-7OQd6`; commit + push there.
+- Develop on a branch off `main`; merge to `main` to release.
 - Don't open PRs unless asked.
 - Prefer verifying UI visually (Playwright screenshots of a static token-matched
   mock) before committing design changes.
