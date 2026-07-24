@@ -1255,6 +1255,13 @@ details[open] .faq-chevron {
    EMPLOYER DASHBOARD — responsive layout
    ===================================================== */
 
+/* Applicant compact row: on small phones drop the quick-action icons and the
+   relative time so the candidate name + status keep the width. */
+@media (max-width: 560px) {
+  .applicant-quick { display: none !important; }
+  .applicant-time  { display: none !important; }
+}
+
 .employer-page-inner {
   max-width: 1100px;
   margin: 0 auto;
