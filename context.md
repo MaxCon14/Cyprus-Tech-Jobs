@@ -15,7 +15,12 @@ Read this first if you're picking up the project in a new chat.
   "Auto-assign Custom Production Domains" is enabled, which keeps
   `cyprustech.careers` / `www.cyprustech.careers` attached to each new deploy.
 
-**Golden rule for new work: branch from `main`.**
+- **`test` is the staging branch.** Same content as `main`, but it only ever
+  builds preview deployments — it cannot reach production. Use it to try changes
+  before they go public. Full workflow (which branch to use when, how to keep
+  `test` level with `main`, how to release) is in `AGENTS.md`.
+
+**Golden rule for new work: branch from `main`. Release by merging into `main`.**
 
 ### History — why this section used to say the opposite
 
@@ -28,9 +33,10 @@ resolved by promoting the correct build, merging the work into `main`, and
 pointing Branch Tracking at `main`. The manual-promotion step is no longer
 needed — don't reintroduce it.
 
-Stale branches left over from that period (`claude/analyze-design-system-Y5y44`,
-`claude/compact-card-layout-92qmqy`, `claude/connect-database-MZ1XL`) are far
-behind `main` and should not be built on.
+The stale branches from that period (`claude/analyze-design-system-Y5y44`,
+`claude/compact-card-layout-92qmqy`, `claude/connect-database-MZ1XL`) were
+deleted. `claude/connect-database-7OQd6` is identical to `main` and is kept only
+as a historical marker — don't build on it.
 
 ---
 
