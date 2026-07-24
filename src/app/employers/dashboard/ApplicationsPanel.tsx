@@ -236,7 +236,6 @@ function ApplicationCard({ app, onStatusChange }: {
   return (
     <div style={{
       border: "1px solid var(--border-strong)",
-      borderLeft: unreviewed ? "3px solid var(--accent)" : "1px solid var(--border-strong)",
       borderRadius: 12,
       background: "var(--surface)",
       boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.05)",
