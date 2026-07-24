@@ -36,7 +36,6 @@ function stripHtml(html: string): string {
 
 export function buildJobPostingSchema(job: JobSchemaInput) {
   const isRemote  = job.remoteType === "REMOTE";
-  const isHybrid  = job.remoteType === "HYBRID";
   const plainDesc = job.description.trimStart().startsWith("<")
     ? stripHtml(job.description)
     : job.description;
@@ -73,12 +72,12 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
         "addressCountry": "CY",
       },
     },
+    // TELECOMMUTE is for fully remote roles only. Hybrid roles keep their
+    // physical jobLocation and no jobLocationType — marking them TELECOMMUTE
+    // surfaces them in searches for remote work they don't qualify for.
     ...(isRemote && {
       "jobLocationType": "TELECOMMUTE",
       "applicantLocationRequirements": { "@type": "Country", "name": "Cyprus" },
-    }),
-    ...(isHybrid && {
-      "jobLocationType": "TELECOMMUTE",
     }),
   };
 

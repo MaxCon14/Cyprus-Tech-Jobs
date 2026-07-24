@@ -113,8 +113,12 @@ export default async function JobDetailPage({ params }: Props) {
 
   return (
     <>
-      {/* JobPosting schema: only for ACTIVE listings with a valid apply URL */}
-      {isActive && job.applyUrl && (
+      {/* JobPosting schema for every ACTIVE listing, whatever its apply method.
+          This used to require job.applyUrl, which is only set for applyType
+          "URL" — so EMAIL and IN_APP listings emitted no markup at all and
+          could never reach Google for Jobs. The real requirement is a named
+          hiringOrganization, since Google rejects the posting without one. */}
+      {isActive && companyName && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJobPostingSchema(job)) }}
