@@ -53,9 +53,16 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
   const [isDirty,         setIsDirty]         = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
-  // Prevent accidental browser close / refresh when form is dirty
+  // Set synchronously right before an intentional navigation (posting the job,
+  // saving a draft, discarding) so the beforeunload guard below doesn't fire
+  // the browser's "leave site?" warning. A ref is used because state updates
+  // are async and wouldn't be seen by the handler before navigation happens.
+  const leavingRef = useRef(false);
+
+  // Prevent accidental browser close / refresh when form is dirty — but not
+  // when we're the ones navigating away on purpose.
   useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => { if (isDirty) e.preventDefault(); };
+    const handler = (e: BeforeUnloadEvent) => { if (isDirty && !leavingRef.current) e.preventDefault(); };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [isDirty]);
@@ -138,6 +145,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
         return;
       }
       setIsDirty(false);
+      leavingRef.current = true;
       window.location.href = `/employers/dashboard?posted=${data.jobSlug}`;
     } catch {
       setServerError("Network error. Please try again.");
@@ -164,6 +172,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
         return false;
       }
       setIsDirty(false);
+      leavingRef.current = true;
       if (navigateAfter) {
         navigateAfter();
       } else {
@@ -189,6 +198,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
 
   function handleLeaveDiscard() {
     setIsDirty(false);
+    leavingRef.current = true;
     setShowLeaveDialog(false);
     window.history.back();
   }
