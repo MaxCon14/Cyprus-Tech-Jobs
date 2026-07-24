@@ -239,7 +239,7 @@ export async function Footer() {
             © {new Date().getFullYear()} CYPRUSTECHCAREERS · ALL RIGHTS RESERVED
           </span>
           <span className="mono-s" style={{ color: "var(--text-subtle)" }}>
-            BUILT FOR CYPRUS TECH · v1.0
+            BUILT FOR CYPRUS TECH · v1.1
           </span>
         </div>
       </div>
