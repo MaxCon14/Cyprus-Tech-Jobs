@@ -2,7 +2,10 @@ import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
-import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
+import {
+  Search, MapPin, Bell, UserPlus, Zap, Target,
+  Code2, Server, Cloud, PenTool, BarChart2, Smartphone, Layers, ShieldCheck,
+} from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { buildWebSiteSchema, buildFAQSchema } from "@/lib/schema";
@@ -63,16 +66,17 @@ const FAQS = [
   },
 ];
 
-/* ── Category icons (emoji-free, SVG-based categories list) ── */
+/* ── Category icons (line icons, not emoji — emoji render as the OS's own
+   colourful glyphs, which clash with the rest of the UI) ── */
 const CATEGORY_GRID = [
-  { label: "Frontend",          slug: "frontend",  icon: "⌨️"  },
-  { label: "Backend",           slug: "backend",   icon: "⚙️"  },
-  { label: "DevOps & Cloud",    slug: "devops",    icon: "☁️"  },
-  { label: "UI/UX Design",      slug: "design",    icon: "🎨"  },
-  { label: "Data & Analytics",  slug: "data",      icon: "📊"  },
-  { label: "Mobile",            slug: "mobile",    icon: "📱"  },
-  { label: "Product",           slug: "product",   icon: "🗂️"  },
-  { label: "Security",          slug: "security",  icon: "🔐"  },
+  { label: "Frontend",          slug: "frontend",  Icon: Code2       },
+  { label: "Backend",           slug: "backend",   Icon: Server      },
+  { label: "DevOps & Cloud",    slug: "devops",    Icon: Cloud       },
+  { label: "UI/UX Design",      slug: "design",    Icon: PenTool     },
+  { label: "Data & Analytics",  slug: "data",      Icon: BarChart2   },
+  { label: "Mobile",            slug: "mobile",    Icon: Smartphone  },
+  { label: "Product",           slug: "product",   Icon: Layers      },
+  { label: "Security",          slug: "security",  Icon: ShieldCheck },
 ];
 
 export default async function HomePage() {
@@ -293,7 +297,7 @@ export default async function HomePage() {
       {/* ── BROWSE BY CATEGORY ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
         <div className="page-container">
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "clamp(24px, 4vw, 36px)", flexWrap: "wrap", gap: 12 }}>
+          <div className="section-head" style={{ marginBottom: "clamp(24px, 4vw, 36px)" }}>
             <div>
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 8 }}>BROWSE BY CATEGORY</div>
               <h2 className="display-m">Find roles in your speciality</h2>
@@ -308,7 +312,9 @@ export default async function HomePage() {
                 style={{ textDecoration: "none", display: "block", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "clamp(16px, 2.5vw, 22px)", transition: "all 180ms var(--ease-out)", cursor: "pointer" }}
                 className="category-card"
               >
-                <div style={{ fontSize: 26, marginBottom: 12, lineHeight: 1 }}>{cat.icon}</div>
+                <div className="category-icon">
+                  <cat.Icon size={19} strokeWidth={1.75} aria-hidden />
+                </div>
                 <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>{cat.label}</div>
                 {(() => {
                   const n = countBySlug.get(cat.slug) ?? 0;
