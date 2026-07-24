@@ -1432,15 +1432,6 @@ details[open] .faq-chevron {
   }
 }
 
-
-.link-subtle-hover {
-  color: rgba(255, 255, 255, 0.45);
-  transition: color 150ms ease;
-}
-.link-subtle-hover:hover {
-  color: rgba(255, 255, 255, 0.75);
-}
-
 /* ─── Skeleton / ghost loading ─────────────────────────────────────── */
 
 @keyframes skeleton-sweep {

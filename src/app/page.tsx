@@ -355,14 +355,16 @@ export default async function HomePage() {
               </h2>
 
               {/* Feature bullets */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left", maxWidth: 400, margin: "0 auto 40px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 420, margin: "0 auto 40px" }}>
                 {[
                   "Upload your CV and get AI-powered match scores",
                   "Personalised job alerts — daily or weekly",
                   "Save your preferences, salary expectations, and work type",
                   "Free forever for candidates",
                 ].map(item => (
-                  <div key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                  <div key={item} style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 10 }}>
+                    {/* flex-start (not center) so the dot tracks the first line
+                        when the label wraps to two lines on narrow screens */}
                     <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(255,61,127,0.2)", border: "1px solid rgba(255,61,127,0.4)", display: "grid", placeItems: "center", flexShrink: 0, marginTop: 1 }}>
                       <Target size={10} style={{ color: "#FF3D7F" }} />
                     </div>
@@ -372,12 +374,9 @@ export default async function HomePage() {
               </div>
 
               {/* CTA */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 10, maxWidth: 360, margin: "0 auto" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", maxWidth: 360, margin: "0 auto" }}>
                 <Link href="/get-started" className="btn btn-accent btn-lg" style={{ justifyContent: "center", boxShadow: "0 0 40px rgba(255,61,127,0.45)" }}>
                   Create free candidate account
-                </Link>
-                <Link href="/jobs" className="link-subtle-hover" style={{ justifyContent: "center", display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, fontSize: 13, fontFamily: "var(--font-sans)", textDecoration: "none" }}>
-                  Browse jobs without an account
                 </Link>
               </div>
             </div>
