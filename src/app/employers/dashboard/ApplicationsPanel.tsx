@@ -69,6 +69,30 @@ function fmtDate(d: string | null) {
   return month ? `${month} ${y}` : y;
 }
 
+// The portfolio field is free-form, so a candidate may drop a social link in
+// it. Label the link by its actual destination so the employer knows where
+// it goes instead of a generic "Portfolio".
+function linkLabel(url: string): string {
+  let host = "";
+  try {
+    host = new URL(url.startsWith("http") ? url : `https://${url}`).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "Portfolio";
+  }
+  if (host === "x.com" || host.endsWith(".x.com") || host.endsWith("twitter.com")) return "X / Twitter";
+  if (host.endsWith("instagram.com"))  return "Instagram";
+  if (host.endsWith("linkedin.com"))   return "LinkedIn";
+  if (host.endsWith("github.com"))     return "GitHub";
+  if (host.endsWith("behance.net"))    return "Behance";
+  if (host.endsWith("dribbble.com"))   return "Dribbble";
+  if (host.endsWith("medium.com"))     return "Medium";
+  if (host.endsWith("youtube.com") || host === "youtu.be") return "YouTube";
+  if (host.endsWith("tiktok.com"))     return "TikTok";
+  if (host.endsWith("facebook.com"))   return "Facebook";
+  if (host.endsWith("gitlab.com"))     return "GitLab";
+  return "Portfolio";
+}
+
 function WorkExperienceModal({ positions, candidateName, onClose }: {
   positions:     CandidatePosition[];
   candidateName: string;
@@ -281,12 +305,16 @@ function ApplicationCard({ app, onStatusChange }: {
           onClick={() => setExpanded(v => !v)}
           style={{
             width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            padding: "8px", background: "none", border: "none", borderTop: "1px solid var(--border)",
-            cursor: "pointer", color: "var(--text-subtle)",
+            padding: "11px", border: "none", borderTop: "1px solid var(--border)",
+            cursor: "pointer",
+            background: expanded ? "var(--bg-alt)" : "var(--accent-soft)",
+            color: "var(--accent)",
+            fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
+            transition: "background 120ms",
           }}
         >
-          <span className="mono-s" style={{ fontSize: 10 }}>{expanded ? "LESS" : "VIEW DETAILS"}</span>
-          {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          {expanded ? "Hide details" : "View details"}
+          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
         </button>
       )}
 
@@ -343,8 +371,9 @@ function ApplicationCard({ app, onStatusChange }: {
             {app.candidatePortfolioUrl && (
               <a href={app.candidatePortfolioUrl.startsWith("http") ? app.candidatePortfolioUrl : `https://${app.candidatePortfolioUrl}`}
                 target="_blank" rel="noopener noreferrer"
+                title={app.candidatePortfolioUrl}
                 className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ExternalLink size={12} /> Portfolio
+                <ExternalLink size={12} /> {linkLabel(app.candidatePortfolioUrl)}
               </a>
             )}
           </div>
