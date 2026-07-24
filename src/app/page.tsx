@@ -65,14 +65,14 @@ const FAQS = [
 
 /* ── Category icons (emoji-free, SVG-based categories list) ── */
 const CATEGORY_GRID = [
-  { label: "Frontend",          slug: "frontend",  icon: "⌨️",  count: 62 },
-  { label: "Backend",           slug: "backend",   icon: "⚙️",  count: 48 },
-  { label: "DevOps & Cloud",    slug: "devops",    icon: "☁️",  count: 24 },
-  { label: "UI/UX Design",      slug: "design",    icon: "🎨",  count: 18 },
-  { label: "Data & Analytics",  slug: "data",      icon: "📊",  count: 15 },
-  { label: "Mobile",            slug: "mobile",    icon: "📱",  count: 11 },
-  { label: "Product",           slug: "product",   icon: "🗂️",  count: 9  },
-  { label: "Security",          slug: "security",  icon: "🔐",  count: 7  },
+  { label: "Frontend",          slug: "frontend",  icon: "⌨️"  },
+  { label: "Backend",           slug: "backend",   icon: "⚙️"  },
+  { label: "DevOps & Cloud",    slug: "devops",    icon: "☁️"  },
+  { label: "UI/UX Design",      slug: "design",    icon: "🎨"  },
+  { label: "Data & Analytics",  slug: "data",      icon: "📊"  },
+  { label: "Mobile",            slug: "mobile",    icon: "📱"  },
+  { label: "Product",           slug: "product",   icon: "🗂️"  },
+  { label: "Security",          slug: "security",  icon: "🔐"  },
 ];
 
 export default async function HomePage() {
@@ -90,6 +90,14 @@ export default async function HomePage() {
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
+
+  // Real active-job count per category slug (parents + children), so the
+  // "Browse by category" grid shows true numbers instead of placeholders.
+  const countBySlug = new Map<string, number>();
+  for (const c of categories) {
+    if (c.slug) countBySlug.set(c.slug, c.count);
+    for (const child of c.children) countBySlug.set(child.slug, child.count);
+  }
 
   return (
     <>
@@ -302,7 +310,14 @@ export default async function HomePage() {
               >
                 <div style={{ fontSize: 26, marginBottom: 12, lineHeight: 1 }}>{cat.icon}</div>
                 <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>{cat.label}</div>
-                <div className="mono-s" style={{ color: "var(--accent)" }}>{cat.count} open roles</div>
+                {(() => {
+                  const n = countBySlug.get(cat.slug) ?? 0;
+                  return (
+                    <div className="mono-s" style={{ color: "var(--accent)" }}>
+                      {n} open {n === 1 ? "role" : "roles"}
+                    </div>
+                  );
+                })()}
               </Link>
             ))}
           </div>
