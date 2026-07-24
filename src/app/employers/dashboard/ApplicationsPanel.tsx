@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ChevronDown, ChevronUp, ScrollText, Briefcase, ChevronRight } from "lucide-react";
+import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ScrollText, Briefcase, ChevronRight } from "lucide-react";
 
 export interface ApplicationRow {
   id:                       string;
@@ -183,6 +183,11 @@ function ApplicationCard({ app, onStatusChange }: {
   const cfg = STATUS_CONFIG[app.status] ?? STATUS_CONFIG.UNREVIEWED;
   const hasCoverLetter = !!(app.coverLetter || app.coverLetterUrl);
   const hasExperience  = app.candidatePositions?.length > 0;
+  const displayName    = app.candidateName || app.candidateEmail;
+  const panelId        = `applicant-panel-${app.id}`;
+
+  /* One-line summary shown while the card is collapsed */
+  const metaParts = [app.candidateCity, app.candidateExperienceLevel, app.candidateHeadline].filter(Boolean);
 
   async function setStatus(status: string) {
     if (updating || status === app.status) return;
@@ -200,204 +205,199 @@ function ApplicationCard({ app, onStatusChange }: {
   }
 
   return (
-    <div style={{
-      border: "1px solid var(--border)", borderRadius: 12,
-      background: isUnreviewed(app.status) ? "var(--surface)" : "var(--bg-alt)",
-      overflow: "hidden",
-    }}>
-      {/* Header row */}
-      <div style={{ padding: "16px 20px", display: "flex", alignItems: "flex-start", gap: 14 }}>
+    <div
+      className="applicant-card"
+      data-expanded={expanded}
+      style={{ background: isUnreviewed(app.status) ? "var(--surface)" : "var(--bg-alt)" }}
+    >
+      {/* Collapsed row — the whole left side toggles the card */}
+      <div className="applicant-head">
+        <button
+          type="button"
+          className="applicant-toggle"
+          onClick={() => setExpanded(v => !v)}
+          aria-expanded={expanded}
+          aria-controls={panelId}
+        >
+          <span className="applicant-chevron"><ChevronRight size={14} /></span>
 
-        {/* Avatar */}
-        <div style={{
-          width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-          background: "var(--accent-soft)", display: "grid", placeItems: "center",
-          fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 16, color: "var(--accent)",
-        }}>
-          {((app.candidateName || app.candidateEmail || "?")?.[0] ?? "?").toUpperCase()}
-        </div>
+          <span className="applicant-avatar">
+            {((displayName || "?")?.[0] ?? "?").toUpperCase()}
+          </span>
 
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-            <div style={{ minWidth: 0 }}>
-              <p className="body-s" style={{ fontWeight: 700, color: "var(--text)", marginBottom: 2 }}>
-                {app.candidateName || app.candidateEmail}
-              </p>
-              {app.candidateHeadline && (
-                <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 4 }}>{app.candidateHeadline}</p>
-              )}
-              {/* Applied for */}
-              <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 6 }}>
-                <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>Applied for:</span>
-                <Link
-                  href={`/jobs/${app.jobSlug}`}
-                  className="mono-s"
-                  style={{ color: "var(--accent)", fontSize: 10, textDecoration: "none", fontWeight: 600 }}
+          <span className="applicant-identity">
+            <span className="body-s applicant-name" style={{ fontWeight: 700, color: "var(--text)", display: "block" }}>
+              {displayName}
+            </span>
+            <span className="mono-s applicant-meta" style={{ color: "var(--text-subtle)", display: "block", marginTop: 1 }}>
+              <span style={{ color: "var(--accent)", fontWeight: 600 }}>{app.jobTitle}</span>
+              {metaParts.length > 0 && ` · ${metaParts.join(" · ")}`}
+            </span>
+          </span>
+        </button>
+
+        <div className="applicant-head-right">
+          {/* Quick triage — desktop only, full controls live in the panel below */}
+          <div className="applicant-quick">
+            {(["SHORTLISTED", "REJECTED"] as const).map(s => {
+              const c      = STATUS_CONFIG[s];
+              const active = app.status === s;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  className="applicant-quick-btn"
+                  title={s === "SHORTLISTED" ? "Shortlist" : "Reject"}
+                  aria-label={`${s === "SHORTLISTED" ? "Shortlist" : "Reject"} ${displayName}`}
+                  disabled={updating || active}
+                  onClick={() => setStatus(s)}
+                  style={active ? { background: c.bg, color: c.color, borderColor: c.color, opacity: 1 } : undefined}
                 >
-                  {app.jobTitle}
-                </Link>
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {app.candidateCity && <span className="tag" style={{ fontSize: 10 }}>{app.candidateCity}</span>}
-                {app.candidateExperienceLevel && (
-                  <span className="tag tag-outline" style={{ fontSize: 10 }}>{app.candidateExperienceLevel}</span>
-                )}
-              </div>
-            </div>
+                  {s === "SHORTLISTED" ? <Star size={13} /> : <X size={13} />}
+                </button>
+              );
+            })}
+          </div>
 
-            {/* Status badge */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "3px 9px", borderRadius: 5, fontSize: 10,
-                fontFamily: "var(--font-mono)", fontWeight: 700,
-                background: cfg.bg, color: cfg.color,
-              }}>
-                {cfg.icon} {cfg.label}
-              </span>
-              <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>{timeAgo(app.appliedAt)}</span>
-            </div>
+          <span
+            title={cfg.label}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "3px 8px", borderRadius: "var(--radius-xs)", fontSize: 10,
+              fontFamily: "var(--font-mono)", fontWeight: 700, whiteSpace: "nowrap",
+              background: cfg.bg, color: cfg.color,
+            }}
+          >
+            {cfg.icon} <span className="applicant-status-label">{cfg.label}</span>
+          </span>
+
+          <span className="mono-s applicant-time" style={{ color: "var(--text-subtle)", fontSize: 10, whiteSpace: "nowrap" }}>
+            {timeAgo(app.appliedAt)}
+          </span>
+        </div>
+      </div>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div id={panelId} className="applicant-body">
+          <div style={{ borderTop: "1px solid var(--border)" }} />
+
+          {/* Applied-for job + contact */}
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+            <Link href={`/jobs/${app.jobSlug}`} className="mono-s" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "none" }}>
+              {app.jobTitle} ↗
+            </Link>
+            <a href={`mailto:${app.candidateEmail}`} className="mono-s" style={{ color: "var(--text-muted)", textDecoration: "none" }}>
+              {app.candidateEmail}
+            </a>
           </div>
 
           {/* Skills */}
           {app.candidateSkills.length > 0 && (
-            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
-              {app.candidateSkills.slice(0, 6).map(s => (
-                <span key={s} className="tag" style={{ fontSize: 10, fontFamily: "var(--font-mono)" }}>{s}</span>
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+              {app.candidateSkills.map(s => (
+                <span key={s} className="tag" style={{ fontSize: 10 }}>{s}</span>
               ))}
-              {app.candidateSkills.length > 6 && (
-                <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>+{app.candidateSkills.length - 6}</span>
-              )}
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Expand toggle */}
-      {(hasCoverLetter || hasExperience || app.cvUrl || app.candidateLinkedinUrl || app.candidateGithubUrl || app.candidatePortfolioUrl) && (
-        <button
-          type="button"
-          onClick={() => setExpanded(v => !v)}
-          style={{
-            width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            padding: "8px", background: "none", border: "none", borderTop: "1px solid var(--border)",
-            cursor: "pointer", color: "var(--text-subtle)",
-          }}
-        >
-          <span className="mono-s" style={{ fontSize: 10 }}>{expanded ? "LESS" : "VIEW DETAILS"}</span>
-          {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-        </button>
-      )}
-
-      {expanded && (
-        <div style={{ padding: "14px 20px 16px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {app.cvUrl && (
-              <a href={app.cvUrl} target="_blank" rel="noopener noreferrer"
-                className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <FileText size={12} /> View CV
-              </a>
-            )}
-            {hasCoverLetter && (
-              app.coverLetterUrl ? (
-                <a href={app.coverLetterUrl} target="_blank" rel="noopener noreferrer"
+          {/* Documents & links */}
+          {(app.cvUrl || hasCoverLetter || hasExperience || app.candidateLinkedinUrl || app.candidateGithubUrl || app.candidatePortfolioUrl) && (
+            <div className="applicant-links">
+              {app.cvUrl && (
+                <a href={app.cvUrl} target="_blank" rel="noopener noreferrer"
                   className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <ScrollText size={12} /> View Cover Letter
+                  <FileText size={12} /> View CV
                 </a>
-              ) : (
+              )}
+              {hasCoverLetter && (
+                app.coverLetterUrl ? (
+                  <a href={app.coverLetterUrl} target="_blank" rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <ScrollText size={12} /> Cover Letter
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setCoverLetterOpen(true)}
+                    className="btn btn-outline btn-sm"
+                    style={{ display: "flex", alignItems: "center", gap: 5 }}
+                  >
+                    <ScrollText size={12} /> Cover Letter
+                  </button>
+                )
+              )}
+              {hasExperience && (
                 <button
                   type="button"
-                  onClick={() => setCoverLetterOpen(true)}
+                  onClick={() => setExperienceOpen(true)}
                   className="btn btn-outline btn-sm"
                   style={{ display: "flex", alignItems: "center", gap: 5 }}
                 >
-                  <ScrollText size={12} /> View Cover Letter
+                  <Briefcase size={12} /> Work Experience
                 </button>
-              )
-            )}
-            {hasExperience && (
+              )}
+              {app.candidateLinkedinUrl && (
+                <a href={app.candidateLinkedinUrl.startsWith("http") ? app.candidateLinkedinUrl : `https://${app.candidateLinkedinUrl}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <ExternalLink size={12} /> LinkedIn
+                </a>
+              )}
+              {app.candidateGithubUrl && (
+                <a href={app.candidateGithubUrl.startsWith("http") ? app.candidateGithubUrl : `https://${app.candidateGithubUrl}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <ExternalLink size={12} /> GitHub
+                </a>
+              )}
+              {app.candidatePortfolioUrl && (
+                <a href={app.candidatePortfolioUrl.startsWith("http") ? app.candidatePortfolioUrl : `https://${app.candidatePortfolioUrl}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <ExternalLink size={12} /> Portfolio
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Status actions */}
+          <div className="applicant-status-row">
+            {(["REVIEWED", "SHORTLISTED", "REJECTED"] as const).map(s => {
+              const c = STATUS_CONFIG[s];
+              const active = app.status === s;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  className="applicant-status-btn"
+                  disabled={updating || active}
+                  onClick={() => setStatus(s)}
+                  style={{
+                    borderColor: active ? c.color : "var(--border)",
+                    background:  active ? c.bg    : "var(--surface)",
+                    color:       active ? c.color : "var(--text-muted)",
+                    opacity: updating ? 0.6 : 1,
+                  }}
+                >
+                  {c.icon} {c.label}
+                </button>
+              );
+            })}
+            {!isUnreviewed(app.status) && (
               <button
                 type="button"
-                onClick={() => setExperienceOpen(true)}
-                className="btn btn-outline btn-sm"
-                style={{ display: "flex", alignItems: "center", gap: 5 }}
+                className="applicant-status-btn"
+                disabled={updating}
+                onClick={() => setStatus("UNREVIEWED")}
+                style={{ color: "var(--text-subtle)", opacity: updating ? 0.6 : 1 }}
               >
-                <Briefcase size={12} /> Work Experience
+                Reset
               </button>
-            )}
-            {app.candidateLinkedinUrl && (
-              <a href={app.candidateLinkedinUrl.startsWith("http") ? app.candidateLinkedinUrl : `https://${app.candidateLinkedinUrl}`}
-                target="_blank" rel="noopener noreferrer"
-                className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ExternalLink size={12} /> LinkedIn
-              </a>
-            )}
-            {app.candidateGithubUrl && (
-              <a href={app.candidateGithubUrl.startsWith("http") ? app.candidateGithubUrl : `https://${app.candidateGithubUrl}`}
-                target="_blank" rel="noopener noreferrer"
-                className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ExternalLink size={12} /> GitHub
-              </a>
-            )}
-            {app.candidatePortfolioUrl && (
-              <a href={app.candidatePortfolioUrl.startsWith("http") ? app.candidatePortfolioUrl : `https://${app.candidatePortfolioUrl}`}
-                target="_blank" rel="noopener noreferrer"
-                className="btn btn-ghost btn-sm" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ExternalLink size={12} /> Portfolio
-              </a>
             )}
           </div>
         </div>
       )}
-
-      {/* Action buttons */}
-      <div style={{
-        padding: "10px 20px 14px", display: "flex", gap: 6, flexWrap: "wrap",
-        borderTop: "1px solid var(--border)", background: "var(--bg-muted)",
-      }}>
-        {(["REVIEWED", "SHORTLISTED", "REJECTED"] as const).map(s => {
-          const c = STATUS_CONFIG[s];
-          const active = app.status === s;
-          return (
-            <button
-              key={s}
-              type="button"
-              disabled={updating || active}
-              onClick={() => setStatus(s)}
-              style={{
-                padding: "5px 12px", borderRadius: 6, fontSize: 11,
-                fontFamily: "var(--font-mono)", fontWeight: 600,
-                border: `1px solid ${active ? c.color : "var(--border)"}`,
-                background: active ? c.bg : "var(--surface)",
-                color: active ? c.color : "var(--text-muted)",
-                cursor: active || updating ? "default" : "pointer",
-                opacity: updating ? 0.6 : 1,
-                display: "flex", alignItems: "center", gap: 4,
-                transition: "all 120ms",
-              }}
-            >
-              {c.icon} {c.label}
-            </button>
-          );
-        })}
-        {!isUnreviewed(app.status) && (
-          <button
-            type="button"
-            disabled={updating}
-            onClick={() => setStatus("UNREVIEWED")}
-            style={{
-              padding: "5px 12px", borderRadius: 6, fontSize: 11,
-              fontFamily: "var(--font-mono)", fontWeight: 600,
-              border: "1px solid var(--border)", background: "var(--surface)",
-              color: "var(--text-subtle)", cursor: updating ? "default" : "pointer",
-              opacity: updating ? 0.6 : 1,
-            }}
-          >
-            Reset
-          </button>
-        )}
-      </div>
 
       {/* Work experience modal */}
       {experienceOpen && (
@@ -549,7 +549,7 @@ export function ApplicationsPanel({
           No {statusFilter === "ALL" ? "" : STATUS_FILTERS.find(f => f.key === statusFilter)?.label.toLowerCase() + " "}applications.
         </p>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {visible.map(app => (
             <ApplicationCard key={app.id} app={app} onStatusChange={handleStatusChange} />
           ))}
