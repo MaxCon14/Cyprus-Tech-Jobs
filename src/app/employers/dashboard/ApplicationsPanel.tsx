@@ -244,15 +244,6 @@ function ApplicationCard({ app, onStatusChange }: {
       {/* Header row */}
       <div style={{ padding: "16px 20px", display: "flex", alignItems: "flex-start", gap: 14 }}>
 
-        {/* Avatar */}
-        <div style={{
-          width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-          background: "var(--accent-soft)", display: "grid", placeItems: "center",
-          fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 16, color: "var(--accent)",
-        }}>
-          {((app.candidateName || app.candidateEmail || "?")?.[0] ?? "?").toUpperCase()}
-        </div>
-
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
