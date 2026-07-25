@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
           "/login",
           "/get-started",
           "/buy-credits",
+          "/style-guide",
           "/_next/",
         ],
       },
