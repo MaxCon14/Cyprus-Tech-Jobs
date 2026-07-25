@@ -21,7 +21,10 @@ what's still open. Read this first if you're picking up the project in a new cha
   how to release — lives in **`AGENTS.md`**, which every Claude session loads
   automatically via `CLAUDE.md`.
 
-**Golden rule for new work: branch from `main`. Release by merging into `main`.**
+**Golden rule for new work: commit to `test`. `main` moves only when Maxim
+explicitly asks to release.** There are no working branches — `test` *is* the
+working branch, and it stays ahead of `main` between releases. Release is a
+fast-forward of `main` to `test`, never the other way round.
 
 ### History — why this section used to say the opposite
 
@@ -31,12 +34,26 @@ dashboard. That caused an incident: a chat branched off stale `main`
 (`claude/compact-card-layout-92qmqy`) and promoted it, rolling production back
 ~43 commits and restoring the broken magic-link login. Resolved by promoting the
 correct build, fast-forwarding `main`, and pointing Branch Tracking at `main`.
-The stale branches (`claude/analyze-design-system-Y5y44`,
-`claude/compact-card-layout-92qmqy`, `claude/connect-database-MZ1XL`) are dead —
-they could not be deleted from the sandbox because the git proxy rejects branch
-deletes (403), so **they may still exist on GitHub and should be deleted there**.
-`claude/connect-database-7OQd6` is identical to an old `main` and is kept only as
-a historical marker — don't build on it.
+All `claude/*` branches have been retired; the repo is now `main` + `test` only.
+Before they went, each was checked against `main`:
+`claude/connect-database-7OQd6`, `claude/connect-database-MZ1XL` and
+`claude/cyprus-tech-jobs-context-elmi9o` were fully contained in `main`, and
+`claude/analyze-design-system-Y5y44` held one obsolete commit (it removed
+`onClick` handlers from a homepage server component; `main`'s `page.tsx` has
+none left).
+
+**`claude/compact-card-layout-92qmqy` (`a4a37fa`) was the exception** — a real
+unmerged feature, "Collapse applicant cards to a compact row by default",
+rewriting `ApplicationsPanel.tsx` (346 lines) and adding the `.applicant-card`
+CSS system (~164 lines). It is *not* in `main` and was never shipped. Preserved
+as tag `archive/compact-card-layout`; it is ~58 commits behind and needs a
+rebase before it can ship. A fragment of it did leak into `main` — the
+`@media (max-width: 560px)` block in `globals.css` hiding `.applicant-quick`
+and `.applicant-time` is dead CSS with nothing left to match.
+
+Note the sandbox git proxy rejects **deletes and tag pushes** (403) while
+allowing branch creates and updates, so branch cleanup and tagging have to be
+done from a real machine or the GitHub UI.
 
 ---
 
