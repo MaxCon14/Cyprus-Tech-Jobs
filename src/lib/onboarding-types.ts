@@ -64,7 +64,7 @@ export function validateEmployerStep(
   if (step === 1) {
     if (!state.name.trim()) errors.name = "Your name is required.";
     if (!state.email.trim()) {
-      errors.email = "Work email is required.";
+      errors.email = "Email is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
       errors.email = "Enter a valid email address.";
     }
@@ -339,7 +339,7 @@ export function computeProfileScore(data: ProfileData): {
   const breakdown: ScoredItem[] = [
     {
       label: "Verified email",
-      description: "Confirm your work email address",
+      description: "Confirm your email address",
       points: 25,
       achieved: data.emailVerified,
     },

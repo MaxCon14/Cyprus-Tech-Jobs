@@ -99,12 +99,12 @@ function Step1Account({ state, dispatch, onNext }: { state: EmployerWizardState;
           <FieldError error={state.errors.name} touched={state.touched.name} />
         </Field>
 
-        <Field label="Work email" required>
+        <Field label="Email" required>
           <input
             className="input"
             type="email"
             value={state.email}
-            placeholder="alex@company.com"
+            placeholder="you@email.com"
             onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
             onBlur={() => dispatch({ type: "BLUR_FIELD", field: "email" })}
             onKeyDown={(e) => e.key === "Enter" && onNext()}
