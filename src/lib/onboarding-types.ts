@@ -76,7 +76,11 @@ export function validateEmployerStep(
     }
   }
   if (step === 3) {
-    if (state.description.trim().length > 0 && state.description.trim().length < 40) {
+    // Required: this seeds the company description pre-filled on every job
+    // the employer posts, so skipping it here leaves that field empty later.
+    if (!state.description.trim()) {
+      errors.description = "A company description is required.";
+    } else if (state.description.trim().length < 40) {
       errors.description = "Add a bit more — at least 40 characters.";
     }
   }

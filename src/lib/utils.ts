@@ -15,6 +15,32 @@ export function formatSalary(min?: number | null, max?: number | null, currency 
   return `Up to ${fmt(max!)}`;
 }
 
+/**
+ * Salary ranges are mandatory on employer listings (EU Pay Transparency
+ * Directive), so every route that can publish a job validates through here —
+ * post, publish-a-draft and edit — rather than each rolling its own rule.
+ * Returns human-readable errors; an empty array means the range is acceptable.
+ */
+export function validateSalaryRange(min: unknown, max: unknown): string[] {
+  const errors: string[] = [];
+  const toNum = (v: unknown) =>
+    v === null || v === undefined || String(v).trim() === "" ? null : Number(v);
+
+  const lo = toNum(min);
+  const hi = toNum(max);
+
+  if (lo === null) errors.push("Minimum salary is required.");
+  else if (!Number.isFinite(lo) || lo <= 0) errors.push("Minimum salary must be a positive number.");
+
+  if (hi === null) errors.push("Maximum salary is required.");
+  else if (!Number.isFinite(hi) || hi <= 0) errors.push("Maximum salary must be a positive number.");
+
+  if (errors.length === 0 && lo! > hi!) {
+    errors.push("Maximum salary must be higher than the minimum.");
+  }
+  return errors;
+}
+
 export function timeAgo(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const diff = Date.now() - d.getTime();

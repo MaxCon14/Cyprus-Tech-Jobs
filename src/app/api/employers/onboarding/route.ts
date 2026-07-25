@@ -8,6 +8,11 @@ function validateBody(body: Record<string, unknown>): string | null {
   if (!body.email || typeof body.email !== "string") return "Email is required.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email as string)) return "Invalid email address.";
   if (!body.companyName || typeof body.companyName !== "string" || !body.companyName.trim()) return "Company name is required.";
+  // Mirrors the wizard's step-3 rule. The description is what pre-fills the
+  // company blurb on every job this employer posts, so it can't be skipped.
+  const desc = typeof body.description === "string" ? body.description.trim() : "";
+  if (!desc) return "A company description is required.";
+  if (desc.length < 40) return "Company description must be at least 40 characters.";
   return null;
 }
 

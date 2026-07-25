@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Star, Building2, Loader2, AlertCircle, Check, Rocket, ShoppingBag } from "lucide-react";
+import { Zap, Star, Building2, Loader2, AlertCircle, AlertTriangle, Check, Rocket, ShoppingBag } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
@@ -96,7 +96,6 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
   const [subCategorySlug,    setSubCategorySlug]    = useState(initSubSlug);
 
   const [remoteType,        setRemoteType]        = useState(job.remoteType);
-  const [salaryDisclosed,   setSalaryDisclosed]   = useState(job.salaryDisclosed);
   const [applyMethod,       setApplyMethod]       = useState<"url" | "email" | "in_app">(
     job.applyType === "IN_APP" ? "in_app" : job.applyEmail && !job.applyUrl ? "email" : "url"
   );
@@ -131,9 +130,8 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
       experienceLevel: form.get("experienceLevel"),
       city:            form.get("city"),
       tags:            form.get("tags"),
-      salaryDisclosed,
-      salaryMin:       salaryDisclosed ? (form.get("salaryMin") || undefined) : null,
-      salaryMax:       salaryDisclosed ? (form.get("salaryMax") || undefined) : null,
+      salaryMin:       form.get("salaryMin") || undefined,
+      salaryMax:       form.get("salaryMax") || undefined,
       applyType:       applyMethod === "in_app" ? "IN_APP" : applyMethod === "email" ? "EMAIL" : "URL",
       applyUrl:        applyMethod === "url"   ? form.get("applyUrl")   : null,
       applyEmail:      applyMethod === "email" ? form.get("applyEmail") : null,
@@ -216,9 +214,8 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
           employmentType:  job.employmentType,
           experienceLevel: job.experienceLevel,
           city:            job.city || undefined,
-          salaryDisclosed: job.salaryDisclosed,
-          salaryMin:       job.salaryDisclosed ? job.salaryMin || undefined : null,
-          salaryMax:       job.salaryDisclosed ? job.salaryMax || undefined : null,
+          salaryMin:       job.salaryMin || undefined,
+          salaryMax:       job.salaryMax || undefined,
           applyType:       job.applyType  || undefined,
           applyUrl:        job.applyUrl   || undefined,
           applyEmail:      job.applyEmail || undefined,
@@ -362,48 +359,24 @@ export function EditJobForm({ job, categories, isDraft = false, standardSlots = 
         </FormSection>
 
         <FormSection icon={<Star size={14} />} title="Salary & apply">
-          {/* Salary disclosure toggle */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--bg-alt)", border: "1px solid var(--border)", borderRadius: 8 }}>
-            <div>
-              <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, marginBottom: 2 }}>Show salary range</div>
-              <div className="body-s" style={{ color: "var(--text-muted)" }}>
-                {salaryDisclosed ? "Candidates will see the salary range" : "Salary will appear as Undisclosed"}
-              </div>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={salaryDisclosed}
-              onClick={() => { setSalaryDisclosed(v => !v); setIsDirty(true); }}
-              style={{
-                width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", flexShrink: 0,
-                background: salaryDisclosed ? "var(--accent)" : "var(--border-strong)",
-                position: "relative", transition: "background 150ms",
-              }}
-            >
-              <span style={{
-                position: "absolute", top: 3, left: salaryDisclosed ? 23 : 3,
-                width: 18, height: 18, borderRadius: "50%", background: "var(--white)",
-                transition: "left 150ms", display: "block",
-              }} />
-            </button>
+          {/* Salary is mandatory — EU Pay Transparency Directive. No opt-out,
+              and no way to hide a range that was published at post time. */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <Field label="Salary min (€/year)" required>
+              <input className="input" name="salaryMin" type="number" min={1} required defaultValue={job.salaryMin ?? ""} placeholder="e.g. 60000" />
+            </Field>
+            <Field label="Salary max (€/year)" required>
+              <input className="input" name="salaryMax" type="number" min={1} required defaultValue={job.salaryMax ?? ""} placeholder="e.g. 85000" />
+            </Field>
           </div>
-
-          {salaryDisclosed && (
-            <>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <Field label="Salary min (€/year)">
-                  <input className="input" name="salaryMin" type="number" defaultValue={job.salaryMin} placeholder="e.g. 60000" />
-                </Field>
-                <Field label="Salary max (€/year)">
-                  <input className="input" name="salaryMax" type="number" defaultValue={job.salaryMax} placeholder="e.g. 85000" />
-                </Field>
-              </div>
-              <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
-                LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
-              </p>
-            </>
-          )}
+          <div style={{ display: "flex", gap: 10, padding: "12px 14px", background: "var(--warning-bg)", border: "1px solid #fcd34d", borderRadius: 8, marginTop: -4 }}>
+            <AlertTriangle size={15} style={{ color: "var(--warning)", flexShrink: 0, marginTop: 1 }} />
+            <p className="body-s" style={{ color: "var(--text)", margin: 0, lineHeight: 1.55 }}>
+              Salary ranges must be genuine. If a listing advertises a range the role
+              doesn&apos;t actually pay, it can be taken down — and the listing credit
+              refunded to your account.
+            </p>
+          </div>
           <div>
             <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
               How should candidates apply? <span style={{ color: "var(--accent)" }}>*</span>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { notifyGoogle } from "@/lib/google-indexing";
+import { validateSalaryRange } from "@/lib/utils";
 
 const CATEGORY_NAMES: Record<string, string> = {
   frontend: "Frontend", backend: "Backend", devops: "DevOps & Cloud",
@@ -44,7 +45,7 @@ export async function PATCH(
   const {
     title, description, categorySlug,
     remoteType, employmentType, experienceLevel,
-    city, salaryDisclosed, salaryMin, salaryMax, applyUrl, applyEmail,
+    city, salaryMin, salaryMax, applyUrl, applyEmail,
     coverLetter,
     tags: rawTags,
   } = body;
@@ -59,6 +60,7 @@ export async function PATCH(
   if (!String(applyUrl    ?? "").trim() && !String(applyEmail ?? "").trim()) {
     errors.push("Application URL or email is required.");
   }
+  errors.push(...validateSalaryRange(salaryMin, salaryMax));
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
   const category = await prisma.category.upsert({
@@ -78,9 +80,9 @@ export async function PATCH(
         employmentType:  employmentType  as never,
         experienceLevel: experienceLevel as never,
         city:            (city as string | undefined)?.trim() || undefined,
-        salaryDisclosed: salaryDisclosed !== false,
-        salaryMin:       salaryDisclosed !== false && salaryMin ? Number(salaryMin) : null,
-        salaryMax:       salaryDisclosed !== false && salaryMax ? Number(salaryMax) : null,
+        salaryDisclosed: true,
+        salaryMin:       Number(salaryMin),
+        salaryMax:       Number(salaryMax),
         applyUrl:        (applyUrl    as string | undefined)?.trim() || undefined,
         applyEmail:      (applyEmail  as string | undefined)?.trim() || undefined,
         coverLetter:     ["REQUIRED", "OPTIONAL", "NONE"].includes(coverLetter as string) ? (coverLetter as string) : "OPTIONAL",

@@ -248,7 +248,7 @@ function Step3Profile({ state, dispatch }: { state: EmployerWizardState; dispatc
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <Field label="About your company" tip="2× more applicants with description">
+        <Field label="About your company" required tip="Pre-fills on every job you post">
           <textarea
             className="textarea"
             value={state.description}

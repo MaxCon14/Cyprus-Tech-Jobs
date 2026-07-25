@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/placeholder-data";
-import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, FileText } from "lucide-react";
+import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, AlertTriangle, FileText } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
@@ -29,6 +29,8 @@ interface FormErrors {
   employmentType?:  string;
   description?:     string;
   applyUrl?:        string;
+  salaryMin?:       string;
+  salaryMax?:       string;
 }
 
 export function PostJobForm({ standardSlots, featuredSlots, companyName, companyWebsite, companyDescription, allTags }: Props) {
@@ -42,7 +44,6 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
   const [remoteType,        setRemoteType]        = useState("");
   const [parentCategorySlug, setParentCategorySlug] = useState("");
   const [subCategorySlug,    setSubCategorySlug]    = useState("");
-  const [salaryDisclosed,   setSalaryDisclosed]   = useState(true);
   const [applyMethod,       setApplyMethod]       = useState<"url" | "email" | "in_app">("in_app");
   const [coverLetterPolicy, setCoverLetterPolicy] = useState<"OPTIONAL" | "REQUIRED" | "NONE">("OPTIONAL");
   const [loading,         setLoading]         = useState(false);
@@ -90,6 +91,15 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
     if (!String(form.get("description")    ?? "").replace(/<[^>]*>/g, "").trim()) errs.description = "Job description is required.";
     if (applyMethod === "url"    && !String(form.get("applyUrl")   ?? "").trim()) errs.applyUrl = "Application URL is required.";
     if (applyMethod === "email"  && !String(form.get("applyEmail") ?? "").trim()) errs.applyUrl = "Email address is required.";
+
+    const min = Number(form.get("salaryMin"));
+    const max = Number(form.get("salaryMax"));
+    if (!String(form.get("salaryMin") ?? "").trim())      errs.salaryMin = "Minimum salary is required.";
+    else if (!Number.isFinite(min) || min <= 0)           errs.salaryMin = "Enter a valid amount.";
+    if (!String(form.get("salaryMax") ?? "").trim())      errs.salaryMax = "Maximum salary is required.";
+    else if (!Number.isFinite(max) || max <= 0)           errs.salaryMax = "Enter a valid amount.";
+    if (!errs.salaryMin && !errs.salaryMax && min > max)  errs.salaryMax = "Maximum must be higher than the minimum.";
+
     return errs;
   }
 
@@ -107,9 +117,9 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
       city:               form.get("city"),
       description:        form.get("description"),
       tags:               form.get("tags"),
-      salaryDisclosed,
-      salaryMin:          salaryDisclosed ? form.get("salaryMin")  : null,
-      salaryMax:          salaryDisclosed ? form.get("salaryMax")  : null,
+      salaryDisclosed:    true,
+      salaryMin:          form.get("salaryMin"),
+      salaryMax:          form.get("salaryMax"),
       applyType:          applyMethod === "in_app" ? "IN_APP" : applyMethod === "email" ? "EMAIL" : "URL",
       applyUrl:           applyMethod === "url"    ? form.get("applyUrl")   : null,
       applyEmail:         applyMethod === "email"  ? form.get("applyEmail") : null,
@@ -473,48 +483,25 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
             </FormSection>
 
             <FormSection icon={<Star size={14} />} title="Salary & apply">
-              {/* Salary disclosure toggle */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--bg-alt)", border: "1px solid var(--border)", borderRadius: 8 }}>
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, marginBottom: 2 }}>Show salary range</div>
-                  <div className="body-s" style={{ color: "var(--text-muted)" }}>
-                    {salaryDisclosed ? "Candidates will see the salary range" : "Salary will appear as Undisclosed"}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={salaryDisclosed}
-                  onClick={() => { setSalaryDisclosed(v => !v); setIsDirty(true); }}
-                  style={{
-                    width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer", flexShrink: 0,
-                    background: salaryDisclosed ? "var(--accent)" : "var(--border-strong)",
-                    position: "relative", transition: "background 150ms",
-                  }}
-                >
-                  <span style={{
-                    position: "absolute", top: 3, left: salaryDisclosed ? 23 : 3,
-                    width: 18, height: 18, borderRadius: "50%", background: "var(--white)",
-                    transition: "left 150ms", display: "block",
-                  }} />
-                </button>
+              {/* Salary is mandatory — the EU Pay Transparency Directive
+                  requires the range to be published up front, so there is no
+                  opt-out toggle here. */}
+              <div className="grid-2">
+                <Field label="Salary min (€/year)" required error={fieldErrors.salaryMin}>
+                  <input className="input" name="salaryMin" type="number" min={1} placeholder="e.g. 60000" />
+                </Field>
+                <Field label="Salary max (€/year)" required error={fieldErrors.salaryMax}>
+                  <input className="input" name="salaryMax" type="number" min={1} placeholder="e.g. 85000" />
+                </Field>
               </div>
-
-              {salaryDisclosed && (
-                <>
-                  <div className="grid-2">
-                    <Field label="Salary min (€/year)">
-                      <input className="input" name="salaryMin" type="number" placeholder="e.g. 60000" />
-                    </Field>
-                    <Field label="Salary max (€/year)">
-                      <input className="input" name="salaryMax" type="number" placeholder="e.g. 85000" />
-                    </Field>
-                  </div>
-                  <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>
-                    LISTINGS WITH SALARY RANGES GET 2× MORE APPLICATIONS
-                  </p>
-                </>
-              )}
+              <div style={{ display: "flex", gap: 10, padding: "12px 14px", background: "var(--warning-bg)", border: "1px solid #fcd34d", borderRadius: 8, marginTop: -4 }}>
+                <AlertTriangle size={15} style={{ color: "var(--warning)", flexShrink: 0, marginTop: 1 }} />
+                <p className="body-s" style={{ color: "var(--text)", margin: 0, lineHeight: 1.55 }}>
+                  Salary ranges must be genuine. If a listing advertises a range the role
+                  doesn&apos;t actually pay, it can be taken down — and the listing credit
+                  refunded to your account.
+                </p>
+              </div>
 
               <div>
                 <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
@@ -670,7 +657,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 20, background: "var(--surface)" }}>
             <h3 className="h3" style={{ marginBottom: 14 }}>Tips for a great listing</h3>
             {[
-              ["Add a salary range", "Listings with salaries get 2× more applications."],
+              ["Keep the range realistic", "A tight, honest band attracts better-matched candidates."],
               ["Be specific", "Clear role descriptions attract better-matched candidates."],
               ["Add your logo", "Company profiles with logos get more clicks."],
             ].map(([title, desc]) => (

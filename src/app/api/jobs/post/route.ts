@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { slugify } from "@/lib/utils";
+import { slugify, validateSalaryRange } from "@/lib/utils";
 
 const CATEGORY_NAMES: Record<string, string> = {
   frontend:    "Frontend",
@@ -73,7 +73,6 @@ export async function POST(req: NextRequest) {
     employmentType,
     city,
     description,
-    salaryDisclosed,
     salaryMin,
     salaryMax,
     applyType,
@@ -96,6 +95,7 @@ export async function POST(req: NextRequest) {
   if (!(description as string)?.trim()) errors.push("Job description is required.");
   if (resolvedApplyType === "URL"   && !(applyUrl   as string)?.trim()) errors.push("Application URL is required.");
   if (resolvedApplyType === "EMAIL" && !(applyEmail as string)?.trim()) errors.push("HR email address is required.");
+  errors.push(...validateSalaryRange(salaryMin, salaryMax));
   if (errors.length > 0) return NextResponse.json({ errors }, { status: 422 });
 
   // Check slot availability
@@ -165,9 +165,9 @@ export async function POST(req: NextRequest) {
           employmentType:  (EMPLOYMENT_TYPE_MAP[employmentType as string] ?? "FULL_TIME") as never,
           experienceLevel: (EXPERIENCE_LEVEL_MAP[experienceLevel as string] ?? "MID") as never,
           city:            (city as string | undefined)?.trim() || undefined,
-          salaryDisclosed: salaryDisclosed !== false,
-          salaryMin:       salaryDisclosed !== false && salaryMin ? Number(salaryMin) : undefined,
-          salaryMax:       salaryDisclosed !== false && salaryMax ? Number(salaryMax) : undefined,
+          salaryDisclosed: true,
+          salaryMin:       Number(salaryMin),
+          salaryMax:       Number(salaryMax),
           applyType:       resolvedApplyType,
           applyUrl:        resolvedApplyType === "URL"   ? (applyUrl   as string | undefined)?.trim() || undefined : undefined,
           applyEmail:      resolvedApplyType === "EMAIL" ? (applyEmail as string | undefined)?.trim() || undefined : undefined,
