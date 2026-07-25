@@ -42,14 +42,22 @@ Before they went, each was checked against `main`:
 `onClick` handlers from a homepage server component; `main`'s `page.tsx` has
 none left).
 
-**`claude/compact-card-layout-92qmqy` (`a4a37fa`) was the exception** — a real
-unmerged feature, "Collapse applicant cards to a compact row by default",
-rewriting `ApplicationsPanel.tsx` (346 lines) and adding the `.applicant-card`
-CSS system (~164 lines). It is *not* in `main` and was never shipped. Preserved
-as tag `archive/compact-card-layout`; it is ~58 commits behind and needs a
-rebase before it can ship. A fragment of it did leak into `main` — the
-`@media (max-width: 560px)` block in `globals.css` hiding `.applicant-quick`
-and `.applicant-time` is dead CSS with nothing left to match.
+`claude/compact-card-layout-92qmqy` (`a4a37fa`) is **superseded, not lost**.
+It is a class-based implementation of "collapse applicant cards to a compact
+row", but `main` already ships that feature by a different route: `21df633`
+*feat(applicants): collapse cards to a compact triage row by default*, refined
+by `5d50e88` (remove the initial-letter avatar) and `b48845e` (remove the pink
+left spine). `main`'s version is inline-styled and shares only the
+`.applicant-quick` / `.applicant-time` class names with the branch, so grepping
+`main` for `.applicant-card` gives a false negative — the feature is there.
+
+Merging `a4a37fa` now would **regress** both refinements, since it reinstates
+the `.applicant-avatar` initial-letter badge that `5d50e88` deliberately
+removed. Don't cherry-pick it.
+
+Note the `@media (max-width: 560px)` block in `globals.css` hiding
+`.applicant-quick` / `.applicant-time` is **live CSS**, not a leftover —
+`ApplicationsPanel.tsx` uses both class names.
 
 Note the sandbox git proxy rejects **deletes and tag pushes** (403) while
 allowing branch creates and updates, so branch cleanup and tagging have to be
