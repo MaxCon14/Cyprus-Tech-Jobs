@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { CheckCircle2, Loader2, FileText, AlertCircle, Upload, X } from "lucide-react";
@@ -38,23 +38,60 @@ function recordApply(jobId: string) {
 
 /** Full-screen centered modal so the application form has room to breathe
  *  instead of being squished into the job-detail sidebar. */
+const FOCUSABLE =
+  'a[href], button:not([disabled]), textarea, select, input:not([type="hidden"]), [tabindex]:not([tabindex="-1"])';
+
 function ApplyModalShell({
-  title, onClose, children,
-}: { title: string; onClose: () => void; children: React.ReactNode }) {
+  title, onClose, children, footer,
+}: {
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  /* Whether the pointer press that led to a click started on the backdrop.
+     Without this, selecting text inside the form and releasing the mouse over
+     the backdrop counts as a backdrop click and throws the application away. */
+  const pressedBackdrop = useRef(false);
+  const titleId = useId();
+
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
+    const prevFocus = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+
+    const focusable = () =>
+      Array.from(cardRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])
+        .filter(el => el.offsetParent !== null);
+
+    focusable()[0]?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (e.key !== "Tab") return;
+      // Keep Tab inside the dialog — an aria-modal dialog that lets focus walk
+      // out into the page behind it is unusable with a keyboard or a reader.
+      const list = focusable();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last  = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
+      prevFocus?.focus?.();
     };
   }, [onClose]);
 
   return (
     <div
-      onClick={onClose}
+      onMouseDown={e => { pressedBackdrop.current = e.target === e.currentTarget; }}
+      onClick={e => { if (e.target === e.currentTarget && pressedBackdrop.current) onClose(); }}
       style={{
         position: "fixed", inset: 0, zIndex: 200,
         background: "rgba(0,0,0,0.45)",
@@ -64,13 +101,14 @@ function ApplyModalShell({
       }}
     >
       <div
-        onClick={e => e.stopPropagation()}
+        ref={cardRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
         style={{
           background: "var(--surface)", borderRadius: 16,
           border: "1px solid var(--border)",
-          width: "100%", maxWidth: 560, margin: "auto",
+          width: "100%", maxWidth: 720, margin: "auto",
           maxHeight: "90vh", display: "flex", flexDirection: "column",
           boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
           overflow: "hidden",
@@ -78,18 +116,32 @@ function ApplyModalShell({
       >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "18px 20px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-          <h2 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 17, color: "var(--text)", margin: 0 }}>
+          <h2 id={titleId} style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 17, color: "var(--text)", margin: 0 }}>
             {title}
           </h2>
           <button onClick={onClose} aria-label="Close" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-subtle)", padding: 4, display: "grid", placeItems: "center", flexShrink: 0 }}>
             <X size={18} />
           </button>
         </div>
-        {/* Scrollable body — flex:1 + minHeight:0 lets it shrink below its
-            content height so overflow-y actually scrolls inside the card. */}
-        <div style={{ flex: 1, minHeight: 0, padding: 20, overflowY: "auto", WebkitOverflowScrolling: "touch", display: "flex", flexDirection: "column", gap: 20 }}>
-          {children}
+
+        {/* Scroll port. The flex column that lays the form out lives *inside*
+            it rather than on it: as flex items the sections inherit
+            flex-shrink:1 and compress instead of overflowing, and since each
+            one clips its own corners with overflow:hidden, the fields get cut
+            off with nothing to scroll. A block child sizes to its content, so
+            the port actually overflows and scrolls. */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+          <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 20 }}>
+            {children}
+          </div>
         </div>
+
+        {/* Actions stay pinned so Submit is reachable from anywhere in a long form */}
+        {footer && (
+          <div style={{ flexShrink: 0, padding: "16px 20px", borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -528,36 +580,39 @@ function InAppApplyForm({
         </div>
       )}
 
+    </>
+  );
+
+  /* Lives in the modal footer, not the scroll body — an error rendered at the
+     bottom of a scrolled-away form is an error nobody reads. */
+  const formActions = (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {error && (
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10, color: "var(--error)", background: "var(--error-bg)", borderRadius: 8, padding: "12px 14px" }}>
+        <div role="alert" style={{ display: "flex", alignItems: "flex-start", gap: 10, color: "var(--error)", background: "var(--error-bg)", borderRadius: 8, padding: "12px 14px" }}>
           <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
           <span className="body-s">{error}</span>
         </div>
       )}
-
-      {/* Action buttons */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="modal-actions">
+        <button
+          onClick={() => setOpen(false)}
+          className="btn btn-ghost btn-lg"
+        >
+          Cancel
+        </button>
         <button
           onClick={handleSubmit}
           disabled={submitting || cvUploading || clUploading}
           className="btn btn-accent btn-lg"
-          style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", gap: 8 }}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
         >
           {submitting
             ? <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Submitting…</>
             : "Submit application"
           }
         </button>
-        <button
-          onClick={() => setOpen(false)}
-          className="btn btn-ghost btn-lg"
-          style={{ width: "100%", justifyContent: "center" }}
-        >
-          Cancel
-        </button>
       </div>
-
-    </>
+    </div>
   );
 
   return (
@@ -574,7 +629,11 @@ function InAppApplyForm({
 
       {/* Full-screen application modal — gives the form room instead of the squished sidebar */}
       {open && createPortal(
-        <ApplyModalShell title={`Apply to ${companyName}`} onClose={() => setOpen(false)}>
+        <ApplyModalShell
+          title={`Apply to ${companyName}`}
+          onClose={() => setOpen(false)}
+          footer={formActions}
+        >
           {formBody}
         </ApplyModalShell>,
         document.body

@@ -633,6 +633,22 @@ body {
   flex-wrap: wrap;
 }
 
+/* Modal footer actions — primary action sits right on desktop. Below 640px the
+   pair stacks and goes full-width, primary first so it stays under the thumb. */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.modal-actions > .btn { min-width: 140px; justify-content: center; }
+
+@media (max-width: 640px) {
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+  .modal-actions > .btn { width: 100%; min-width: 0; }
+}
+
 /* Stacked CTA strip (text + single button) — button goes full-width on mobile */
 @media (max-width: 640px) {
   .cta-strip {
