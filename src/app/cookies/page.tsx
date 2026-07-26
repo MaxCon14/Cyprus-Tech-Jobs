@@ -22,7 +22,11 @@ const SECTIONS: LegalSection[] = [
     blocks: [
       {
         type: "note",
-        text: "We use strictly necessary cookies only — the ones that keep you signed in. We do not use advertising cookies, tracking pixels or third-party marketing trackers, and we do not sell or share browsing data. That is why you are not greeted by a consent banner.",
+        text: "We use strictly necessary cookies only — the one that keeps you signed in. We do not use advertising cookies, tracking pixels or third-party marketing trackers, and we do not sell or share browsing data.",
+      },
+      {
+        type: "p",
+        text: "The notice at the bottom of the page tells you this rather than asking permission, because there is nothing here to permit. EU rules require consent for cookies that are not strictly necessary, and we do not set any. If that ever changes — if we add analytics that identify you, or an advertising pixel — we will ask first, and nothing non-essential will run until you agree.",
       },
       {
         type: "p",
@@ -66,7 +70,7 @@ const SECTIONS: LegalSection[] = [
       },
       {
         type: "p",
-        text: "If you never sign in, no cookie is set at all. Browsing jobs anonymously stores nothing in your browser.",
+        text: "If you never sign in, we set no cookie at all. Browsing jobs anonymously stores nothing in your browser on our behalf — see Third parties below for the requests your browser makes to other companies while loading a page.",
       },
     ],
   },
@@ -82,6 +86,11 @@ const SECTIONS: LegalSection[] = [
             "Onboarding draft",
             "While you are filling in the job seeker or employer sign-up wizard, your answers so far are saved in your browser so a refresh or an accidental back button does not lose them. It never leaves your device until you submit the form.",
             "Cleared when you finish the wizard, or when you clear site data",
+          ],
+          [
+            "Cookie notice",
+            "Records that you have seen the notice at the bottom of the page, so it is not shown again on every visit. It stores a version number and the date you dismissed it, nothing about you.",
+            "Kept until you clear site data",
           ],
         ],
       },
@@ -108,6 +117,10 @@ const SECTIONS: LegalSection[] = [
       {
         type: "p",
         text: "No advertising network, social media tracker or marketing pixel runs on this site.",
+      },
+      {
+        type: "p",
+        text: "Some images are served from other companies' networks. Technology logos on job listings come from cdn.simpleicons.org and cdn.jsdelivr.net. As with any image on the web, loading one tells the host your IP address and which page requested it. They set no cookies for us and we send them nothing about you, but the request itself is visible to them.",
       },
       {
         type: "p",
@@ -151,7 +164,7 @@ export default function CookiesPage() {
     <LegalPage
       eyebrow="Legal"
       title="Cookie Policy"
-      intro={`What ${SITE_NAME} stores in your browser, and why there is no consent banner.`}
+      intro={`What ${SITE_NAME} stores in your browser, and what it is for.`}
       sections={SECTIONS}
       current="/cookies"
     />

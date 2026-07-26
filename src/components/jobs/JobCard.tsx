@@ -9,19 +9,15 @@ import { SaveJobButton } from "./SaveJobButton";
 import { SkillTag } from "./SkillTag";
 import { CompanyLogoImg } from "./CompanyLogoImg";
 
-function CompanyLogo({ name, logoUrl, website }: { name: string; logoUrl?: string | null; website?: string | null }) {
+/* No favicon fallback. This used to fetch https://www.google.com/s2/favicons
+   when a company had no logo, which put a request to Google on every page a
+   candidate browses — handing over their IP and the page they were reading,
+   for a 16px image. Companies and curated listings can both upload a logo now,
+   and the initial tile is a fine stand-in when they haven't. */
+function CompanyLogo({ name, logoUrl }: { name: string; logoUrl?: string | null; website?: string | null }) {
   const initial = name.charAt(0).toUpperCase();
 
-  const domain = website
-    ? website.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0]
-    : null;
-  const src = logoUrl
-    ? logoUrl
-    : domain
-      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=256`
-      : null;
-
-  if (src) return <CompanyLogoImg src={src} name={name} initial={initial} />;
+  if (logoUrl) return <CompanyLogoImg src={logoUrl} name={name} initial={initial} />;
 
   return <div className="job-card-logo job-card-logo-fallback">{initial}</div>;
 }

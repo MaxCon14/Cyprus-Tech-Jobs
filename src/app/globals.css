@@ -633,6 +633,19 @@ body {
   flex-wrap: wrap;
 }
 
+/* Cookie notice — the action sits right of the text on desktop and drops to a
+   full-width row on phones, where a small inline button is hard to hit. */
+.cookie-notice-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.cookie-notice-actions > .btn { min-width: 120px; justify-content: center; }
+
+@media (max-width: 560px) {
+  .cookie-notice-actions > .btn { width: 100%; }
+}
+
 /* =====================================================
    COMPANY DIRECTORY
    ===================================================== */

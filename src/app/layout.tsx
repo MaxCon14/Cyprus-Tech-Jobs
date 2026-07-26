@@ -7,6 +7,7 @@ import { FooterConditional } from "@/components/layout/FooterConditional";
 import { Providers } from "./providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import { CookieNotice } from "@/components/layout/CookieNotice";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -58,7 +59,6 @@ export default function RootLayout({
         {/* Warm up connections to the third-party icon/logo CDNs so their
             DNS/TLS handshakes overlap with the initial render. */}
         <link rel="preconnect" href="https://cdn.simpleicons.org" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.google.com" />
       </head>
       <body className="min-h-screen flex flex-col antialiased" style={{ background: "var(--bg)", color: "var(--text)" }}>
         <Providers>
@@ -66,6 +66,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <FooterConditional><Footer /></FooterConditional>
         </Providers>
+        <CookieNotice />
         <SpeedInsights />
         <Analytics />
       </body>
