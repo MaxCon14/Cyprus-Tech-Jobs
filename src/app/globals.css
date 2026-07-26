@@ -1614,3 +1614,9 @@ details[open] .faq-chevron {
   transform-origin: center;
   animation: cv-star-rotate 1.7s ease-in-out infinite;
 }
+
+/* Dashboard zone headings — the qualifier ("what employers see") is helpful on
+   a wide column but competes with the label once the columns stack. */
+@media (max-width: 640px) {
+  .dashboard-zone-hint { display: none; }
+}
