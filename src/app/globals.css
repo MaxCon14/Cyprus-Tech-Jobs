@@ -638,7 +638,7 @@ body {
 .cookie-notice-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 .cookie-notice-actions > .btn { min-width: 120px; justify-content: center; }
 

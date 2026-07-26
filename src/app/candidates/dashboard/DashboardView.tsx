@@ -5,10 +5,10 @@ import {
 } from "lucide-react";
 import {
   ProfileSection, LinksSection, ExperienceSection,
-  PreferencesSection, AlertSection, SkillsSection, CvSection,
+  PreferencesSection, SkillsSection, CvSection,
 } from "./ProfileEditor";
 import { AppliedJobsCard } from "./AppliedJobsCard";
-import { MyAlertsCard } from "@/components/alerts/MyAlertsCard";
+import { AlertsCard } from "@/components/alerts/AlertsCard";
 import { remoteLabel, formatSalary } from "@/lib/utils";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 
@@ -179,8 +179,7 @@ export function DashboardView({
               <ZoneRule />
             </div>
             <PreferencesSection candidate={c} />
-            <AlertSection candidate={c} />
-            <MyAlertsCard />
+            <AlertsCard email={c.email} initialFrequency={c.alertFrequency} />
           </div>
         </div>
       </div>

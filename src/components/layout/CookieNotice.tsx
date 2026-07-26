@@ -81,7 +81,9 @@ export function CookieNotice() {
           padding: "16px 18px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+        {/* Icon sits above the text rather than beside it, so the heading,
+            description and link form one uninterrupted column to read down. */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
           <span style={{
             width: 32, height: 32, borderRadius: 9, flexShrink: 0,
             background: "var(--accent-soft)", color: "var(--accent)",
@@ -89,18 +91,6 @@ export function CookieNotice() {
           }}>
             <Cookie size={16} />
           </span>
-
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p className="body-s" style={{ color: "var(--text)", margin: "0 0 4px", fontWeight: 600 }}>
-              Essential cookies only
-            </p>
-            <p className="body-s" style={{ color: "var(--text-muted)", margin: 0 }}>
-              {"We use one cookie, to keep you signed in. No advertising, no tracking, and nothing sold or shared. "}
-              <Link href="/cookies" style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 500 }}>
-                Read the cookie policy
-              </Link>
-            </p>
-          </div>
 
           <button
             type="button"
@@ -115,6 +105,16 @@ export function CookieNotice() {
             <X size={16} />
           </button>
         </div>
+
+        <p className="body-s" style={{ color: "var(--text)", margin: "0 0 4px", fontWeight: 600 }}>
+          Essential cookies only
+        </p>
+        <p className="body-s" style={{ color: "var(--text-muted)", margin: "0 0 8px" }}>
+          We use one cookie, to keep you signed in. No advertising, no tracking, and nothing sold or shared.
+        </p>
+        <Link href="/cookies" className="body-s" style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 500 }}>
+          Read the cookie policy
+        </Link>
 
         <div className="cookie-notice-actions">
           <button type="button" onClick={dismiss} className="btn btn-accent btn-sm">
