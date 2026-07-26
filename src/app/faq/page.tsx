@@ -28,11 +28,11 @@ const FAQS = [
   },
   {
     q: "How do I apply for a job?",
-    a: "Click any job listing and hit the \"Apply for this role\" button. You'll be taken directly to the employer's application page. We don't process applications ourselves — the link goes straight to the employer.",
+    a: "It depends on the listing. Many employers take applications directly here — those show an \"Apply on CyprusTech.Careers\" button, and applying sends them your profile, your CV and an optional cover letter, with the application tracked in your dashboard. Other listings hand you over to the employer's own site or email address; those show \"Apply for this role\" and we take no part beyond the click.",
   },
   {
     q: "Do I need an account to apply?",
-    a: "No account is needed to browse or apply. Creating a candidate account gives you extra features: saving jobs, tracking applications, getting personalised job alerts, and having your profile discoverable by employers.",
+    a: "You can browse and search everything without an account. Applying depends on the listing: where we hand you over to the employer's own site, no account is needed. To apply directly on CyprusTech.Careers you need a free candidate account, because we send the employer your saved profile and CV. An account also lets you save jobs, track applications, get personalised alerts, and be discoverable by employers.",
   },
   {
     q: "How do job alerts work?",
@@ -58,6 +58,10 @@ const FAQS = [
         {" "}and fill in the details. Your listing goes live immediately.
       </>
     ),
+  },
+  {
+    q: "Do I have to include a salary range?",
+    a: "Yes. Every published listing must show a salary range, in line with the EU Pay Transparency Directive, and this is enforced when you publish. You can save an incomplete draft without one, but you will not be able to publish until it is filled in. The range must be genuine — a listing advertising a range the employer has no intention of honouring can be removed, and we refund the slot it used.",
   },
   {
     q: "How does pricing work?",
