@@ -13,9 +13,15 @@ import { Bell, Building2, Layers, X, RefreshCw, Check } from "lucide-react";
  * box owned which decision. They are one thing seen from two sides — when the
  * digest arrives, and what goes in it.
  *
- * Cadence saves on click rather than behind an Edit mode. A two-option toggle
- * does not need a save step, and an edit mode over the whole card would have
- * put the subscription list into a state it has no business being in.
+ * Delivery saves on click rather than behind an Edit mode: a three-option
+ * segmented control does not need a save step, and an edit mode over the whole
+ * card would have put the subscription list into a state it has no business
+ * being in.
+ *
+ * Off is a real opt-out, not a label. It goes through PATCH
+ * /api/candidates/alerts, which unconfirms the JobAlert rows the send-alerts
+ * cron selects on. Writing candidates.alertFrequency alone — which is what the
+ * old "Job alerts" card did — changed the wording here and nothing else.
  */
 
 interface AlertRow {
@@ -32,7 +38,7 @@ interface AlertRow {
 }
 
 type LoadState = "loading" | "ready" | "error";
-type Frequency = "DAILY" | "WEEKLY";
+type Delivery = "OFF" | "DAILY" | "WEEKLY";
 
 function remoteWord(t: string | null): string | null {
   if (t === "REMOTE") return "Remote";
@@ -46,7 +52,9 @@ export function AlertsCard({ email, initialFrequency }: { email: string; initial
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [removing,  setRemoving]  = useState<Set<string>>(new Set());
 
-  const [frequency, setFrequency] = useState<Frequency>(initialFrequency === "DAILY" ? "DAILY" : "WEEKLY");
+  const [delivery, setDelivery] = useState<Delivery>(
+    initialFrequency === "OFF" ? "OFF" : initialFrequency === "DAILY" ? "DAILY" : "WEEKLY",
+  );
   const [savingFreq, setSavingFreq] = useState(false);
   const [savedFreq,  setSavedFreq]  = useState(false);
   const [freqError,  setFreqError]  = useState(false);
@@ -65,24 +73,27 @@ export function AlertsCard({ email, initialFrequency }: { email: string; initial
 
   useEffect(() => { load(); }, []);
 
-  async function chooseFrequency(next: Frequency) {
-    if (next === frequency || savingFreq) return;
-    const previous = frequency;
-    setFrequency(next);            // optimistic; a digest setting is cheap to undo
+  async function chooseDelivery(next: Delivery) {
+    if (next === delivery || savingFreq) return;
+    const previous = delivery;
+    setDelivery(next);            // optimistic; a delivery setting is cheap to undo
     setSavingFreq(true);
     setFreqError(false);
     setSavedFreq(false);
     try {
-      const res = await fetch("/api/candidates/profile", {
+      /* Not /api/candidates/profile: that writes candidates.alertFrequency,
+         which nothing that sends email reads. This endpoint updates the
+         JobAlert rows the cron actually selects on. */
+      const res = await fetch("/api/candidates/alerts", {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ alertFrequency: next }),
+        body:    JSON.stringify({ mode: next }),
       });
       if (!res.ok) throw new Error();
       setSavedFreq(true);
       setTimeout(() => setSavedFreq(false), 2000);
     } catch {
-      setFrequency(previous);
+      setDelivery(previous);
       setFreqError(true);
     }
     setSavingFreq(false);
@@ -107,7 +118,7 @@ export function AlertsCard({ email, initialFrequency }: { email: string; initial
      says weekly is noise. */
   function rowCadence(a: AlertRow): string | null {
     const own = a.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY";
-    if (own === frequency) return null;
+    if (own === delivery) return null;
     return own === "DAILY" ? "Daily" : "Weekly";
   }
 
@@ -165,29 +176,32 @@ export function AlertsCard({ email, initialFrequency }: { email: string; initial
       {/* ── When it arrives ── */}
       <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
         <p className="body-s" style={{ color: "var(--text-muted)", margin: "0 0 10px" }}>
-          {"Sent to "}
-          <span style={{ color: "var(--text)", fontWeight: 500, wordBreak: "break-all" }}>{email}</span>
+          {delivery === "OFF"
+            ? "Alerts are off. Your subscriptions are kept, so you can turn them back on any time."
+            : <>{"Sent to "}<span style={{ color: "var(--text)", fontWeight: 500, wordBreak: "break-all" }}>{email}</span></>}
         </p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {(["WEEKLY", "DAILY"] as const).map(f => {
-            const active = frequency === f;
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+          {(["WEEKLY", "DAILY", "OFF"] as const).map(mode => {
+            const active = delivery === mode;
+            const label  = mode === "DAILY" ? "Daily" : mode === "WEEKLY" ? "Weekly" : "Off";
+            const sub    = mode === "DAILY" ? "MORNINGS" : mode === "WEEKLY" ? "MONDAYS" : "NO EMAIL";
             return (
               <button
-                key={f} type="button"
-                onClick={() => chooseFrequency(f)}
+                key={mode} type="button"
+                onClick={() => chooseDelivery(mode)}
                 aria-pressed={active}
                 style={{
-                  padding: "9px 12px", borderRadius: 8,
+                  padding: "9px 8px", borderRadius: 8,
                   border: `1.5px solid ${active ? "var(--accent)" : "var(--border)"}`,
                   background: active ? "var(--accent-soft)" : "var(--surface)",
                   cursor: "pointer", textAlign: "center", transition: "all 150ms ease",
                 }}
               >
                 <div className="body-s" style={{ fontWeight: 600, color: active ? "var(--accent)" : "var(--text)" }}>
-                  {f === "DAILY" ? "Daily" : "Weekly"}
+                  {label}
                 </div>
                 <div className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10 }}>
-                  {f === "DAILY" ? "EVERY MORNING" : "EVERY MONDAY"}
+                  {sub}
                 </div>
               </button>
             );
@@ -222,7 +236,9 @@ export function AlertsCard({ email, initialFrequency }: { email: string; initial
             <p className="body-s" style={{ color: "var(--text-muted)", margin: "0 0 10px" }}>
               You haven&apos;t subscribed to anything yet, so the digest has nothing to send.
             </p>
-            <Link href="/jobs" className="btn btn-outline btn-sm">Find roles to follow</Link>
+            <Link href="/jobs" className="btn btn-outline btn-sm" style={{ width: "100%", justifyContent: "center" }}>
+              Find roles to follow
+            </Link>
           </div>
         )}
 

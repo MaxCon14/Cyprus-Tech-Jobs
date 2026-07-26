@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -56,4 +57,45 @@ export async function GET() {
   }));
 
   return NextResponse.json(result);
+}
+
+/**
+ * Sets delivery for every alert this candidate has.
+ *
+ * It has to act on the JobAlert rows, not on candidates.alertFrequency, because
+ * the rows are what the send-alerts cron reads — it selects on
+ * jobAlert.alertFrequency and confirmed. The candidate column is only a default
+ * carried over from onboarding, so changing it alone would move the label in
+ * the dashboard while the emails carried on exactly as before.
+ *
+ * "OFF" unconfirms the rows rather than deleting them: the cron skips
+ * unconfirmed alerts, and the candidate keeps the list they built, so turning
+ * alerts back on does not mean subscribing to everything again.
+ */
+export async function PATCH(req: NextRequest) {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let mode: unknown;
+  try {
+    mode = (await req.json())?.mode;
+  } catch {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  if (mode !== "OFF" && mode !== "DAILY" && mode !== "WEEKLY") {
+    return NextResponse.json({ error: "mode must be OFF, DAILY or WEEKLY." }, { status: 422 });
+  }
+
+  const email = user.email.toLowerCase();
+
+  const { count } = mode === "OFF"
+    ? await prisma.jobAlert.updateMany({ where: { email }, data: { confirmed: false } })
+    : await prisma.jobAlert.updateMany({ where: { email }, data: { alertFrequency: mode, confirmed: true } });
+
+  // Keep the candidate row in step so the dashboard shows the right state on reload.
+  await supabaseAdmin.from("candidates").update({ alertFrequency: mode }).eq("email", email);
+
+  return NextResponse.json({ ok: true, updated: count });
 }
