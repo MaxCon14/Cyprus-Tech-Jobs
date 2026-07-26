@@ -22,6 +22,7 @@ export interface CitySearchParams {
   category?: string;
   type?:     string;
   employment?: string;
+  skill?: string;
   level?:    string;
   salary?:   string;
   search?:   string;
@@ -51,7 +52,7 @@ const TYPE_LABELS: Record<string, string> = {
 export async function CityPage({ config, searchParams }: Props) {
   const { displayName, slug, city, isRemote, description } = config;
 
-  const { category, type, employment, level, search } = searchParams;
+  const { category, type, employment, level, skill, search } = searchParams;
   const salary  = searchParams.salary ? parseInt(searchParams.salary) : undefined;
   const pageNum = Math.max(1, parseInt(searchParams.page ?? "1") || 1);
 
@@ -67,6 +68,7 @@ export async function CityPage({ config, searchParams }: Props) {
        on every city page including remote. */
     ...(!isRemote && type ? { remoteType: type } : {}),
     ...(employment ? { employmentType: employment } : {}),
+    ...(skill ? { skill } : {}),
   };
 
   let jobs:       Awaited<ReturnType<typeof getJobs>> = [];
@@ -101,6 +103,7 @@ export async function CityPage({ config, searchParams }: Props) {
   if (category) activeFilters.push({ label: catLabel(category),                     key: "category" });
   if (!isRemote && type) activeFilters.push({ label: TYPE_LABELS[type] ?? type,     key: "type"     });
   if (employment) activeFilters.push({ label: EMPLOYMENT_LABELS[employment] ?? employment, key: "employment" });
+  if (skill     ) activeFilters.push({ label: skill,                                key: "skill"      });
   if (level   ) activeFilters.push({ label: level,                                  key: "level"    });
   if (salary  ) activeFilters.push({ label: `min €${(salary / 1000).toFixed(0)}k`, key: "salary"   });
 
@@ -111,6 +114,7 @@ export async function CityPage({ config, searchParams }: Props) {
       search, category, level, salary: searchParams.salary,
       ...(!isRemote ? { type } : {}),
       employment,
+      skill,
     };
     cur[key] = val;
     for (const [k, v] of Object.entries(cur)) { if (v) p.set(k, v); }
@@ -200,7 +204,7 @@ export async function CityPage({ config, searchParams }: Props) {
           {/* Filter sidebar */}
           <FilterBar
             categories={categories}
-            current={{ category, type, employment, level, salary: searchParams.salary, search }}
+            current={{ category, type, employment, level, skill, salary: searchParams.salary, search }}
             cities={CITIES}
             basePath={basePath}
             hideCityFilter

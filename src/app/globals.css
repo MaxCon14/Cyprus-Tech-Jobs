@@ -1615,3 +1615,17 @@ details[open] .faq-chevron {
   animation: cv-star-rotate 1.7s ease-in-out infinite;
 }
 
+
+/* A skill on a job detail page links to that skill's listings. Only the
+   hover affordance differs from a plain .tag-skill — the tag already reads
+   as a chip, and underlining it would fight the icon beside it. */
+.tag-skill-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              background var(--duration-fast) var(--ease-out);
+}
+.tag-skill-link:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}

@@ -21,6 +21,8 @@ interface Props {
     /** Not a control here — set from the nav's Job Type menu. Carried through
      *  so changing a filter in this panel does not silently drop it. */
     employment?: string;
+    /** Set by clicking a skill on a job card; carried through, not edited here. */
+    skill?: string;
     level?: string;
     city?: string;
     salary?: string;
@@ -89,6 +91,7 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
     if (resolvedCategory)            p.set("category", resolvedCategory);
     if (!hideTypeFilter  && type)    p.set("type",     type);
     if (current.employment)          p.set("employment", current.employment);
+    if (current.skill)               p.set("skill",      current.skill);
     if (level)                       p.set("level",    level);
     if (!hideCityFilter  && city)    p.set("city",     city);
     if (salary)                      p.set("salary",   salary);

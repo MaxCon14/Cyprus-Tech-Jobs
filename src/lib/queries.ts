@@ -8,6 +8,7 @@ export async function getJobs({
   employmentType,
   experienceLevel,
   city,
+  skill,
   search,
   salary,
   take = 20,
@@ -23,6 +24,9 @@ export async function getJobs({
   employmentType?: string;
   experienceLevel?: string;
   city?: string;
+  /** A skill tag name, e.g. "React". Employers attach these when posting and
+   *  the cards show them, but until now nothing could filter on them. */
+  skill?: string;
   search?: string;
   salary?: number;
   take?: number;
@@ -39,6 +43,7 @@ export async function getJobs({
       ...(employmentType && { employmentType: employmentType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city         && { city: { contains: city, mode: "insensitive" } }),
+      ...(skill        && { tags: { some: { tag: { name: { equals: skill, mode: "insensitive" } } } } }),
       ...(salary       && { salaryMin: { gte: salary } }),
       ...(search       && {
         OR: [
@@ -107,6 +112,7 @@ export async function getJobCount({
   employmentType,
   experienceLevel,
   city,
+  skill,
   search,
   salary,
 }: {
@@ -115,6 +121,7 @@ export async function getJobCount({
   employmentType?: string;
   experienceLevel?: string;
   city?: string;
+  skill?: string;
   search?: string;
   salary?: number;
 } = {}) {
@@ -128,6 +135,7 @@ export async function getJobCount({
       ...(employmentType  && { employmentType: employmentType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city            && { city: { contains: city, mode: "insensitive" } }),
+      ...(skill           && { tags: { some: { tag: { name: { equals: skill, mode: "insensitive" } } } } }),
       ...(salary          && { salaryMin: { gte: salary } }),
       ...(search          && {
         OR: [

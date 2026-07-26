@@ -224,7 +224,7 @@ export default async function JobDetailPage({ params }: Props) {
               <h2 className="h2" style={{ marginBottom: 16 }}>Skills & requirements</h2>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {job.tags.map(t => (
-                  <SkillTag key={t.tag.name} name={t.tag.name} size="md" />
+                  <SkillTag key={t.tag.name} name={t.tag.name} size="md" href={`/jobs?skill=${encodeURIComponent(t.tag.name)}`} />
                 ))}
               </div>
             </div>

@@ -51,6 +51,8 @@ type SearchParams = Promise<{
    *  `type`; the nav's Job Type menu used to write FULL_TIME into `type`, which
    *  the page fed to the remote-type column, so it never matched a job. */
   employment?: string;
+  /** Skill tag name, e.g. React. */
+  skill?: string;
   city?: string;
   level?: string;
   search?: string;
@@ -60,7 +62,7 @@ type SearchParams = Promise<{
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const { category, type, employment, city, level, search } = params;
+  const { category, type, employment, city, level, skill, search } = params;
   const salary  = params.salary ? parseInt(params.salary) : undefined;
   const pageNum = Math.max(1, parseInt(params.page ?? "1") || 1);
 
@@ -68,6 +70,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     categorySlug:    category,
     remoteType:      type,
     employmentType:  employment,
+    skill,
     city:            city && city !== "Remote" ? city : undefined,
     experienceLevel: level,
     search:          search?.trim() || undefined,
@@ -103,7 +106,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   function urlWith(key: string, val: string | undefined) {
     const p = new URLSearchParams();
     const cur: Record<string, string | undefined> = {
-      search, category, type, employment, city, level, salary: params.salary,
+      search, category, type, employment, city, level, skill, salary: params.salary,
     };
     cur[key] = val;
     for (const [k, v] of Object.entries(cur)) { if (v) p.set(k, v); }
@@ -118,6 +121,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     if (category      ) up.set("category", category);
     if (type          ) up.set("type",     type);
     if (employment    ) up.set("employment", employment);
+    if (skill         ) up.set("skill",    skill);
     if (city          ) up.set("city",     city);
     if (level         ) up.set("level",    level);
     if (params.salary ) up.set("salary",   params.salary);
@@ -132,6 +136,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
   if (category) activeFilters.push({ label: catLabel(category),                     key: "category" });
   if (type      ) activeFilters.push({ label: WORK_TYPE_LABELS[type] ?? type,        key: "type"       });
   if (employment) activeFilters.push({ label: EMPLOYMENT_LABELS[employment] ?? employment, key: "employment" });
+  if (skill     ) activeFilters.push({ label: skill,                                key: "skill"      });
   if (city    ) activeFilters.push({ label: city,                                   key: "city"     });
   if (level   ) activeFilters.push({ label: level,                                  key: "level"    });
   if (salary  ) activeFilters.push({ label: `min €${(salary / 1000).toFixed(0)}k`, key: "salary"   });
@@ -140,6 +145,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     ? `${catLabel(category)} Jobs in Cyprus`
     : city       ? `Tech Jobs in ${city}`
     : employment ? `${EMPLOYMENT_LABELS[employment] ?? employment} Tech Jobs in Cyprus`
+    : skill      ? `${skill} Jobs in Cyprus`
     : type       ? `${WORK_TYPE_LABELS[type] ?? type} Tech Jobs in Cyprus`
     : "Tech Jobs in Cyprus";
 
@@ -184,7 +190,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         {/* ── Sticky filter sidebar ── */}
         <FilterBar
           categories={categories}
-          current={{ category, type, employment, city, level, salary: params.salary, search }}
+          current={{ category, type, employment, city, level, skill, salary: params.salary, search }}
           cities={CITIES}
         />
 
