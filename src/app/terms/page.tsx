@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LegalPage, type LegalSection } from "@/components/legal/LegalPage";
-import { SITE_NAME, SITE_URL, CONTACT_EMAIL, LEGAL_ENTITY, operatorLabel } from "@/lib/legal";
+import { SITE_NAME, SITE_URL, CONTACT_EMAIL, operatorLabel, addressLine } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Terms of Service — CyprusTech.Careers",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 const introLine = [
   `These terms are an agreement between you and ${operatorLabel()}, which operates cyprustech.careers.`,
-  LEGAL_ENTITY.registeredAddress ? `Registered address: ${LEGAL_ENTITY.registeredAddress}.` : "",
+  addressLine(),
 ].filter(Boolean).join(" ");
 
 const SECTIONS: LegalSection[] = [

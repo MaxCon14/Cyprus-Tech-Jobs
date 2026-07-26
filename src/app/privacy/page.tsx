@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage, type LegalSection } from "@/components/legal/LegalPage";
 import {
-  SITE_NAME, SITE_URL, CONTACT_EMAIL, LEGAL_ENTITY, DPA, operatorLabel,
+  SITE_NAME, SITE_URL, CONTACT_EMAIL, DPA, operatorLabel, registrationLine, addressLine,
 } from "@/lib/legal";
 
 export const metadata: Metadata = {
@@ -19,10 +19,8 @@ export const metadata: Metadata = {
 
 const controllerLines = [
   `${operatorLabel()} operates this site and is the data controller for personal data described in this policy.`,
-  LEGAL_ENTITY.registeredName && LEGAL_ENTITY.registrationNumber
-    ? `Registered in Cyprus under company number ${LEGAL_ENTITY.registrationNumber}.`
-    : "",
-  LEGAL_ENTITY.registeredAddress ? `Registered address: ${LEGAL_ENTITY.registeredAddress}.` : "",
+  registrationLine(),
+  addressLine(),
   `You can reach us about anything in this policy at ${CONTACT_EMAIL}.`,
 ].filter(Boolean);
 
