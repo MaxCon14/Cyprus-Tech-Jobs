@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify, validateSalaryRange } from "@/lib/utils";
 import { findCategoryBySlug } from "@/lib/queries";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
+import { linkJobTags, parseTagNames } from "@/lib/job-tags";
 
 const REMOTE_TYPE_MAP: Record<string, string> = {
   Remote:   "REMOTE",
@@ -167,16 +168,7 @@ export async function POST(req: NextRequest) {
     ]);
 
     // Link selected skill tags to the new job
-    const tagNames = (() => {
-      try { return JSON.parse(body.tags as string) as string[]; } catch { return []; }
-    })();
-    if (tagNames.length > 0) {
-      const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
-      await prisma.jobTag.createMany({
-        data: tagRecords.map(t => ({ jobId: job.id, tagId: t.id })),
-        skipDuplicates: true,
-      });
-    }
+    await linkJobTags(job.id, parseTagNames(body.tags));
 
     return NextResponse.json({ jobSlug: job.slug }, { status: 201 });
   } catch (err) {

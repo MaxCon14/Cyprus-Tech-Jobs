@@ -5,6 +5,7 @@ import { notifyGoogle } from "@/lib/google-indexing";
 import { validateSalaryRange } from "@/lib/utils";
 import { findCategoryBySlug } from "@/lib/queries";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
+import { linkJobTags, parseTagNames } from "@/lib/job-tags";
 
 export async function PATCH(
   req: NextRequest,
@@ -86,17 +87,8 @@ export async function PATCH(
     });
 
     // Replace skill tags
-    const tagNames = (() => {
-      try { return JSON.parse(rawTags as string) as string[]; } catch { return []; }
-    })();
     await prisma.jobTag.deleteMany({ where: { jobId: id } });
-    if (tagNames.length > 0) {
-      const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
-      await prisma.jobTag.createMany({
-        data: tagRecords.map(t => ({ jobId: id, tagId: t.id })),
-        skipDuplicates: true,
-      });
-    }
+    await linkJobTags(id, parseTagNames(rawTags));
 
     // If the job is active, re-ping Google so updated content gets re-indexed
     if (job.status === "ACTIVE") void notifyGoogle(updated.slug, "URL_UPDATED");

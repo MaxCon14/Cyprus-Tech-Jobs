@@ -52,6 +52,10 @@ export async function getJobs({
           { title:       { contains: search, mode: "insensitive" } },
           { description: { contains: search, mode: "insensitive" } },
           { company:     { name: { contains: search, mode: "insensitive" } } },
+          /* Curated listings have no Company row — the employer's name lives on
+             the job itself. Without this, searching for a curated company found
+             none of its jobs, which is every job an admin adds by hand. */
+          { curatedCompanyName: { contains: search, mode: "insensitive" } },
         ],
       }),
     },
@@ -144,6 +148,10 @@ export async function getJobCount({
           { title:       { contains: search, mode: "insensitive" } },
           { description: { contains: search, mode: "insensitive" } },
           { company:     { name: { contains: search, mode: "insensitive" } } },
+          /* Curated listings have no Company row — the employer's name lives on
+             the job itself. Without this, searching for a curated company found
+             none of its jobs, which is every job an admin adds by hand. */
+          { curatedCompanyName: { contains: search, mode: "insensitive" } },
         ],
       }),
     },

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
+import { linkJobTags, parseTagNames } from "@/lib/job-tags";
+import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 
 function slugify(str: string) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -24,6 +26,12 @@ export async function POST(req: NextRequest) {
 
   if (!companyName?.trim()) {
     return NextResponse.json({ error: "Company name is required" }, { status: 400 });
+  }
+
+  /* Confirm the category exists before writing. A missing or stale id used to
+     fall through to a foreign-key violation and surface as an opaque 500. */
+  if (!categoryId || !await prisma.category.findUnique({ where: { id: String(categoryId) } })) {
+    return NextResponse.json({ error: UNKNOWN_CATEGORY_MESSAGE }, { status: 422 });
   }
 
   const job = await prisma.job.create({
@@ -52,16 +60,7 @@ export async function POST(req: NextRequest) {
   });
 
   // Link skill tags
-  const tagNames: string[] = (() => {
-    try { return JSON.parse(rawTags as string) as string[]; } catch { return []; }
-  })();
-  if (tagNames.length > 0) {
-    const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
-    await prisma.jobTag.createMany({
-      data: tagRecords.map(t => ({ jobId: job.id, tagId: t.id })),
-      skipDuplicates: true,
-    });
-  }
+  await linkJobTags(job.id, parseTagNames(rawTags));
 
   return NextResponse.json(job);
 }

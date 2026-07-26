@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
+import { linkJobTags, parseTagNames } from "@/lib/job-tags";
+import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -18,7 +20,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (description !== undefined)    data.description = description;
   if (companyName !== undefined)    data.curatedCompanyName = companyName.trim();
   if (curatedCompanyLogoUrl !== undefined) data.curatedCompanyLogoUrl = typeof curatedCompanyLogoUrl === "string" && curatedCompanyLogoUrl.trim() ? curatedCompanyLogoUrl.trim() : null;
-  if (categoryId !== undefined)     data.categoryId = categoryId;
+  if (categoryId !== undefined) {
+    /* Confirm the category exists rather than letting a stale id fall through
+       to a foreign-key violation and an opaque 500. */
+    if (!await prisma.category.findUnique({ where: { id: String(categoryId) } })) {
+      return NextResponse.json({ error: UNKNOWN_CATEGORY_MESSAGE }, { status: 422 });
+    }
+    data.categoryId = categoryId;
+  }
   if (city !== undefined)           data.city = city || null;
   if (remoteType !== undefined)     data.remoteType = remoteType;
   if (employmentType !== undefined) data.employmentType = employmentType;
@@ -40,17 +49,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   // Replace skill tags if provided
   if (rawTags !== undefined) {
-    const tagNames: string[] = (() => {
-      try { return JSON.parse(rawTags as string) as string[]; } catch { return []; }
-    })();
     await prisma.jobTag.deleteMany({ where: { jobId: id } });
-    if (tagNames.length > 0) {
-      const tagRecords = await prisma.tag.findMany({ where: { name: { in: tagNames } } });
-      await prisma.jobTag.createMany({
-        data: tagRecords.map(t => ({ jobId: id, tagId: t.id })),
-        skipDuplicates: true,
-      });
-    }
+    await linkJobTags(id, parseTagNames(rawTags));
   }
 
   return NextResponse.json(job);
