@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/Select";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import { EMPLOYMENT_OPTIONS, WORK_TYPE_OPTIONS, EXPERIENCE_OPTIONS } from "@/lib/taxonomy";
 
 export type CategoryNode = {
@@ -62,6 +62,9 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
   const [level,      setLevel]      = useState(current.level   ?? "");
   const [city,       setCity]       = useState(current.city    ?? "");
   const [salary,     setSalary]     = useState(current.salary  ?? "");
+  /* Mobile only — the CSS leaves the body unconstrained above 768px, so this
+     has no effect on desktop. Starts closed: the complaint was height. */
+  const [open,       setOpen]       = useState(false);
 
   const selectedParent = parents.find(p => p.slug === parentSlug);
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
@@ -105,45 +108,25 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
   ] : [];
 
   return (
-    <aside style={{
-      position: "sticky",
-      top: 24,
-      maxHeight: "calc(100vh - 48px)",
-      overflowY: "auto",
-      display: "flex",
-      flexDirection: "column",
-      gap: 0,
-      border: "1px solid var(--border)",
-      borderRadius: 10,
-      background: "var(--surface)",
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: "14px 16px",
-        borderBottom: "1px solid var(--border)",
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        background: "var(--bg-alt)",
-      }}>
+    <aside className="filter-aside">
+      {/* Header — a plain heading on desktop, the collapse toggle on mobile,
+          where the panel is closed by default so it costs one row instead of a
+          screenful above the results. The count stays visible while collapsed
+          so an applied filter is never hidden. */}
+      <button
+        type="button"
+        className="filter-aside-header"
+        onClick={() => setOpen(v => !v)}
+        aria-expanded={open}
+        aria-controls="filter-panel-body"
+      >
         <SlidersHorizontal size={13} style={{ color: "var(--accent)" }} />
-        <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13 }}>
-          Filters
-        </span>
-        {activeCount > 0 && (
-          <span style={{
-            marginLeft: "auto",
-            background: "var(--accent)",
-            color: "#fff",
-            fontSize: 11,
-            fontFamily: "var(--font-mono)",
-            borderRadius: 99,
-            padding: "1px 7px",
-          }}>
-            {activeCount}
-          </span>
-        )}
-      </div>
+        <span style={{ flex: 1 }}>Filters</span>
+        {activeCount > 0 && <span className="filter-aside-count">{activeCount}</span>}
+        <ChevronDown size={14} className={`nav-chevron filter-aside-chevron${open ? " open" : ""}`} />
+      </button>
+
+      <div id="filter-panel-body" className={`filters-panel-body${open ? " open" : ""}`}>
 
       {/* Category */}
       <FilterSection title="Category">
@@ -208,6 +191,8 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
             Clear all
           </button>
         )}
+      </div>
+
       </div>
     </aside>
   );
