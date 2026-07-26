@@ -48,20 +48,10 @@ function strengthColour(pct: number): string {
   return "var(--success)";
 }
 
-/** Zone label. The rule runs to the end of the column so the eye can see where
- *  one group of cards stops and the next begins. */
-function ZoneHeading({ label, hint }: { label: string; hint: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginTop: 4 }}>
-      <span className="caption" style={{ color: "var(--text)", letterSpacing: "0.1em", flexShrink: 0 }}>
-        {label}
-      </span>
-      <span className="mono-s dashboard-zone-hint" style={{ color: "var(--text-subtle)", flexShrink: 0 }}>
-        {hint}
-      </span>
-      <span style={{ flex: 1, height: 1, background: "var(--border)" }} />
-    </div>
-  );
+/** Divider between groups of cards. The grouping does the work; a label on top
+ *  of it would only name what the spacing already makes obvious. */
+function ZoneRule() {
+  return <div style={{ height: 1, background: "var(--border)", marginTop: 4 }} />;
 }
 
 export function DashboardView({
@@ -89,17 +79,13 @@ export function DashboardView({
           </div>
         )}
 
-        {/* ── Hero. The one filled surface on the page; everything below it is a
-              quiet white card, so this is what the eye lands on first. ── */}
-        <div style={{
-          background: "var(--accent-soft)",
-          border: "1px solid var(--border)",
+        {/* ── Hero. The one dark surface on the page, so the white cards below it
+              read as cards. Its colours come from tokens redefined in
+              .dashboard-identity, so the tags and bar inside adapt on their own. ── */}
+        <div className="dashboard-identity" style={{
           borderRadius: 16, padding: "clamp(20px, 3vw, 28px)", marginBottom: 20,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
-            <h1 className="h1" style={{ margin: 0, color: "var(--text)" }}>{displayName}</h1>
-            {c.openToWork && <span className="tag tag-success" style={{ fontSize: 11 }}>Open to work</span>}
-          </div>
+          <h1 className="h1" style={{ margin: "0 0 6px", color: "var(--text)" }}>{displayName}</h1>
 
           <p className="body" style={{
             color: c.headline ? "var(--text-muted)" : "var(--text-subtle)",
@@ -169,7 +155,7 @@ export function DashboardView({
 
           {/* Everything an employer sees when you apply */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <ZoneHeading label="YOUR PROFILE" hint="WHAT EMPLOYERS SEE" />
+            <ZoneRule />
             <ProfileSection candidate={c} />
             <CvSection candidate={c} />
             <SkillsSection candidate={c} />
@@ -179,14 +165,14 @@ export function DashboardView({
 
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {/* What you've done */}
-            <ZoneHeading label="YOUR ACTIVITY" hint="SAVED & APPLIED" />
+            <ZoneRule />
             <SavedJobsCard jobs={savedJobs} />
             <AppliedJobsCard jobs={appliedJobs} />
             {matchingJobs.length > 0 && <MatchingJobsCard jobs={matchingJobs} />}
 
             {/* What you're looking for */}
             <div style={{ marginTop: 14 }}>
-              <ZoneHeading label="YOUR SEARCH" hint="WHAT YOU WANT" />
+              <ZoneRule />
             </div>
             <PreferencesSection candidate={c} />
             <AlertSection candidate={c} />
