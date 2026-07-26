@@ -213,11 +213,30 @@ export async function getEmployerWithCompanyAndJobs(email: string) {
 
 // ─── Companies ─────────────────────────────────────────────────
 
-export async function getCompanies({ featured }: { featured?: boolean } = {}) {
+/**
+ * @param withAccount  Restrict to companies that have at least one registered
+ *   employer. The public directory uses this so it lists companies that signed
+ *   up, not seeded or imported rows. Curated (admin-listed) jobs never create a
+ *   Company at all, so they cannot appear here by construction.
+ */
+export async function getCompanies(
+  { featured, withAccount }: { featured?: boolean; withAccount?: boolean } = {},
+) {
   return prisma.company.findMany({
-    where:   { ...(featured !== undefined && { featured }) },
+    where: {
+      ...(featured !== undefined && { featured }),
+      ...(withAccount && { employers: { some: {} } }),
+    },
     include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
     orderBy: [{ featured: "desc" }, { name: "asc" }],
+  });
+}
+
+/** Slugs for the sitemap — directory members only, matching the index. */
+export async function getCompanySlugs() {
+  return prisma.company.findMany({
+    where:  { employers: { some: {} } },
+    select: { slug: true, updatedAt: true },
   });
 }
 
@@ -228,7 +247,7 @@ export async function getCompanyBySlug(slug: string) {
       jobs: {
         where:   { status: "ACTIVE" },
         include: { category: true, tags: { include: { tag: true } } },
-        orderBy: { postedAt: "desc" },
+        orderBy: [{ featured: "desc" }, { postedAt: "desc" }],
       },
       _count: { select: { jobs: { where: { status: "ACTIVE" } } } },
     },

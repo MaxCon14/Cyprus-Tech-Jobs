@@ -633,6 +633,86 @@ body {
   flex-wrap: wrap;
 }
 
+/* =====================================================
+   COMPANY DIRECTORY
+   ===================================================== */
+
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.company-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--duration-base) var(--ease-out);
+}
+.company-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.company-card-featured {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  padding: 4px 10px;
+  background: var(--accent);
+  color: var(--white);
+  font: 400 10px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  border-radius: 0 var(--radius-md) 0 var(--radius-sm);
+}
+
+.company-card-head { display: flex; align-items: center; gap: 12px; }
+
+.company-card-name {
+  font: 600 16px/1.3 var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.company-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+  font: 400 12px/1.4 var(--font-sans);
+  color: var(--text-muted);
+}
+
+/* Clamp the blurb so cards in a row keep a common height */
+.company-card-desc {
+  font: 400 13px/1.6 var(--font-sans);
+  color: var(--text-muted);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.company-card-stack { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.company-card-foot {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
 /* Modal footer actions — primary action sits right on desktop. Below 640px the
    pair stacks and goes full-width, primary first so it stays under the thumb. */
 .modal-actions {

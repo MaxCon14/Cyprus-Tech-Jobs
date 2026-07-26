@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { getAllPosts } from "@/lib/blog";
+import { getCompanySlugs } from "@/lib/queries";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
 
@@ -11,6 +12,7 @@ const STATIC: MetadataRoute.Sitemap = [
   { url: `${BASE}/post-a-job`,         lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   { url: `${BASE}/faq`,                lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
   { url: `${BASE}/blog`,               lastModified: new Date(), changeFrequency: "weekly",  priority: 0.6 },
+  { url: `${BASE}/companies`,          lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
   { url: `${BASE}/jobs/nicosia`,       lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
   { url: `${BASE}/jobs/limassol`,      lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
   { url: `${BASE}/jobs/larnaca`,       lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
@@ -54,5 +56,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] blog query failed:", err);
   }
 
-  return [...STATIC, ...jobEntries, ...blogEntries];
+  /* ── Company profiles ── */
+  let companyEntries: MetadataRoute.Sitemap = [];
+  try {
+    const companies = await getCompanySlugs();
+    companyEntries = companies.map(c => ({
+      url:             `${BASE}/companies/${c.slug}`,
+      lastModified:    c.updatedAt ?? new Date(),
+      changeFrequency: "weekly" as const,
+      priority:        0.6,
+    }));
+  } catch (err) {
+    console.error("[sitemap] companies query failed:", err);
+  }
+
+  return [...STATIC, ...jobEntries, ...companyEntries, ...blogEntries];
 }
