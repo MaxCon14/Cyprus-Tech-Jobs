@@ -18,6 +18,9 @@ interface Props {
   current: {
     category?: string;
     type?: string;
+    /** Not a control here — set from the nav's Job Type menu. Carried through
+     *  so changing a filter in this panel does not silently drop it. */
+    employment?: string;
     level?: string;
     city?: string;
     salary?: string;
@@ -85,6 +88,7 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
     if (current.search)              p.set("search",   current.search);
     if (resolvedCategory)            p.set("category", resolvedCategory);
     if (!hideTypeFilter  && type)    p.set("type",     type);
+    if (current.employment)          p.set("employment", current.employment);
     if (level)                       p.set("level",    level);
     if (!hideCityFilter  && city)    p.set("city",     city);
     if (salary)                      p.set("salary",   salary);

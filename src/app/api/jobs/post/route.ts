@@ -3,19 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify, validateSalaryRange } from "@/lib/utils";
 
-const CATEGORY_NAMES: Record<string, string> = {
-  frontend:    "Frontend",
-  backend:     "Backend",
-  devops:      "DevOps",
-  design:      "Design",
-  data:        "Data",
-  mobile:      "Mobile",
-  product:     "Product",
-  security:    "Security",
-  qa:          "QA",
-  "full-stack":"Full Stack",
-};
-
 const REMOTE_TYPE_MAP: Record<string, string> = {
   Remote:   "REMOTE",
   Hybrid:   "HYBRID",
@@ -108,12 +95,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const categoryName = CATEGORY_NAMES[categorySlug as string] ?? (categorySlug as string);
-    const category = await prisma.category.upsert({
-      where:  { slug: categorySlug as string },
-      create: { name: categoryName, slug: categorySlug as string },
-      update: {},
-    });
+    /* Look the category up; do not create it. This used to upsert, so any slug
+       the form happened to send became a new top-level category named after
+       its own slug, with no parent — which meant the job could never be found
+       under /jobs?category=<parent>. Rejecting an unknown slug keeps the
+       taxonomy closed and surfaces a mismatch instead of burying it. */
+    const category = await prisma.category.findUnique({ where: { slug: categorySlug as string } });
+    if (!category) {
+      return NextResponse.json(
+        { error: "That category is no longer available. Pick one from the list." },
+        { status: 422 },
+      );
+    }
 
     const companySlug    = slugify((companyName as string).trim());
     const existingCo     = await prisma.company.findUnique({ where: { slug: companySlug } });

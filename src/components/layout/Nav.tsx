@@ -56,7 +56,7 @@ const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNod
 
 const FLYOUT_ITEMS: Record<FlyoutSection, { label: string; href: string }[]> = {
   category: CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
-  type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?type=${t.value}` })),
+  type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?employment=${t.value}` })),
   city:     CITIES.map(c =>    ({ label: c.label,    href: c.href })),
 };
 
@@ -331,7 +331,7 @@ export function Nav() {
                 <div className={`mobile-menu-sub${mobileTypeOpen ? " open" : ""}`}>
                   <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
                     {JOB_TYPES.map(t => (
-                      <Link key={t.value} href={`/jobs?type=${t.value}`} className="mobile-menu-link">
+                      <Link key={t.value} href={`/jobs?employment=${t.value}`} className="mobile-menu-link">
                         {t.label}
                       </Link>
                     ))}

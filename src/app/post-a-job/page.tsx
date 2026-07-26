@@ -31,9 +31,20 @@ export default async function PostAJobPage() {
     redirect("/login");
   }
 
-  const [employer, allTagRows] = await Promise.all([
+  /* Categories come from the database, not from placeholder-data. The
+     placeholder list carries a different taxonomy — its Frontend children are
+     frontend-react / frontend-web, the real ones are react-developer /
+     web-developer — and api/jobs/post upserts whatever slug it receives. So a
+     job posted against a placeholder slug created a brand-new top-level
+     category with no parent, invisible to /jobs?category=frontend. */
+  const [employer, allTagRows, categoryRows] = await Promise.all([
     prisma.employer.findUnique({ where: { email: user.email }, include: { company: true } }),
     prisma.tag.findMany({ orderBy: { name: "asc" } }),
+    prisma.category.findMany({
+      where:   { parentId: null },
+      orderBy: { name: "asc" },
+      include: { children: { orderBy: { name: "asc" }, select: { name: true, slug: true } } },
+    }),
   ]);
   if (!employer) {
     const { data: candidate } = await supabaseAdmin
@@ -70,6 +81,10 @@ export default async function PostAJobPage() {
           companyWebsite={employer.company?.website ?? ""}
           companyDescription={employer.company?.description ?? ""}
           allTags={allTags}
+          categories={categoryRows.map(c => ({
+            label: c.name, slug: c.slug,
+            children: c.children.map(ch => ({ label: ch.name, slug: ch.slug })),
+          }))}
         />
       </div>
     </div>

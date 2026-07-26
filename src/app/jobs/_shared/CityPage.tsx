@@ -21,6 +21,7 @@ export interface CitySearchParams {
   page?:     string;
   category?: string;
   type?:     string;
+  employment?: string;
   level?:    string;
   salary?:   string;
   search?:   string;
@@ -30,6 +31,14 @@ interface Props {
   config:       CityConfig;
   searchParams: CitySearchParams;
 }
+
+const EMPLOYMENT_LABELS: Record<string, string> = {
+  FULL_TIME:  "Full-time",
+  PART_TIME:  "Part-time",
+  CONTRACT:   "Contract",
+  INTERNSHIP: "Internship",
+  FREELANCE:  "Freelance",
+};
 
 const TYPE_LABELS: Record<string, string> = {
   FULL_TIME:  "Full-time",
@@ -42,7 +51,7 @@ const TYPE_LABELS: Record<string, string> = {
 export async function CityPage({ config, searchParams }: Props) {
   const { displayName, slug, city, isRemote, description } = config;
 
-  const { category, type, level, search } = searchParams;
+  const { category, type, employment, level, search } = searchParams;
   const salary  = searchParams.salary ? parseInt(searchParams.salary) : undefined;
   const pageNum = Math.max(1, parseInt(searchParams.page ?? "1") || 1);
 
@@ -53,8 +62,11 @@ export async function CityPage({ config, searchParams }: Props) {
     experienceLevel: level,
     search:          search?.trim() || undefined,
     salary,
-    /* Only apply type filter on non-remote pages (remote page base is already REMOTE) */
+    /* Only apply the work-type filter on non-remote pages (the remote page's
+       base is already REMOTE). Employment type is orthogonal, so it applies
+       on every city page including remote. */
     ...(!isRemote && type ? { remoteType: type } : {}),
+    ...(employment ? { employmentType: employment } : {}),
   };
 
   let jobs:       Awaited<ReturnType<typeof getJobs>> = [];
@@ -88,6 +100,7 @@ export async function CityPage({ config, searchParams }: Props) {
   if (search  ) activeFilters.push({ label: `"${search}"`,                          key: "search"   });
   if (category) activeFilters.push({ label: catLabel(category),                     key: "category" });
   if (!isRemote && type) activeFilters.push({ label: TYPE_LABELS[type] ?? type,     key: "type"     });
+  if (employment) activeFilters.push({ label: EMPLOYMENT_LABELS[employment] ?? employment, key: "employment" });
   if (level   ) activeFilters.push({ label: level,                                  key: "level"    });
   if (salary  ) activeFilters.push({ label: `min €${(salary / 1000).toFixed(0)}k`, key: "salary"   });
 
@@ -97,6 +110,7 @@ export async function CityPage({ config, searchParams }: Props) {
     const cur: Record<string, string | undefined> = {
       search, category, level, salary: searchParams.salary,
       ...(!isRemote ? { type } : {}),
+      employment,
     };
     cur[key] = val;
     for (const [k, v] of Object.entries(cur)) { if (v) p.set(k, v); }
@@ -186,7 +200,7 @@ export async function CityPage({ config, searchParams }: Props) {
           {/* Filter sidebar */}
           <FilterBar
             categories={categories}
-            current={{ category, type, level, salary: searchParams.salary, search }}
+            current={{ category, type, employment, level, salary: searchParams.salary, search }}
             cities={CITIES}
             basePath={basePath}
             hideCityFilter

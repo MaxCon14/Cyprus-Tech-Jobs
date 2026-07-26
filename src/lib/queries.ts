@@ -5,6 +5,7 @@ import { prisma } from "./prisma";
 export async function getJobs({
   categorySlug,
   remoteType,
+  employmentType,
   experienceLevel,
   city,
   search,
@@ -13,7 +14,13 @@ export async function getJobs({
   skip = 0,
 }: {
   categorySlug?: string;
+  /** Where the work happens: REMOTE | HYBRID | ON_SITE. */
   remoteType?: string;
+  /** The contract: FULL_TIME | PART_TIME | CONTRACT | INTERNSHIP | FREELANCE.
+   *  Distinct from remoteType — the two were previously conflated behind a
+   *  single `type` query param, so asking for full-time work searched the
+   *  remote column and matched nothing. */
+  employmentType?: string;
   experienceLevel?: string;
   city?: string;
   search?: string;
@@ -29,6 +36,7 @@ export async function getJobs({
         category: { OR: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] },
       }),
       ...(remoteType   && { remoteType: remoteType as never }),
+      ...(employmentType && { employmentType: employmentType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city         && { city: { contains: city, mode: "insensitive" } }),
       ...(salary       && { salaryMin: { gte: salary } }),
@@ -96,6 +104,7 @@ export async function getFeaturedJobs(take = 5) {
 export async function getJobCount({
   categorySlug,
   remoteType,
+  employmentType,
   experienceLevel,
   city,
   search,
@@ -103,6 +112,7 @@ export async function getJobCount({
 }: {
   categorySlug?: string;
   remoteType?: string;
+  employmentType?: string;
   experienceLevel?: string;
   city?: string;
   search?: string;
@@ -115,6 +125,7 @@ export async function getJobCount({
         category: { OR: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] },
       }),
       ...(remoteType      && { remoteType: remoteType as never }),
+      ...(employmentType  && { employmentType: employmentType as never }),
       ...(experienceLevel && { experienceLevel: experienceLevel as never }),
       ...(city            && { city: { contains: city, mode: "insensitive" } }),
       ...(salary          && { salaryMin: { gte: salary } }),

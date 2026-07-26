@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CATEGORIES } from "@/lib/placeholder-data";
 import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, AlertTriangle, FileText } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
@@ -11,7 +10,10 @@ import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
 type ListingType = "standard" | "featured";
 
+export type CategoryOption = { label: string; slug: string; children: { label: string; slug: string }[] };
+
 interface Props {
+  categories:         CategoryOption[];
   standardSlots:      number;
   featuredSlots:      number;
   companyName:        string;
@@ -33,7 +35,7 @@ interface FormErrors {
   salaryMax?:       string;
 }
 
-export function PostJobForm({ standardSlots, featuredSlots, companyName, companyWebsite, companyDescription, allTags }: Props) {
+export function PostJobForm({ categories, standardSlots, featuredSlots, companyName, companyWebsite, companyDescription, allTags }: Props) {
   const hasSlots       = standardSlots > 0 || featuredSlots > 0;
   const defaultType: ListingType = featuredSlots > 0 ? "featured" : "standard";
 
@@ -395,7 +397,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
               </Field>
               {/* Cascading category: parent → subcategory */}
               {(() => {
-                const selParent = CATEGORIES.find(c => c.slug === parentCategorySlug);
+                const selParent = categories.find(c => c.slug === parentCategorySlug);
                 const hasSub    = (selParent?.children?.length ?? 0) > 0;
                 return (
                   <div style={{ display: "grid", gridTemplateColumns: hasSub ? "1fr 1fr" : "1fr", gap: 16 }}>
@@ -405,7 +407,7 @@ export function PostJobForm({ standardSlots, featuredSlots, companyName, company
                         placeholder="Select category"
                         value={parentCategorySlug}
                         onChange={val => { setParentCategorySlug(val); setSubCategorySlug(""); setIsDirty(true); }}
-                        options={CATEGORIES.slice(1).map(c => ({ label: c.label, value: c.slug }))}
+                        options={categories.map(c => ({ label: c.label, value: c.slug }))}
                       />
                     </Field>
                     {hasSub && selParent && (
