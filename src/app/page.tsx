@@ -395,7 +395,9 @@ export default async function HomePage() {
       {/* ── FAQ ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>
         <div className="page-container">
-          <div style={{ textAlign: "center", marginBottom: "clamp(28px, 4vw, 44px)" }}>
+          {/* Left-aligned to sit flush with the accordion rows below — a centred
+              heading over left-aligned content reads as two separate axes. */}
+          <div style={{ marginBottom: "clamp(28px, 4vw, 44px)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>FAQ</div>
             <h2 className="display-m" style={{ marginBottom: 12 }}>Common questions about Cyprus tech jobs</h2>
             <p className="body" style={{ color: "var(--text-muted)" }}>
