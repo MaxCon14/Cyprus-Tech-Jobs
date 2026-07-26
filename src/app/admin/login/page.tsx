@@ -27,16 +27,25 @@ export default function AdminLoginPage() {
     setError(null);
     setLoading(true);
 
-    // No emailRedirectTo: the Supabase email template sends an 8-digit code,
-    // not a confirmation link, so there is nothing to redirect to.
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true },
-    });
+    /* Routed through the server so the address can be checked against
+       ADMIN_EMAIL before anything is sent — calling signInWithOtp from here
+       let anyone make us email a code to any address. The route answers 200
+       either way, so advancing to the code step reveals nothing. */
+    let ok = false;
+    try {
+      const res = await fetch("/api/admin/auth/request-code", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email }),
+      });
+      ok = res.ok;
+    } catch {
+      ok = false;
+    }
 
     setLoading(false);
 
-    if (err) {
+    if (!ok) {
       setError("Couldn't send the code. Please try again in a moment.");
       return;
     }
