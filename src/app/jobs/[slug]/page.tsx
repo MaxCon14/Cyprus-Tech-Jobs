@@ -191,8 +191,10 @@ export default async function JobDetailPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 28, marginBottom: 24, background: "var(--surface)" }}>
             <div className="job-header-inner">
               <div style={{ width: 64, height: 64, borderRadius: 10, flexShrink: 0, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, border: "1px solid var(--border)", overflow: "hidden" }}>
-                {job.company?.logoUrl
-                  ? <img src={job.company.logoUrl} alt={companyName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                {/* Curated listings carry their logo on the job itself, since
+                    they have no Company row to hang it off. */}
+                {(job.company?.logoUrl ?? job.curatedCompanyLogoUrl)
+                  ? <img src={(job.company?.logoUrl ?? job.curatedCompanyLogoUrl)!} alt={companyName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   : companyName.charAt(0)
                 }
               </div>

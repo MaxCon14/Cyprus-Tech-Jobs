@@ -124,6 +124,7 @@ model Job {
   featured            Boolean         @default(false)
   isCurated           Boolean         @default(false)
   curatedCompanyName  String?
+  curatedCompanyLogoUrl String?
   status              JobStatus       @default(DRAFT)
   activeDays      Int             @default(0)
   inactiveDays    Int             @default(0)

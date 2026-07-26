@@ -16,6 +16,7 @@ type PrismaJob = {
   featured: boolean;
   isCurated: boolean;
   curatedCompanyName: string | null;
+  curatedCompanyLogoUrl?: string | null;
   postedAt: Date | null;
   company: { name: string; slug: string; logoUrl: string | null; website: string | null; description?: string | null } | null;
   tags: { tag: { name: string } }[];
@@ -38,6 +39,7 @@ export function serialiseJob(job: PrismaJob) {
     featured:           job.featured,
     isCurated:          job.isCurated,
     curatedCompanyName: job.curatedCompanyName,
+    curatedCompanyLogoUrl: job.curatedCompanyLogoUrl ?? null,
     postedAt:           job.postedAt?.toISOString() ?? null,
     company: {
       name:        companyName,

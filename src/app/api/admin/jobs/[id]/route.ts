@@ -8,7 +8,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!await getAdminUser()) return adminUnauthorized();
   const { id } = await params;
   const body = await req.json();
-  const { title, description, companyName, categoryId, city, remoteType, employmentType,
+  const { title, description, companyName, curatedCompanyLogoUrl, categoryId, city,
+    remoteType, employmentType,
     experienceLevel, salaryMin, salaryMax, salaryDisclosed, applyUrl,
     featured, status, tags: rawTags } = body;
 
@@ -16,6 +17,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (title !== undefined)          data.title = title;
   if (description !== undefined)    data.description = description;
   if (companyName !== undefined)    data.curatedCompanyName = companyName.trim();
+  if (curatedCompanyLogoUrl !== undefined) data.curatedCompanyLogoUrl = typeof curatedCompanyLogoUrl === "string" && curatedCompanyLogoUrl.trim() ? curatedCompanyLogoUrl.trim() : null;
   if (categoryId !== undefined)     data.categoryId = categoryId;
   if (city !== undefined)           data.city = city || null;
   if (remoteType !== undefined)     data.remoteType = remoteType;

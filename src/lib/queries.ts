@@ -59,6 +59,7 @@ export async function getJobs({
       featured:           true,
       isCurated:          true,
       curatedCompanyName: true,
+      curatedCompanyLogoUrl: true,
       postedAt:           true,
       company: { select: { name: true, slug: true, logoUrl: true, website: true } },
       tags:    { select: { tag: { select: { name: true } } } },

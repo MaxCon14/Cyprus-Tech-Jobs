@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Star, Building2, Check, Loader2, AlertCircle, DollarSign, Tag } from "lucide-react";
+import { Zap, Star, Building2, Check, Loader2, AlertCircle, DollarSign, Tag, Upload, X } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
@@ -23,6 +23,7 @@ interface InitialValues {
   applyUrl?: string;
   featured?: boolean;
   status?: string;
+  curatedCompanyLogoUrl?: string | null;
 }
 
 interface Props {
@@ -86,6 +87,32 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
   const [salaryDisclosed,setSalaryDisclosed]= useState(initial?.salaryDisclosed ?? true);
   const [featured,       setFeatured]       = useState(initial?.featured        ?? false);
 
+  // Curated listings have no Company row, so the logo hangs off the job itself.
+  const [logoUrl,   setLogoUrl]   = useState(initial?.curatedCompanyLogoUrl ?? "");
+  const [logoBusy,  setLogoBusy]  = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLogoError(null);
+    setLogoBusy(true);
+
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res  = await fetch("/api/admin/logo-upload", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) setLogoError(data.error ?? "Upload failed.");
+      else setLogoUrl(data.url);
+    } catch {
+      setLogoError("Upload failed. Please try again.");
+    }
+    setLogoBusy(false);
+    e.target.value = "";
+  }
+
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setServerError(null);
@@ -99,6 +126,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
       title:          String(fd.get("title") ?? "").trim(),
       description:    String(fd.get("description") ?? ""),
       companyName:    String(fd.get("companyName") ?? "").trim(),
+      curatedCompanyLogoUrl: logoUrl || null,
       applyUrl:       String(fd.get("applyUrl") ?? "").trim(),
       tags:           String(fd.get("tags") ?? "[]"),
       categoryId:     resolvedCategoryId,
@@ -253,12 +281,48 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
 
       {/* ── Company ── */}
       <FormSection icon={<Building2 size={14} />} title="Company">
-        <Field label="Company name" required hint="A COMPANY PROFILE IS CREATED AUTOMATICALLY IF ONE DOESN'T EXIST YET.">
+        <Field label="Company name" required hint="SHOWN ON THE LISTING. CURATED JOBS DO NOT CREATE A COMPANY PROFILE.">
           <input
             className="input" name="companyName" required
             defaultValue={initial?.companyName ?? ""}
             placeholder="e.g. Revolut, Exness, Cyta…"
           />
+        </Field>
+
+        <Field label="Company logo" hint="OPTIONAL — PNG, JPG, WEBP OR SVG, UP TO 2 MB. FALLS BACK TO THE CURATED MARK.">
+          <input
+            ref={logoInputRef} type="file" accept="image/*"
+            style={{ display: "none" }} onChange={handleLogoChange}
+          />
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div className="job-card-logo" style={{ width: 56, height: 56, flexShrink: 0 }}>
+              {logoUrl
+                /* eslint-disable-next-line @next/next/no-img-element */
+                ? <img src={logoUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4, borderRadius: 9 }} />
+                : <span className="job-card-logo-fallback" style={{ fontSize: 18, color: "var(--text-subtle)" }}>—</span>}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                type="button" className="btn btn-outline btn-sm"
+                disabled={logoBusy} onClick={() => logoInputRef.current?.click()}
+              >
+                {logoBusy
+                  ? <><Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Uploading…</>
+                  : <><Upload size={12} /> {logoUrl ? "Replace" : "Upload logo"}</>}
+              </button>
+              {logoUrl && !logoBusy && (
+                <button
+                  type="button" className="btn btn-ghost btn-sm"
+                  onClick={() => { setLogoUrl(""); setLogoError(null); }}
+                >
+                  <X size={12} /> Remove
+                </button>
+              )}
+            </div>
+          </div>
+          {logoError && (
+            <p style={{ color: "var(--error)", fontSize: 11, marginTop: 8, fontFamily: "var(--font-mono)" }}>{logoError}</p>
+          )}
         </Field>
         <Field label="Original job posting URL" required hint="CANDIDATES ARE REDIRECTED HERE WHEN THEY CLICK APPLY.">
           <input

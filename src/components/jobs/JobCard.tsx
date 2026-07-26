@@ -55,6 +55,7 @@ type JobCardProps = {
   featured?: boolean;
   isCurated?: boolean;
   curatedCompanyName?: string | null;
+  curatedCompanyLogoUrl?: string | null;
   postedAt?: Date | string | null;
   tags?: { name: string }[];
 };
@@ -75,6 +76,7 @@ export function JobCard({
   featured,
   isCurated = false,
   curatedCompanyName,
+  curatedCompanyLogoUrl,
   postedAt,
   tags = [],
 }: JobCardProps) {
@@ -90,7 +92,13 @@ export function JobCard({
 
       {/* Header: logo + company + time + save */}
       <div className="job-card-head">
-        {isCurated ? <CuratedLogo /> : <CompanyLogo name={company.name} logoUrl={company.logoUrl} website={company.website} />}
+        {/* Curated listings have no Company row. Use the logo uploaded with the
+            job when there is one, and the generic mark when there isn't. */}
+        {isCurated
+          ? (curatedCompanyLogoUrl
+              ? <CompanyLogo name={displayName} logoUrl={curatedCompanyLogoUrl} />
+              : <CuratedLogo />)
+          : <CompanyLogo name={company.name} logoUrl={company.logoUrl} website={company.website} />}
         <div className="job-card-head-info">
           <span className="job-card-company">{displayName}</span>
           {postedAt && <span className="job-card-time">{timeAgo(postedAt)}</span>}

@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     title, description, companyName, categoryId, city,
+    curatedCompanyLogoUrl,
     remoteType, employmentType, experienceLevel,
     salaryMin, salaryMax, salaryDisclosed,
     applyUrl, featured, status, tags: rawTags,
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
       description,
       isCurated:          true,
       curatedCompanyName: companyName.trim(),
+      curatedCompanyLogoUrl: typeof curatedCompanyLogoUrl === "string" && curatedCompanyLogoUrl.trim() ? curatedCompanyLogoUrl.trim() : null,
       categoryId,
       city:               city || null,
       remoteType,
