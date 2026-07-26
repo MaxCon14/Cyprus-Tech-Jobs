@@ -62,6 +62,7 @@ const COMPANY_LINKS = [
   ["Blog",             "/blog"],
   ["FAQ",              "/faq"],
   ["Privacy policy",   "/privacy"],
+  ["Cookie policy",    "/cookies"],
   ["Terms of service", "/terms"],
   ["Contact",          "/contact"],
 ] as const;
