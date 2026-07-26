@@ -506,14 +506,8 @@ export const EXPERIENCE_LEVEL_OPTIONS = [
   { value: "EXECUTIVE", label: "Executive", description: "VP / Director / C-suite" },
 ] as const;
 
-export const CATEGORY_OPTIONS = [
-  { label: "Frontend",  slug: "frontend" },
-  { label: "Backend",   slug: "backend" },
-  { label: "DevOps",    slug: "devops" },
-  { label: "Design",    slug: "design" },
-  { label: "Data",      slug: "data" },
-  { label: "Mobile",    slug: "mobile" },
-  { label: "Product",   slug: "product" },
-  { label: "Security",  slug: "security" },
-  { label: "QA",        slug: "qa" },
-];
+/* CATEGORY_OPTIONS used to be declared here: nine hardcoded slugs that omitted
+   three of the twelve top-level categories, so a candidate could not express an
+   interest in Full Stack, Finance & Trading or Management work and their alerts
+   and job matches skipped those roles entirely. Category pickers now read the
+   taxonomy from the database — see useCategories in lib/use-categories.ts. */

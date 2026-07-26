@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/Select";
 import { SlidersHorizontal } from "lucide-react";
+import { EMPLOYMENT_OPTIONS, WORK_TYPE_OPTIONS, EXPERIENCE_OPTIONS } from "@/lib/taxonomy";
 
 export type CategoryNode = {
   id: string;
@@ -18,8 +19,6 @@ interface Props {
   current: {
     category?: string;
     type?: string;
-    /** Not a control here — set from the nav's Job Type menu. Carried through
-     *  so changing a filter in this panel does not silently drop it. */
     employment?: string;
     /** Set by clicking a skill on a job card; carried through, not edited here. */
     skill?: string;
@@ -36,22 +35,6 @@ interface Props {
   /** Hide the work-type filter (e.g. on the Remote page). */
   hideTypeFilter?: boolean;
 }
-
-const REMOTE_OPTIONS = [
-  { label: "Any work type", value: "" },
-  { label: "Remote",        value: "REMOTE"  },
-  { label: "Hybrid",        value: "HYBRID"  },
-  { label: "On-site",       value: "ON_SITE" },
-];
-
-const EXPERIENCE_OPTIONS = [
-  { label: "Any experience", value: ""          },
-  { label: "Junior",         value: "JUNIOR"    },
-  { label: "Mid-level",      value: "MID"       },
-  { label: "Senior",         value: "SENIOR"    },
-  { label: "Lead",           value: "LEAD"      },
-  { label: "Executive",      value: "EXECUTIVE" },
-];
 
 const SALARY_OPTIONS = [
   { label: "Any salary", value: ""       },
@@ -75,6 +58,7 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
   const [parentSlug, setParentSlug] = useState(initParentSlug);
   const [subSlug,    setSubSlug]    = useState(initSubSlug);
   const [type,       setType]       = useState(current.type    ?? "");
+  const [employment, setEmployment] = useState(current.employment ?? "");
   const [level,      setLevel]      = useState(current.level   ?? "");
   const [city,       setCity]       = useState(current.city    ?? "");
   const [salary,     setSalary]     = useState(current.salary  ?? "");
@@ -83,14 +67,14 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
   const resolvedCategory = subSlug || parentSlug || undefined;
 
-  const activeCount = [resolvedCategory, !hideTypeFilter && type, level, !hideCityFilter && city, salary].filter(Boolean).length;
+  const activeCount = [resolvedCategory, !hideTypeFilter && type, employment, level, !hideCityFilter && city, salary].filter(Boolean).length;
 
   function apply() {
     const p = new URLSearchParams();
     if (current.search)              p.set("search",   current.search);
     if (resolvedCategory)            p.set("category", resolvedCategory);
     if (!hideTypeFilter  && type)    p.set("type",     type);
-    if (current.employment)          p.set("employment", current.employment);
+    if (employment)                  p.set("employment", employment);
     if (current.skill)               p.set("skill",      current.skill);
     if (level)                       p.set("level",    level);
     if (!hideCityFilter  && city)    p.set("city",     city);
@@ -101,7 +85,7 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
 
   function clear() {
     setParentSlug(""); setSubSlug("");
-    setType(""); setLevel(""); setCity(""); setSalary("");
+    setType(""); setEmployment(""); setLevel(""); setCity(""); setSalary("");
     router.push(basePath);
   }
 
@@ -186,9 +170,16 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
       {/* Work type */}
       {!hideTypeFilter && (
         <FilterSection title="Work type">
-          <Select name="type" value={type} placeholder="Any work type" onChange={setType} options={REMOTE_OPTIONS} />
+          <Select name="type" value={type} placeholder="Any work type" onChange={setType} options={WORK_TYPE_OPTIONS} />
         </FilterSection>
       )}
+
+      {/* Job type — the nav links here with ?employment=…, but until now the
+          panel had no control for it, so arriving from that menu left a filter
+          applied that could be seen and not changed. */}
+      <FilterSection title="Job type">
+        <Select name="employment" value={employment} placeholder="Any job type" onChange={setEmployment} options={EMPLOYMENT_OPTIONS} />
+      </FilterSection>
 
       {/* Experience */}
       <FilterSection title="Experience">

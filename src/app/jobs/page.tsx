@@ -3,6 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
+import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS } from "@/lib/taxonomy";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "./FilterBar";
 import type { Metadata } from "next";
@@ -22,23 +23,6 @@ export const metadata: Metadata = {
     title: "Tech Jobs in Cyprus — Browse All Roles",
     description: "Browse all tech jobs in Cyprus. Filter by category, location, and salary.",
   },
-};
-
-/* These are employment types. They used to be applied to the `type` param,
-   which carries the work type — so a HYBRID filter rendered a raw "HYBRID"
-   pill while a FULL_TIME one looked correct and returned nothing. */
-const EMPLOYMENT_LABELS: Record<string, string> = {
-  FULL_TIME:  "Full-time",
-  PART_TIME:  "Part-time",
-  CONTRACT:   "Contract",
-  INTERNSHIP: "Internship",
-  FREELANCE:  "Freelance",
-};
-
-const WORK_TYPE_LABELS: Record<string, string> = {
-  REMOTE:  "Remote",
-  HYBRID:  "Hybrid",
-  ON_SITE: "On-site",
 };
 
 const PAGE_SIZE = 20;

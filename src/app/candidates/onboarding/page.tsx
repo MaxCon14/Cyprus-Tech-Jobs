@@ -9,7 +9,6 @@ import {
   initialCandidateState,
   CANDIDATE_STEPS,
   EXPERIENCE_LEVEL_OPTIONS,
-  CATEGORY_OPTIONS,
   TECH_STACK_OPTIONS,
   type CandidateWizardState,
   type CandidateWizardAction,
@@ -18,6 +17,7 @@ import {
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CvUpload } from "@/components/candidates/CvUpload";
 import { CITIES } from "@/lib/placeholder-data";
+import { useCategories } from "@/lib/use-categories";
 import { Select } from "@/components/ui/Select";
 import { WizardShell } from "@/components/onboarding/WizardShell";
 import { StepSlide } from "@/components/onboarding/StepSlide";
@@ -150,6 +150,7 @@ function Step1Welcome() {
 // ─── Step 2: Work type ────────────────────────────────────────────────────────
 
 function Step2WorkType({ state, dispatch }: { state: CandidateWizardState; dispatch: React.Dispatch<CandidateWizardAction> }) {
+  const categories = useCategories();
   const remoteOptions = [
     { value: "REMOTE", label: "Remote", description: "Work from anywhere" },
     { value: "HYBRID", label: "Hybrid", description: "Mix of office & home" },
@@ -164,12 +165,12 @@ function Step2WorkType({ state, dispatch }: { state: CandidateWizardState; dispa
         <div>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Categories</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-            {CATEGORY_OPTIONS.map((cat) => {
+            {categories.map((cat) => {
               const active = state.categories.includes(cat.slug);
               return (
                 <button key={cat.slug} type="button" onClick={() => dispatch({ type: "TOGGLE_CATEGORY", slug: cat.slug })}
                   style={{ padding: "10px 14px", borderRadius: "var(--radius-md)", border: `1.5px solid ${active ? "var(--accent)" : "var(--border)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: active ? "var(--accent)" : "var(--text)", transition: "all 150ms ease", textAlign: "center" }}>
-                  {cat.label}
+                  {cat.name}
                 </button>
               );
             })}

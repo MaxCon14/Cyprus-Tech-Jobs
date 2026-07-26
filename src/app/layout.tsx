@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { CookieNotice } from "@/components/layout/CookieNotice";
+import { getNavCategories } from "@/lib/queries";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -46,9 +47,14 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  /* The nav's category menu comes from the database so it can never disagree
+     with the filters it links to. The read is cached and tag-revalidated, so
+     this is not a query per page view. */
+  const navCategories = await getNavCategories();
+
   return (
     <html
       lang="en"
@@ -62,7 +68,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col antialiased" style={{ background: "var(--bg)", color: "var(--text)" }}>
         <Providers>
-          <Nav />
+          <Nav categories={navCategories} />
           <main className="flex-1">{children}</main>
           <FooterConditional><Footer /></FooterConditional>
         </Providers>

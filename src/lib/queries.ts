@@ -1,4 +1,6 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
+import { CATEGORY_CACHE_TAG, type NavCategory } from "./taxonomy";
 
 // ─── Jobs ──────────────────────────────────────────────────────
 
@@ -275,6 +277,51 @@ export async function getCompanyBySlug(slug: string) {
 }
 
 // ─── Categories ────────────────────────────────────────────────
+
+/**
+ * The category tree for navigation: top-level categories with their children.
+ *
+ * Cached because the root layout renders it on every page and the taxonomy only
+ * changes when an admin edits it — those routes revalidate CATEGORY_CACHE_TAG,
+ * so an edit still appears immediately. Job counts are deliberately excluded:
+ * they change with every posting and would either go stale here or make the
+ * cache pointless. Pages that show counts call getCategoriesWithCount instead.
+ */
+const getNavCategoriesCached = unstable_cache(
+  async (): Promise<NavCategory[]> =>
+    prisma.category.findMany({
+      where:   { parentId: null },
+      select:  {
+        slug:     true,
+        name:     true,
+        children: { select: { slug: true, name: true }, orderBy: { name: "asc" } },
+      },
+      orderBy: { name: "asc" },
+    }),
+  ["nav-categories"],
+  { tags: [CATEGORY_CACHE_TAG], revalidate: 3600 },
+);
+
+/**
+ * The nav renders on every page, including ones that do not otherwise touch the
+ * database. A dropped connection should cost the menu, not the whole site, so
+ * failure degrades to an empty tree.
+ */
+export async function getNavCategories(): Promise<NavCategory[]> {
+  try {
+    return await getNavCategoriesCached();
+  } catch (err) {
+    console.error("[queries] category tree unavailable:", err);
+    return [];
+  }
+}
+
+/** Resolve a submitted category slug. Callers reject an unknown slug rather
+ *  than creating it: an invented category has no parent, so its jobs are
+ *  invisible under every category page the site actually links to. */
+export async function findCategoryBySlug(slug: string) {
+  return prisma.category.findUnique({ where: { slug } });
+}
 
 export async function getCategoriesWithCount() {
   // Parallelize the two round-trips instead of awaiting them back-to-back.

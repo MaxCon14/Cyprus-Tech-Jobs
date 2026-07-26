@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify, validateSalaryRange } from "@/lib/utils";
+import { findCategoryBySlug } from "@/lib/queries";
+import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 
 const REMOTE_TYPE_MAP: Record<string, string> = {
   Remote:   "REMOTE",
@@ -100,13 +102,8 @@ export async function POST(req: NextRequest) {
        its own slug, with no parent — which meant the job could never be found
        under /jobs?category=<parent>. Rejecting an unknown slug keeps the
        taxonomy closed and surfaces a mismatch instead of burying it. */
-    const category = await prisma.category.findUnique({ where: { slug: categorySlug as string } });
-    if (!category) {
-      return NextResponse.json(
-        { error: "That category is no longer available. Pick one from the list." },
-        { status: 422 },
-      );
-    }
+    const category = await findCategoryBySlug(categorySlug as string);
+    if (!category) return NextResponse.json({ error: UNKNOWN_CATEGORY_MESSAGE }, { status: 422 });
 
     const companySlug    = slugify((companyName as string).trim());
     const existingCo     = await prisma.company.findUnique({ where: { slug: companySlug } });

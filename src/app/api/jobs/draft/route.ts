@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
-
-const CATEGORY_NAMES: Record<string, string> = {
-  frontend: "Frontend", backend: "Backend", devops: "DevOps",
-  design: "Design", data: "Data", mobile: "Mobile",
-  product: "Product", security: "Security", qa: "QA", "full-stack": "Full Stack",
-};
+import { findCategoryBySlug } from "@/lib/queries";
+import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 
 const REMOTE_TYPE_MAP: Record<string, string> = {
   Remote: "REMOTE", Hybrid: "HYBRID", "On-site": "ON_SITE",
@@ -70,11 +66,12 @@ export async function POST(req: NextRequest) {
       await prisma.employer.update({ where: { id: employer.id }, data: { companyId: company.id } });
     }
 
-    const category = await prisma.category.upsert({
-      where:  { slug: categorySlug },
-      create: { name: CATEGORY_NAMES[categorySlug] ?? categorySlug, slug: categorySlug },
-      update: {},
-    });
+    /* Look the category up; do not create it. This used to upsert, so any slug
+       the form happened to send became a new top-level category named after its
+       own slug, with no parent — which meant the job could never be found under
+       /jobs?category=<parent>. */
+    const category = await findCategoryBySlug(categorySlug);
+    if (!category) return NextResponse.json({ error: UNKNOWN_CATEGORY_MESSAGE }, { status: 422 });
 
     const baseSlug    = slugify(`${jobTitle}-${companyName}`);
     const existingJob = await prisma.job.findUnique({ where: { slug: baseSlug } });

@@ -5,6 +5,7 @@ import { serialiseJob } from "@/lib/serialise";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
 import { CITIES } from "@/lib/placeholder-data";
+import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS } from "@/lib/taxonomy";
 
 const PAGE_SIZE = 20;
 const BASE_URL  = "https://cyprustech.careers";
@@ -33,21 +34,6 @@ interface Props {
   searchParams: CitySearchParams;
 }
 
-const EMPLOYMENT_LABELS: Record<string, string> = {
-  FULL_TIME:  "Full-time",
-  PART_TIME:  "Part-time",
-  CONTRACT:   "Contract",
-  INTERNSHIP: "Internship",
-  FREELANCE:  "Freelance",
-};
-
-const TYPE_LABELS: Record<string, string> = {
-  FULL_TIME:  "Full-time",
-  PART_TIME:  "Part-time",
-  CONTRACT:   "Contract",
-  INTERNSHIP: "Internship",
-  FREELANCE:  "Freelance",
-};
 
 export async function CityPage({ config, searchParams }: Props) {
   const { displayName, slug, city, isRemote, description } = config;
@@ -101,7 +87,10 @@ export async function CityPage({ config, searchParams }: Props) {
   const activeFilters: { label: string; key: string }[] = [];
   if (search  ) activeFilters.push({ label: `"${search}"`,                          key: "search"   });
   if (category) activeFilters.push({ label: catLabel(category),                     key: "category" });
-  if (!isRemote && type) activeFilters.push({ label: TYPE_LABELS[type] ?? type,     key: "type"     });
+  /* WORK_TYPE_LABELS, not the employment map. This pill used to read from a
+     local map of employment types while `type` carries the work type, so a
+     Hybrid filter here rendered a raw "HYBRID". */
+  if (!isRemote && type) activeFilters.push({ label: WORK_TYPE_LABELS[type] ?? type, key: "type"     });
   if (employment) activeFilters.push({ label: EMPLOYMENT_LABELS[employment] ?? employment, key: "employment" });
   if (skill     ) activeFilters.push({ label: skill,                                key: "skill"      });
   if (level   ) activeFilters.push({ label: level,                                  key: "level"    });

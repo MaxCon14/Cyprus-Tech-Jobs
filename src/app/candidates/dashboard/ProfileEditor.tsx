@@ -10,7 +10,8 @@ const IconBehance   = () => <svg width="16" height="16" viewBox="0 0 24 24" fill
 const IconX         = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>;
 const IconMedium    = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>;
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
-import { CATEGORY_OPTIONS, EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
+import { EXPERIENCE_LEVEL_OPTIONS, TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
+import { useCategories } from "@/lib/use-categories";
 import { TechStackSelector } from "@/components/onboarding/TechStackSelector";
 import { CvUpload } from "@/components/candidates/CvUpload";
 import { CITIES } from "@/lib/placeholder-data";
@@ -480,6 +481,7 @@ const REMOTE_OPTIONS = [
 ] as const;
 
 export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
+  const categories = useCategories();
   const [editing, setEditing] = useState(false);
   const [saving,  setSaving]  = useState(false);
   const [form, setForm] = useState({
@@ -547,12 +549,12 @@ export function PreferencesSection({ candidate }: { candidate: CandidateRow }) {
         <div>
           <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>Job categories</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {CATEGORY_OPTIONS.map(cat => {
+            {categories.map(cat => {
               const active = form.categories.includes(cat.slug);
               return (
                 <button key={cat.slug} type="button" onClick={() => toggleCat(cat.slug)}
                   style={{ padding: "7px 14px", borderRadius: 8, border: `1.5px solid ${active ? "var(--accent)" : "var(--border)"}`, background: active ? "var(--accent-soft)" : "var(--surface)", cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13, color: active ? "var(--accent)" : "var(--text)", transition: "all 150ms ease" }}>
-                  {cat.label}
+                  {cat.name}
                 </button>
               );
             })}

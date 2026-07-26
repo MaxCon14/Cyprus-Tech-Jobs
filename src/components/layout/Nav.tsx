@@ -9,28 +9,18 @@ import {
   Briefcase, MapPin, Clock, Zap, Star,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { EMPLOYMENT_LABELS, type NavCategory } from "@/lib/taxonomy";
 
 const supabase = createSupabaseBrowserClient();
 
 /* ── Data ─────────────────────────────────────────────────────────────────── */
 
-const CATEGORIES = [
-  { label: "Frontend",         slug: "frontend" },
-  { label: "Backend",          slug: "backend" },
-  { label: "DevOps & Cloud",   slug: "devops" },
-  { label: "UI/UX Design",     slug: "design" },
-  { label: "Data & Analytics", slug: "data" },
-  { label: "Mobile",           slug: "mobile" },
-  { label: "Product",          slug: "product" },
-  { label: "Security",         slug: "security" },
-  { label: "QA & Testing",     slug: "qa" },
-];
+/* Categories arrive as a prop, read from the database by the root layout. This
+   menu used to carry its own hardcoded list, which drifted from the taxonomy:
+   three top-level categories had no entry at all, and the ones that did were
+   labelled differently here than on /jobs. */
 
-const JOB_TYPES = [
-  { label: "Full-time",  value: "FULL_TIME" },
-  { label: "Part-time",  value: "PART_TIME" },
-  { label: "Contract",   value: "CONTRACT" },
-];
+const JOB_TYPES = Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => ({ label, value }));
 
 const CITIES = [
   { label: "Limassol", href: "/jobs/limassol" },
@@ -54,14 +44,17 @@ const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNod
   { key: "city",     label: "City",        icon: <MapPin size={13} /> },
 ];
 
-const FLYOUT_ITEMS: Record<FlyoutSection, { label: string; href: string }[]> = {
-  category: CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
-  type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?employment=${t.value}` })),
-  city:     CITIES.map(c =>    ({ label: c.label,    href: c.href })),
-};
+function flyoutItems(categories: NavCategory[]): Record<FlyoutSection, { label: string; href: string }[]> {
+  return {
+    category: categories.map(c => ({ label: c.name,  href: `/jobs?category=${c.slug}` })),
+    type:     JOB_TYPES.map(t =>    ({ label: t.label, href: `/jobs?employment=${t.value}` })),
+    city:     CITIES.map(c =>       ({ label: c.label, href: c.href })),
+  };
+}
 
-function JobsDropdown({ onClose }: { onClose: () => void }) {
+function JobsDropdown({ onClose, categories }: { onClose: () => void; categories: NavCategory[] }) {
   const [active, setActive] = useState<FlyoutSection>("category");
+  const items = flyoutItems(categories);
 
   return (
     <div className="nav-mega-menu">
@@ -95,7 +88,7 @@ function JobsDropdown({ onClose }: { onClose: () => void }) {
             {FLYOUT_SECTIONS.find(s => s.key === active)?.icon}
             {FLYOUT_SECTIONS.find(s => s.key === active)?.label}
           </div>
-          {FLYOUT_ITEMS[active].map(item => (
+          {items[active].map(item => (
             <Link key={item.href} href={item.href} className="nav-dropdown-item" onClick={onClose}>
               {item.label}
             </Link>
@@ -109,10 +102,14 @@ function JobsDropdown({ onClose }: { onClose: () => void }) {
 
 /* ── Nav ──────────────────────────────────────────────────────────────────── */
 
-export function Nav() {
+export function Nav({ categories }: { categories: NavCategory[] }) {
   const pathname = usePathname();
   const router   = useRouter();
-  if (pathname?.startsWith("/admin")) return null;
+  /* The admin area has its own chrome, so the public nav renders nothing there.
+     The check has to come after every hook: bailing out above them changed the
+     hook count between renders, which React throws on the moment you navigate
+     from /admin back into the site. */
+  const isAdmin  = pathname?.startsWith("/admin") ?? false;
   const [user,    setUser]    = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [slots,   setSlots]   = useState<{ standardSlots: number; featuredSlots: number } | null>(null);
@@ -171,6 +168,8 @@ export function Nav() {
   const openJobs  = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setJobsOpen(true); };
   const closeJobs = () => { closeTimer.current = setTimeout(() => setJobsOpen(false), 150); };
 
+  if (isAdmin) return null;
+
   return (
     <>
       <header style={{
@@ -210,7 +209,7 @@ export function Nav() {
                   onMouseEnter={openJobs}
                   onMouseLeave={closeJobs}
                 >
-                  <JobsDropdown onClose={() => setJobsOpen(false)} />
+                  <JobsDropdown onClose={() => setJobsOpen(false)} categories={categories} />
                 </div>
               )}
             </div>
@@ -311,9 +310,9 @@ export function Nav() {
                 </button>
                 <div className={`mobile-menu-sub${mobileCatOpen ? " open" : ""}`}>
                   <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
-                    {CATEGORIES.map(cat => (
+                    {categories.map(cat => (
                       <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="mobile-menu-link">
-                        {cat.label}
+                        {cat.name}
                       </Link>
                     ))}
                   </div>

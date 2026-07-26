@@ -3,12 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { notifyGoogle } from "@/lib/google-indexing";
 import { validateSalaryRange } from "@/lib/utils";
-
-const CATEGORY_NAMES: Record<string, string> = {
-  frontend: "Frontend", backend: "Backend", devops: "DevOps & Cloud",
-  design: "UI/UX Design", data: "Data & Analytics", mobile: "Mobile",
-  product: "Product", security: "Security", qa: "QA & Testing", "full-stack": "Full Stack",
-};
+import { findCategoryBySlug } from "@/lib/queries";
+import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 
 export async function POST(
   req: NextRequest,
@@ -76,11 +72,11 @@ export async function POST(
     return NextResponse.json({ error: "No standard listing slots available." }, { status: 402 });
   }
 
-  const category = await prisma.category.upsert({
-    where:  { slug: categorySlug as string },
-    create: { name: CATEGORY_NAMES[categorySlug as string] ?? String(categorySlug), slug: categorySlug as string },
-    update: {},
-  });
+  /* Look the category up; do not create it. Publishing through an upsert could
+     mint a parentless category, which would put the freshly published job
+     outside every category page that links to it. */
+  const category = await findCategoryBySlug(categorySlug as string);
+  if (!category) return NextResponse.json({ error: UNKNOWN_CATEGORY_MESSAGE }, { status: 422 });
 
   const now      = new Date();
   const expiresAt = new Date(now);

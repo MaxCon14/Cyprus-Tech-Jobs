@@ -5,6 +5,7 @@ import { serialiseJob } from "@/lib/serialise";
 import {
   Search, MapPin, Bell, UserPlus, Zap,
   Code2, Server, Cloud, PenTool, BarChart2, Smartphone, Layers, ShieldCheck,
+  Blocks, CandlestickChart, UsersRound, TestTube2, Briefcase,
 } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
@@ -67,17 +68,25 @@ const FAQS = [
 ];
 
 /* ── Category icons (line icons, not emoji — emoji render as the OS's own
-   colourful glyphs, which clash with the rest of the UI) ── */
-const CATEGORY_GRID = [
-  { label: "Frontend",          slug: "frontend",  Icon: Code2       },
-  { label: "Backend",           slug: "backend",   Icon: Server      },
-  { label: "DevOps & Cloud",    slug: "devops",    Icon: Cloud       },
-  { label: "UI/UX Design",      slug: "design",    Icon: PenTool     },
-  { label: "Data & Analytics",  slug: "data",      Icon: BarChart2   },
-  { label: "Mobile",            slug: "mobile",    Icon: Smartphone  },
-  { label: "Product",           slug: "product",   Icon: Layers      },
-  { label: "Security",          slug: "security",  Icon: ShieldCheck },
-];
+   colourful glyphs, which clash with the rest of the UI).
+
+   Keyed by slug rather than being a list of its own: the grid itself is built
+   from the categories in the database, so adding one in /admin/taxonomy puts it
+   on the homepage with a generic icon instead of leaving it unreachable. ── */
+const CATEGORY_ICONS: Record<string, typeof Code2> = {
+  frontend:     Code2,
+  backend:      Server,
+  devops:       Cloud,
+  design:       PenTool,
+  data:         BarChart2,
+  mobile:       Smartphone,
+  product:      Layers,
+  security:     ShieldCheck,
+  "full-stack": Blocks,
+  finance:      CandlestickChart,
+  management:   UsersRound,
+  qa:           TestTube2,
+};
 
 export default async function HomePage() {
   let jobs: Awaited<ReturnType<typeof getJobs>> = [];
@@ -102,6 +111,11 @@ export default async function HomePage() {
     if (c.slug) countBySlug.set(c.slug, c.count);
     for (const child of c.children) countBySlug.set(child.slug, child.count);
   }
+
+  // The "Browse by category" grid — every top-level category, in the same order
+  // and under the same names as the nav and the /jobs filter panel.
+  // categories[0] is the synthetic "All jobs" row, which is not a category.
+  const categoryGrid = categories.slice(1);
 
   return (
     <>
@@ -305,27 +319,26 @@ export default async function HomePage() {
             <Link href="/jobs" className="btn btn-outline btn-sm">All jobs</Link>
           </div>
           <div className="grid-4" style={{ gap: "clamp(10px, 2vw, 16px)" }}>
-            {CATEGORY_GRID.map(cat => (
-              <Link
-                key={cat.slug}
-                href={`/jobs?category=${cat.slug}`}
-                style={{ textDecoration: "none", display: "block", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "clamp(16px, 2.5vw, 22px)", transition: "all 180ms var(--ease-out)", cursor: "pointer" }}
-                className="category-card"
-              >
-                <div className="category-icon">
-                  <cat.Icon size={19} strokeWidth={1.75} aria-hidden />
-                </div>
-                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>{cat.label}</div>
-                {(() => {
-                  const n = countBySlug.get(cat.slug) ?? 0;
-                  return (
-                    <div className="mono-s" style={{ color: "var(--accent)" }}>
-                      {n} open {n === 1 ? "role" : "roles"}
-                    </div>
-                  );
-                })()}
-              </Link>
-            ))}
+            {categoryGrid.map(cat => {
+              const Icon = CATEGORY_ICONS[cat.slug] ?? Briefcase;
+              const n    = countBySlug.get(cat.slug) ?? 0;
+              return (
+                <Link
+                  key={cat.slug}
+                  href={`/jobs?category=${cat.slug}`}
+                  style={{ textDecoration: "none", display: "block", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "clamp(16px, 2.5vw, 22px)", transition: "all 180ms var(--ease-out)", cursor: "pointer" }}
+                  className="category-card"
+                >
+                  <div className="category-icon">
+                    <Icon size={19} strokeWidth={1.75} aria-hidden />
+                  </div>
+                  <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>{cat.label}</div>
+                  <div className="mono-s" style={{ color: "var(--accent)" }}>
+                    {n} open {n === 1 ? "role" : "roles"}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
