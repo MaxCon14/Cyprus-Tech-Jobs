@@ -1,6 +1,11 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const supabase = createSupabaseBrowserClient();
 
 const NAV = [
   { href: "/admin/dashboard",  label: "Dashboard",         icon: "◈" },
@@ -14,6 +19,19 @@ const NAV = [
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const router   = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
+
+  /* Straight to /admin/login rather than the homepage: signing out of the
+     admin panel means you want back in, not out to the public site. */
+  async function handleSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    router.push("/admin/login");
+    router.refresh();
+  }
+
   return (
     <nav style={{
       width: 216, flexShrink: 0, minHeight: "100vh",
@@ -50,10 +68,27 @@ export default function AdminNav() {
       </div>
 
       {/* Footer */}
-      <div style={{ padding: "16px 20px", borderTop: "1px solid var(--border)" }}>
+      <div style={{ padding: "14px 20px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
         <Link href="/" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", fontSize: 11 }}>
           ← Back to site
         </Link>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          style={{
+            display: "flex", alignItems: "center", gap: 8, width: "100%",
+            padding: "8px 12px", marginLeft: -12,
+            background: "none", border: "none", borderRadius: 7,
+            cursor: signingOut ? "default" : "pointer",
+            fontFamily: "var(--font-sans)", fontSize: 13,
+            color: signingOut ? "var(--text-subtle)" : "var(--text-muted)",
+            transition: "background 120ms, color 120ms",
+          }}
+        >
+          <LogOut size={14} />
+          {signingOut ? "Signing out…" : "Sign out"}
+        </button>
       </div>
     </nav>
   );
