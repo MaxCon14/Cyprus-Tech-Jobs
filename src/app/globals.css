@@ -1615,29 +1615,3 @@ details[open] .faq-chevron {
   animation: cv-star-rotate 1.7s ease-in-out infinite;
 }
 
-/* Candidate dashboard identity panel — the one dark surface on the page, so the
-   white cards below it read as cards. Deliberately NOT called .dashboard-hero:
-   that class already exists above as a two-column grid used by loading.tsx.
-
-   Rather than restyling each child, the surface roles are redefined for this
-   subtree: .tag, .tag-outline, the caption and the strength track all read
-   these same variables, so they invert themselves. In dark mode the page is
-   already near-black, so the hero lifts to neutral-800 instead of dropping. */
-.dashboard-identity {
-  background: var(--black);
-  border: 1px solid var(--black);
-
-  --text:          var(--white);
-  --text-muted:    var(--neutral-300);
-  --text-subtle:   var(--neutral-400);
-  --border-strong: rgba(255, 255, 255, 0.28);
-  --bg-muted:      rgba(255, 255, 255, 0.10);
-  --surface:       rgba(255, 255, 255, 0.14);
-  --success:       #4ADE80;
-  --warning:       #FBBF24;
-}
-
-[data-theme="dark"] .dashboard-identity {
-  background: var(--neutral-800);
-  border-color: var(--neutral-700);
-}

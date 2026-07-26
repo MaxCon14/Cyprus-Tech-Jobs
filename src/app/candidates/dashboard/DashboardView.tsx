@@ -24,9 +24,12 @@ import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
  *
  *   1. The page sits on --bg-alt, not --bg, so white cards read as cards. Every
  *      other page on the site already does this; the dashboard was the outlier.
- *   2. Cards are grouped into three named zones that match how someone actually
- *      thinks about a job hunt — who I am, what I've done, what I'm looking for.
- *   3. Profile strength is stated once, in the hero, instead of twice with two
+ *      This is the change doing most of the work — the cards themselves stayed
+ *      white, and that is enough once the ground behind them is not.
+ *   2. Cards are grouped by what they are for — who I am, what I have done, what
+ *      I am looking for — separated by plain rules. The grouping carries the
+ *      meaning; labelling each group only added words to read.
+ *   3. Profile strength is stated once, at the top, instead of twice with two
  *      different colour thresholds.
  */
 
@@ -79,10 +82,11 @@ export function DashboardView({
           </div>
         )}
 
-        {/* ── Hero. The one dark surface on the page, so the white cards below it
-              read as cards. Its colours come from tokens redefined in
-              .dashboard-identity, so the tags and bar inside adapt on their own. ── */}
-        <div className="dashboard-identity" style={{
+        {/* ── Identity. A white card like the rest; it leads by size and type
+              rather than colour. Separation comes from the page ground being
+              --bg-alt, which is what stops the screen reading as one sheet. ── */}
+        <div style={{
+          background: "var(--surface)", border: "1px solid var(--border)",
           borderRadius: 16, padding: "clamp(20px, 3vw, 28px)", marginBottom: 20,
         }}>
           <h1 className="h1" style={{ margin: "0 0 6px", color: "var(--text)" }}>{displayName}</h1>
@@ -113,7 +117,7 @@ export function DashboardView({
               {`${completion.pct}%`}
             </span>
           </div>
-          <div style={{ height: 8, width: "100%", background: "var(--surface)", borderRadius: 99, overflow: "hidden" }}>
+          <div style={{ height: 8, width: "100%", background: "var(--bg-muted)", borderRadius: 99, overflow: "hidden" }}>
             <div style={{
               height: "100%", width: `${completion.pct}%`,
               background: strengthColour(completion.pct), borderRadius: 99,
