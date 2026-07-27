@@ -107,7 +107,15 @@ export async function POST(req: NextRequest) {
         linkedinUrl,
         portfolioUrl,
         emailVerified: false,
-        // A guest has expressed no alert preference; do not start emailing them.
+        /* Applying is not subscribing. Alert emails are driven entirely by rows
+           in job_alerts, and this route deliberately creates none — the column
+           below is a NOT NULL default that the send path never reads. A guest
+           who separately signed up for alerts through the alert form keeps that
+           subscription; it is theirs, and it has its own unsubscribe link.
+
+           emailVerified: false also marks this row for deletion after 30 days
+           by cron/purge-guest-data. Signing up flips the flag and takes the
+           person out of that sweep. */
         alertFrequency: "WEEKLY",
       })
       .select("id")

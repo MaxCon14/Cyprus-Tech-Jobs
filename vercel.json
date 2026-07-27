@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/send-alerts",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/purge-guest-data",
+      "schedule": "30 3 * * *"
     }
   ]
 }

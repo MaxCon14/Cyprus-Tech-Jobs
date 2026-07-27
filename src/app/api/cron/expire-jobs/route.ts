@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { authoriseCron } from "@/lib/cron-auth";
 import { notifyGoogleBatch } from "@/lib/google-indexing";
 
 export const dynamic = "force-dynamic";
@@ -8,10 +9,8 @@ const ACTIVE_DAYS_LIMIT   = 30;
 const INACTIVE_DAYS_LIMIT = 30;
 
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = authoriseCron(req);
+  if (denied) return denied;
 
   // ── 1. Find ACTIVE jobs that have reached the limit ──────────
   const activeToExpire = await prisma.job.findMany({

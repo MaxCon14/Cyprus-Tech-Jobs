@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { authoriseCron } from "@/lib/cron-auth";
 import { getResend, FROM_EMAIL, FROM_NAME, buildAlertEmail } from "@/lib/resend";
 import type { Prisma } from "@prisma/client";
 
@@ -9,10 +10,8 @@ const DAILY_THRESHOLD  = 23 * 60 * 60 * 1000;
 const WEEKLY_THRESHOLD = 6  * 24 * 60 * 60 * 1000;
 
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = authoriseCron(req);
+  if (denied) return denied;
 
   const now       = new Date();
   const dailyCut  = new Date(now.getTime() - DAILY_THRESHOLD);
