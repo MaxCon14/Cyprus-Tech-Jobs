@@ -1,5 +1,7 @@
 {
-  "regions": ["dub1"],
+  "regions": [
+    "dub1"
+  ],
   "crons": [
     {
       "path": "/api/cron/expire-jobs",
@@ -8,10 +10,6 @@
     {
       "path": "/api/cron/send-alerts",
       "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/purge-guest-data",
-      "schedule": "30 3 * * *"
     }
   ]
 }

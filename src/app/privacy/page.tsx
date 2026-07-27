@@ -165,8 +165,8 @@ const SECTIONS: LegalSection[] = [
         type: "ul",
         items: [
           "Account data: for as long as your account exists. Delete your account and we remove your profile, CV and cover letters.",
-          "Applications: retained while your account exists so you can see your history. The employer keeps its own copy independently.",
-          "Applications made without an account: deleted automatically 30 days after your last application — the details you entered, your CV, your cover letter and the uploaded files themselves. Nothing is kept, and applying this way never signs you up for anything. Create an account before then and your applications stay with it.",
+          "Applications: kept so the employer you applied to can review them, including after the listing has closed or expired — employers often revisit earlier applicants when a similar role opens. We do not delete them on a fixed schedule.",
+          "Applications made without an account: kept on the same basis, so the employer kept the application you sent them. Applying this way never signs you up for anything — no alerts, no marketing. You can ask us to delete your application and CV at any time using the address below, and we will.",
           "Job alerts: until you unsubscribe, which every alert email links to.",
           "Job listings: published for 30 days, then expired. Expired listings are kept as part of the employer's account history.",
           "Payment and invoice records: kept for as long as accounting and tax law requires, normally six years.",
