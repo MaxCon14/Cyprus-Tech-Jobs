@@ -216,18 +216,14 @@ function InAppApplyForm({
   const cvFileRef = useRef<HTMLInputElement>(null);
   const clFileRef = useRef<HTMLInputElement>(null);
 
-  if (!candidateId) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <Link href="/login" className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Sign in to apply
-        </Link>
-        <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-          APPLY DIRECTLY ON CYPRUSTECHCAREERS
-        </p>
-      </div>
-    );
-  }
+  /* Guests apply with the same form, filling in by hand the details a profile
+     would otherwise supply. An account is worth having, not worth requiring:
+     making people register mid-application is where job-board funnels leak. */
+  const isGuest = !candidateId;
+  const [guestFirst, setGuestFirst] = useState("");
+  const [guestLast,  setGuestLast]  = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [needsSignIn, setNeedsSignIn] = useState(false);
 
   if (submitted) {
     return (
@@ -283,10 +279,21 @@ function InAppApplyForm({
     setClUploading(false);
   }
 
-  const activeCvUrl = cvSource === "upload" ? uploadedCvUrl : (cvUrl ?? null);
+  /* A guest has no saved CV, so the only source is the one they just uploaded. */
+  const activeCvUrl = isGuest
+    ? uploadedCvUrl
+    : (cvSource === "upload" ? uploadedCvUrl : (cvUrl ?? null));
 
   async function handleSubmit() {
     setError(null);
+    setNeedsSignIn(false);
+
+    if (isGuest) {
+      if (!guestFirst.trim())                     { setError("Enter your first name.");    return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim())) { setError("Enter a valid email address."); return; }
+      if (!activeCvUrl)                           { setError("Attach your CV to apply.");  return; }
+    }
+
     const hasCl = clMode === "type" ? coverLetter.trim().length > 0 : !!clFileUrl;
     if (coverLetterPolicy === "REQUIRED" && !hasCl) {
       setError(clMode === "type" ? "A cover letter is required for this role." : "Please upload your cover letter PDF.");
@@ -294,7 +301,7 @@ function InAppApplyForm({
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/candidates/applications", {
+      const res = await fetch(isGuest ? "/api/applications/guest" : "/api/candidates/applications", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -302,10 +309,21 @@ function InAppApplyForm({
           coverLetter:    clMode === "type"   ? (coverLetter.trim() || null) : null,
           coverLetterUrl: clMode === "upload" ? (clFileUrl || null)          : null,
           cvUrl:          activeCvUrl ?? null,
+          ...(isGuest && {
+            firstName: guestFirst.trim(),
+            lastName:  guestLast.trim() || null,
+            email:     guestEmail.trim().toLowerCase(),
+          }),
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Something went wrong. Please try again."); setSubmitting(false); return; }
+      if (!res.ok) {
+        // The address already has an account; only its owner may apply with it.
+        if (data.needsSignIn) setNeedsSignIn(true);
+        setError(data.error ?? "Something went wrong. Please try again.");
+        setSubmitting(false);
+        return;
+      }
       recordApply(jobId);
       setSubmitted(true);
     } catch {
@@ -317,11 +335,62 @@ function InAppApplyForm({
   const initials = (candidateName ?? candidateEmail ?? "?")
     .split(" ").slice(0, 2).map(w => w[0]?.toUpperCase() ?? "").join("");
 
+  const guestIdentity = (
+    <div style={{
+      background: "var(--bg-alt)",
+      border: "1px solid var(--border)",
+      borderLeft: "3px solid var(--accent)",
+      borderRadius: 10,
+      padding: 20,
+    }}>
+      <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 4, letterSpacing: "0.08em" }}>
+        YOUR DETAILS
+      </p>
+      <p className="body-s" style={{ color: "var(--text-muted)", margin: "0 0 16px" }}>
+        No account needed.{" "}
+        <Link href="/login" style={{ color: "var(--accent)" }}>Sign in</Link>{" "}
+        if you have one and we&apos;ll use your saved profile.
+      </p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+        <label style={{ display: "block" }}>
+          <span className="body-s" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>First name</span>
+          <input
+            className="input" value={guestFirst} onChange={e => setGuestFirst(e.target.value)}
+            autoComplete="given-name" placeholder="Maria" style={{ width: "100%" }}
+          />
+        </label>
+        <label style={{ display: "block" }}>
+          <span className="body-s" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>
+            Last name <span style={{ color: "var(--text-subtle)", fontWeight: 400 }}>(optional)</span>
+          </span>
+          <input
+            className="input" value={guestLast} onChange={e => setGuestLast(e.target.value)}
+            autoComplete="family-name" placeholder="Georgiou" style={{ width: "100%" }}
+          />
+        </label>
+      </div>
+
+      <label style={{ display: "block" }}>
+        <span className="body-s" style={{ display: "block", marginBottom: 6, fontWeight: 500 }}>Email</span>
+        <input
+          className="input" type="email" value={guestEmail} onChange={e => setGuestEmail(e.target.value)}
+          autoComplete="email" placeholder="maria@example.com" style={{ width: "100%" }}
+        />
+        <span className="body-s" style={{ color: "var(--text-subtle)", display: "block", marginTop: 6 }}>
+          {companyName} will use this to reply to you.
+        </span>
+      </label>
+    </div>
+  );
+
   const formBody = (
     <>
 
+      {isGuest && guestIdentity}
+
       {/* ── Applying As ── */}
-      <div style={{
+      {!isGuest && <div style={{
         background: "var(--bg-alt)",
         border: "1px solid var(--border)",
         borderLeft: "3px solid var(--accent)",
@@ -370,7 +439,7 @@ function InAppApplyForm({
             )}
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* ── CV / Résumé ── */}
       <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
@@ -387,7 +456,25 @@ function InAppApplyForm({
 
         {/* Section body */}
         <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Source toggle */}
+          {/* Source toggle — a guest has no profile CV to choose between, so
+              they get a single upload button instead of a two-way choice. */}
+          {isGuest ? (
+            <button
+              type="button"
+              onClick={() => cvFileRef.current?.click()}
+              style={{
+                padding: "11px 14px", borderRadius: 8,
+                border: `1.5px solid ${uploadedCvUrl ? "var(--accent)" : "var(--border)"}`,
+                background: uploadedCvUrl ? "var(--accent-soft)" : "var(--surface)",
+                cursor: "pointer", fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 13,
+                color: uploadedCvUrl ? "var(--accent)" : "var(--text-muted)",
+                transition: "all 120ms",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              }}
+            >
+              <Upload size={12} /> {uploadedCvUrl ? "Choose a different PDF" : "Upload your CV (PDF)"}
+            </button>
+          ) : (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <button
               type="button"
@@ -419,11 +506,12 @@ function InAppApplyForm({
               <Upload size={12} /> Upload different
             </button>
           </div>
+          )}
 
           <input ref={cvFileRef} type="file" accept="application/pdf" style={{ display: "none" }} onChange={handleCvFileChange} />
 
           {/* Status */}
-          {cvSource === "saved" ? (
+          {!isGuest && cvSource === "saved" ? (
             cvUrl ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--success)", flexShrink: 0 }} />
@@ -458,7 +546,10 @@ function InAppApplyForm({
                 Change
               </button>
             </div>
-          ) : (
+          ) : isGuest ? null : (
+            /* Signed-in applicants get this prompt under the two-way toggle. A
+               guest already has one full-width upload button; a second link
+               saying the same thing just reads as clutter. */
             <button type="button" onClick={() => cvFileRef.current?.click()}
               className="body-s" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--accent)", padding: 0, textDecoration: "underline", textAlign: "left" }}>
               Choose PDF…
@@ -590,8 +681,19 @@ function InAppApplyForm({
       {error && (
         <div role="alert" style={{ display: "flex", alignItems: "flex-start", gap: 10, color: "var(--error)", background: "var(--error-bg)", borderRadius: 8, padding: "12px 14px" }}>
           <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-          <span className="body-s">{error}</span>
+          <span className="body-s">
+            {error}
+            {needsSignIn && (
+              <> <Link href="/login" style={{ color: "var(--error)", textDecoration: "underline", fontWeight: 600 }}>Sign in</Link>.</>
+            )}
+          </span>
         </div>
+      )}
+      {isGuest && (
+        <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
+          Your details and CV go to {companyName} so they can consider you for this role. See our{" "}
+          <Link href="/privacy" style={{ color: "var(--text-muted)", textDecoration: "underline" }}>privacy policy</Link>.
+        </p>
       )}
       <div className="modal-actions">
         <button
@@ -623,7 +725,7 @@ function InAppApplyForm({
           Apply on CyprusTech.Careers
         </button>
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-          USES YOUR SAVED PROFILE &amp; CV
+          {isGuest ? "NO ACCOUNT NEEDED" : "USES YOUR SAVED PROFILE & CV"}
         </p>
       </div>
 
