@@ -80,9 +80,33 @@ done from a real machine or the GitHub UI.
 - **Resend** for transactional email; also configured as Supabase Auth's custom
   SMTP.
 - **Stripe** for listing-slot purchases.
+- **The `categories` table is the only source of truth for the job taxonomy.**
+  The nav, the homepage grid and the candidate category pickers all read it —
+  none of them may carry a hardcoded list again. Enum labels (employment type,
+  work type, experience) live once in `src/lib/taxonomy.ts`; the cached nav tree
+  is `getNavCategories` in `src/lib/queries.ts`, invalidated by
+  `revalidateTag(CATEGORY_CACHE_TAG, "max")` from the admin category routes.
+  Routes that store a job **look a category slug up and 422 on an unknown one**
+  — they must never upsert, or the job lands under a parentless category that no
+  page links to.
+- **Two data-access worlds.** Jobs, companies, employers, categories and tags are
+  Prisma. Candidates, applications, saved/applied jobs and positions are *not in
+  the Prisma schema at all* — they are reached through `supabaseAdmin` (service
+  role, bypasses RLS). Expect to use both in one file.
 - Design tokens in `src/app/globals.css` — pink `--accent` `#FF3D7F`, Figtree
   sans, Fragment Mono. **Dark mode is `[data-theme="dark"]` on the root element,
   not `prefers-color-scheme`.**
+- **Job descriptions are HTML and must go through `sanitizeJobHtml`**
+  (`src/lib/sanitize.ts`, allowlist, no attributes) on every write *and* at
+  render. Anything embedded in a `<script type="application/ld+json">` goes
+  through `jsonLd()` in `src/lib/schema.ts` — `JSON.stringify` alone does not
+  escape `<`, so a job title containing `</script>` breaks out of the tag.
+- **Public endpoints get a rate limit.** `src/lib/rate-limit.ts` +
+  the `rate_limits` table and `consume_rate_limit()` RPC. Counters are in
+  Postgres because serverless instances share no memory; it fails open.
+- **Scheduled routes use `authoriseCron`** (`src/lib/cron-auth.ts`). Never inline
+  the secret comparison: with `CRON_SECRET` unset the old inline check compared
+  against the literal string `"Bearer undefined"` and let anyone in.
 - Styling is mostly inline styles reading CSS custom properties; responsive
   helpers are classes in `globals.css` (`.page-container`, `.grid-4`,
   `.section-head`, `.cta-strip`, …).
@@ -113,9 +137,15 @@ done from a real machine or the GitHub UI.
   region `eu-west-1`. Sign-in codes are being **sent and delivered** — this was
   confirmed against Resend's delivery log, and sign-ins have succeeded.
   Two operational facts worth knowing:
-  - **`hello@cyprustech.careers` has no inbox** (receiving is disabled on the
-    domain). Mail to it **bounces**. If `ADMIN_EMAIL` is set to that address,
-    admin sign-in codes can never arrive — point it at a mailbox that receives.
+  - **Receiving on the domain needs confirming before trusting it.** This file
+    used to state flatly that `hello@cyprustech.careers` bounces. Since then
+    inbound was worked on (Resend inbound + an MX record) and Maxim also said the
+    address is backed by a Google account — so the two accounts of it disagree
+    and neither was verified end to end. `ADMIN_EMAIL` is set to `hello@`, and
+    **admin sign-in has still never been completed**, so this is the first thing
+    to test rather than assume. `CONTACT_EMAIL` in `src/lib/legal.ts` is a
+    different address again (`help@`) and the legal pages publish it, so it has
+    to receive mail too.
   - Mail to `@avocadots.com` is accepted by its server (Microsoft 365) but not
     reaching the inbox; Gmail delivery works fine. Investigation was stopped at
     the user's request.
@@ -223,10 +253,141 @@ rule. Relabelled to "Email" with a neutral placeholder.
 
 ---
 
+## Session: filters, security, guest applications
+
+**Filtering was broken in three ways and is now DB-driven end to end.**
+A published full-time job appeared under neither the Full-time menu nor its
+category. Causes: one `type` param was doing double duty for work type *and*
+employment type, so "full-time" was searched against the remote column; and
+`/api/jobs/post` **upserted** categories, so a form posting a retired slug minted
+a parentless category named after its own slug — invisible under every parent
+page. One live listing was sitting in exactly that state (`design-ux`) and was
+re-pointed to `uiux-designer`. All four job-writing routes now resolve the slug
+and 422 on an unknown one, and the nav/homepage/candidate pickers read the
+database (they had been missing Finance & Trading, Full Stack and Management
+entirely, and disagreed with each other on names). Skill filtering (`?skill=`)
+was added, along with a Job type control the filter panel never had.
+
+**Skills were being silently dropped on save.** Every write path linked tags
+with `findMany({ name: { in: names } })` and ignored what came back empty — the
+picker offers 261 skills, the table held 119, so 160 of them (Blender, Unity,
+Photoshop, PyTorch…) saved as nothing. `linkJobTags` (`src/lib/job-tags.ts`) now
+creates what is missing; the picker is a closed list so nothing arbitrary gets
+in. Slugs are lossy (`C#` and `C++` both reduce to `c`), so collisions take a
+numeric suffix.
+
+**Search never matched curated jobs** — they have no `Company` row, so
+`curatedCompanyName` had to be added to the search predicate. That is every job
+an admin adds by hand.
+
+**Stored XSS, fixed.** Job descriptions are authored as HTML and rendered with
+`dangerouslySetInnerHTML` with no sanitiser anywhere in the project — any
+employer could run script on the site for every visitor of their listing.
+Verifying the fix exposed a second live route to the same thing: schema blocks
+embedded `JSON.stringify` output straight into a `<script>` tag, so a job title
+of `Dev</script><img src=x onerror=…>` closed the block and executed. Confirmed
+executing in a browser before the fix. Both closed; see Stack & conventions.
+
+**A live data leak, fixed.** The `applied_jobs` RLS policy was named
+`candidates_read_own_applied_jobs` but its condition was `USING (true)` — anyone
+holding the anon key (which ships in the JS bundle) could read which candidate
+applied to which job. Replaced with the ownership check the other candidate
+tables use. Every other private table was already correct.
+
+**Guest applications.** Job seekers can apply to in-app listings without an
+account (link-out listings never required one). A guest gets a candidate row with
+`emailVerified: false`; nothing else changed, because the employer dashboard
+resolves applicants through `candidateId` and candidate rows are looked up by
+email everywhere — so signing up later lands on the row you already have. An
+address belonging to a **verified** account is refused with a prompt to sign in,
+otherwise a stranger could attach an application to someone else's profile.
+Applying never subscribes anyone: alert emails come only from `job_alerts` rows
+and the guest route creates none.
+
+**Retention: employers keep applications indefinitely.** A 30-day purge of guest
+data was built and then deliberately reversed — employers revisit earlier
+applicants when a similar role opens. `expire-jobs` only moves a job to
+`EXPIRED`; no read path filters on status, so applicants survive expiry, pausing
+and closing. `scripts/verify-employer-access.ts` pins that down. The privacy
+policy was updated to match — the previous wording promised 30-day deletion,
+which would have been untrue the moment this shipped. **Open question flagged to
+Maxim:** indefinite retention of CVs from people who never registered is the
+hard part to defend under GDPR storage limitation; ~24 months from last
+application is the usual ATS compromise and costs employers nothing real.
+
+**Mobile filters collapse.** The sidebar took a screenful above the first result
+and could not be closed. A collapsible version existed in `FiltersPanel.tsx` but
+nothing ever imported it — the collapse now lives in `FilterBar` itself. Also
+unsticks it: `.layout-sidebar-left` is not covered by the 768px rule that
+flattens the other sidebars, so it kept `position: sticky` and
+`max-height: calc(100vh - 48px)` on phones. 686px → 50px collapsed.
+
+**Legal pages can name an individual.** `LEGAL_ENTITY` could only describe a
+company, so with none the pages named the *website* as data controller — and a
+trading name is not a legal person. It now carries a `type`; as an individual the
+pages read "<name>, trading as CyprusTech.Careers". **Still blank** — see TODO.
+
+**Verification scripts** live in `scripts/` and run against a scratch Postgres
+(see Working agreements): `verify-taxonomy.ts` (20 checks that a newly posted job
+is findable by every filter), `verify-sanitize.ts` (25 XSS payload/passthrough
+cases), `verify-employer-access.ts` (applicants survive every job status).
+
+---
+
+## Security backlog — found in an audit, NOT yet fixed
+
+Ordered by how easily someone could do damage. All 49 API routes, every RLS
+policy and the render paths were reviewed; what is missing here was checked and
+is fine (service-role key never reaches the client, admin routes all gated,
+Stripe webhook verifies signatures, employer job routes check ownership).
+
+1. **Unauthenticated AI endpoints.** `candidates/parse-cv` and `cv-review` take a
+   POST from anyone and call the Anthropic API — no auth, no per-user cap.
+   `parse-cv` additionally does `fetch(userSuppliedUrl)` with no host allowlist
+   and returns Claude's reading of the response: an SSRF read primitive.
+2. **`employers/logo-upload` has no auth at all** — free storage on the Supabase
+   account. Also permits `image/svg+xml` (scripts) and trusts the client's
+   declared content type. (`candidates/cv-upload` was hardened: magic-byte check
+   plus rate limit.)
+3. **Email enumeration** on the three `check-email` routes — `{exists:true|false}`
+   for any address. On a job board that leaks who is job-hunting.
+4. **`stripe/checkout` takes `employerId` from the request body**, not the
+   session. Pricing is server-side, so no amount tampering — but it is an ID
+   oracle.
+5. **No security headers** — no CSP, HSTS, X-Frame-Options or Referrer-Policy in
+   `next.config.ts`. A CSP would also blunt any future XSS.
+6. **Preview deployments share the production `DATABASE_URL`.** A preview URL can
+   write real user data. Override it for the Preview environment in Vercel.
+
+---
+
 ## Open items / TODO
 
-1. Delete the three stale `claude/*` branches on GitHub (sandbox can't — the git
-   proxy rejects deletes).
+0. **The security backlog above.** Items 1 and 2 are the ones to do before
+   pushing the site publicly.
+1. **Fill in `src/lib/legal.ts`** — `type`, `registeredName` and
+   `registeredAddress`. Until then the privacy policy and terms name the website
+   rather than a legal person, which is the one thing GDPR's controller-identity
+   requirement actually asks for. Maxim has no registered company; a natural
+   person is a perfectly valid controller, so this needs a name and a postal
+   address that receives mail (a service address is fine — it gets published).
+   Separately, trading as "CyprusTech.Careers" in Cyprus likely needs a business
+   name registered under Cap. 116; an hour with an accountant settles that, the
+   tax registration and VAT together.
+2. **`CRON_SECRET` must be set in Vercel.** All three cron routes now fail
+   *closed* — if it is missing they return 503 and job expiry stops running.
+3. Delete the five stale `claude/*` branches on GitHub (sandbox can't — the git
+   proxy rejects deletes): `analyze-design-system-Y5y44`,
+   `compact-card-layout-92qmqy`, `connect-database-7OQd6`,
+   `connect-database-MZ1XL`, `cyprus-tech-jobs-context-elmi9o`. All are
+   superseded — see the History note above before resurrecting any of them.
+4. **Admin sign-in has still never been completed end to end.** Confirm
+   `ADMIN_EMAIL` points at a mailbox that actually receives, then sign in once.
+5. Guest applications have not been exercised against real Supabase — the
+   candidate tables are served by the Supabase API, not Postgres, so the local
+   scratch DB cannot cover the insert path. Submit one real guest application.
+6. `employers/dashboard/page.tsx` holds all 9 remaining lint errors (`any`,
+   `prefer-const`). Untouched for several sessions; worth a cleanup pass.
 2. **Status colours have no dark-mode variants.** `--success-bg`, `--warning-bg`,
    `--error-bg`, `--info-bg` stay pale against dark surfaces — visible on
    `/style-guide` in dark mode.
@@ -242,8 +403,22 @@ rule. Relabelled to "Email" with a neutral placeholder.
 
 ## Working agreements
 
-- Develop on a branch off `main`; merge to `main` to release. See `AGENTS.md`.
+- **Commit to `test`. `main` moves only when Maxim explicitly asks to release**,
+  and a release is `git merge --ff-only test`. See `AGENTS.md` — this line used
+  to say "develop on a branch off `main`", which contradicted it.
 - Don't open PRs unless asked.
+- **A scratch Postgres beats guessing.** Postgres 16 is installed but refuses to
+  run as root — `initdb`/`pg_ctl` under `su -s /bin/bash nobody` with a data dir
+  in `/var/tmp` (not the scratchpad, which `nobody` cannot read), then
+  `npx prisma db push --url …&sslmode=disable`. Prisma's adapter tries TLS
+  otherwise. This is how the filter, sanitiser and employer-access checks were
+  run against real queries rather than reasoned about. Note the candidate-side
+  tables are Supabase-served, so anything touching them cannot be covered this
+  way.
+- Playwright is not a dependency; `npm i -D --no-save playwright` and launch with
+  `executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"` (the
+  bundled version expects a build number that is not installed). Remove it before
+  committing so `package.json` stays clean.
 - Verify UI changes visually before committing — run the app and screenshot with
   Playwright (`playwright-core` + `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`,
   `--no-sandbox`). For auth-gated or wizard UI, a temporary throwaway route that
@@ -251,3 +426,13 @@ rule. Relabelled to "Email" with a neutral placeholder.
 - Watch for **stale dev servers holding a port** — a screenshot that comes back
   unstyled or showing removed content usually means an old server is serving a
   previous build whose asset hashes no longer exist. Start on a fresh port.
+  This bit hard again this session: a security fix appeared *not* to work because
+  `next start` had silently failed to bind an occupied port, so the test hit the
+  previous build. Kill the old process by PID and confirm the new server's uptime
+  before trusting a result. `pkill -f "next start"` is a trap — it matches the
+  shell running the command and kills that instead.
+- **Don't declare something fixed without exercising it.** Every claim in the
+  session above came from running the thing: injected XSS payloads in a real
+  browser, `set local role anon` to prove the RLS leak, measured pixel heights
+  for the mobile filters. Three of those started as "this looks right" and turned
+  out not to be.
