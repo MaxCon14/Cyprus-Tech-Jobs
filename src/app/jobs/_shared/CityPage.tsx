@@ -6,6 +6,7 @@ import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
 import { CITIES } from "@/lib/placeholder-data";
 import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS } from "@/lib/taxonomy";
+import { jsonLd } from "@/lib/schema";
 
 const PAGE_SIZE = 20;
 const BASE_URL  = "https://cyprustech.careers";
@@ -138,7 +139,7 @@ export async function CityPage({ config, searchParams }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }}
       />
 
       <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>

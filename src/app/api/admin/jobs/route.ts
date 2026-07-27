@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sanitizeJobHtml } from "@/lib/sanitize";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
 import { linkJobTags, parseTagNames } from "@/lib/job-tags";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     data: {
       slug:               jobSlug(title),
       title,
-      description,
+      description:        sanitizeJobHtml(description),
       isCurated:          true,
       curatedCompanyName: companyName.trim(),
       curatedCompanyLogoUrl: typeof curatedCompanyLogoUrl === "string" && curatedCompanyLogoUrl.trim() ? curatedCompanyLogoUrl.trim() : null,

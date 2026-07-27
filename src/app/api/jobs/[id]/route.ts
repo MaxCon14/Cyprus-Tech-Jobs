@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sanitizeJobHtml } from "@/lib/sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { notifyGoogle } from "@/lib/google-indexing";
 import { validateSalaryRange } from "@/lib/utils";
@@ -71,7 +72,7 @@ export async function PATCH(
       where: { id },
       data: {
         title:           String(title).trim(),
-        description:     String(description).trim(),
+        description:     sanitizeJobHtml(description),
         categoryId:      category.id,
         remoteType:      remoteType      as never,
         employmentType:  employmentType  as never,

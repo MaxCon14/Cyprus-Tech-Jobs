@@ -189,3 +189,26 @@ export function buildWebSiteSchema() {
     },
   };
 }
+
+/**
+ * Serialise a schema object for embedding in a <script type="application/ld+json"> tag.
+ *
+ * JSON.stringify escapes quotes and backslashes but leaves `<` and `>` alone,
+ * so any user-supplied string reaching a schema — a job title, a company name —
+ * could contain `</script>` and close the block early. Everything after it was
+ * then parsed as ordinary HTML, which made a job title like
+ * `Dev</script><img src=x onerror=…>` execute on the listing page.
+ *
+ * Escaping these three characters as \uXXXX keeps the JSON semantically
+ * identical (a JSON parser resolves the escapes) while making it impossible to
+ * terminate the surrounding tag. U+2028/U+2029 are escaped too: they are legal
+ * in JSON strings but are line terminators in older JS parsers.
+ */
+export function jsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}

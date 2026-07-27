@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getCompanies } from "@/lib/queries";
 import { CompanyCard } from "@/components/companies/CompanyCard";
-import { buildBreadcrumbSchema } from "@/lib/schema";
+import { buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Tech Companies Hiring in Cyprus — CyprusTech.Careers",
@@ -36,7 +36,7 @@ export default async function CompaniesPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbSchema([
+        dangerouslySetInnerHTML={{ __html: jsonLd(buildBreadcrumbSchema([
           { name: "Home", path: "/" },
           { name: "Companies", path: "/companies" },
         ])) }}

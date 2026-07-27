@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAnyPost, type BlogSection } from "@/lib/blog";
 import { ChevronLeft, Clock, Info, Lightbulb, AlertTriangle } from "lucide-react";
-import { buildArticleSchema, buildBreadcrumbSchema } from "@/lib/schema";
+import { buildArticleSchema, buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
 import type { Metadata } from "next";
 
 export const revalidate = 3600;
@@ -64,8 +64,8 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Breadcrumb */}

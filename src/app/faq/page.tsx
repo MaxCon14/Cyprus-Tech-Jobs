@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
-import { buildFAQSchema } from "@/lib/schema";
+import { buildFAQSchema, jsonLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "FAQ — CyprusTech.Careers Help & Support",
@@ -121,7 +121,7 @@ export default function FAQPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFAQSchema(PLAIN_TEXT_FAQS.map(f => ({ question: f.q, answer: f.a })))) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(buildFAQSchema(PLAIN_TEXT_FAQS.map(f => ({ question: f.q, answer: f.a })))) }}
       />
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", background: "var(--bg-alt)", minHeight: "100vh" }}>
       <div className="page-container">

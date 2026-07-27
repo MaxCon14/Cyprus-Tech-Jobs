@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sanitizeJobHtml } from "@/lib/sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import { findCategoryBySlug } from "@/lib/queries";
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
       data: {
         slug:            jobSlug,
         title:           jobTitle,
-        description:     (body.description as string | undefined)?.trim() ?? "",
+        description:     sanitizeJobHtml(body.description),
         status:          "DRAFT",
         featured:        false,
         companyId:       company.id,

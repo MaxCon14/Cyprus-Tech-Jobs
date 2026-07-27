@@ -8,7 +8,7 @@ import { getCompanyBySlug } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { CompanyLogoImg } from "@/components/jobs/CompanyLogoImg";
-import { buildOrganizationSchema, buildBreadcrumbSchema } from "@/lib/schema";
+import { buildOrganizationSchema, buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
 
 const BASE = "https://cyprustech.careers";
 
@@ -90,7 +90,7 @@ export default async function CompanyProfilePage(
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildOrganizationSchema({
+        dangerouslySetInnerHTML={{ __html: jsonLd(buildOrganizationSchema({
           name:        company.name,
           website:     company.website,
           description: company.description,
@@ -99,7 +99,7 @@ export default async function CompanyProfilePage(
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildBreadcrumbSchema([
+        dangerouslySetInnerHTML={{ __html: jsonLd(buildBreadcrumbSchema([
           { name: "Home",      path: "/" },
           { name: "Companies", path: "/companies" },
           { name: company.name, path: `/companies/${company.slug}` },

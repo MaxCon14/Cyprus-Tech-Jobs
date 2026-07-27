@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sanitizeJobHtml } from "@/lib/sanitize";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
 import { linkJobTags, parseTagNames } from "@/lib/job-tags";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
@@ -17,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const data: Record<string, unknown> = {};
   if (title !== undefined)          data.title = title;
-  if (description !== undefined)    data.description = description;
+  if (description !== undefined)    data.description = sanitizeJobHtml(description);
   if (companyName !== undefined)    data.curatedCompanyName = companyName.trim();
   if (curatedCompanyLogoUrl !== undefined) data.curatedCompanyLogoUrl = typeof curatedCompanyLogoUrl === "string" && curatedCompanyLogoUrl.trim() ? curatedCompanyLogoUrl.trim() : null;
   if (categoryId !== undefined) {

@@ -14,7 +14,8 @@ import { CvReviewPanel } from "./CvReviewPanel";
 import { ApplyButton } from "./ApplyButton";
 import { CollapsibleDescription } from "./CollapsibleDescription";
 import { SkillTag } from "@/components/jobs/SkillTag";
-import { buildJobPostingSchema, buildBreadcrumbSchema } from "@/lib/schema";
+import { buildJobPostingSchema, buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
+import { sanitizeJobHtml } from "@/lib/sanitize";
 import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -101,7 +102,12 @@ export default async function JobDetailPage({ params }: Props) {
     { icon: <Clock size={14} />,      label: job.employmentType.replace("_", " ") },
   ];
 
+  /* Sanitised again at render, not only on write. Descriptions stored before
+     the write paths cleaned them are still in the database, and this is the one
+     place any of it reaches dangerouslySetInnerHTML — so the guarantee belongs
+     here too, where it holds no matter which route produced the row. */
   const descIsHtml = job.description.trimStart().startsWith("<");
+  const safeDesc   = descIsHtml ? sanitizeJobHtml(job.description) : "";
   const descBlocks = descIsHtml ? [] : job.description.split("\n\n");
   const isActive   = job.status === "ACTIVE";
   const isPaused   = job.status === "PAUSED";
@@ -121,12 +127,12 @@ export default async function JobDetailPage({ params }: Props) {
       {isActive && companyName && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJobPostingSchema(job)) }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(buildJobPostingSchema(job)) }}
         />
       )}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }}
       />
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
@@ -235,7 +241,7 @@ export default async function JobDetailPage({ params }: Props) {
             <h2 className="h2" style={{ marginBottom: 20 }}>About the role</h2>
             <CollapsibleDescription>
               {descIsHtml ? (
-                <div className="job-desc" dangerouslySetInnerHTML={{ __html: job.description }} />
+                <div className="job-desc" dangerouslySetInnerHTML={{ __html: safeDesc }} />
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   {descBlocks.map((block, i) => {
