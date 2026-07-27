@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ScrollText, Briefcase, ChevronRight } from "lucide-react";
+import { CheckCircle2, Clock, Star, X, FileText, ExternalLink, ScrollText, Briefcase, ChevronRight, Inbox } from "lucide-react";
+import { Select } from "@/components/ui/Select";
+
+// A position the employer can filter applicants down to.
+export interface PositionOption {
+  id:     string;
+  title:  string;
+  status: string;
+  count:  number;
+}
 
 export interface ApplicationRow {
   id:                       string;
@@ -248,16 +257,13 @@ function ApplicationCard({ app, onStatusChange }: {
       overflow: "hidden",
     }}>
       {/* Collapsed row — dense by default; click the name area to expand */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 12px 12px" }}>
+      <div className="applicant-row">
         <button
           type="button"
+          className="applicant-row-toggle"
           onClick={() => setExpanded(v => !v)}
           aria-expanded={expanded}
           aria-controls={panelId}
-          style={{
-            flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 10,
-            background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left",
-          }}
         >
           <span style={{
             color: "var(--text-subtle)", flexShrink: 0, display: "flex",
@@ -424,21 +430,17 @@ function ApplicationCard({ app, onStatusChange }: {
                   <button
                     key={d.key}
                     type="button"
+                    className="applicant-decision-btn"
                     disabled={updating}
                     onClick={() => setStatus(d.key)}
                     onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = d.color; (e.currentTarget as HTMLElement).style.color = "var(--white)"; } }}
                     onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = "var(--surface)"; (e.currentTarget as HTMLElement).style.color = d.color; } }}
                     style={{
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                      padding: "10px 10px", borderRadius: 9,
-                      fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
                       border: `1.5px solid ${d.color}`,
                       background: active ? d.color : "var(--surface)",
                       color: active ? "var(--white)" : d.color,
                       cursor: updating ? "default" : "pointer",
                       opacity: updating && !active ? 0.55 : 1,
-                      transition: "background 120ms, color 120ms",
-                      minWidth: 0,
                     }}
                   >
                     {d.icon}
@@ -524,88 +526,172 @@ const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
   { key: "REJECTED",   label: "Rejected"    },
 ];
 
+const ALL_POSITIONS = "ALL_POSITIONS";
+
 export function ApplicationsPanel({
-  initialApplications,
+  applications,
+  positions,
+  selectedJobId,
+  onSelectJob,
+  onStatusChange,
 }: {
-  initialApplications: ApplicationRow[];
+  applications:   ApplicationRow[];
+  positions:      PositionOption[];
+  selectedJobId:  string | null;
+  onSelectJob:    (jobId: string | null) => void;
+  onStatusChange: (id: string, status: string) => void;
 }) {
-  const [applications, setApplications] = useState(initialApplications);
-  const [statusFilter, setStatusFilter]  = useState<StatusFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
 
-  function handleStatusChange(id: string, status: string) {
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-  }
+  // Both filters derive straight from props — nothing is copied into state, so
+  // picking a position always reaches the list below.
+  const byPosition = selectedJobId
+    ? applications.filter(a => a.jobId === selectedJobId)
+    : applications;
 
+  const selectedPosition = positions.find(p => p.id === selectedJobId) ?? null;
+
+  // Counts describe the chosen position, not the whole inbox, so the tabs match
+  // what is actually on screen.
   const counts: Record<StatusFilter, number> = {
-    ALL:         applications.length,
-    UNREVIEWED:  applications.filter(a => isUnreviewed(a.status)).length,
-    REVIEWED:    applications.filter(a => a.status === "REVIEWED").length,
-    SHORTLISTED: applications.filter(a => a.status === "SHORTLISTED").length,
-    REJECTED:    applications.filter(a => a.status === "REJECTED").length,
+    ALL:         byPosition.length,
+    UNREVIEWED:  byPosition.filter(a => isUnreviewed(a.status)).length,
+    REVIEWED:    byPosition.filter(a => a.status === "REVIEWED").length,
+    SHORTLISTED: byPosition.filter(a => a.status === "SHORTLISTED").length,
+    REJECTED:    byPosition.filter(a => a.status === "REJECTED").length,
   };
 
-  const visible = applications.filter(a =>
+  const visible = byPosition.filter(a =>
     statusFilter === "ALL"        ? true :
     statusFilter === "UNREVIEWED" ? isUnreviewed(a.status) :
     a.status === statusFilter
   );
 
-  if (applications.length === 0) {
-    return (
-      <div style={{ padding: "32px 24px", textAlign: "center", color: "var(--text-subtle)" }}>
-        <p className="body-s">No applications yet. Post a job with in-app applications to receive candidates here.</p>
-      </div>
-    );
-  }
+  const positionOptions = [
+    { value: ALL_POSITIONS, label: `All positions (${applications.length})` },
+    ...positions.map(p => ({ value: p.id, label: `${p.title} (${p.count})` })),
+  ];
+
+  const statusLabel = STATUS_FILTERS.find(f => f.key === statusFilter)?.label.toLowerCase() ?? "";
 
   return (
-    <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 16, background: "var(--bg-alt)" }}>
-
-      {/* Status filter tabs — switch which applicants are shown */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {STATUS_FILTERS.map(f => {
-          const active = statusFilter === f.key;
-          const count  = counts[f.key];
-          return (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setStatusFilter(f.key)}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                padding: "7px 13px", borderRadius: 8, fontSize: 13,
-                fontFamily: "var(--font-sans)", fontWeight: 600, cursor: "pointer",
-                border: `1px solid ${active ? "var(--accent)" : "var(--border-strong)"}`,
-                background: active ? "var(--accent)" : "var(--surface)",
-                color: active ? "var(--white)" : "var(--text-muted)",
-                transition: "all 120ms",
-              }}
-            >
-              {f.label}
-              <span style={{
-                minWidth: 18, textAlign: "center",
-                padding: "1px 6px", borderRadius: 999,
-                fontFamily: "var(--font-mono)",
-                background: active ? "rgba(255,255,255,0.25)" : "var(--bg-muted)",
-                color: active ? "var(--white)" : "var(--text-subtle)",
-                fontSize: 11, fontWeight: 700,
-              }}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+    <div style={{
+      background: "var(--surface)", border: "1px solid var(--border)",
+      borderRadius: 14, overflow: "hidden", marginBottom: 20,
+    }}>
+      {/* Header — wraps instead of colliding once the viewport narrows */}
+      <div className="applications-panel-head">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          <Inbox size={15} style={{ color: "var(--accent)", flexShrink: 0 }} />
+          <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, margin: 0 }}>
+            Applications
+          </p>
+          <span style={{
+            fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
+            color: "var(--accent)", background: "var(--accent-soft)",
+            padding: "2px 8px", borderRadius: 99,
+          }}>
+            {byPosition.length}
+          </span>
+        </div>
+        <span style={{
+          fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
+          padding: "3px 9px", borderRadius: 99, whiteSpace: "nowrap",
+          background: counts.UNREVIEWED > 0 ? "var(--accent-soft)" : "var(--bg-muted)",
+          color:      counts.UNREVIEWED > 0 ? "var(--accent)"      : "var(--text-subtle)",
+        }}>
+          {counts.UNREVIEWED > 0 ? `${counts.UNREVIEWED} unreviewed` : "All reviewed"}
+        </span>
       </div>
 
-      {visible.length === 0 ? (
-        <p className="body-s" style={{ color: "var(--text-subtle)", padding: "12px 0" }}>
-          No {statusFilter === "ALL" ? "" : STATUS_FILTERS.find(f => f.key === statusFilter)?.label.toLowerCase() + " "}applications.
-        </p>
+      {applications.length === 0 ? (
+        <div style={{ padding: "32px 24px", textAlign: "center", color: "var(--text-subtle)" }}>
+          <p className="body-s">No applications yet. Post a job with in-app applications to receive candidates here.</p>
+        </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {visible.map(app => (
-            <ApplicationCard key={app.id} app={app} onStatusChange={handleStatusChange} />
-          ))}
+        <div className="applications-panel-body">
+
+          {/* Position picker — the primary way to narrow to one listing */}
+          <div className="applications-filters">
+            <div className="applications-position-select">
+              <label
+                htmlFor="applicant-position-filter"
+                className="caption"
+                style={{ display: "block", color: "var(--text-subtle)", marginBottom: 6 }}
+              >
+                Position
+              </label>
+              <Select
+                name="applicant-position-filter"
+                options={positionOptions}
+                value={selectedJobId ?? ALL_POSITIONS}
+                icon={<Briefcase size={13} />}
+                onChange={val => {
+                  onSelectJob(val === ALL_POSITIONS ? null : val);
+                  setStatusFilter("ALL");
+                }}
+              />
+            </div>
+
+            {/* Status filter tabs — switch which applicants are shown */}
+            <div className="applicant-status-tabs">
+              {STATUS_FILTERS.map(f => {
+                const active = statusFilter === f.key;
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    className="applicant-status-tab"
+                    aria-pressed={active}
+                    onClick={() => setStatusFilter(f.key)}
+                    style={{
+                      border: `1px solid ${active ? "var(--accent)" : "var(--border-strong)"}`,
+                      background: active ? "var(--accent)" : "var(--surface)",
+                      color: active ? "var(--white)" : "var(--text-muted)",
+                    }}
+                  >
+                    {f.label}
+                    <span style={{
+                      minWidth: 18, textAlign: "center",
+                      padding: "1px 6px", borderRadius: 999,
+                      fontFamily: "var(--font-mono)",
+                      background: active ? "rgba(255,255,255,0.25)" : "var(--bg-muted)",
+                      color: active ? "var(--white)" : "var(--text-subtle)",
+                      fontSize: 11, fontWeight: 700,
+                    }}>
+                      {counts[f.key]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {visible.length === 0 ? (
+            <div style={{ padding: "20px 0 8px", textAlign: "center" }}>
+              <p className="body-s" style={{ color: "var(--text-muted)" }}>
+                {selectedPosition
+                  ? `No ${statusFilter === "ALL" ? "" : statusLabel + " "}applicants for ${selectedPosition.title}.`
+                  : `No ${statusFilter === "ALL" ? "" : statusLabel + " "}applications.`}
+              </p>
+              {selectedPosition && (
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  style={{ marginTop: 12 }}
+                  onClick={() => { onSelectJob(null); setStatusFilter("ALL"); }}
+                >
+                  Show all positions
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {visible.map(app => (
+                <ApplicationCard key={app.id} app={app} onStatusChange={onStatusChange} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

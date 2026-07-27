@@ -59,6 +59,7 @@ export function JobVisibilityToggle({ jobId, initialStatus }: Props) {
             ? <Play  size={13} />
             : <Pause size={13} />
         }
+        <span className="employer-action-label">{isPaused ? "Resume" : "Pause"}</span>
       </button>
 
       {confirm && createPortal(

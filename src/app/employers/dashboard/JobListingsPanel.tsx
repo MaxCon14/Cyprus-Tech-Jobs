@@ -201,7 +201,9 @@ export function JobListingsPanel({
                   style={{
                     borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none",
                     cursor: onJobSelect ? "pointer" : undefined,
-                    background: isSelected ? "var(--accent-soft)" : undefined,
+                    // A soft tint rather than the full accent wash — the row is
+                    // marked as selected, not turned into a banner.
+                    background: isSelected ? "color-mix(in srgb, var(--accent) 7%, transparent)" : undefined,
                     borderLeft: isSelected ? "3px solid var(--accent)" : "3px solid transparent",
                     transition: "background 120ms",
                   }}
@@ -238,6 +240,18 @@ export function JobListingsPanel({
                       <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 11 }}>
                         {postedLabel}{daysLabel !== "—" ? ` · ${daysLabel}` : ""}
                       </span>
+                      {/* The applicants column is desktop-only, so surface the
+                          count here or a phone gives no sign anyone applied. */}
+                      {job.applyType === "IN_APP" && appCount > 0 && (
+                        <span style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "3px 8px", borderRadius: 5, fontSize: 11,
+                          fontFamily: "var(--font-mono)", fontWeight: 700,
+                          background: "var(--accent-soft)", color: "var(--accent)",
+                        }}>
+                          <Inbox size={10} /> {appCount}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -288,7 +302,7 @@ export function JobListingsPanel({
 
                   {/* Actions */}
                   <div
-                    style={{ display: "flex", gap: 4, justifyContent: "flex-end", alignItems: "center" }}
+                    className="employer-row-actions"
                     onClick={e => e.stopPropagation()}
                   >
                     {isConfirming ? (
@@ -324,6 +338,7 @@ export function JobListingsPanel({
                         {job.status !== "DRAFT" && (
                           <Link href={`/jobs/${job.slug}`} className="btn btn-ghost btn-icon btn-sm" title="View listing">
                             <Eye size={13} />
+                            <span className="employer-action-label">View</span>
                           </Link>
                         )}
                         <Link
@@ -332,6 +347,7 @@ export function JobListingsPanel({
                           title={job.status === "DRAFT" ? "Edit & publish draft" : "Edit listing"}
                         >
                           <Edit2 size={13} />
+                          <span className="employer-action-label">Edit</span>
                         </Link>
                         {job.status !== "CLOSED" && job.status !== "EXPIRED" && (
                           <button
@@ -342,6 +358,7 @@ export function JobListingsPanel({
                             style={{ color: "var(--text-subtle)" }}
                           >
                             <Trash2 size={13} />
+                            <span className="employer-action-label">Close</span>
                           </button>
                         )}
                       </>

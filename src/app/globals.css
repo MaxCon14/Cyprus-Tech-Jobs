@@ -1453,6 +1453,97 @@ details[open] .faq-chevron {
   .applicant-time  { display: none !important; }
 }
 
+.applicant-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 12px;
+}
+
+/* The whole name block is the expand control — a thin text-sized hit area is
+   the difference between opening a candidate and missing on a phone. */
+.applicant-row-toggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.applications-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  padding: 14px clamp(16px, 3vw, 24px);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+
+.applications-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px clamp(14px, 3vw, 20px) 20px;
+  background: var(--bg-alt);
+}
+
+.applications-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.applications-position-select {
+  flex: 0 1 320px;
+  min-width: 240px;
+}
+
+.applicant-status-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.applicant-decision-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px;
+  border-radius: 9px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  transition: background 120ms, color 120ms;
+}
+
+/* Sizing lives here, not inline, so the mobile rules below can win. */
+.applicant-status-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+
 .employer-page-inner {
   max-width: 1100px;
   margin: 0 auto;
@@ -1503,6 +1594,19 @@ details[open] .faq-chevron {
 }
 
 .employer-row-mobile-meta {
+  display: none;
+}
+
+.employer-row-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* Desktop keeps the icon-only row (the column is narrow and tooltips carry the
+   meaning); mobile has the width to spell the actions out. */
+.employer-action-label {
   display: none;
 }
 
@@ -1559,10 +1663,12 @@ details[open] .faq-chevron {
     display: none;
   }
 
+  /* Actions drop to their own full-width row. Squeezed into an `auto` column
+     they collapsed into a strip of unreadable, barely tappable marks. */
   .employer-job-row {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     padding: 14px 16px;
-    gap: 12px;
+    gap: 10px;
   }
 
   .employer-col-hide-mobile {
@@ -1575,6 +1681,56 @@ details[open] .faq-chevron {
     gap: 8px;
     margin-top: 8px;
     flex-wrap: wrap;
+  }
+
+  .employer-row-actions {
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Four unlabelled icons read as stray marks at this size — spell them out and
+     let them share the row evenly. */
+  .employer-row-actions .btn-icon {
+    flex: 1;
+    width: auto;
+    height: 40px;
+    gap: 5px;
+    padding: 0 6px;
+    font-size: 12px;
+    border: 1px solid var(--border-strong);
+  }
+
+  .employer-action-label {
+    display: inline;
+  }
+
+  /* Full width so the five filters stay visible and evenly tappable rather
+     than wrapping into a ragged two-line block. */
+  .applications-position-select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .applicant-status-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+
+  .applicant-status-tab {
+    min-height: 42px;
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+
+  /* Three across on a phone leaves ~105px each — trim the padding so
+     "Shortlist" and "Reviewed" read in full instead of ellipsing. */
+  .applicant-decision-btn {
+    gap: 4px;
+    padding: 10px 4px;
+    font-size: 12px;
   }
 }
 
