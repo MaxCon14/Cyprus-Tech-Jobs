@@ -32,7 +32,9 @@ export const metadata: Metadata = {
   description:
     "The home for tech jobs in Cyprus. Find roles at the best companies in Limassol, Nicosia, Larnaca and beyond — or post a job to reach Cyprus's top tech talent.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers"),
-  icons: { icon: "/logo.svg", shortcut: "/logo.svg" },
+  // Favicon comes from the file-convention icons in this folder — favicon.ico
+  // (16/32/48), icon.svg and apple-icon.png, all generated from the brand logo.
+  // (The previous /logo.svg was 628×576, so Google rejected it as non-square.)
   openGraph: {
     siteName: "CyprusTech.Careers",
     type: "website",
