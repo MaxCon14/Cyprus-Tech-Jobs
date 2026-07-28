@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Zap, Star, Building2, Check, Loader2, AlertCircle, DollarSign, Tag, Upload, X } from "lucide-react";
 import { Select } from "@/components/ui/Select";
+import { CategoryCombobox } from "@/components/ui/CategoryCombobox";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
@@ -68,17 +69,12 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // Resolve initial parent/sub from categoryId
-  const initParentCat = categories.find(c =>
-    c.id === initial?.categoryId || c.children?.some(ch => ch.id === initial?.categoryId)
-  );
-  const initParentId = initParentCat?.id ?? categories[0]?.id ?? "";
-  const initSubId    = initParentCat?.children?.some(ch => ch.id === initial?.categoryId)
-    ? (initial?.categoryId ?? "") : "";
+  // Single searchable category. An existing job carries the exact category id
+  // (parent or role); a new job defaults to the first category, as before.
+  const initCategoryId = initial?.categoryId ?? categories[0]?.id ?? "";
 
   // Controlled select/toggle state
-  const [parentCategoryId, setParentCategoryId] = useState(initParentId);
-  const [subCategoryId,    setSubCategoryId]    = useState(initSubId);
+  const [categoryId, setCategoryId] = useState(initCategoryId);
   const [remoteType,     setRemoteType]     = useState(initial?.remoteType     ?? "ON_SITE");
   const [employmentType, setEmploymentType] = useState(initial?.employmentType ?? "FULL_TIME");
   const [experienceLevel,setExperienceLevel]= useState(initial?.experienceLevel?? "MID");
@@ -120,8 +116,6 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
 
     const fd = new FormData(e.currentTarget);
 
-    const resolvedCategoryId = subCategoryId || parentCategoryId;
-
     const payload = {
       title:          String(fd.get("title") ?? "").trim(),
       description:    String(fd.get("description") ?? ""),
@@ -129,7 +123,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
       curatedCompanyLogoUrl: logoUrl || null,
       applyUrl:       String(fd.get("applyUrl") ?? "").trim(),
       tags:           String(fd.get("tags") ?? "[]"),
-      categoryId:     resolvedCategoryId,
+      categoryId:     categoryId,
       city:           city || null,
       remoteType,
       employmentType,
@@ -172,38 +166,18 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
           <input className="input" name="title" required defaultValue={initial?.title ?? ""} placeholder="e.g. Senior Backend Engineer" />
         </Field>
 
-        {/* Category — cascading parent → subcategory */}
-        {(() => {
-          const selectedParent  = categories.find(c => c.id === parentCategoryId);
-          const hasChildren     = (selectedParent?.children?.length ?? 0) > 0;
-          return (
-            <div style={{ display: "grid", gridTemplateColumns: hasChildren ? "1fr 1fr" : "1fr", gap: 16 }}>
-              <Field label="Category" required>
-                <Select
-                  name="parentCategoryId"
-                  value={parentCategoryId}
-                  onChange={val => { setParentCategoryId(val); setSubCategoryId(""); }}
-                  options={categories.map(c => ({ label: c.name, value: c.id }))}
-                  placeholder="Select category"
-                />
-              </Field>
-              {hasChildren && selectedParent && (
-                <Field label="Subcategory">
-                  <Select
-                    name="subCategoryId"
-                    value={subCategoryId}
-                    onChange={setSubCategoryId}
-                    placeholder={`All ${selectedParent.name}`}
-                    options={[
-                      { label: `All ${selectedParent.name}`, value: "" },
-                      ...(selectedParent.children ?? []).map(c => ({ label: c.name, value: c.id })),
-                    ]}
-                  />
-                </Field>
-              )}
-            </div>
-          );
-        })()}
+        {/* One searchable picker across every category and role. */}
+        <Field label="Category" required>
+          <CategoryCombobox
+            name="category"
+            value={categoryId}
+            onChange={setCategoryId}
+            categories={categories.map(c => ({
+              label: c.name, value: c.id,
+              children: (c.children ?? []).map(ch => ({ label: ch.name, value: ch.id })),
+            }))}
+          />
+        </Field>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           <Field label="Experience level" required>

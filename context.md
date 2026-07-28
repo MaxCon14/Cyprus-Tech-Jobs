@@ -431,6 +431,53 @@ or render the panel above the card. Reproduce before claiming fixed.
 
 ---
 
+## Session: broad taxonomy + searchable category picker
+
+**The category picker is now one searchable box, not two cascading dropdowns.**
+Posting a job used to mean picking a broad parent category, then a subcategory —
+so to file a role you first had to guess its parent ("Company Secretary" lives
+under "Legal & Corporate", which is not obvious). New component
+`src/components/ui/CategoryCombobox.tsx` flattens the whole tree (parents *and*
+the roles beneath them) into one type-to-filter list; typing "company secretary",
+"fincrime" or "head of product" surfaces the exact role regardless of parent.
+Picking a role submits that role's value; picking a broad parent submits the
+parent — both are values the job APIs already accept, so nothing downstream
+changed. It replaced the cascading `Select` pair in all three job forms:
+`post-a-job/PostJobForm.tsx` (employer), `employers/jobs/[id]/edit/EditJobForm.tsx`
+(employer edit), and `admin/_components/AdminJobForm.tsx` (admin — value-agnostic,
+so it feeds slugs for employers and ids for admin). Whatever the employer can do
+here the admin can too.
+
+**The taxonomy went broad.** The board was tech-only (12 parents / 56 roles). It
+now covers the business functions a Cyprus fintech/forex/corporate-services
+employer actually hires for: added parents **Customer Support**, **Compliance &
+Financial Crime**, **Risk**, **Legal & Corporate**, **Finance & Accounting**,
+**HR & People**, **Marketing**, **Sales & Business Development**, **Operations**,
+plus **Head of Product** under the existing Product. Now **21 parents / 138
+roles**. Homepage grid icons for the new parents added to `CATEGORY_ICONS` in
+`page.tsx` (the grid is DB-driven and falls back to a generic briefcase, but the
+named icons look intentional). `prisma/seed.ts` was rewritten to build the full
+parent→child tree so a fresh DB reproduces production.
+
+**Written straight to production.** The new rows were inserted into the live DB
+via the Supabase MCP (`gen_random_uuid()` ids — functionally fine, `id` is just a
+unique text PK; format doesn't matter). So they are live on the homepage grid and
+the existing pickers **now**, ahead of any code deploy. Two caveats:
+- The **nav dropdown is cached** (`getNavCategories`, `unstable_cache`,
+  `revalidate: 3600`, tag `CATEGORY_CACHE_TAG`). A direct SQL insert does not bust
+  that tag, so the new parents appear in the nav menu within ~1h or on the next
+  deploy. The job pickers and homepage grid read uncached queries, so they show
+  the new categories immediately.
+- The **searchable combobox itself only ships when this branch is deployed.**
+  Until then production still renders the old cascading dropdowns — which harmlessly
+  just show the newly-added categories.
+- Minor redundancy left in place: Finance & Trading still carries "Compliance
+  Analyst" and "Risk Analyst" (both 0 jobs) which now overlap the dedicated
+  Compliance and Risk parents. Harmless with a flattened search; move them later
+  if it bothers you.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS

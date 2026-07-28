@@ -6,6 +6,7 @@ import {
   Search, MapPin, Bell, UserPlus, Zap,
   Code2, Server, Cloud, PenTool, BarChart2, Smartphone, Layers, ShieldCheck,
   Blocks, CandlestickChart, UsersRound, TestTube2, Briefcase,
+  Headphones, ShieldAlert, Gauge, Scale, Calculator, Users, Megaphone, TrendingUp, Workflow,
 } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
@@ -86,6 +87,15 @@ const CATEGORY_ICONS: Record<string, typeof Code2> = {
   finance:      CandlestickChart,
   management:   UsersRound,
   qa:           TestTube2,
+  "customer-support": Headphones,
+  compliance:   ShieldAlert,
+  risk:         Gauge,
+  legal:        Scale,
+  accounting:   Calculator,
+  hr:           Users,
+  marketing:    Megaphone,
+  sales:        TrendingUp,
+  operations:   Workflow,
 };
 
 export default async function HomePage() {

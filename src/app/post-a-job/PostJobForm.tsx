@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, AlertTriangle, FileText } from "lucide-react";
 import { Select } from "@/components/ui/Select";
+import { CategoryCombobox } from "@/components/ui/CategoryCombobox";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
@@ -44,8 +45,7 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
 
   const [listingType,       setListingType]       = useState<ListingType>(defaultType);
   const [remoteType,        setRemoteType]        = useState("");
-  const [parentCategorySlug, setParentCategorySlug] = useState("");
-  const [subCategorySlug,    setSubCategorySlug]    = useState("");
+  const [categorySlug,      setCategorySlug]      = useState("");
   const [applyMethod,       setApplyMethod]       = useState<"url" | "email" | "in_app">("in_app");
   const [coverLetterPolicy, setCoverLetterPolicy] = useState<"OPTIONAL" | "REQUIRED" | "NONE">("OPTIONAL");
   const [loading,         setLoading]         = useState(false);
@@ -86,7 +86,7 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
     const errs: FormErrors = {};
     if (!String(form.get("companyName")    ?? "").trim()) errs.companyName     = "Company name is required.";
     if (!String(form.get("jobTitle")       ?? "").trim()) errs.jobTitle        = "Job title is required.";
-    if (!parentCategorySlug)                              errs.category        = "Please select a category.";
+    if (!categorySlug)                                    errs.category        = "Please select a category.";
     if (!form.get("experienceLevel"))                     errs.experienceLevel = "Please select an experience level.";
     if (!form.get("remoteType"))                          errs.remoteType      = "Please select a work type.";
     if (!form.get("employmentType"))                      errs.employmentType  = "Please select an employment type.";
@@ -112,7 +112,7 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
       companyWebsite:     form.get("companyWebsite"),
       companyDescription: form.get("companyDescription"),
       jobTitle:           form.get("jobTitle"),
-      category:           subCategorySlug || parentCategorySlug,
+      category:           categorySlug,
       experienceLevel:    form.get("experienceLevel"),
       remoteType:         form.get("remoteType"),
       employmentType:     form.get("employmentType"),
@@ -395,38 +395,21 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
               <Field label="Job title" required error={fieldErrors.jobTitle}>
                 <input className="input" name="jobTitle" type="text" placeholder="e.g. Senior Frontend Engineer" />
               </Field>
-              {/* Cascading category: parent → subcategory */}
-              {(() => {
-                const selParent = categories.find(c => c.slug === parentCategorySlug);
-                const hasSub    = (selParent?.children?.length ?? 0) > 0;
-                return (
-                  <div style={{ display: "grid", gridTemplateColumns: hasSub ? "1fr 1fr" : "1fr", gap: 16 }}>
-                    <Field label="Category" required error={fieldErrors.category}>
-                      <Select
-                        name="parentCategorySlug"
-                        placeholder="Select category"
-                        value={parentCategorySlug}
-                        onChange={val => { setParentCategorySlug(val); setSubCategorySlug(""); setIsDirty(true); }}
-                        options={categories.map(c => ({ label: c.label, value: c.slug }))}
-                      />
-                    </Field>
-                    {hasSub && selParent && (
-                      <Field label="Subcategory">
-                        <Select
-                          name="subCategorySlug"
-                          placeholder={`All ${selParent.label}`}
-                          value={subCategorySlug}
-                          onChange={val => { setSubCategorySlug(val); setIsDirty(true); }}
-                          options={[
-                            { label: `All ${selParent.label}`, value: "" },
-                            ...(selParent.children ?? []).map(c => ({ label: c.label, value: c.slug })),
-                          ]}
-                        />
-                      </Field>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* One searchable picker across every category and role — type
+                  "company secretary", "fincrime", "head of product" and pick it
+                  directly, no need to know which broad category it sits under. */}
+              <Field label="Category" required error={fieldErrors.category}>
+                <CategoryCombobox
+                  name="category"
+                  value={categorySlug}
+                  onChange={val => { setCategorySlug(val); setIsDirty(true); }}
+                  error={!!fieldErrors.category}
+                  categories={categories.map(c => ({
+                    label: c.label, value: c.slug,
+                    children: c.children.map(ch => ({ label: ch.label, value: ch.slug })),
+                  }))}
+                />
+              </Field>
               <div className="grid-2">
                 <Field label="Experience level" required error={fieldErrors.experienceLevel}>
                   <Select name="experienceLevel" placeholder="Select level"

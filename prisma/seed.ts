@@ -8,28 +8,217 @@ async function main() {
   console.log("🌱 Seeding CyprusTech.Jobs database…\n");
 
   // ─── Categories ───────────────────────────────────────────
+  // The `categories` table is the single source of truth for the taxonomy (the
+  // nav, homepage grid and every job picker read it). Broad parents, each with
+  // the specific roles beneath them — the whole tree is searchable in one box
+  // when posting, so breadth here costs an employer nothing to navigate. Both
+  // engineering and the wider business functions a Cyprus fintech/forex/
+  // corporate-services employer hires for.
   console.log("Creating categories…");
-  const categories = await Promise.all([
-    { name: "Frontend",  slug: "frontend"  },
-    { name: "Backend",   slug: "backend"   },
-    { name: "DevOps",    slug: "devops"    },
-    { name: "Design",    slug: "design"    },
-    { name: "Data",      slug: "data"      },
-    { name: "Mobile",    slug: "mobile"    },
-    { name: "Product",   slug: "product"   },
-    { name: "Security",  slug: "security"  },
-    { name: "QA",        slug: "qa"        },
-    { name: "Full Stack",slug: "full-stack"},
-  ].map(c =>
-    prisma.category.upsert({
-      where: { slug: c.slug },
-      update: {},
-      create: c,
-    })
-  ));
+  const TAXONOMY: { name: string; slug: string; children: { name: string; slug: string }[] }[] = [
+    { name: "Frontend", slug: "frontend", children: [
+      { name: "Angular Developer", slug: "angular-developer" },
+      { name: "Frontend Engineer", slug: "frontend-engineer" },
+      { name: "React Developer", slug: "react-developer" },
+      { name: "Vue.js Developer", slug: "vue-developer" },
+      { name: "Web Developer", slug: "web-developer" },
+    ] },
+    { name: "Backend", slug: "backend", children: [
+      { name: "API Developer", slug: "api-developer" },
+      { name: "Backend Engineer", slug: "backend-engineer" },
+      { name: "Platform Engineer", slug: "platform-engineer" },
+      { name: "Software Engineer", slug: "software-engineer" },
+      { name: "Systems Engineer", slug: "systems-engineer" },
+    ] },
+    { name: "Full Stack", slug: "full-stack", children: [
+      { name: "Full Stack Engineer", slug: "fullstack-engineer" },
+      { name: "Software Developer", slug: "software-developer" },
+    ] },
+    { name: "Mobile", slug: "mobile", children: [
+      { name: "Android Developer", slug: "android-developer" },
+      { name: "Flutter Developer", slug: "flutter-developer" },
+      { name: "iOS Developer", slug: "ios-developer" },
+      { name: "React Native Developer", slug: "rn-developer" },
+    ] },
+    { name: "DevOps & Cloud", slug: "devops", children: [
+      { name: "Cloud Engineer", slug: "cloud-engineer" },
+      { name: "DevOps Engineer", slug: "devops-engineer" },
+      { name: "Infrastructure Engineer", slug: "infrastructure-engineer" },
+      { name: "Kubernetes Engineer", slug: "kubernetes-engineer" },
+      { name: "Site Reliability Engineer", slug: "sre-engineer" },
+    ] },
+    { name: "Data & AI", slug: "data", children: [
+      { name: "AI Engineer", slug: "ai-engineer" },
+      { name: "BI Analyst", slug: "bi-analyst" },
+      { name: "Data Analyst", slug: "data-analyst" },
+      { name: "Data Engineer", slug: "data-engineer" },
+      { name: "Data Scientist", slug: "data-scientist" },
+      { name: "ML Engineer", slug: "ml-engineer" },
+    ] },
+    { name: "Design", slug: "design", children: [
+      { name: "Graphic Designer", slug: "graphic-designer" },
+      { name: "Motion Designer", slug: "motion-designer" },
+      { name: "Product Designer", slug: "product-designer" },
+      { name: "UI/UX Designer", slug: "uiux-designer" },
+      { name: "Visual Designer", slug: "visual-designer" },
+    ] },
+    { name: "Product", slug: "product", children: [
+      { name: "Business Analyst", slug: "business-analyst" },
+      { name: "Head of Product", slug: "head-of-product" },
+      { name: "Product Manager", slug: "product-manager" },
+      { name: "Product Owner", slug: "product-owner" },
+      { name: "Scrum Master", slug: "scrum-master" },
+      { name: "Technical PM", slug: "technical-pm" },
+    ] },
+    { name: "QA & Testing", slug: "qa", children: [
+      { name: "Automation Engineer", slug: "automation-engineer" },
+      { name: "QA Engineer", slug: "qa-engineer" },
+      { name: "SDET", slug: "sdet" },
+      { name: "Test Engineer", slug: "test-engineer" },
+    ] },
+    { name: "Security", slug: "security", children: [
+      { name: "Cybersecurity Analyst", slug: "cybersecurity-analyst" },
+      { name: "Penetration Tester", slug: "penetration-tester" },
+      { name: "Security Architect", slug: "security-architect" },
+      { name: "Security Engineer", slug: "security-engineer" },
+    ] },
+    { name: "Management", slug: "management", children: [
+      { name: "CTO", slug: "cto" },
+      { name: "Engineering Manager", slug: "engineering-manager" },
+      { name: "Head of Engineering", slug: "head-of-engineering" },
+      { name: "Tech Lead", slug: "tech-lead" },
+      { name: "VP of Engineering", slug: "vp-engineering" },
+    ] },
+    { name: "Finance & Trading", slug: "finance", children: [
+      { name: "Compliance Analyst", slug: "compliance-analyst" },
+      { name: "Financial Analyst", slug: "financial-analyst" },
+      { name: "Financial Engineer", slug: "financial-engineer" },
+      { name: "Quantitative Analyst", slug: "quant-analyst" },
+      { name: "Risk Analyst", slug: "risk-analyst" },
+      { name: "Trading Developer", slug: "trading-developer" },
+    ] },
+    { name: "Customer Support", slug: "customer-support", children: [
+      { name: "Customer Support Agent", slug: "customer-support-agent" },
+      { name: "Customer Service Representative", slug: "customer-service-representative" },
+      { name: "Technical Support Engineer", slug: "technical-support-engineer" },
+      { name: "Customer Success Manager", slug: "customer-success-manager" },
+      { name: "Client Relationship Manager", slug: "client-relationship-manager" },
+      { name: "Support Team Lead", slug: "support-team-lead" },
+      { name: "Retention Specialist", slug: "retention-specialist" },
+      { name: "Head of Customer Support", slug: "head-of-customer-support" },
+    ] },
+    { name: "Compliance & Financial Crime", slug: "compliance", children: [
+      { name: "Compliance Officer", slug: "compliance-officer" },
+      { name: "Compliance Manager", slug: "compliance-manager" },
+      { name: "AML Analyst", slug: "aml-analyst" },
+      { name: "KYC Analyst", slug: "kyc-analyst" },
+      { name: "Financial Crime Analyst", slug: "financial-crime-analyst" },
+      { name: "Financial Crime Compliance Manager", slug: "financial-crime-compliance-manager" },
+      { name: "FinCrime Escalation Officer", slug: "fincrime-escalation-officer" },
+      { name: "Fraud Analyst", slug: "fraud-analyst" },
+      { name: "Transaction Monitoring Analyst", slug: "transaction-monitoring-analyst" },
+      { name: "MLRO (Money Laundering Reporting Officer)", slug: "mlro" },
+      { name: "Regulatory Affairs Officer", slug: "regulatory-affairs-officer" },
+      { name: "Head of Compliance", slug: "head-of-compliance" },
+    ] },
+    { name: "Risk", slug: "risk", children: [
+      { name: "Risk Manager", slug: "risk-manager" },
+      { name: "Financial Risk Manager", slug: "financial-risk-manager" },
+      { name: "Credit Risk Analyst", slug: "credit-risk-analyst" },
+      { name: "Market Risk Analyst", slug: "market-risk-analyst" },
+      { name: "Operational Risk Manager", slug: "operational-risk-manager" },
+      { name: "Risk & Compliance Officer", slug: "risk-and-compliance-officer" },
+      { name: "Head of Risk", slug: "head-of-risk" },
+    ] },
+    { name: "Legal & Corporate", slug: "legal", children: [
+      { name: "Legal Counsel", slug: "legal-counsel" },
+      { name: "Corporate Lawyer", slug: "corporate-lawyer" },
+      { name: "Legal Advisor", slug: "legal-advisor" },
+      { name: "Company Secretary", slug: "company-secretary" },
+      { name: "Corporate Administrator", slug: "corporate-administrator" },
+      { name: "Paralegal", slug: "paralegal" },
+      { name: "Contracts Manager", slug: "contracts-manager" },
+      { name: "Head of Legal", slug: "head-of-legal" },
+    ] },
+    { name: "Finance & Accounting", slug: "accounting", children: [
+      { name: "Accountant", slug: "accountant" },
+      { name: "Senior Accountant", slug: "senior-accountant" },
+      { name: "Bookkeeper", slug: "bookkeeper" },
+      { name: "Financial Controller", slug: "financial-controller" },
+      { name: "Finance Manager", slug: "finance-manager" },
+      { name: "Auditor", slug: "auditor" },
+      { name: "Internal Auditor", slug: "internal-auditor" },
+      { name: "Tax Advisor", slug: "tax-advisor" },
+      { name: "Payroll Specialist", slug: "payroll-specialist" },
+      { name: "Accounts Assistant", slug: "accounts-assistant" },
+      { name: "Head of Finance", slug: "head-of-finance" },
+    ] },
+    { name: "HR & People", slug: "hr", children: [
+      { name: "HR Officer", slug: "hr-officer" },
+      { name: "HR Manager", slug: "hr-manager" },
+      { name: "Recruiter", slug: "recruiter" },
+      { name: "Technical Recruiter", slug: "technical-recruiter" },
+      { name: "Talent Acquisition Specialist", slug: "talent-acquisition-specialist" },
+      { name: "People Operations Manager", slug: "people-operations-manager" },
+      { name: "HR Business Partner", slug: "hr-business-partner" },
+      { name: "Head of HR", slug: "head-of-hr" },
+    ] },
+    { name: "Marketing", slug: "marketing", children: [
+      { name: "Marketing Manager", slug: "marketing-manager" },
+      { name: "Digital Marketing Specialist", slug: "digital-marketing-specialist" },
+      { name: "Content Writer", slug: "content-writer" },
+      { name: "SEO Specialist", slug: "seo-specialist" },
+      { name: "Social Media Manager", slug: "social-media-manager" },
+      { name: "Performance Marketing Manager", slug: "performance-marketing-manager" },
+      { name: "Brand Manager", slug: "brand-manager" },
+      { name: "PPC Specialist", slug: "ppc-specialist" },
+      { name: "Affiliate Manager", slug: "affiliate-manager" },
+      { name: "CRM Manager", slug: "crm-manager" },
+      { name: "Head of Marketing", slug: "head-of-marketing" },
+    ] },
+    { name: "Sales & Business Development", slug: "sales", children: [
+      { name: "Sales Representative", slug: "sales-representative" },
+      { name: "Account Manager", slug: "account-manager" },
+      { name: "Business Development Manager", slug: "business-development-manager" },
+      { name: "Sales Manager", slug: "sales-manager" },
+      { name: "Account Executive", slug: "account-executive" },
+      { name: "Partnerships Manager", slug: "partnerships-manager" },
+      { name: "Sales Development Representative", slug: "sales-development-representative" },
+      { name: "Head of Sales", slug: "head-of-sales" },
+    ] },
+    { name: "Operations", slug: "operations", children: [
+      { name: "Operations Manager", slug: "operations-manager" },
+      { name: "Operations Analyst", slug: "operations-analyst" },
+      { name: "Project Manager", slug: "project-manager" },
+      { name: "Office Manager", slug: "office-manager" },
+      { name: "Executive Assistant", slug: "executive-assistant" },
+      { name: "Payments Operations Specialist", slug: "payments-operations-specialist" },
+      { name: "Dealing Room Operator", slug: "dealing-room-operator" },
+      { name: "Head of Operations", slug: "head-of-operations" },
+    ] },
+  ];
 
-  const catMap = Object.fromEntries(categories.map(c => [c.slug, c.id]));
-  console.log(`  ✓ ${categories.length} categories\n`);
+  const catMap: Record<string, string> = {};
+  let catCount = 0;
+  for (const parent of TAXONOMY) {
+    const p = await prisma.category.upsert({
+      where:  { slug: parent.slug },
+      update: { name: parent.name },
+      create: { name: parent.name, slug: parent.slug },
+    });
+    catMap[parent.slug] = p.id;
+    catCount++;
+    for (const child of parent.children) {
+      const c = await prisma.category.upsert({
+        where:  { slug: child.slug },
+        update: { name: child.name, parentId: p.id },
+        create: { name: child.name, slug: child.slug, parentId: p.id },
+      });
+      catMap[child.slug] = c.id;
+      catCount++;
+    }
+  }
+  console.log(`  ✓ ${catCount} categories\n`);
 
   // ─── Tags ─────────────────────────────────────────────────
   console.log("Creating tags…");
