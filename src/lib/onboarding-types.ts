@@ -171,7 +171,6 @@ export interface CandidateWizardState {
   city: string;
   // Step 4 — level
   experienceLevel: "JUNIOR" | "MID" | "SENIOR" | "LEAD" | "EXECUTIVE" | "";
-  salaryMin: string;
   // Step 5 — skills (skippable, max 10)
   skills: string[];
   // Step 6 — alerts
@@ -218,7 +217,6 @@ export function initialCandidateState(): CandidateWizardState {
     remoteType: "",
     city: "",
     experienceLevel: "",
-    salaryMin: "",
     skills: [],
     alertFrequency: "WEEKLY",
     firstName: "",

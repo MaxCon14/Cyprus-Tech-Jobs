@@ -29,7 +29,7 @@ const supabase = createSupabaseBrowserClient();
 const LS_KEY = "cyprustechcareers:candidate-draft";
 
 const PERSIST_FIELDS = [
-  "categories", "remoteType", "city", "experienceLevel", "salaryMin",
+  "categories", "remoteType", "city", "experienceLevel",
   "skills", "firstName", "lastName", "email", "headline", "bio",
   "githubUrl", "linkedinUrl", "portfolioUrl",
   "dribbbleUrl", "behanceUrl", "twitterUrl", "mediumUrl", "cvUrl",
@@ -237,7 +237,6 @@ function Step4Level({ state, dispatch }: { state: CandidateWizardState; dispatch
 
       <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
         <div>
-          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Level</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {EXPERIENCE_LEVEL_OPTIONS.map((opt) => {
               const active = state.experienceLevel === opt.value;
@@ -250,17 +249,6 @@ function Step4Level({ state, dispatch }: { state: CandidateWizardState; dispatch
               );
             })}
           </div>
-        </div>
-
-        <div>
-          <p className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Minimum salary (optional)</p>
-          <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--text-muted)" }}>€</span>
-            <input className="input" type="number" value={state.salaryMin} placeholder="30000" min={0} step={1000}
-              onChange={(e) => dispatch({ type: "SET_FIELD", field: "salaryMin", value: e.target.value })}
-              style={{ paddingLeft: 28 }} />
-          </div>
-          <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 6 }}>Shown to you only — not shared with employers</p>
         </div>
       </div>
     </div>
@@ -862,7 +850,6 @@ export default function CandidateOnboardingPage() {
           remoteType: state.remoteType || null,
           city: state.city || null,
           experienceLevel: state.experienceLevel || null,
-          salaryMin: state.salaryMin ? parseInt(state.salaryMin, 10) : null,
           skills: state.skills,
           alertFrequency: state.alertFrequency,
           headline: state.headline || null,
