@@ -106,12 +106,13 @@ export default function AdminLoginPage() {
             <div>
               <div style={{ textAlign: "center", marginBottom: 24 }}>
                 <h2 className="h3" style={{ marginBottom: 8 }}>Enter your code</h2>
-                <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 6 }}>
-                  We sent an 8-digit code to
+                {/* The address is deliberately not echoed. A code is only ever
+                    sent to ADMIN_EMAIL, so printing whatever was typed claimed
+                    a delivery that did not happen — and naming the real address
+                    here would disclose it just as the placeholder used to. */}
+                <p className="body-s" style={{ color: "var(--text-muted)" }}>
+                  If that address is the admin account, an 8-digit code is on its way.
                 </p>
-                <div style={{ display: "inline-block", padding: "6px 14px", background: "var(--bg-alt)", borderRadius: 8, fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--text)" }}>
-                  {email}
-                </div>
               </div>
 
               <OtpCodeInput value={code} onChange={setCode} disabled={loading} autoFocus />
@@ -159,7 +160,10 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="hello@cyprustech.careers"
+                  /* No placeholder: it used to spell out the admin address,
+                     which handed over the one thing request-code goes out of
+                     its way not to disclose. */
+                  autoComplete="off"
                   style={{
                     width: "100%", fontFamily: "var(--font-sans)", fontSize: 14,
                     padding: "10px 12px", border: "1px solid var(--border)",

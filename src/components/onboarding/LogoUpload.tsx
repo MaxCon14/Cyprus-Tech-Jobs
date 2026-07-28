@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { Camera, X, Loader2 } from "lucide-react";
 
+const ACCEPTED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 interface Props {
   value: string;
   onChange: (url: string) => void;
@@ -15,8 +17,10 @@ export function LogoUpload({ value, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file.");
+    // Mirrors the formats the server sniffs for. SVG is excluded on purpose —
+    // it can carry script and the logo bucket is public.
+    if (!ACCEPTED.includes(file.type)) {
+      setError("Use a JPG, PNG, WebP or GIF image.");
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
@@ -97,7 +101,7 @@ export function LogoUpload({ value, onChange }: Props) {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept={ACCEPTED.join(",")}
           style={{ display: "none" }}
           onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
         />

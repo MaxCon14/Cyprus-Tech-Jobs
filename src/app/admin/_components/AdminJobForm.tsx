@@ -291,7 +291,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
 
         <Field label="Company logo" hint="OPTIONAL — PNG, JPG, WEBP OR SVG, UP TO 2 MB. FALLS BACK TO THE CURATED MARK.">
           <input
-            ref={logoInputRef} type="file" accept="image/*"
+            ref={logoInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
             style={{ display: "none" }} onChange={handleLogoChange}
           />
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
