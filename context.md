@@ -63,6 +63,14 @@ Note the sandbox git proxy rejects **deletes and tag pushes** (403) while
 allowing branch creates and updates, so branch cleanup and tagging have to be
 done from a real machine or the GitHub UI.
 
+A later session was configured (by its harness prompt, not by Maxim) to develop
+on a branch `claude/cyprus-tech-jobs-repo-s9ar6h`. That contradicts the
+`test`-only rule, so the work went to `test`/`main` per `AGENTS.md` instead — but
+the branch got created on GitHub along the way and its commits are fully
+contained in `main`. It is a **sixth stale `claude/*` branch to delete** (added
+to the TODO list). If a future session gets the same branch instruction, follow
+`AGENTS.md` (commit to `test`), not the branch name.
+
 ---
 
 ## Stack & conventions
@@ -106,7 +114,10 @@ done from a real machine or the GitHub UI.
   Postgres because serverless instances share no memory; it fails open.
 - **Scheduled routes use `authoriseCron`** (`src/lib/cron-auth.ts`). Never inline
   the secret comparison: with `CRON_SECRET` unset the old inline check compared
-  against the literal string `"Bearer undefined"` and let anyone in.
+  against the literal string `"Bearer undefined"` and let anyone in. There are
+  **two** cron routes (`expire-jobs`, `send-alerts`), both `GET`, both wired in
+  `vercel.json`; `CRON_SECRET` is confirmed set in Vercel (they now fail *closed*
+  with 503 if it is missing).
 - Styling is mostly inline styles reading CSS custom properties; responsive
   helpers are classes in `globals.css` (`.page-container`, `.grid-4`,
   `.section-head`, `.cta-strip`, …).
@@ -133,22 +144,43 @@ done from a real machine or the GitHub UI.
   write** tool, and `gh` CLI. Direct `curl` to `cyprustech.careers` is blocked by
   the egress proxy — use the Vercel MCP fetch tool instead. DNS lookups work via
   Python `dnspython` (no `dig`/`nslookup` installed).
-- **Email**: Resend domain `cyprustech.careers` is verified, sending enabled,
-  region `eu-west-1`. Sign-in codes are being **sent and delivered** — this was
-  confirmed against Resend's delivery log, and sign-ins have succeeded.
-  Two operational facts worth knowing:
-  - **Receiving on the domain needs confirming before trusting it.** This file
-    used to state flatly that `hello@cyprustech.careers` bounces. Since then
-    inbound was worked on (Resend inbound + an MX record) and Maxim also said the
-    address is backed by a Google account — so the two accounts of it disagree
-    and neither was verified end to end. `ADMIN_EMAIL` is set to `hello@`, and
-    **admin sign-in has still never been completed**, so this is the first thing
-    to test rather than assume. `CONTACT_EMAIL` in `src/lib/legal.ts` is a
-    different address again (`help@`) and the legal pages publish it, so it has
-    to receive mail too.
-  - Mail to `@avocadots.com` is accepted by its server (Microsoft 365) but not
-    reaching the inbox; Gmail delivery works fine. Investigation was stopped at
-    the user's request.
+- **Email — sending** goes through Resend (domain verified, region `eu-west-1`).
+  Sign-in codes, job alerts and contact mail all send out via Resend and were
+  confirmed against its delivery log. **Sending is unaffected by any of the MX
+  changes below** — MX only controls incoming mail.
+- **Email — receiving now goes to Google Workspace, and this is resolved.**
+  History: the domain's MX record used to point at Resend inbound
+  (`inbound-smtp.eu-west-1.amazonaws.com`), so mail to `hello@cyprustech.careers`
+  landed in Resend's inbound store and nowhere else — which is why "admin sign-in
+  has never worked" sat open for weeks (the code was arriving in Resend, not any
+  inbox Maxim reads). Maxim already paid for Google Workspace on the domain; the
+  setup had just never been finished. Fixed this session by pointing DNS at
+  Google (DNS is hosted at **Vercel** → Domains → cyprustech.careers → DNS):
+  - `MX @ 1 smtp.google.com` (replaced the Resend inbound MX)
+  - `TXT google._domainkey` — Google DKIM, generated in Admin console → Apps →
+    Gmail → Authenticate email. Verified from the sandbox as a complete 2048-bit
+    RSA key (parsed with openssl; a truncated paste is the usual silent failure).
+  - `TXT @  v=spf1 include:_spf.google.com include:amazonses.com ~all` — note it
+    authorises **both** Google (mail Maxim sends from hello@) and Amazon SES (the
+    site's Resend mail). Uses 2 of the 10 permitted SPF lookups.
+  - `TXT _dmarc  v=DMARC1; p=none; rua=mailto:hello@cyprustech.careers` — DMARC
+    was previously **absent entirely**, a real deliverability gap (Gmail/Yahoo
+    have required it of senders since Feb 2024). `p=none` is monitor-only.
+  **Confirmed working end to end:** an admin sign-in code was received in the
+  `hello@cyprustech.careers` Gmail inbox — the first successful admin sign-in
+  path on the project. `ADMIN_EMAIL` stays `hello@` (unchanged).
+  - Consequence: the ~11 messages already in Resend's inbound store (old admin
+    codes, Instagram codes, Medium newsletters) stay there; they do not migrate.
+  - A **Resend inbound-forwarding webhook** route was built this session
+    (`/api/resend/inbound` + `src/lib/svix-verify.ts`) and then **reverted** once
+    the Google MX change made it unnecessary. It is recoverable from git history
+    (`git show 5cebb94`) if inbound ever moves back to Resend; it verifies the
+    Svix signature with node crypto rather than the `svix` package.
+  - `CONTACT_EMAIL` in `src/lib/legal.ts` is `help@` — a different address the
+    legal pages publish, so it also has to receive. Not separately verified.
+  - Old note kept for the record: mail to `@avocadots.com` is accepted by its
+    Microsoft 365 server but not reaching the inbox; Gmail works. Left as-is at
+    Maxim's request.
 - **Stripe (test mode)** — Standard `price_1TUCiXRupFe5vg1GnWRQ81Rl` (€9.99),
   Featured `price_1TUCirRupFe5vg1GvgLccOtB` (€14.99). Employers buy "slots"
   (`standardSlots` / `featuredSlots` on `Employer`); the webhook credits them via
@@ -331,24 +363,104 @@ pages read "<name>, trading as CyprusTech.Careers". **Still blank** — see TODO
 (see Working agreements): `verify-taxonomy.ts` (20 checks that a newly posted job
 is findable by every filter), `verify-sanitize.ts` (25 XSS payload/passthrough
 cases), `verify-employer-access.ts` (applicants survive every job status).
+Added since: `verify-logo-upload.ts` (byte-sniff upload validation),
+`verify-svix.ts` (webhook signature guard — kept even though the route it
+covered was reverted, since the helper `src/lib/svix-verify.ts` also went).
 
 ---
 
-## Security backlog — found in an audit, NOT yet fixed
+## Session: employer dashboard, email delivery, onboarding trim
+
+**Employer applicant filter was broken (live on `main`).** Picking a job updated
+the count and the "Filtered:" chip but not the list — `ApplicationsPanel` took
+the filtered rows via `useState(initialApplications)`, and a state initialiser
+only runs on mount, so the rows never changed. Reproduced on the old code before
+touching it (chip said "Filtered: X" while all applicants stayed on screen).
+Fix: applications now live in `DashboardContent`, and the panel derives both
+filters from props — nothing copied into state. Same bug had a second face: a
+status set on a candidate was discarded whenever the filter remounted the list;
+gone too. Added an explicit **Position picker** (`Select`) listing every job that
+can receive applicants with counts — filtering was previously only reachable by
+clicking a listings-table row, which nothing advertised; the two stay in sync.
+Mobile rebuild of the panel: header wraps instead of colliding, job-row actions
+became a labelled full-width row (were four unreadable crushed icons), status
+tabs a 3-across grid, applicant count surfaced on job rows (the column is
+desktop-only), 40px tap targets, and picking a job scrolls the panel into view
+clear of the 61px sticky header. `DashboardContent.tsx` / `ApplicationsPanel.tsx`
+/ `JobListingsPanel.tsx` / `JobVisibilityToggle.tsx` + `globals.css`.
+
+**Admin login stopped naming the admin (live on `main`).** The email input's
+`placeholder` was literally `hello@cyprustech.careers`, printing the admin
+address to every visitor — the one thing `api/admin/auth/request-code` goes out
+of its way NOT to disclose (it returns an identical 200 for any address). The
+code step also echoed whatever was typed, claiming a delivery that never
+happened (a code is only ever sent to `ADMIN_EMAIL`). Both removed. The gate is
+unchanged and server-side (`ADMIN_EMAIL`, checked in `proxy.ts`,
+`admin/layout.tsx`, `admin-auth.ts`) — deliberately not hardcoded client-side,
+which would re-leak it into the bundle.
+
+**Email delivery + admin sign-in — see External services.** The headline is that
+`hello@` receiving moved from Resend to Google Workspace and admin sign-in now
+works end to end.
+
+**Minimum-salary step removed from candidate onboarding (on `test`, commit
+`6072314`).** The field was write-only — its own helper text said "Shown to you
+only — not shared with employers", and nothing read it back (employers never see
+it; job alerts match on the separate value from the alert form). Removed from the
+wizard step, the persisted draft, the wizard-state type (`onboarding-types.ts`)
+and the onboarding API. The `candidates.salaryMin` column and the profile editor
+were left alone — no migration implied, existing values kept. The **adjacent
+"kind of work" step is deliberately kept**: unlike salary, `categories` and
+`remoteType` are read by `getMatchingJobsForCandidate` to build the matching-jobs
+list on the candidate dashboard (verified by tracing `candidates/dashboard/page.tsx`).
+
+**CRON_SECRET confirmed set in Vercel.** Probed production
+`/api/cron/expire-jobs` unauthenticated → `401` (would be `503` if the var were
+missing). The `x-vercel-id` header also still shows `dub1`, so the region pin
+holds.
+
+**KNOWN BUG, not yet fixed — position-picker dropdown paints behind the applicant
+card.** On the employer dashboard, opening the `Select` position filter renders
+its dropdown panel (`z-index: 200` in `src/components/ui/Select.tsx`) *under* the
+first `ApplicationCard` below it, clipping the last option. A stacking-context
+issue. Was mid-diagnosis (reproduced via the preview harness) when work switched
+to this file. The dropdown's `z-index` lives on an absolutely-positioned panel
+whose `Select` root is `position: relative` with no `z-index` (so no stacking
+context of its own); the fix will likely be to establish/raise the right context
+or render the panel above the card. Reproduce before claiming fixed.
+
+---
+
+## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
 policy and the render paths were reviewed; what is missing here was checked and
 is fine (service-role key never reaches the client, admin routes all gated,
 Stripe webhook verifies signatures, employer job routes check ownership).
 
-1. **Unauthenticated AI endpoints.** `candidates/parse-cv` and `cv-review` take a
-   POST from anyone and call the Anthropic API — no auth, no per-user cap.
-   `parse-cv` additionally does `fetch(userSuppliedUrl)` with no host allowlist
-   and returns Claude's reading of the response: an SSRF read primitive.
-2. **`employers/logo-upload` has no auth at all** — free storage on the Supabase
-   account. Also permits `image/svg+xml` (scripts) and trusts the client's
-   declared content type. (`candidates/cv-upload` was hardened: magic-byte check
-   plus rate limit.)
+1. **Unauthenticated AI endpoints — STILL OPEN, approach decided.**
+   `candidates/parse-cv` and `cv-review` take a POST from anyone and call the
+   Anthropic API — no auth, no per-user cap. `parse-cv` additionally does
+   `fetch(userSuppliedUrl)` with no host allowlist and returns Claude's reading
+   of the response: an SSRF read primitive. **Do NOT require sign-in** — verified
+   by tracing callers: `parse-cv` runs at step 7 of candidate onboarding (before
+   verification at step 8), and `cv-review` sits on the public job page with no
+   gate. Both legitimately serve people without accounts. The fix that does not
+   break guests: (a) restrict the fetched URL to the project's own Supabase
+   storage host — a real CV always comes from there, since `cv-upload` put it
+   there — which closes the SSRF; (b) add the existing `rate-limit.ts`
+   (anon-vs-signed-in, same shape as `cv-upload`) to cap the Anthropic spend.
+   Realistic exposure is the **API bill**, not a data breach — Vercel's setup
+   dampens the internal-address angle. This is the top remaining launch blocker.
+2. **`employers/logo-upload` — FIXED this session (live on `main`).** Was
+   anonymous write access to a public bucket with no rate limit, permitted
+   `image/svg+xml`, and trusted the client's declared type/filename. Now: cannot
+   require a session (the logo is chosen at wizard step 2, before verification at
+   step 4), so it is IP-rate-limited when anonymous / account-limited when signed
+   in; validation ignores the declared type and sniffs magic bytes, deriving both
+   stored content-type and extension from them; SVG dropped (script vector, public
+   bucket). Shared `src/lib/logo-upload.ts`; `scripts/verify-logo-upload.ts`
+   covers it (SVG and HTML relabelled as PNG both rejected).
 3. **Email enumeration** on the three `check-email` routes — `{exists:true|false}`
    for any address. On a job board that leaks who is job-hunting.
 4. **`stripe/checkout` takes `employerId` from the request body**, not the
@@ -357,47 +469,64 @@ Stripe webhook verifies signatures, employer job routes check ownership).
 5. **No security headers** — no CSP, HSTS, X-Frame-Options or Referrer-Policy in
    `next.config.ts`. A CSP would also blunt any future XSS.
 6. **Preview deployments share the production `DATABASE_URL`.** A preview URL can
-   write real user data. Override it for the Preview environment in Vercel.
+   write real user data. Override it for the Preview environment in Vercel. More
+   pressing now that `test` is used routinely.
+
+**Rate-limit coverage is 3 of 50 routes** (`cv-upload`, `applications/guest`,
+`logo-upload`). Every public unauthenticated route that writes or costs money
+should have it; the pattern is reactive-per-route, which is exactly how the logo
+hole stayed open. `rate-limit.ts` fails **open** (a DB that can't serve the
+counter can't serve the request either), so it is not a defence during an outage.
 
 ---
 
 ## Open items / TODO
 
-0. **The security backlog above.** Items 1 and 2 are the ones to do before
-   pushing the site publicly.
-1. **Fill in `src/lib/legal.ts`** — `type`, `registeredName` and
-   `registeredAddress`. Until then the privacy policy and terms name the website
-   rather than a legal person, which is the one thing GDPR's controller-identity
-   requirement actually asks for. Maxim has no registered company; a natural
-   person is a perfectly valid controller, so this needs a name and a postal
-   address that receives mail (a service address is fine — it gets published).
-   Separately, trading as "CyprusTech.Careers" in Cyprus likely needs a business
-   name registered under Cap. 116; an hour with an accountant settles that, the
-   tax registration and VAT together.
-2. **`CRON_SECRET` must be set in Vercel.** All three cron routes now fail
-   *closed* — if it is missing they return 503 and job expiry stops running.
-3. Delete the five stale `claude/*` branches on GitHub (sandbox can't — the git
-   proxy rejects deletes): `analyze-design-system-Y5y44`,
-   `compact-card-layout-92qmqy`, `connect-database-7OQd6`,
-   `connect-database-MZ1XL`, `cyprus-tech-jobs-context-elmi9o`. All are
-   superseded — see the History note above before resurrecting any of them.
-4. **Admin sign-in has still never been completed end to end.** Confirm
-   `ADMIN_EMAIL` points at a mailbox that actually receives, then sign in once.
-5. Guest applications have not been exercised against real Supabase — the
-   candidate tables are served by the Supabase API, not Postgres, so the local
-   scratch DB cannot cover the insert path. Submit one real guest application.
-6. `employers/dashboard/page.tsx` holds all 9 remaining lint errors (`any`,
-   `prefer-const`). Untouched for several sessions; worth a cleanup pass.
-2. **Status colours have no dark-mode variants.** `--success-bg`, `--warning-bg`,
-   `--error-bg`, `--info-bg` stay pale against dark surfaces — visible on
+Numbered as one list (the old one restarted at 2 halfway down — merged here).
+
+1. **Security backlog #1 — the AI-endpoint SSRF / unmetered spend.** Top launch
+   blocker; approach decided (restrict fetch URL to Supabase storage + rate
+   limit, no sign-in requirement). See the Security backlog section.
+2. **Fix the position-picker dropdown z-index bug** (see the latest session
+   section). Small, visible, employer-facing; reproduce before claiming done.
+3. **Fill in `src/lib/legal.ts`** — `registeredName` and `registeredAddress` are
+   still blank, so the privacy policy and terms name the website rather than a
+   legal person (the one thing GDPR's controller-identity rule asks for). Maxim
+   has no company; a natural person is a valid controller — needs a full name and
+   a postal address that receives mail (a service address is fine, it gets
+   published). Trading as "CyprusTech.Careers" in Cyprus likely also needs a
+   business name registered under Cap. 116 — an accountant settles that plus tax
+   and VAT.
+4. **Guest applications never exercised against real Supabase.** The single most
+   important path on the site (what job seekers come to do) and it has never run
+   for real — candidate tables are Supabase-served, so the scratch Postgres can't
+   cover the insert. Submit one real guest application.
+5. **Confirm Stripe end to end** with test card `4242 4242 4242 4242` — checkout
+   *and* the fulfilment webhook. Never tested; if broken, employers pay and get
+   nothing.
+6. **Preview `DATABASE_URL`** — override it for the Preview environment in Vercel
+   (security backlog #6). Live risk now that `test` is used routinely.
+7. **No error monitoring** (no Sentry or equivalent). A crash in the apply flow
+   is invisible unless a user reports it. Given #4, higher priority than it looks.
+8. Delete the **six** stale `claude/*` branches on GitHub (sandbox can't — proxy
+   rejects deletes): `analyze-design-system-Y5y44`, `compact-card-layout-92qmqy`,
+   `connect-database-7OQd6`, `connect-database-MZ1XL`,
+   `cyprus-tech-jobs-context-elmi9o`, and `cyprus-tech-jobs-repo-s9ar6h` (the new
+   one — see Branches history). All superseded / contained in `main`.
+9. **Status colours have no dark-mode variants.** `--success-bg`, `--warning-bg`,
+   `--error-bg`, `--info-bg` stay pale on dark surfaces — visible on
    `/style-guide` in dark mode.
-3. Re-check FCP/LCP in Vercel Speed Insights now that `dub1` is confirmed live.
-4. Confirm Stripe end-to-end with a test card (`4242 4242 4242 4242`).
-5. Editing an existing listing with no salary now forces one to be added — a
-   consequence of the mandatory-salary change worth watching for on legacy jobs.
-6. `src/app/employers/login/LoginForm.tsx` is dead code (nothing imports it;
-   the page just redirects). Safe to delete.
-7. The SEO items listed as "still open" above.
+10. `employers/dashboard/page.tsx` holds all 9 remaining lint errors (`any`,
+    `prefer-const`). Untouched for several sessions; worth a cleanup pass.
+11. `src/app/employers/login/LoginForm.tsx` is dead code (nothing imports it; the
+    page just redirects). Safe to delete.
+12. Re-check FCP/LCP in Vercel Speed Insights now that `dub1` is confirmed live.
+13. Editing a legacy listing with no salary now forces one to be added — a
+    consequence of the mandatory-salary change worth watching for.
+14. The SEO items listed as "still open" above.
+
+**DONE this session (was on the list):** `CRON_SECRET` confirmed set (item was
+"must be set"); admin sign-in completed end to end (was "still never completed").
 
 ---
 
@@ -418,7 +547,21 @@ Stripe webhook verifies signatures, employer job routes check ownership).
 - Playwright is not a dependency; `npm i -D --no-save playwright` and launch with
   `executablePath: "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"` (the
   bundled version expects a build number that is not installed). Remove it before
-  committing so `package.json` stays clean.
+  committing so `package.json` stays clean. Scripts run from the scratchpad need
+  `NODE_PATH=<repo>/node_modules` since Playwright is installed in the repo, not
+  globally.
+- **Vercel MCP for production checks.** `curl` to the live domain is proxy-blocked;
+  use the Vercel MCP `web_fetch_vercel_url` tool. Fetch the **public** host
+  (`www.cyprustech.careers`) not the `*.vercel.app` deployment URL — the latter is
+  behind SSO and returns a 302 to a login page for assets. Handy trick: fetching
+  the compiled CSS chunk confirms which build is actually live. Unauthenticated
+  hits to gated routes are a cheap probe (`/api/cron/*` → 401 set / 503 unset).
+- **DNS lives at Vercel** (nameservers `ns1/ns2.vercel-dns.com`), edited under
+  Domains → cyprustech.careers → DNS. No DNS-**write** MCP tool exists, so DNS
+  changes are Maxim's to make; read/verify with Python `dnspython` (resolve
+  against `8.8.8.8` to dodge stale local caching). Watch the classic Vercel
+  gotcha: enter a subdomain host as just the label (`google._domainkey`), never
+  the FQDN, or it becomes `…​.cyprustech.careers.cyprustech.careers`.
 - Verify UI changes visually before committing — run the app and screenshot with
   Playwright (`playwright-core` + `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`,
   `--no-sandbox`). For auth-gated or wizard UI, a temporary throwaway route that
