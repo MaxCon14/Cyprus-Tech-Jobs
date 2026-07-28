@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, AlertTriangle, FileText } from "lucide-react";
+import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle, FileText } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { CategoryCombobox } from "@/components/ui/CategoryCombobox";
+import { InfoTip } from "@/components/ui/InfoTip";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { SkillTagSelector } from "@/components/ui/SkillTagSelector";
 
@@ -479,18 +480,23 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
                   <input className="input" name="salaryMax" type="number" min={1} placeholder="e.g. 85000" />
                 </Field>
               </div>
-              <div style={{ display: "flex", gap: 10, padding: "12px 14px", background: "var(--warning-bg)", border: "1px solid #fcd34d", borderRadius: 8, marginTop: -4 }}>
-                <AlertTriangle size={15} style={{ color: "var(--warning)", flexShrink: 0, marginTop: 1 }} />
-                <p className="body-s" style={{ color: "var(--text)", margin: 0, lineHeight: 1.55 }}>
-                  Salary ranges must be genuine. If a listing advertises a range the role
-                  doesn&apos;t actually pay, it can be taken down — and the listing credit
-                  refunded to your account.
-                </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: -6 }}>
+                <span className="mono-s" style={{ color: "var(--text-subtle)" }}>SALARY RANGES MUST BE GENUINE</span>
+                <InfoTip label="About salary ranges" align="left">
+                  If a listing advertises a range the role doesn&apos;t actually pay, it can be
+                  taken down — and the listing credit refunded to your account.
+                </InfoTip>
               </div>
 
               <div>
-                <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8 }}>
+                <div className="body-s" style={{ fontWeight: 500, color: "var(--text)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
                   How should candidates apply? <span style={{ color: "var(--accent)" }}>*</span>
+                  <InfoTip label="About application methods" align="left">
+                    <strong>In-app</strong> — candidates apply on CyprusTech.Careers and their profiles, CVs
+                    and cover letters land in your dashboard. No setup, recommended.<br />
+                    <strong>Redirect to URL</strong> — send applicants to your own careers page.<br />
+                    <strong>Via email</strong> — applications go to an address you choose.
+                  </InfoTip>
                 </div>
 
                 {/* In-app — recommended, full-width */}
@@ -509,9 +515,6 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
                     <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13, color: applyMethod === "in_app" ? "var(--accent)" : "var(--text)", marginBottom: 2, display: "flex", alignItems: "center", gap: 8 }}>
                       📥 In-app applications
                       <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "var(--white)", padding: "2px 7px", borderRadius: 4 }}>RECOMMENDED</span>
-                    </div>
-                    <div className="body-s" style={{ color: "var(--text-muted)" }}>
-                      Candidates apply directly on CyprusTech.Careers. You receive rich profiles, CVs, and cover letters in your dashboard.
                     </div>
                   </div>
                   {applyMethod === "in_app" && <Check size={16} style={{ color: "var(--accent)", flexShrink: 0, marginLeft: 12 }} />}
@@ -538,11 +541,6 @@ export function PostJobForm({ categories, standardSlots, featuredSlots, companyN
                   <Field label="HR email address" required error={fieldErrors.applyUrl}>
                     <input className="input" name="applyEmail" type="email" placeholder="jobs@yourcompany.com" />
                   </Field>
-                )}
-                {applyMethod === "in_app" && (
-                  <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: 4 }}>
-                    NO SETUP NEEDED · APPLICATIONS ARRIVE IN YOUR DASHBOARD AUTOMATICALLY
-                  </p>
                 )}
               </div>
 
