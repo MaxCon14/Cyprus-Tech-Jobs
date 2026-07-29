@@ -181,10 +181,25 @@ to the TODO list). If a future session gets the same branch instruction, follow
   - Old note kept for the record: mail to `@avocadots.com` is accepted by its
     Microsoft 365 server but not reaching the inbox; Gmail works. Left as-is at
     Maxim's request.
-- **Stripe (test mode)** — Standard `price_1TUCiXRupFe5vg1GnWRQ81Rl` (€9.99),
-  Featured `price_1TUCirRupFe5vg1GvgLccOtB` (€14.99). Employers buy "slots"
-  (`standardSlots` / `featuredSlots` on `Employer`); the webhook credits them via
-  `src/lib/stripe-fulfill.ts`, with `SlotPurchase` as the idempotency log.
+- **Stripe is LIVE (real payments) — switched this session, confirmed working.**
+  Checkout builds prices **inline** with `price_data` in
+  `api/stripe/checkout/route.ts` (999¢/1499¢ base + per-extra-slot pricing) — there
+  are **no Stripe Price IDs anywhere in the code**, so the old
+  `STRIPE_STANDARD_PRICE_ID` / `STRIPE_FEATURED_PRICE_ID` env vars referenced
+  elsewhere in this file are **dead, not used**. `getStripe()` (`src/lib/stripe.ts`)
+  is mode-agnostic — it just reads `STRIPE_SECRET_KEY`, so going live was a Vercel
+  env-var change, not a code change: `STRIPE_SECRET_KEY` → `sk_live_…`,
+  `STRIPE_WEBHOOK_SECRET` → a **new live-mode** webhook endpoint's `whsec_…`
+  (`https://cyprustech.careers/api/stripe/webhook`, event
+  `checkout.session.completed`) — the old test-mode webhook secret does not carry
+  over. **Verified end to end with a real card**: production log showed
+  `POST /api/stripe/webhook 200` → `session cs_live_… : credited`. Employers buy
+  "slots" (`standardSlots` / `featuredSlots` on `Employer`); the webhook credits
+  them via `src/lib/stripe-fulfill.ts`, with `SlotPurchase` as the idempotency log
+  (`sessionId` unique — safe against Stripe's at-least-once delivery).
+  Account: `acct_1TUCKmRupFe5vg1G` ("Cyprus Tech Careers"). Test-mode keys should
+  stay on Vercel's Preview/Development environments so preview deploys never take
+  real money — only Production got the live keys.
 
 ---
 
@@ -228,11 +243,47 @@ publish/edit, `URL_DELETED` on expire/pause/delete).
 - `unitText: "YEAR"` on `baseSalary` is hardcoded; there's no `salaryPeriod`
   column. Fixing it needs a schema migration plus a form field.
 
+**Category landing pages added this session — was the biggest gap, now closed.**
+Categories used to be reachable only as `?category=slug` query params, which
+Google indexes poorly (often folded in as duplicates of `/jobs`) and which had no
+unique title/H1/canonical/sitemap entry. New route `src/app/jobs/category/[slug]`
++ `src/app/jobs/_shared/CategoryPage.tsx`: per-category `generateMetadata`
+(keyword title, description, canonical), H1 + unique intro copy, the filtered job
+list, Breadcrumb + ItemList JSON-LD, related-role and category×city internal
+links. All ~130 categories (parents + roles) are now in the sitemap. Homepage
+grid/chips and the nav menu were repointed from `?category=` to these pretty
+URLs so link equity flows to the landing pages instead of a dead end. Verified
+live on production (`/jobs/category/customer-support`): correct title/canonical,
+ItemList + BreadcrumbList schema present.
+
+**City pages enriched.** Added ItemList JSON-LD and a dynamic, city-specific FAQ
+(visible content + FAQPage schema, live job count + realistic salary range baked
+into the copy) to `CityPage.tsx` for content depth.
+
+**Found and fixed while verifying the above: every city page (and the new
+category pages) had a doubled `<title>` suffix** —
+`"… | CyprusTech.Careers | CyprusTech.Careers"`. The root layout
+(`src/app/layout.tsx`) already applies a `title.template: "%s | CyprusTech.Careers"`,
+but each city route's `metadata.title` *also* hard-coded the suffix. Caught by
+actually fetching the rendered `<title>` from the live preview, not by reading
+the code — the bug was invisible in the source, each half looked correct in
+isolation. Stripped the manual suffix from all five city routes and the new
+category route.
+
+**`/jobs/famagusta` is a redirect, not a page** (`redirect("/jobs")`,
+`src/app/jobs/famagusta/page.tsx`) — it was briefly added to the sitemap this
+session and then reverted; a sitemap should not list redirect URLs.
+
 **Still open:** no 410 for expired listings (they return 200 + noindex);
-`export const dynamic = "force-dynamic"` on job pages means no ISR; the sitemap
-omits `/jobs/famagusta`, `/companies` and company profiles; no role pages or
-role×city "money pages" (categories are query params only); no `hreflang` for
-`el-CY`/`en-CY`; robots doesn't disallow filter query params.
+`export const dynamic = "force-dynamic"` on job pages means no ISR; no
+role×city "money pages" as *dedicated* pages (e.g. a single page for "customer
+support jobs limassol" — today that intent is served by
+`/jobs/limassol?category=customer-support`, functional but a query-param URL,
+same limitation the category pages just fixed for the category-only case); no
+`hreflang` for `el-CY`/`en-CY`; robots doesn't disallow filter query params.
+Two **test company records** (`/companies/test-company`, `/companies/test`) are
+sitting in the sitemap from test data — cosmetic, but worth deleting in admin so
+Google doesn't index them.
 
 ---
 
@@ -478,6 +529,92 @@ the existing pickers **now**, ahead of any code deploy. Two caveats:
 
 ---
 
+## Session: Google go-live (Search Console, favicon, Indexing API), Stripe live, SEO landing pages
+
+**Favicon fixed.** The only icon was `/logo.svg` referenced from `metadata.icons`
+in `layout.tsx` — but that SVG's canvas is **628×576, not square**, so Google (and
+some browsers) rejected it as a favicon and fell back to a generic icon; the repo
+also still shipped Next's default placeholder `favicon.ico`. Fix: a new square
+`src/app/icon.svg` (cropped viewBox around the mark) plus generated
+`src/app/favicon.ico` (16/32/48, via `sharp` + `png-to-ico`) and
+`src/app/apple-icon.png` (180×180, white background — the mark is dark and needs
+a light backing for iOS). These are Next's file-convention icons, picked up
+automatically; the manual `metadata.icons` entry was removed. Verified: fetched
+`/favicon.ico` and `/icon.svg` from production, both 200 and both the real logo.
+**Caches (Chrome's "visit often" tiles, Google's own favicon cache) are slow to
+update and are not evidence of a broken deploy** — confirming at the source
+(`curl`/fetch the file directly) is the only reliable check; incognito does
+**not** bypass Google's server-side favicon cache, only the local browser one.
+
+**Google Search Console verified.** Domain property, TXT record. First attempt
+failed — queried Vercel's authoritative nameserver directly (`ns1.vercel-dns.com`)
+and confirmed the token genuinely wasn't published (only the SPF TXT record
+existed), not a propagation delay. Root cause was almost certainly the TXT
+record's Name/host field not being left blank/`@`. Second attempt succeeded.
+
+**www → apex 301 consolidated.** Google was indexing both `cyprustech.careers`
+and `www.cyprustech.careers` as separate hosts, splitting ranking signals (all
+code canonicalizes to the apex). First redirect attempt in Vercel Domains was
+backwards (apex → www); corrected to `www → apex` (301). Verify via Vercel
+Domains screenshot, not `curl` (egress-proxy-blocked) — Vercel's `web_fetch`
+tool *follows* redirects rather than showing the 301, so it can't verify this
+either; the dashboard config is the source of truth here.
+
+**Google for Jobs — Indexing API wired up, and a real bug found + fixed along
+the way.** Structured data was already valid (Rich Results Test: "2 valid items
+detected", Job Postings eligible; the "Missing addressRegion/postalCode/
+streetAddress" warnings are explicitly optional and not worth chasing). Getting
+credentials required routing around an org policy
+(`iam.disableServiceAccountKeyCreation`) blocking key downloads on the Workspace
+account — resolved by creating the Cloud project under a personal Gmail instead
+(Search Console ownership, which is what actually authorizes the API, is
+independent of which Google account owns the Cloud project). Set
+`GOOGLE_INDEXING_CLIENT_EMAIL` / `GOOGLE_INDEXING_PRIVATE_KEY` in Vercel
+Production.
+
+**The real bug: every `notifyGoogle()` call site was fire-and-forget
+(`void notifyGoogle(...)`), and Vercel freezes the function the instant the
+response is returned — killing the in-flight request to Google mid-write.**
+Symptom in production logs: `TypeError: fetch failed` /
+`SocketError: other side closed` with `bytesWritten: 1518, bytesRead: 0` — the
+JWT signed fine and the request left the function, it just never got to finish.
+This looked exactly like a bad credential and was not one; the giveaway is
+bytes *written* with zero bytes *read back*. Fixed by wrapping every call in
+`after(() => notifyGoogle(...))` (`next/server`), which keeps the function alive
+until the background request completes without adding latency to the response.
+Applied to all five call sites: employer `visibility`/`publish`/`[id]` PATCH+DELETE
+routes and both admin job routes. Confirmed fixed by re-running the same
+unpublish/republish and seeing `200` + `[google-indexing] URL_UPDATED …` /
+`URL_DELETED …` in the logs with no socket error.
+
+**Second bug found in the same investigation: the admin job routes never called
+`notifyGoogle` at all.** Only the employer-facing routes
+(`visibility`/`publish`/`[id]`) pinged Google; `api/admin/jobs/route.ts` (POST)
+and `api/admin/jobs/[id]/route.ts` (PATCH/DELETE) did not. Since curated jobs are
+created and managed *only* through admin, this meant the entire curated-job
+catalog was invisible to the Indexing API regardless of the credential/`after()`
+fix. Added `notifyGoogle` to all three admin paths, mirroring the employer
+routes' URL_UPDATED-while-ACTIVE / URL_DELETED-otherwise logic.
+
+**Stripe switched to live payments — see External services / env.** Confirmed
+end to end with a real card and a webhook log showing `credited`.
+
+**SEO landing pages — see the SEO section above** (category pages, city-page
+enrichment, the title-doubling fix).
+
+**Diagnostic techniques used repeatedly this session, worth reusing:**
+Vercel `get_runtime_logs` (scope to `deploymentId` when a wide time-range query
+times out; `group_by: "requestPath"` is fast even over wide ranges and is how
+the "admin routes never call notifyGoogle" gap was actually found — grouping
+showed zero `/api/jobs/[id]/visibility` hits despite the user testing via admin).
+`list_deployments` to correlate a log line's timestamp against which commit was
+actually live. `web_fetch_vercel_url` for anything that needs to see rendered
+output/response headers from the real production edge (bypasses the sandbox's
+`curl`-to-the-live-domain block) — but note it can return oversized results for
+full HTML pages; grep the saved file rather than re-fetching.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
@@ -512,7 +649,9 @@ Stripe webhook verifies signatures, employer job routes check ownership).
    for any address. On a job board that leaks who is job-hunting.
 4. **`stripe/checkout` takes `employerId` from the request body**, not the
    session. Pricing is server-side, so no amount tampering — but it is an ID
-   oracle.
+   oracle. **More pressing now that Stripe is live (real payments, see External
+   services)** — still not a payment-amount risk, but worth deriving from the
+   authenticated session before this gets more traffic.
 5. **No security headers** — no CSP, HSTS, X-Frame-Options or Referrer-Policy in
    `next.config.ts`. A CSP would also blunt any future XSS.
 6. **Preview deployments share the production `DATABASE_URL`.** A preview URL can
@@ -548,9 +687,9 @@ Numbered as one list (the old one restarted at 2 halfway down — merged here).
    important path on the site (what job seekers come to do) and it has never run
    for real — candidate tables are Supabase-served, so the scratch Postgres can't
    cover the insert. Submit one real guest application.
-5. **Confirm Stripe end to end** with test card `4242 4242 4242 4242` — checkout
-   *and* the fulfilment webhook. Never tested; if broken, employers pay and get
-   nothing.
+5. ~~Confirm Stripe end to end~~ **DONE — Stripe is now live (not test mode)**,
+   confirmed with a real card and a `credited` webhook log. See External
+   services / env and the Google go-live session above.
 6. **Preview `DATABASE_URL`** — override it for the Preview environment in Vercel
    (security backlog #6). Live risk now that `test` is used routinely.
 7. **No error monitoring** (no Sentry or equivalent). A crash in the apply flow
@@ -574,6 +713,14 @@ Numbered as one list (the old one restarted at 2 halfway down — merged here).
 
 **DONE this session (was on the list):** `CRON_SECRET` confirmed set (item was
 "must be set"); admin sign-in completed end to end (was "still never completed").
+
+**DONE in the Google go-live / SEO session:** item 5 above (Stripe confirmed end
+to end — live mode, not test); the "no role pages" and "sitemap omits
+`/companies`/company profiles" SEO gaps (category landing pages shipped; company
+profiles were already in the sitemap — that line was stale, see
+`getCompanySlugs()` in `queries.ts`); favicon was not on this list but is fixed
+(see that session's section). **NOT done, still open:** items 1, 2, 3, 6, 7, 9,
+10, 11, 13; item 8's branch list (unchanged); item 12 (FCP/LCP re-check).
 
 ---
 
