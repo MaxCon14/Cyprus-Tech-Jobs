@@ -1,0 +1,50 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import { CategoryPage } from "../../_shared/CategoryPage";
+
+export const dynamic = "force-dynamic";
+
+const BASE = "https://cyprustech.careers";
+
+async function getCategory(slug: string) {
+  return prisma.category.findUnique({
+    where:   { slug },
+    include: {
+      parent:   { select: { name: true, slug: true } },
+      children: { select: { name: true, slug: true }, orderBy: { name: "asc" } },
+    },
+  });
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const cat = await getCategory(slug).catch(() => null);
+  if (!cat) return { title: "Category not found | CyprusTech.Careers" };
+
+  const title       = `${cat.name} Jobs in Cyprus | CyprusTech.Careers`;
+  const description = `Find the latest ${cat.name} jobs in Cyprus — open roles in Limassol, Nicosia, Larnaca and remote, every listing with a verified salary. Updated daily.`;
+  const url         = `${BASE}/jobs/category/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph:  { title: `${cat.name} Jobs in Cyprus`, description, url, type: "website" },
+    twitter:    { card: "summary_large_image", title: `${cat.name} Jobs in Cyprus`, description },
+  };
+}
+
+export default async function CategoryJobsPage({
+  params,
+  searchParams,
+}: {
+  params:       Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
+}) {
+  const { slug } = await params;
+  const cat = await getCategory(slug);
+  if (!cat) notFound();
+
+  return <CategoryPage category={cat} searchParams={await searchParams} />;
+}

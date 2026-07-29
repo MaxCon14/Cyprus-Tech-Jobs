@@ -6,7 +6,7 @@ import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
 import { CITIES } from "@/lib/placeholder-data";
 import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS } from "@/lib/taxonomy";
-import { jsonLd } from "@/lib/schema";
+import { buildFAQSchema, jsonLd } from "@/lib/schema";
 
 const PAGE_SIZE = 20;
 const BASE_URL  = "https://cyprustech.careers";
@@ -135,12 +135,39 @@ export async function CityPage({ config, searchParams }: Props) {
     ],
   };
 
+  /* ItemList of the jobs on this page — helps Google read it as a jobs collection. */
+  const itemListSchema = serialisedJobs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": serialisedJobs.map((j, i) => ({
+      "@type": "ListItem",
+      "position": (pageNum - 1) * PAGE_SIZE + i + 1,
+      "url": `${BASE_URL}/jobs/${j.slug}`,
+      "name": j.title,
+    })),
+  } : null;
+
+  /* City-specific FAQ — unique content per page (name + live count) and FAQ schema. */
+  const cityFaqs = [
+    { question: `How many tech jobs are available in ${displayName}?`,
+      answer: `There ${total === 1 ? "is" : "are"} currently ${total} active tech job${total === 1 ? "" : "s"} in ${displayName} on CyprusTech.Careers, updated daily — spanning software engineering, DevOps, design, data and product. Every listing shows a verified salary.` },
+    { question: `What salary can I expect for tech jobs in ${displayName}?`,
+      answer: `Tech salaries in ${displayName} typically range from about €35,000 for junior roles to €120,000+ for senior and lead positions, with fintech and forex companies paying at the top of the range. Every listing on CyprusTech.Careers shows the salary up front.` },
+    { question: `Are there remote tech jobs in ${displayName}?`,
+      answer: `Yes — many companies hiring in ${displayName} offer remote or hybrid arrangements. Use the work-type filter or browse the remote jobs page to see roles you can do from anywhere in Cyprus.` },
+  ];
+  const faqSchema = buildFAQSchema(cityFaqs);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }}
       />
+      {itemListSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(itemListSchema) }} />
+      )}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
 
       <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
@@ -273,8 +300,21 @@ export async function CityPage({ config, searchParams }: Props) {
               </div>
             )}
 
-            {/* SEO internal links to other cities */}
+            {/* City FAQ — content depth + FAQ schema above */}
             <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
+              <h2 className="h3" style={{ marginBottom: 16 }}>Tech jobs in {displayName} — FAQ</h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                {cityFaqs.map(f => (
+                  <div key={f.question}>
+                    <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{f.question}</div>
+                    <p className="body-s" style={{ color: "var(--text-muted)", margin: 0, lineHeight: 1.6 }}>{f.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SEO internal links to other cities */}
+            <div style={{ marginTop: 40, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 14 }}>BROWSE JOBS BY CITY</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {OTHER_CITIES.filter(c => c.slug !== slug).map(c => (

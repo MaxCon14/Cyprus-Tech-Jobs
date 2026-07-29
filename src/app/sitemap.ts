@@ -17,6 +17,7 @@ const STATIC: MetadataRoute.Sitemap = [
   { url: `${BASE}/jobs/limassol`,      lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
   { url: `${BASE}/jobs/larnaca`,       lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
   { url: `${BASE}/jobs/paphos`,        lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
+  { url: `${BASE}/jobs/famagusta`,     lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
   { url: `${BASE}/jobs/remote`,        lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
   { url: `${BASE}/privacy`,            lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
   { url: `${BASE}/terms`,              lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
@@ -42,7 +43,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] jobs query failed:", err);
   }
 
-/* ── Blog posts ── */
+  /* ── Category landing pages (parents + roles) ── */
+  let categoryEntries: MetadataRoute.Sitemap = [];
+  try {
+    const categories = await prisma.category.findMany({ select: { slug: true } });
+    categoryEntries = categories.map(c => ({
+      url:             `${BASE}/jobs/category/${c.slug}`,
+      lastModified:    new Date(),
+      changeFrequency: "daily" as const,
+      priority:        0.7,
+    }));
+  } catch (err) {
+    console.error("[sitemap] categories query failed:", err);
+  }
+
+  /* ── Blog posts ── */
   let blogEntries: MetadataRoute.Sitemap = [];
   try {
     const posts = await getAllPosts();
@@ -70,5 +85,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] companies query failed:", err);
   }
 
-  return [...STATIC, ...jobEntries, ...companyEntries, ...blogEntries];
+  return [...STATIC, ...categoryEntries, ...jobEntries, ...companyEntries, ...blogEntries];
 }

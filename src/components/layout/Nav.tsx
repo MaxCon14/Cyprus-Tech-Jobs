@@ -46,7 +46,7 @@ const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNod
 
 function flyoutItems(categories: NavCategory[]): Record<FlyoutSection, { label: string; href: string }[]> {
   return {
-    category: categories.map(c => ({ label: c.name,  href: `/jobs?category=${c.slug}` })),
+    category: categories.map(c => ({ label: c.name,  href: `/jobs/category/${c.slug}` })),
     type:     JOB_TYPES.map(t =>    ({ label: t.label, href: `/jobs?employment=${t.value}` })),
     city:     CITIES.map(c =>       ({ label: c.label, href: c.href })),
   };
@@ -311,7 +311,7 @@ export function Nav({ categories }: { categories: NavCategory[] }) {
                 <div className={`mobile-menu-sub${mobileCatOpen ? " open" : ""}`}>
                   <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
                     {categories.map(cat => (
-                      <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="mobile-menu-link">
+                      <Link key={cat.slug} href={`/jobs/category/${cat.slug}`} className="mobile-menu-link">
                         {cat.name}
                       </Link>
                     ))}

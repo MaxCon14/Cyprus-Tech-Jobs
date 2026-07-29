@@ -251,7 +251,7 @@ export default async function HomePage() {
               {/* Category filter chips */}
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
                 {categories.map((cat, i) => (
-                  <Link key={cat.slug} href={cat.slug ? `/jobs?category=${cat.slug}` : "/jobs"} className={`chip${i === 0 ? " chip-active" : ""}`}>
+                  <Link key={cat.slug} href={cat.slug ? `/jobs/category/${cat.slug}` : "/jobs"} className={`chip${i === 0 ? " chip-active" : ""}`}>
                     {cat.label} <span className="chip-count">{cat.count}</span>
                   </Link>
                 ))}
@@ -335,7 +335,7 @@ export default async function HomePage() {
               return (
                 <Link
                   key={cat.slug}
-                  href={`/jobs?category=${cat.slug}`}
+                  href={`/jobs/category/${cat.slug}`}
                   style={{ textDecoration: "none", display: "block", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "clamp(16px, 2.5vw, 22px)", transition: "all 180ms var(--ease-out)", cursor: "pointer" }}
                   className="category-card"
                 >
