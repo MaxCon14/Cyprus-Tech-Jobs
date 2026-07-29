@@ -20,9 +20,11 @@ async function getCategory(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const cat = await getCategory(slug).catch(() => null);
-  if (!cat) return { title: "Category not found | CyprusTech.Careers" };
+  if (!cat) return { title: "Category not found" };
 
-  const title       = `${cat.name} Jobs in Cyprus | CyprusTech.Careers`;
+  // The root layout applies a `%s | CyprusTech.Careers` template, so the title
+  // must NOT include the suffix here or it doubles.
+  const title       = `${cat.name} Jobs in Cyprus`;
   const description = `Find the latest ${cat.name} jobs in Cyprus — open roles in Limassol, Nicosia, Larnaca and remote, every listing with a verified salary. Updated daily.`;
   const url         = `${BASE}/jobs/category/${slug}`;
 

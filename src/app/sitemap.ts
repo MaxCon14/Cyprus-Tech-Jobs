@@ -17,7 +17,6 @@ const STATIC: MetadataRoute.Sitemap = [
   { url: `${BASE}/jobs/limassol`,      lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
   { url: `${BASE}/jobs/larnaca`,       lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
   { url: `${BASE}/jobs/paphos`,        lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
-  { url: `${BASE}/jobs/famagusta`,     lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
   { url: `${BASE}/jobs/remote`,        lastModified: new Date(), changeFrequency: "daily",   priority: 0.8 },
   { url: `${BASE}/privacy`,            lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
   { url: `${BASE}/terms`,              lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },

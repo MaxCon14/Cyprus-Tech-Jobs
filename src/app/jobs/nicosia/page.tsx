@@ -11,7 +11,7 @@ const CONFIG = {
 } as const;
 
 export const metadata: Metadata = {
-  title:       "Tech Jobs in Nicosia, Cyprus | CyprusTech.Careers",
+  title:       "Tech Jobs in Nicosia, Cyprus",
   description: "Find the latest software engineering, design, DevOps and product jobs in Nicosia. Updated daily with verified salaries.",
   alternates:  { canonical: "https://cyprustech.careers/jobs/nicosia" },
   openGraph: {
