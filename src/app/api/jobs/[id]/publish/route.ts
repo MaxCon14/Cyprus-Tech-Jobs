@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeJobHtml } from "@/lib/sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -117,7 +117,7 @@ export async function POST(
     ]);
 
     // Notify Google Indexing API — non-blocking
-    void notifyGoogle(updated.slug, "URL_UPDATED");
+    after(() => notifyGoogle(updated.slug, "URL_UPDATED"));
 
     return NextResponse.json({ jobSlug: updated.slug });
   } catch (err) {

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeJobHtml } from "@/lib/sanitize";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   await linkJobTags(job.id, parseTagNames(rawTags));
 
   // Curated job published straight to ACTIVE → tell Google to crawl it now.
-  if (job.status === "ACTIVE") void notifyGoogle(job.slug, "URL_UPDATED");
+  if (job.status === "ACTIVE") after(() => notifyGoogle(job.slug, "URL_UPDATED"));
 
   return NextResponse.json(job);
 }

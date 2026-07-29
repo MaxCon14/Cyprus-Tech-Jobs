@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { notifyGoogle } from "@/lib/google-indexing";
@@ -44,7 +44,7 @@ export async function PATCH(
   });
 
   // ACTIVE → tell Google the page is live; PAUSED → remove from Jobs results
-  void notifyGoogle(updated.slug, newStatus === "ACTIVE" ? "URL_UPDATED" : "URL_DELETED");
+  after(() => notifyGoogle(updated.slug, newStatus === "ACTIVE" ? "URL_UPDATED" : "URL_DELETED"));
 
   return NextResponse.json({ status: newStatus });
 }

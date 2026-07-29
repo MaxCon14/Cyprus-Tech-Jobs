@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeJobHtml } from "@/lib/sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -92,7 +92,7 @@ export async function PATCH(
     await linkJobTags(id, parseTagNames(rawTags));
 
     // If the job is active, re-ping Google so updated content gets re-indexed
-    if (job.status === "ACTIVE") void notifyGoogle(updated.slug, "URL_UPDATED");
+    if (job.status === "ACTIVE") after(() => notifyGoogle(updated.slug, "URL_UPDATED"));
 
     return NextResponse.json({ jobSlug: updated.slug });
   } catch (err) {
@@ -129,7 +129,7 @@ export async function DELETE(
   try {
     await prisma.job.update({ where: { id }, data: { status: "CLOSED" } });
     // Tell Google to remove this URL from Jobs results
-    void notifyGoogle(job.slug, "URL_DELETED");
+    after(() => notifyGoogle(job.slug, "URL_DELETED"));
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[jobs/delete]", err);

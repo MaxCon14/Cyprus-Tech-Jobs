@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeJobHtml } from "@/lib/sanitize";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
@@ -58,7 +58,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   // Notify Google: a live listing was updated; anything else (paused, closed,
   // draft) should be pulled from Jobs results. Curated jobs are edited only
   // here, so without this they never reached the Indexing API at all.
-  void notifyGoogle(job.slug, job.status === "ACTIVE" ? "URL_UPDATED" : "URL_DELETED");
+  after(() => notifyGoogle(job.slug, job.status === "ACTIVE" ? "URL_UPDATED" : "URL_DELETED"));
 
   return NextResponse.json(job);
 }
@@ -67,6 +67,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   if (!await getAdminUser()) return adminUnauthorized();
   const { id } = await params;
   const job = await prisma.job.delete({ where: { id } });
-  void notifyGoogle(job.slug, "URL_DELETED");
+  after(() => notifyGoogle(job.slug, "URL_DELETED"));
   return NextResponse.json({ ok: true });
 }
