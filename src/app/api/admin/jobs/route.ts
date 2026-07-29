@@ -4,6 +4,7 @@ import { sanitizeJobHtml } from "@/lib/sanitize";
 import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
 import { linkJobTags, parseTagNames } from "@/lib/job-tags";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
+import { notifyGoogle } from "@/lib/google-indexing";
 
 function slugify(str: string) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -62,6 +63,9 @@ export async function POST(req: NextRequest) {
 
   // Link skill tags
   await linkJobTags(job.id, parseTagNames(rawTags));
+
+  // Curated job published straight to ACTIVE → tell Google to crawl it now.
+  if (job.status === "ACTIVE") void notifyGoogle(job.slug, "URL_UPDATED");
 
   return NextResponse.json(job);
 }
