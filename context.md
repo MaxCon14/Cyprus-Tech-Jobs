@@ -274,6 +274,12 @@ category route.
 `src/app/jobs/famagusta/page.tsx`) — it was briefly added to the sitemap this
 session and then reverted; a sitemap should not list redirect URLs.
 
+**Job-type landing pages added since, and category-page filters restored — see
+the "SEO landing pages + GEO" session below.** `/jobs/type/<slug>` now exists
+for the five employment types (indexable, canonical, schema-carrying), and the
+category pages — which had regressed to a row of "ROLES:" tag chips — got their
+real `FilterBar` back.
+
 **Still open:** no 410 for expired listings (they return 200 + noindex);
 `export const dynamic = "force-dynamic"` on job pages means no ISR; no
 role×city "money pages" as *dedicated* pages (e.g. a single page for "customer
@@ -612,6 +618,98 @@ actually live. `web_fetch_vercel_url` for anything that needs to see rendered
 output/response headers from the real production edge (bypasses the sandbox's
 `curl`-to-the-live-domain block) — but note it can return oversized results for
 full HTML pages; grep the saved file rather than re-fetching.
+
+---
+
+## Session: SEO landing pages + GEO, footer, dropped CV matcher
+
+All the code below shipped straight to `main` (production) at Maxim's explicit
+"push to main" requests — commits `f4db703` → `d15525f`. **These bypassed `test`,
+so `main` and `test` diverged; this context.md update is on a merge that brought
+that code back onto `test` and restored `main` as an ancestor (so `--ff-only`
+releases work again).** If you're reading this on `test`, the code and the docs
+now match; `main`'s own `context.md` stays stale until the next release
+fast-forwards it.
+
+**Category pages got their filters back (`f4db703`).** The earlier "category
+landing pages" work (see the Google go-live SEO notes) had since regressed —
+`/jobs/<category>` was rendering a row of "ROLES:" tag chips instead of a filter
+panel, so category pages had lost filtering entirely. Restored real filtering:
+`CategoryPage.tsx` now renders the shared `FilterBar` scoped to the category
+(`basePath` = the category path, `hideCategoryFilter` so it doesn't offer to
+filter away the page's own category), filtering in place across type / employment
+/ level / city / skill / salary / search, with active-filter pills. `FilterBar.tsx`
+grew two props for this — `hideCategoryFilter` and `hideEmploymentFilter`,
+mirroring the existing `hideCityFilter` / `hideTypeFilter`; each hidden facet is
+excluded from `activeCount`, the `apply()` URL builder, and the rendered section.
+This was Maxim's "Option A": dedicated category pages **with** filters.
+
+**Indexable job-type landing pages (`596c44a`).** New route `/jobs/type/[slug]`
+for the five employment types (full-time, part-time, contract, internship,
+freelance). `JobTypePage.tsx` (new, modelled on `CityPage.tsx`) carries a unique
+intro + FAQ per type, Breadcrumb / ItemList / FAQ JSON-LD, and a `FilterBar` with
+`hideEmploymentFilter`. `type/[slug]/page.tsx` holds a `CONFIGS` map (unique
+metadata + canonical per type) and `generateStaticParams`. Category and city
+pages were enriched the same pass (fuller copy, per-page canonical, by-city /
+by-type internal links); the five `/jobs/type/*` URLs went into `sitemap.ts`.
+**Metadata shallow-merges and children override parents — every one of these
+pages sets its own `alternates.canonical`, or it inherits the parent's and
+self-cannibalises.**
+
+**FAQs are dropdowns everywhere (`13f183d`).** Every FAQ block that was static
+`<h3>`/`<p>` text now renders through the `FaqAccordion` component (category,
+city, job-type pages). The visible copy still matches the `FAQPage` JSON-LD, so
+rich-result eligibility is unchanged — only the presentation collapsed.
+
+**GEO — `/llms.txt` + AI crawlers explicitly welcomed (`3d91a8f`).** New route
+`src/app/llms.txt/route.ts` (`revalidate = 3600`) emits llmstxt.org-style
+markdown built from `getCategoriesWithCount`, with a safe hardcoded fallback if
+the DB is unreachable at build/request time. `robots.ts` was refactored to a
+shared `DISALLOW` list plus an `AI_CRAWLERS` array that **explicitly `allow`s**
+the AI search/training bots we want indexing us — GPTBot, OAI-SearchBot,
+ChatGPT-User, ClaudeBot, anthropic-ai, Claude-Web, PerplexityBot, Perplexity-User,
+Google-Extended, Applebot-Extended, CCBot, cohere-ai. (Maxim also floated
+"AI-logo footer links" — discussed, not built: `/llms.txt` + robots is the
+substantive GEO lever; decorative logo links are not.)
+
+**Footer — job-type links + social links live (`4fca87d`, `bc7231b`, `034aa31`,
+`d15525f`).** Added a `JOB_TYPE_LINKS` group under the "browse jobs" column
+pointing at the new `/jobs/type/*` pages. Activated the social row in `Footer.tsx`
+(`SocialLinks`): Instagram (`instagram.com/cyprustech.careers`), Threads
+(`threads.com/@cyprustech.careers`), Facebook (`facebook.com/share/1Beo4MTY9w/`)
+and LinkedIn (`linkedin.com/company/cyprus-tech-careers/`) are now `active: true`
+real links; Medium was already live. Any `socials` entry with `active: true` + an
+`href` renders as a `target="_blank"` icon link; a `null` / `active:false` entry
+stays a greyed "coming soon" placeholder.
+
+**Bug fixed during a self-review (`cf05040`).** `CityPage.tsx`'s by-type internal
+links pointed at `/jobs/type/${slug}?city=Remote`, but `JobTypePage` ignores a
+`?city=` param, so the links were dead weight. Corrected to
+`/jobs/${slug}?employment=${t.employment}`.
+
+**CV matcher — built, then DROPPED at Maxim's request. Not on `main` or `test`.**
+A "Match my CV" feature was built on a working branch: upload a CV → one Anthropic
+call (`claude-haiku-4-5-20251001`, base64 PDF `document` block) extracts a
+structured profile, then a free **deterministic** scorer ranks every active job
+against it, best-match first, paginated. Files: `src/lib/cv-match.ts`,
+`api/cv-match/route.ts`, `components/cv-match/CvMatchUploader.tsx`,
+`jobs/match/page.tsx` + `jobs/match/[id]/page.tsx`, a `CvMatch` Prisma model and
+its migration, plus a hero "Match my CV" button. Preview returned "Matching
+failed" — root cause confirmed via Supabase MCP `list_tables`: **the `cv_matches`
+migration was never applied to the shared prod/preview DB**, so the insert hit a
+non-existent table. The blocker was purely operational (an unapplied migration),
+not a code defect. Maxim said "drop this feature", so it was fully reverted —
+schema, migration, routes, component and hero button all removed; **no schema
+change ever reached the database.** If revisited, the whole feature is recoverable
+from git history (branch commits around `c27f4b9`); the only thing needed to make
+it run is `prisma migrate deploy` against the real DB before the route goes live.
+Cost note for a redo: ~1,500–3,000 input tokens per CV page at Haiku 4.5's
+$1 / $5 per-MTok — cents per upload, since only the extract step calls the model.
+
+**Favicon "still not in Google results" — not a code bug.** Maxim asked why the
+search result still shows no icon. The favicon code is only a couple of days old
+(see the Google go-live session); Google simply hasn't recrawled `/favicon.ico`
++ the manifest yet. Recrawl latency, nothing to fix.
 
 ---
 
