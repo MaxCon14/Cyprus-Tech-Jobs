@@ -58,6 +58,14 @@ const CITY_LINKS = [
   ["Remote",   "/jobs/remote"   ],
 ] as const;
 
+const JOB_TYPE_LINKS = [
+  ["Full-time",  "/jobs/type/full-time"  ],
+  ["Part-time",  "/jobs/type/part-time"  ],
+  ["Contract",   "/jobs/type/contract"   ],
+  ["Internship", "/jobs/type/internship" ],
+  ["Freelance",  "/jobs/type/freelance"  ],
+] as const;
+
 const COMPANY_LINKS = [
   ["Blog",             "/blog"],
   ["FAQ",              "/faq"],
@@ -217,10 +225,13 @@ export async function Footer() {
             </>
           )}
 
-          {/* Jobs by city — always shown */}
+          {/* Browse jobs (city + type) — always shown. Kept as one column so the
+              grid stays 4/5 wide; a 6th column has no grid class and would wrap. */}
           <div>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>Jobs by city</div>
             <FooterLinks links={CITY_LINKS} />
+            <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12, marginTop: 20 }}>Jobs by type</div>
+            <FooterLinks links={JOB_TYPE_LINKS} />
           </div>
 
           {/* Company — always shown */}
