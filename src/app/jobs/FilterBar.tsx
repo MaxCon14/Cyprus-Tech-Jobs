@@ -38,6 +38,9 @@ interface Props {
    *  scopes the category — showing a category picker here would let it fight
    *  the URL). */
   hideCategoryFilter?: boolean;
+  /** Hide the job-type (employment) filter, e.g. on job-type pages where the
+   *  path already scopes the employment type. */
+  hideEmploymentFilter?: boolean;
 }
 
 const SALARY_OPTIONS = [
@@ -48,7 +51,7 @@ const SALARY_OPTIONS = [
   { label: "€100k+",     value: "100000" },
 ];
 
-export function FilterBar({ categories, current, cities, basePath = "/jobs", hideCityFilter = false, hideTypeFilter = false, hideCategoryFilter = false }: Props) {
+export function FilterBar({ categories, current, cities, basePath = "/jobs", hideCityFilter = false, hideTypeFilter = false, hideCategoryFilter = false, hideEmploymentFilter = false }: Props) {
   const router  = useRouter();
   const parents = categories.filter(c => c.slug !== "");
 
@@ -74,14 +77,14 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
   const hasChildren    = (selectedParent?.children.length ?? 0) > 0;
   const resolvedCategory = subSlug || parentSlug || undefined;
 
-  const activeCount = [!hideCategoryFilter && resolvedCategory, !hideTypeFilter && type, employment, level, !hideCityFilter && city, salary].filter(Boolean).length;
+  const activeCount = [!hideCategoryFilter && resolvedCategory, !hideTypeFilter && type, !hideEmploymentFilter && employment, level, !hideCityFilter && city, salary].filter(Boolean).length;
 
   function apply() {
     const p = new URLSearchParams();
     if (current.search)                          p.set("search",   current.search);
     if (!hideCategoryFilter && resolvedCategory) p.set("category", resolvedCategory);
     if (!hideTypeFilter  && type)    p.set("type",     type);
-    if (employment)                  p.set("employment", employment);
+    if (!hideEmploymentFilter && employment) p.set("employment", employment);
     if (current.skill)               p.set("skill",      current.skill);
     if (level)                       p.set("level",    level);
     if (!hideCityFilter  && city)    p.set("city",     city);
@@ -166,9 +169,11 @@ export function FilterBar({ categories, current, cities, basePath = "/jobs", hid
       {/* Job type — the nav links here with ?employment=…, but until now the
           panel had no control for it, so arriving from that menu left a filter
           applied that could be seen and not changed. */}
-      <FilterSection title="Job type">
-        <Select name="employment" value={employment} placeholder="Any job type" onChange={setEmployment} options={EMPLOYMENT_OPTIONS} />
-      </FilterSection>
+      {!hideEmploymentFilter && (
+        <FilterSection title="Job type">
+          <Select name="employment" value={employment} placeholder="Any job type" onChange={setEmployment} options={EMPLOYMENT_OPTIONS} />
+        </FilterSection>
+      )}
 
       {/* Experience */}
       <FilterSection title="Experience">

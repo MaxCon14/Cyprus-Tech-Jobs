@@ -6,7 +6,7 @@ import { CITIES } from "@/lib/placeholder-data";
 import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS, EXPERIENCE_LABELS } from "@/lib/taxonomy";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
-import { buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
+import { buildBreadcrumbSchema, buildFAQSchema, jsonLd } from "@/lib/schema";
 
 const PAGE_SIZE = 20;
 const BASE_URL  = "https://cyprustech.careers";
@@ -19,6 +19,14 @@ const CITY_LINKS = [
   { displayName: "Larnaca",  slug: "larnaca"  },
   { displayName: "Paphos",   slug: "paphos"   },
   { displayName: "Remote",   slug: "remote"   },
+];
+
+const JOB_TYPE_LINKS = [
+  { displayName: "Full-time",  slug: "full-time"  },
+  { displayName: "Part-time",  slug: "part-time"  },
+  { displayName: "Contract",   slug: "contract"   },
+  { displayName: "Internship", slug: "internship" },
+  { displayName: "Freelance",  slug: "freelance"  },
 ];
 
 export interface CategoryNode {
@@ -144,12 +152,25 @@ export async function CategoryPage({ category, searchParams }: Props) {
     })),
   } : null;
 
+  /* Category-specific FAQ — unique content per page (name + live count) plus
+     FAQ schema, matching the depth of the city pages. */
+  const faqs = [
+    { question: `How many ${name} jobs are available in Cyprus?`,
+      answer: `There ${categoryTotal === 1 ? "is" : "are"} currently ${categoryTotal} ${name} job${categoryTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily. Roles span Limassol, Nicosia, Larnaca and remote, and every listing shows a verified salary.` },
+    { question: `What salary do ${name} roles in Cyprus pay?`,
+      answer: `${name} salaries in Cyprus typically range from about €35,000 for junior positions to €120,000+ for senior and lead roles, with fintech and forex companies paying at the top of the range. Every listing on CyprusTech.Careers shows the salary up front.` },
+    { question: `Which cities have the most ${name} jobs in Cyprus?`,
+      answer: `Limassol leads for ${name.toLowerCase()} roles thanks to its fintech and forex cluster, followed by Nicosia's gaming and enterprise scene. Larnaca and Paphos are growing, and many roles are fully remote — use the city filter to narrow your search.` },
+  ];
+  const faqSchema = buildFAQSchema(faqs);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
       {itemListSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(itemListSchema) }} />
       )}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
 
       <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
@@ -280,13 +301,38 @@ export async function CategoryPage({ category, searchParams }: Props) {
           </div>
         </div>
 
-        {/* SEO internal links — browse this category by city */}
+        {/* FAQ — content depth + FAQ schema above */}
         <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
+          <h2 className="h3" style={{ marginBottom: 16 }}>{name} jobs in Cyprus — FAQ</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18, maxWidth: 720 }}>
+            {faqs.map(f => (
+              <div key={f.question}>
+                <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{f.question}</div>
+                <p className="body-s" style={{ color: "var(--text-muted)", margin: 0, lineHeight: 1.6 }}>{f.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* SEO internal links — browse this category by city */}
+        <div style={{ marginTop: 40, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
           <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 14 }}>{name.toUpperCase()} JOBS BY CITY</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {CITY_LINKS.map(c => (
               <Link key={c.slug} href={`/jobs/${c.slug}?category=${slug}`} className="chip">
                 {name} in {c.displayName}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* SEO internal links — browse this category by job type */}
+        <div style={{ marginTop: 32, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
+          <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 14 }}>{name.toUpperCase()} JOBS BY TYPE</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {JOB_TYPE_LINKS.map(t => (
+              <Link key={t.slug} href={`/jobs/type/${t.slug}?category=${slug}`} className="chip">
+                {t.displayName} {name}
               </Link>
             ))}
           </div>
