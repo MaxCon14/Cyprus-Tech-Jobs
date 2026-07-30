@@ -324,7 +324,7 @@ export async function CityPage({ config, searchParams }: Props) {
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 14 }}>{displayName.toUpperCase()} JOBS BY TYPE</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {JOB_TYPE_LINKS.map(t => (
-                  <Link key={t.slug} href={isRemote ? `/jobs/type/${t.slug}?city=Remote` : `/jobs/${slug}?employment=${t.employment}`} className="chip">
+                  <Link key={t.slug} href={`/jobs/${slug}?employment=${t.employment}`} className="chip">
                     {t.displayName} {isRemote ? "remote " : ""}jobs
                   </Link>
                 ))}
