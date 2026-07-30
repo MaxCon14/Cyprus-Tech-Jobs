@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/prisma";
 import { CreditSelector } from "./CreditSelector";
+import { FaqAccordion } from "@/components/home/FaqAccordion";
 
 export const metadata: Metadata = {
   title: "Buy Listing Slots — CyprusTech.Careers",
@@ -77,17 +78,14 @@ export default async function BuyCreditsPage() {
           <h2 className="h2" style={{ marginBottom: 16 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 10 }}><ShoppingBag size={16} /> How slots work</span>
           </h2>
-          {[
-            ["When do my slots expire?", "Slots don't expire — they sit in your account until you use them."],
-            ["Standard vs featured?", "Standard slots post to all category feeds. Featured slots pin to the top of results with a FEATURED badge for maximum visibility."],
-            ["How quickly do listings go live?", "Instantly. As soon as you click Post, your listing is live on the site."],
-            ["Can I buy more later?", "Yes — your balance stacks up. Buy as many as you need."],
-          ].map(([q, a]) => (
-            <div key={q} style={{ borderBottom: "1px solid var(--border)", paddingBlock: 14 }}>
-              <p className="body-s" style={{ fontWeight: 600, marginBottom: 4 }}>{q}</p>
-              <p className="body-s" style={{ color: "var(--text-muted)" }}>{a}</p>
-            </div>
-          ))}
+          <FaqAccordion
+            faqs={[
+              { q: "When do my slots expire?", a: "Slots don't expire — they sit in your account until you use them." },
+              { q: "Standard vs featured?", a: "Standard slots post to all category feeds. Featured slots pin to the top of results with a FEATURED badge for maximum visibility." },
+              { q: "How quickly do listings go live?", a: "Instantly. As soon as you click Post, your listing is live on the site." },
+              { q: "Can I buy more later?", a: "Yes — your balance stacks up. Buy as many as you need." },
+            ]}
+          />
         </div>
       </div>
     </div>

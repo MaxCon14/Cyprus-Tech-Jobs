@@ -4,6 +4,7 @@ import { getJobs, getJobCount, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
+import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { CITIES } from "@/lib/placeholder-data";
 import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS } from "@/lib/taxonomy";
 import { buildFAQSchema, jsonLd } from "@/lib/schema";
@@ -303,14 +304,7 @@ export async function CityPage({ config, searchParams }: Props) {
             {/* City FAQ — content depth + FAQ schema above */}
             <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
               <h2 className="h3" style={{ marginBottom: 16 }}>Tech jobs in {displayName} — FAQ</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                {cityFaqs.map(f => (
-                  <div key={f.question}>
-                    <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{f.question}</div>
-                    <p className="body-s" style={{ color: "var(--text-muted)", margin: 0, lineHeight: 1.6 }}>{f.answer}</p>
-                  </div>
-                ))}
-              </div>
+              <FaqAccordion faqs={cityFaqs.map(f => ({ q: f.question, a: f.answer }))} />
             </div>
 
             {/* SEO internal links to other cities */}
