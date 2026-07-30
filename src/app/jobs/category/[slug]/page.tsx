@@ -42,7 +42,16 @@ export default async function CategoryJobsPage({
   searchParams,
 }: {
   params:       Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string; search?: string }>;
+  searchParams: Promise<{
+    page?:       string;
+    search?:     string;
+    type?:       string;
+    employment?: string;
+    level?:      string;
+    city?:       string;
+    salary?:     string;
+    skill?:      string;
+  }>;
 }) {
   const { slug } = await params;
   const cat = await getCategory(slug);
