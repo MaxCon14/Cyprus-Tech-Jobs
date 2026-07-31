@@ -26,7 +26,7 @@ const fragmentMono = Fragment_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CyprusTech.Careers — Tech Jobs in Cyprus",
+    default: "Tech Jobs in Cyprus | CyprusTech.Careers",
     template: "%s | CyprusTech.Careers",
   },
   description:

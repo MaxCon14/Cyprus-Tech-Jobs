@@ -16,19 +16,24 @@ import type { Metadata } from "next";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "CyprusTech.Careers — Tech Jobs in Cyprus with Salaries",
-  description: "Find tech jobs in Cyprus with verified salaries. Browse software engineering, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
+  // Keyword-first, and WITHOUT the brand: the root layout's
+  // `title.template` ("%s | CyprusTech.Careers") appends the brand, so baking it
+  // in here again produced a doubled "… | CyprusTech.Careers | CyprusTech.Careers".
+  title: "Tech Jobs in Cyprus with Salaries",
+  description: "Find tech jobs in Cyprus with verified salaries. Browse IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote — everything you need to work in Cyprus tech.",
   alternates: { canonical: "https://cyprustech.careers" },
   openGraph: {
-    title: "CyprusTech.Careers — Tech Jobs in Cyprus with Salaries",
-    description: "Find tech jobs in Cyprus with verified salaries. Browse roles in Limassol, Nicosia, Larnaca and remote.",
+    // OpenGraph/Twitter titles don't go through the layout template, so they
+    // carry the brand explicitly.
+    title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
+    description: "Find tech jobs in Cyprus with verified salaries. IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
     url: "https://cyprustech.careers",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CyprusTech.Careers — Tech Jobs in Cyprus",
-    description: "Find tech jobs in Cyprus with verified salaries.",
+    title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
+    description: "Find tech jobs in Cyprus with verified salaries — IT, software, DevOps, design, data and product roles.",
   },
 };
 
@@ -146,7 +151,7 @@ export default async function HomePage() {
           </div>
 
           <h1 className="display-xl" style={{ marginBottom: 16, maxWidth: 780 }}>
-            Find your next tech role{" "}
+            Find your next tech job{" "}
             <em style={{ fontStyle: "normal", color: "var(--accent)" }}>in Cyprus.</em>
           </h1>
 
