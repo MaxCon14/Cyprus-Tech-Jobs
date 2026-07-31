@@ -89,5 +89,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] companies query failed:", err);
   }
 
-  return [...STATIC, ...categoryEntries, ...jobEntries, ...companyEntries, ...blogEntries];
+  /* ── Role × city landing pages ──
+     Only the combinations that actually have a live job are submitted —
+     publishing empty "X jobs in Y" pages to Google is thin content and hurts.
+     A job contributes to its own category slug AND its parent's, crossed with
+     its city (Limassol/Nicosia/Larnaca/Paphos) and, when remote, "remote". */
+  let roleCityEntries: MetadataRoute.Sitemap = [];
+  try {
+    const jobs = await prisma.job.findMany({
+      where:  { status: "ACTIVE" },
+      select: {
+        city:       true,
+        remoteType: true,
+        category:   { select: { slug: true, parent: { select: { slug: true } } } },
+      },
+    });
+    const CITY_SLUGS = ["limassol", "nicosia", "larnaca", "paphos"];
+    const combos = new Set<string>();
+    for (const j of jobs) {
+      const catSlugs  = [j.category?.slug, j.category?.parent?.slug].filter(Boolean) as string[];
+      const citySlugs: string[] = [];
+      const cityLower = j.city?.toLowerCase() ?? "";
+      for (const cs of CITY_SLUGS) if (cityLower.includes(cs)) citySlugs.push(cs);
+      if (j.remoteType === "REMOTE") citySlugs.push("remote");
+      for (const cat of catSlugs) for (const city of citySlugs) combos.add(`${cat}/${city}`);
+    }
+    roleCityEntries = [...combos].map(c => ({
+      url:             `${BASE}/jobs/category/${c}`,
+      lastModified:    new Date(),
+      changeFrequency: "daily" as const,
+      priority:        0.7,
+    }));
+  } catch (err) {
+    console.error("[sitemap] role×city query failed:", err);
+  }
+
+  return [...STATIC, ...categoryEntries, ...jobEntries, ...companyEntries, ...roleCityEntries, ...blogEntries];
 }
