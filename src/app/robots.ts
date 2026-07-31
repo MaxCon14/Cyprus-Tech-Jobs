@@ -1,17 +1,22 @@
 import type { MetadataRoute } from "next";
 
-/* Private/app areas no crawler should index. Shared by every user-agent rule
-   below so the AI crawlers get the same treatment as everyone else. */
+/* Private/app areas no crawler should fetch. Shared by every user-agent rule
+   below so the AI crawlers get the same treatment as everyone else.
+
+   NOTE: only paths that are non-HTML (/api/, /_next/) or auth-gated (admin,
+   dashboards) belong here. Public-but-functional pages that we want kept OUT of
+   the index — /login, /get-started, /buy-credits, /style-guide — are NOT blocked
+   here; they carry `robots: { index: false }` instead. Blocking them in
+   robots.txt while they're linked site-wide is exactly what produced Search
+   Console's "Indexed, though blocked by robots.txt": Google indexes the bare URL
+   from the links but can't crawl it to see the noindex. Letting it crawl and
+   read the noindex drops them cleanly. */
 const DISALLOW = [
   "/api/",
   "/admin/",
   "/employers/dashboard",
   "/candidates/dashboard",
   "/dashboard",
-  "/login",
-  "/get-started",
-  "/buy-credits",
-  "/style-guide",
   "/_next/",
 ];
 

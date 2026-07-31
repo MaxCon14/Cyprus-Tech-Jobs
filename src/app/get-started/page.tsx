@@ -4,6 +4,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Get Started — CyprusTech.Careers",
+  // Functional page, linked site-wide from the nav. noindex (not a robots.txt
+  // block) so Google crawls it, sees this, and drops it cleanly.
+  robots: { index: false, follow: true },
 };
 
 export default function GetStartedPage() {

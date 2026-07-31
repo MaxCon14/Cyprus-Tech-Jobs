@@ -11,6 +11,10 @@ import { FaqAccordion } from "@/components/home/FaqAccordion";
 export const metadata: Metadata = {
   title: "Buy Listing Slots — CyprusTech.Careers",
   description: "Purchase standard or featured job listing slots to post roles on CyprusTech.Careers.",
+  // Auth-gated purchase page. noindex (not a robots.txt block) so Google can
+  // crawl it, see this, and keep it out of the index without the "Indexed,
+  // though blocked" warning.
+  robots: { index: false, follow: true },
 };
 
 export default async function BuyCreditsPage() {

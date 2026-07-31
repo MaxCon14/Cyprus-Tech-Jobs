@@ -8,6 +8,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sign in — CyprusTech.Careers",
+  // Functional page, linked site-wide from the nav. Keep it out of the index
+  // with noindex (not a robots.txt block) so Google can crawl it, see this, and
+  // drop it — a robots block leaves it "Indexed, though blocked" instead.
+  robots: { index: false, follow: true },
 };
 
 type Props = { searchParams: Promise<{ error?: string }> };
