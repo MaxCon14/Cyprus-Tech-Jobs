@@ -264,8 +264,12 @@ export async function getCompanies(
 
 /** Slugs for the sitemap — directory members only, matching the index. */
 export async function getCompanySlugs() {
+  // Only companies with at least one ACTIVE job. A company page with no live
+  // listings is thin content, and this also keeps leftover test records (which
+  // have no active jobs) out of the sitemap. Previously this returned any
+  // company that had an employer, empty profiles included.
   return prisma.company.findMany({
-    where:  { employers: { some: {} } },
+    where:  { jobs: { some: { status: "ACTIVE" } } },
     select: { slug: true, updatedAt: true },
   });
 }

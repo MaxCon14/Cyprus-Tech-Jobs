@@ -8,6 +8,22 @@ const EMPLOYMENT_TYPE: Record<string, string> = {
   FREELANCE:  "CONTRACTOR",
 };
 
+/* A job's city → its Cyprus administrative district. Google recommends
+   `addressRegion` on a JobPosting's PostalAddress (the Rich Results Test warns
+   when it's absent); the district is the correct region value for Cyprus. Only
+   the towns we actually list are mapped — an unknown city just omits the region
+   rather than guessing. */
+const CITY_TO_REGION: Record<string, string> = {
+  "Limassol":  "Limassol",
+  "Nicosia":   "Nicosia",
+  "Larnaca":   "Larnaca",
+  "Paphos":    "Paphos",
+  "Famagusta": "Famagusta",
+  "Ayia Napa": "Famagusta",
+  "Paralimni": "Famagusta",
+  "Kyrenia":   "Kyrenia",
+};
+
 interface JobSchemaInput {
   id: string;
   slug: string;
@@ -69,6 +85,7 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
       "address": {
         "@type": "PostalAddress",
         "addressLocality": job.city ?? "Cyprus",
+        ...(job.city && CITY_TO_REGION[job.city] && { "addressRegion": CITY_TO_REGION[job.city] }),
         "addressCountry": "CY",
       },
     },
