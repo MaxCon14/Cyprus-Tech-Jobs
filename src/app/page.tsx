@@ -16,10 +16,12 @@ import type { Metadata } from "next";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  // Keyword-first, and WITHOUT the brand: the root layout's
-  // `title.template` ("%s | CyprusTech.Careers") appends the brand, so baking it
-  // in here again produced a doubled "… | CyprusTech.Careers | CyprusTech.Careers".
-  title: "Tech Jobs in Cyprus with Salaries",
+  // Keyword-first, with the brand written in explicitly. Next.js does NOT run
+  // the root layout's `title.template` over this page: the index page shares the
+  // root layout's own segment, and a template only decorates *child* segments.
+  // (Verified live: /jobs gets the "| CyprusTech.Careers" suffix, the homepage
+  // does not.) So unlike every child page, the brand has to be added here.
+  title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
   description: "Find tech jobs in Cyprus with verified salaries. Browse IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote — everything you need to work in Cyprus tech.",
   alternates: { canonical: "https://cyprustech.careers" },
   openGraph: {
