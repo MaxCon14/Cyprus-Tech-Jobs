@@ -280,16 +280,21 @@ for the five employment types (indexable, canonical, schema-carrying), and the
 category pages — which had regressed to a row of "ROLES:" tag chips — got their
 real `FilterBar` back.
 
-**Still open:** no 410 for expired listings (they return 200 + noindex);
-`export const dynamic = "force-dynamic"` on job pages means no ISR; no
-role×city "money pages" as *dedicated* pages (e.g. a single page for "customer
-support jobs limassol" — today that intent is served by
-`/jobs/limassol?category=customer-support`, functional but a query-param URL,
-same limitation the category pages just fixed for the category-only case); no
-`hreflang` for `el-CY`/`en-CY`; robots doesn't disallow filter query params.
-Two **test company records** (`/companies/test-company`, `/companies/test`) are
-sitting in the sitemap from test data — cosmetic, but worth deleting in admin so
-Google doesn't index them.
+**Still open:** `export const dynamic = "force-dynamic"` on job pages means no
+ISR; no `hreflang` for `el-CY`/`en-CY`; robots doesn't disallow filter query
+params (low risk — filtered views canonicalise to the base page).
+
+**Closed since** (see the "title/robots/GfJ + role×city" session below): role×city
+"money pages" now exist as dedicated indexable pages (`/jobs/category/<slug>/<city>`);
+the two test company records are gone from the sitemap (`getCompanySlugs` now
+requires an active job).
+
+**Deliberately not done — a 410 for expired listings.** The current handling
+(200 + `noindex` + JobPosting schema removed + "Closed" label) is a
+Google-compliant way to retire a posting, it's better UX than a dead 410 (the
+candidate lands on a "browse similar" page), the Indexing API already pings
+`URL_DELETED` on expiry, and the App Router can't cleanly return a 410 *with*
+rendered content. Left as-is on purpose, not an oversight.
 
 ---
 
@@ -710,6 +715,105 @@ $1 / $5 per-MTok — cents per upload, since only the extract step calls the mod
 search result still shows no icon. The favicon code is only a couple of days old
 (see the Google go-live session); Google simply hasn't recrawled `/favicon.ico`
 + the manifest yet. Recrawl latency, nothing to fix.
+
+---
+
+## Session: title/robots/Google-for-Jobs SEO + role×city money pages
+
+An SEO-focused session. Everything below shipped to `main` (production) at
+Maxim's explicit "ship it" requests; `main` and `test` are level again at the end.
+Driven by a plain goal — "rank higher when people search Cyprus/tech jobs".
+
+**Blog post — original Cyprus-fintech piece (`src/lib/blog.ts`, Post 4).** Maxim
+saw an ergodotisi.com article on Cyprus fintech growth and wanted our own, SEO'd
+and worded differently. Their page 403'd (Cloudflare), which was fine — wrote a
+fully original ~12-min post angled on *economic impact + the jobs the sector
+creates* (deliberately distinct from the existing Limassol-tech-hub post's
+city angle). Slug `cyprus-fintech-economic-impact-jobs-2026`, category "Market
+Insights". Uses the standard `BlogSection[]` shape so it renders through the
+existing template with Article/Breadcrumb schema, canonical, OG/Twitter — no new
+code. House rule kept: structural facts (12.5% tax, CySEC, MiCA, non-dom) are
+real; market-share/salary figures are hedged as directional.
+
+**Keyword-first titles — and a Next.js gotcha worth remembering.** The homepage
+`<title>` and the root layout's `title.default` led with the brand; front-loaded
+them with the keyword instead (homepage now "Tech Jobs in Cyprus with Salaries |
+CyprusTech.Careers"), broadened the meta description ("IT", "software", "work in
+Cyprus tech"), and changed the H1 "tech role" → "tech job". **The gotcha:** I
+first claimed the homepage title was *doubling* via `title.template`. Wrong —
+verified live that Next.js does **not** apply a layout's `title.template` to the
+index page (the root `page.tsx` shares the root `layout.tsx`'s own segment; a
+template only decorates *child* segments). Proof: `/jobs` renders with the
+"| CyprusTech.Careers" suffix, the homepage does not. So there was never a
+double; removing the baked-in brand simply dropped it, and the brand had to be
+written back into the homepage title *explicitly*. Child-page titles (category,
+city, job-type, role×city) correctly omit the brand and let the template add it.
+
+**Search Console "Indexed, though blocked by robots.txt" — fixed with the right
+pattern.** `/login`, `/get-started`, `/buy-credits` are linked site-wide from the
+nav (logged-out state), so Google discovered them everywhere while `robots.ts`
+*blocked* them — the exact recipe for that warning (Google indexes the bare URL
+from the links but can't crawl it to see a noindex). Fix: give those pages
+`robots: { index: false }` and **remove** them (plus `/style-guide`, which already
+had noindex) from the robots.txt `DISALLOW`, so Google crawls them, reads the
+noindex, and drops them cleanly. `robots.txt` now blocks only non-HTML (`/api/`,
+`/_next/`) and auth-gated (`/admin`, dashboards) areas. Verified live. General
+rule: to keep a *linked* page out of the index, use `noindex`, never a robots
+block.
+
+**Google for Jobs — was already ~80% set up; closed the last gap.** No signup
+exists for the Jobs widget — eligibility is just valid `JobPosting` structured
+data on crawlable pages, which the active job pages already emit (plus the
+Indexing API pings). Added `addressRegion` (a city→Cyprus-district map in
+`src/lib/schema.ts`) to `jobLocation` — the one Google-recommended address field
+the Rich Results Test flagged that we can actually fill (no per-job
+`postalCode`/`streetAddress` data). Everything else was already correct
+(`directApply:false`, hybrid keeps `jobLocation`, TELECOMMUTE only for remote).
+
+**Sitemap cleanup.** `getCompanySlugs` (sitemap-only) now requires `jobs: { some:
+{ status: "ACTIVE" } }` instead of "any company with an employer", so empty
+company profiles — and the leftover `test`/`test-company` records — stop being
+submitted to Google.
+
+**Role×city "money pages" — the biggest new lever.** The high-intent long-tail
+("<role> jobs <city>") had no dedicated page; the intent was only reachable as a
+query-param filter that canonicalised back to the base category page (so Google
+never indexed it separately). Built dedicated pages:
+- New route `src/app/jobs/category/[slug]/[city]/page.tsx` (`force-dynamic`) +
+  new shared component `src/app/jobs/_shared/CategoryCityPage.tsx` (mirrors
+  `CategoryPage`, scoped to a fixed location). Locations: Limassol, Nicosia,
+  Larnaca, Paphos, **Remote** (remote swaps the city filter for
+  `remoteType=REMOTE`). URL e.g. `/jobs/category/data-analyst/limassol`,
+  `/jobs/category/backend/remote`.
+- Each page: **self-canonical**, unique keyword title/H1/description ("<Role> Jobs
+  in <City>"), role+city-specific intro & FAQ, Breadcrumb + ItemList + FAQPage
+  JSON-LD, full filtering (category + location fixed by the path).
+- **Quality gate:** only combos with ≥1 live job go in the sitemap; empty combos
+  still render a helpful "browse all" state but are `noindex` (metadata checks the
+  count) — so no thin/empty pages get indexed. URL scheme is
+  `/jobs/category/[slug]/[city]` (nesting under the existing category route avoids
+  colliding with the static `/jobs/<city>` folders).
+- Interlinking: the category page's "jobs by city" chips were repointed from the
+  old `/jobs/<city>?category=<slug>` query-param URLs to these dedicated pages,
+  giving Google a crawl path to every combo.
+- **Verified live** on production (`/jobs/category/data-analyst/limassol`): title
+  "Data Analyst Jobs in Limassol | CyprusTech.Careers", matching H1,
+  self-referencing canonical, BreadcrumbList + ItemList + FAQPage present; ~22
+  combos in the sitemap; no test-company URLs.
+
+**Expectation set with Maxim:** these are on-page wins — live, but ranking still
+needs Google to recrawl (days–weeks) and depends on off-page authority
+(backlinks) too. On-page is necessary, not sufficient. Next nudge: submit the
+sitemap in Search Console and Request Indexing on the top few money pages.
+
+**Process note (git hygiene).** Mid-session a commit landed on a *local* `main`
+by mistake, and local `test` had drifted behind `origin/test` (so a cherry-pick
+briefly skipped a shipped commit). Caught both before any bad push by checking
+`git branch --show-current` and comparing against the **real remote** with
+`git ls-remote` (local tracking refs had gone stale), then relocating the commit
+onto the true `origin/test` tip. Lesson reinforced: verify the branch *and*
+`git ls-remote origin` before committing/pushing; don't trust local refs after a
+release dance.
 
 ---
 
