@@ -399,7 +399,7 @@ export const TECH_STACK_OPTIONS = [
   "TypeScript", "JavaScript", "Python", "Go", "Rust", "Java", "Kotlin", "Swift",
   "C#", "C++", "PHP", "Ruby", "Scala", "Elixir", "Dart", "R", "Bash", "Lua",
   "Haskell", "Clojure", "Groovy", "Objective-C", "MATLAB", "Solidity",
-  "HTML", "CSS",
+  "HTML", "CSS", "SQL", "Perl", "PowerShell", "Julia", "Zig",
 
   // Frontend frameworks & libraries
   "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "SvelteKit",
@@ -418,7 +418,7 @@ export const TECH_STACK_OPTIONS = [
   "Node.js", "Express", "NestJS", "Fastify", "Hono", "Bun", "Deno",
   "FastAPI", "Django", "Flask", "Rails", "Laravel", "Symfony",
   "Spring Boot", "Quarkus", "Micronaut", "Ktor",
-  "Gin", "Echo", "Fiber", "Actix", "Axum",
+  "Gin", "Echo", "Fiber", "Actix", "Axum", ".NET",
 
   // API & data fetching
   "GraphQL", "tRPC", "REST API", "gRPC", "WebSockets", "OpenAPI", "Swagger",
@@ -428,6 +428,7 @@ export const TECH_STACK_OPTIONS = [
   "MongoDB", "Redis", "Elasticsearch", "Cassandra",
   "DynamoDB", "Firestore", "CockroachDB", "ClickHouse",
   "BigQuery", "Snowflake", "Redshift",
+  "Microsoft SQL Server", "Oracle Database", "Neo4j", "Couchbase", "InfluxDB",
   "Prisma", "DrizzleORM", "SQLAlchemy", "Hibernate", "TypeORM",
   "Supabase", "Firebase", "PlanetScale", "Neon",
 
@@ -457,6 +458,8 @@ export const TECH_STACK_OPTIONS = [
   "TensorFlow", "PyTorch", "scikit-learn", "Keras", "Hugging Face",
   "LangChain", "OpenAI API", "pandas", "NumPy", "Jupyter",
   "Apache Spark", "Airflow", "dbt", "MLflow",
+  "Matplotlib", "Seaborn", "Plotly", "OpenCV", "spaCy", "XGBoost",
+  "Anthropic Claude API", "Google Gemini API", "LlamaIndex", "Ollama",
 
   // Design & Creative — Adobe suite
   "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Adobe After Effects",
@@ -485,8 +488,14 @@ export const TECH_STACK_OPTIONS = [
   "Git", "GitHub", "GitLab", "Bitbucket",
   "Gradle", "Maven",
 
-  // Security
-  "Penetration Testing", "OWASP", "Burp Suite", "SIEM", "ISO 27001", "SOC 2",
+  // Security & Compliance
+  "Penetration Testing", "OWASP", "Burp Suite", "SIEM", "Splunk",
+  "Wireshark", "Metasploit", "Nessus", "Okta", "CrowdStrike",
+  "Zero Trust", "IAM", "PKI", "Vulnerability Management", "Threat Modeling",
+  "DevSecOps", "SAST", "DAST", "Cloud Security", "Network Security",
+  "ISO 27001", "ISO 27701", "ISO 9001", "SOC 2", "PCI DSS", "GDPR", "HIPAA",
+  "NIST Cybersecurity Framework", "CISSP", "CISM", "CISA", "CEH",
+  "CompTIA Security+", "OSCP", "CCSP",
 
   // Payments & integrations
   "Stripe", "Twilio", "SendGrid", "Auth0", "Clerk",
