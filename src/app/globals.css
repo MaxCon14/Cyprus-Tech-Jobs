@@ -1808,4 +1808,91 @@ details[open] .faq-chevron {
   animation: cv-star-rotate 1.7s ease-in-out infinite;
 }
 
+/* ── Admin — responsive shell ────────────────────────────────────────────
+   The admin panel was built as a fixed 216px sidebar + content row with no
+   breakpoints at all — on a phone the sidebar alone is wider than a lot of
+   screens, squeezing every form/table into a sliver. Below 768px the sidebar
+   becomes an off-canvas drawer (AdminNav toggles `.is-open`, JS lives there);
+   above 768px every rule here is inert and the layout is exactly as before. */
+/* Base (desktop) layout for the sidebar — width/position/height need to live
+   here rather than as an inline style so the mobile override below can
+   actually win; an inline style always beats a class regardless of media
+   query. Unchanged from the old inline values. */
+.admin-nav {
+  width: 216px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.admin-nav-backdrop { display: none; }
+.admin-nav-toggle   { display: none; }
+
+@media (max-width: 768px) {
+  .admin-nav {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    width: min(82vw, 280px);
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+    box-shadow: 2px 0 28px rgba(0, 0, 0, 0.28);
+  }
+  .admin-nav.is-open { transform: translateX(0); }
+
+  .admin-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+  .admin-nav-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+  .admin-nav-toggle {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    top: 9px;
+    left: 12px;
+    z-index: 70;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  /* Left padding reserves room for the hamburger button, which is
+     position:fixed at top:10/left:12 and only rendered below this breakpoint. */
+  .admin-header  { padding: 0 14px 0 56px !important; gap: 10px !important; }
+  .admin-main    { padding: 16px !important; }
+  .admin-email   { display: none; }
+}
+
+/* Two-column form/panel grids that never had a mobile fallback. Anything
+   pairing fields side by side in the admin forms and taxonomy/dashboard
+   panels should use this instead of an inline `1fr 1fr` grid. */
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .admin-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* AdminTable renders a plain <table> with no wrap — on narrow screens the
+   columns just got clipped by the card's `overflow: hidden` instead of being
+   reachable. Scope the scroll to the table only, not the whole page. */
+.admin-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 

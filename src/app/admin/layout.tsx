@@ -23,16 +23,16 @@ export default async function AdminLayout({
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
       <AdminNav />
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <header style={{
+        <header className="admin-header" style={{
           height: 52, borderBottom: "1px solid var(--border)",
           background: "var(--surface)", display: "flex", alignItems: "center",
           padding: "0 28px", gap: 12,
         }}>
-          <span className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 11 }}>
+          <span className="admin-email mono-s" style={{ color: "var(--text-subtle)", fontSize: 11 }}>
             Logged in as <strong style={{ color: "var(--text)" }}>{user.email}</strong>
           </span>
         </header>
-        <main style={{ flex: 1, padding: "28px 32px", overflowY: "auto" }}>
+        <main className="admin-main" style={{ flex: 1, padding: "28px 32px", overflowY: "auto" }}>
           {children}
         </main>
       </div>

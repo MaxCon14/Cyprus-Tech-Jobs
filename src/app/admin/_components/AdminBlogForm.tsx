@@ -143,7 +143,7 @@ export function AdminBlogForm({ initial, postId }: {
         <h2 style={{ fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Post details</h2>
         {LABEL("Title *", <input required style={INPUT} value={meta.title} onChange={setMF("title")} />)}
         {LABEL("Excerpt *", <textarea required rows={2} style={{ ...INPUT, resize: "vertical" }} value={meta.excerpt} onChange={setMF("excerpt")} />)}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="admin-grid-2" style={{ gap: 12 }}>
           {LABEL("Author", <input style={INPUT} value={meta.author} onChange={setMF("author")} />)}
           {LABEL("Author role", <input style={INPUT} value={meta.authorRole} onChange={setMF("authorRole")} />)}
           {LABEL("Category", (

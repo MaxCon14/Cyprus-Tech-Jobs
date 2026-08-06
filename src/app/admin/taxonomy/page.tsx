@@ -270,7 +270,7 @@ export default function AdminTaxonomyPage() {
         <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Categories &amp; Tags</h1>
         <p className="body-s" style={{ color: "var(--text-subtle)" }}>Manage the taxonomy used to organise job listings</p>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <div className="admin-grid-2" style={{ gap: 24 }}>
         <CategorySection items={categories} reload={load} />
         <TagSection      items={tags}       reload={load} />
       </div>

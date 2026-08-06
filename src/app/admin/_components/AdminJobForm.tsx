@@ -179,7 +179,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
           />
         </Field>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="admin-grid-2">
           <Field label="Experience level" required>
             <Select name="experienceLevel" value={experienceLevel} onChange={setExperienceLevel}
               options={[
@@ -336,7 +336,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
 
         {salaryDisclosed && (
           <>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div className="admin-grid-2">
               <Field label="Salary min (€/year)">
                 <input className="input" name="salaryMin" type="number" defaultValue={initial?.salaryMin ?? ""} placeholder="e.g. 60000" />
               </Field>

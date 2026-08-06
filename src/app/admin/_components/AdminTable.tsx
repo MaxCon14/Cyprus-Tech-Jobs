@@ -3,22 +3,27 @@ import type { ReactNode } from "react";
 export function AdminTable({ columns, children }: { columns: string[]; children: ReactNode }) {
   return (
     <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-sans)", fontSize: 13 }}>
-        <thead>
-          <tr style={{ background: "var(--bg-muted)" }}>
-            {columns.map(col => (
-              <th key={col} style={{
-                textAlign: "left", padding: "10px 14px", fontWeight: 600,
-                color: "var(--text-subtle)", fontSize: 10, letterSpacing: "0.06em",
-                whiteSpace: "nowrap",
-              }}>
-                {col.toUpperCase()}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>{children}</tbody>
-      </table>
+      {/* Columns don't reflow on a phone-width screen — scope the scroll to
+          the table itself so the row stays reachable instead of getting
+          clipped by the wrapper's rounded-corner `overflow: hidden`. */}
+      <div className="admin-table-scroll">
+        <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-sans)", fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: "var(--bg-muted)" }}>
+              {columns.map(col => (
+                <th key={col} style={{
+                  textAlign: "left", padding: "10px 14px", fontWeight: 600,
+                  color: "var(--text-subtle)", fontSize: 10, letterSpacing: "0.06em",
+                  whiteSpace: "nowrap",
+                }}>
+                  {col.toUpperCase()}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
     </div>
   );
 }

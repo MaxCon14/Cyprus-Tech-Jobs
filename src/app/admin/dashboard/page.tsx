@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <div className="admin-grid-2" style={{ gap: 24 }}>
         {/* Recent jobs */}
         <div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
