@@ -31,6 +31,10 @@ function timeAgoShort(iso: string): string {
 }
 
 function LinkBadge({ job }: { job: Job }) {
+  // Covers both a genuine HTTP 404/410 and a "soft 404" — a 200 response
+  // whose title/heading reads as a not-found page — so the badge says
+  // "Broken" rather than a literal status code that wouldn't be accurate
+  // for the soft-404 case.
   if (job.applyUrlBroken) {
     return (
       <span style={{
@@ -38,7 +42,7 @@ function LinkBadge({ job }: { job: Job }) {
         fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
         padding: "2px 7px", borderRadius: 4, color: "#ef4444", background: "#fef2f2",
       }}>
-        <AlertTriangle size={10} /> 404
+        <AlertTriangle size={10} /> Broken
       </span>
     );
   }
