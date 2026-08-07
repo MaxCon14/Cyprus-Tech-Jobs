@@ -71,6 +71,16 @@ contained in `main`. It is a **sixth stale `claude/*` branch to delete** (added
 to the TODO list). If a future session gets the same branch instruction, follow
 `AGENTS.md` (commit to `test`), not the branch name.
 
+**This keeps happening — the count is now eight, not six.** `git ls-remote` shows
+two more that no TODO entry ever mentioned: `claude/context-md-review-8yvpxp` and
+`claude/cyprus-tech-jobs-context-nrt0cp`. Sessions opened from the web UI appear
+to be handed a generated `claude/<topic>-<hash>` branch by their harness prompt
+regardless of what `AGENTS.md` says, and the branch gets created on GitHub as a
+side effect even when the work correctly goes to `test`. Treat the branch name in
+a harness prompt as noise; the rule is `test`. When cleaning up, enumerate the
+real remote rather than trusting this list — it goes stale by exactly this
+mechanism.
+
 ---
 
 ## Stack & conventions
@@ -200,6 +210,13 @@ to the TODO list). If a future session gets the same branch instruction, follow
   Account: `acct_1TUCKmRupFe5vg1G` ("Cyprus Tech Careers"). Test-mode keys should
   stay on Vercel's Preview/Development environments so preview deploys never take
   real money — only Production got the live keys.
+- **Google Analytics 4 — `G-MGNJW82FYC`, live, gated behind cookie consent.**
+  The measurement ID is hardcoded in `src/components/analytics/GoogleAnalytics.tsx`
+  (not an env var). gtag.js loads for everyone, but **Consent Mode v2 defaults
+  every signal to `denied`** in a `beforeInteractive` inline script that runs
+  before gtag.js, so nothing is stored until the visitor accepts. See the session
+  section below for the duplication hazard between that inline script and
+  `src/lib/consent.ts`.
 
 ---
 
@@ -817,6 +834,123 @@ release dance.
 
 ---
 
+## Session: apply-link checker, admin on mobile, GA4 behind consent
+
+Everything here shipped to `main` (production) except the last item, which is on
+`test` only and is the current gap between the two branches.
+
+**Curated jobs get their apply links checked, soft 404s included (`d3844d8`,
+`30f1573`).** Curated listings link out to an employer's own careers page, and
+those pages go dead without telling anyone — a candidate clicks Apply and lands
+on nothing. New `src/lib/link-check.ts` + `POST /api/admin/jobs/check-links`
+(admin-gated, `maxDuration = 60`, a 6-worker pool since dozens of sequential
+external fetches would blow any function time limit). Two schema columns back it:
+`applyUrlBroken` / `applyUrlCheckedAt` on `Job`, migration
+`20260807000000_add_apply_url_link_check`, **and that migration IS applied to the
+live database — verified this session against `information_schema` via the
+Supabase MCP.** Worth stating plainly because the CV matcher died on exactly the
+opposite situation (see that session); with a shared prod/preview DB, "the
+migration is in the repo" is not evidence it ran.
+
+The checker is **deliberately conservative**, and that's the part to preserve if
+anyone touches it:
+- Only a real **404/410** counts as broken by status. A 403, a 5xx, a timeout, a
+  DNS or TLS failure all return `broken: false` — career sites 403 non-browser
+  requests and blip 5xx routinely, and a checker that cries wolf is one the admin
+  learns to ignore.
+- **GET, not HEAD** — many ATS platforms 405 or misreport on HEAD, and the body
+  is what the soft-404 check needs.
+- A browser-like **User-Agent**, because a bare fetch's default UA is itself a
+  common 403 trigger.
+- **Soft-404 detection** was the actual bug that prompted `30f1573`: an Exness
+  careers page returned **200** with a body reading "404 / Not found", so a
+  status-code check saw a healthy page. Patterns are matched against
+  `<title>`/`<h1>`/`<h2>` **only, never the whole body** — a live job description
+  can legitimately say "no longer accepting applications after <date>", and
+  whole-body matching would flag real listings.
+
+Admin UI: `JobsTableClient` gained a "Check apply links" button, a per-row
+badge (`Broken` / `OK · 2h ago` / `Not checked`), a broken count in the header
+and a "show broken only" filter. On demand, not on a cron — nothing schedules it.
+
+**The debug-probe episode, and the lesson (`cfd9365` → `c59ba30`).** Diagnosing
+that Exness soft-404 took five commits of temporary probe routes on production,
+including `cb25ab0` "fix the probe route itself" — the first probe was under a
+`_debug` folder, and **`_`-prefixed folders are private and unroutable in this
+Next.js version**, so it 404'd rather than running. The important commit is the
+last one: `c59ba30` removed a probe route that `18b98d8` had been *supposed* to
+remove and missed. An unauthenticated route that fetches an arbitrary URL and
+reports what came back is the same SSRF shape as security-backlog item 1, and it
+sat on production between deploys. If you ship a probe, grep for it before you
+call the investigation finished — `git ls-tree -r origin/main | grep -iE
+'debug|probe'` should come back empty, and it does now.
+
+**Admin panel usable on mobile (`8e0acd2`).** `AdminNav` becomes an off-canvas
+drawer below 768px, driven by React state, closing on route change. Note the
+comment left in the file: the drawer's widths/transforms live in `globals.css`
+media queries **on purpose** — an inline style would out-specificity the media
+query and the drawer would never narrow or slide. `AdminTable`, `AdminJobForm`,
+`AdminBlogForm` and the admin layout were adjusted in the same pass.
+
+**GA4 added, behind real consent (`fd6beb2`).** Google Analytics 4
+(`G-MGNJW82FYC`) under Consent Mode v2. The design point: a `beforeInteractive`
+inline script sets `ad_storage` / `ad_user_data` / `ad_personalization` /
+`analytics_storage` to `denied` **before gtag.js or the config call can run**,
+unless a prior "granted" decision is already in localStorage. That is what keeps
+the Cookie Policy's "nothing non-essential runs until you agree" true rather than
+making it false the moment GA was installed. `CookieNotice` was rebuilt into a
+real accept/decline choice, `CookiePreferences` on `/cookies` lets a visitor
+change their mind later, and shared storage logic lives in `src/lib/consent.ts`.
+
+Two things to know before editing any of this:
+- **`CONSENT_VERSION` went 1 → 2 on purpose, and that re-prompts every visitor.**
+  Version 1 was a bare acknowledgment of a site that set nothing non-essential;
+  dismissing *that* cannot stand in for consenting to analytics nobody was shown.
+  A stored record of the wrong version reads as "no decision yet". Bump it again
+  on any future change in what is actually collected.
+- **The Consent Mode bootstrap duplicates the storage key and version as string
+  literals** (`"ctc-cookie-notice"`, `version === 2`) because it is plain inline
+  JS with no bundler and cannot import `consent.ts`. Both files carry a comment
+  saying so. **Change one, change the other**, or a returning visitor's stored
+  consent silently stops being recognised and analytics goes quiet with no error
+  anywhere.
+
+**GA4 page views on client-side navigation — on `test` only (`234ba8c`).**
+Reported as "GA4 says no data received", and it was two real gaps, not just an
+unaccepted notice. gtag.js's automatic `page_view` fires once, at the initial
+full page load; it has no idea Next.js's client-side routing exists, so clicking
+through five listings via `next/link` produced exactly one page view for the
+session. Fixed with `send_page_view: false` plus a `GoogleAnalyticsPageview`
+route-change listener (`usePathname` + `useSearchParams`, **wrapped in
+`Suspense`** in the root layout — `useSearchParams` requires it or the build opts
+out of static rendering). Second gap: a visitor who lands, accepts, then leaves
+without navigating generated nothing at all, because the automatic page view had
+already been correctly suppressed while consent was denied and was **not** queued
+for replay. `updateAnalyticsConsent` now fires one `page_view` explicitly the
+moment consent flips to granted. **This is the one commit `main` does not have** —
+release it before judging GA4 numbers from production.
+
+**Blog post 5 (`35eec54`).** "The September Hiring Surge in Cyprus Tech", slug
+`september-hiring-surge-cyprus-tech-2026`, Career Advice, 10 min. Standard
+`BlogSection[]` shape, so it renders through the existing template with
+Article/Breadcrumb schema and no new code — same house rule as post 4 on hedging
+non-structural figures.
+
+**Skill taxonomy widened (`73c13db`).** `TECH_STACK_OPTIONS` in
+`onboarding-types.ts` gained SQL, Perl, PowerShell, Julia, Zig, .NET, the
+enterprise databases (MSSQL, Oracle, Neo4j, Couchbase, InfluxDB), data/ML
+libraries (Matplotlib, Seaborn, Plotly, OpenCV, spaCy, XGBoost, LlamaIndex,
+Ollama, the Anthropic and Gemini APIs), and a much fuller Security & Compliance
+group including certifications (CISSP, CISM, CISA, CEH, Security+, OSCP, CCSP)
+and frameworks (ISO 27001/27701/9001, SOC 2, PCI DSS, GDPR, HIPAA, NIST CSF),
+with matching icons in `skill-icons.ts`. **SQL being absent is the notable one** —
+it is one of the most-requested skills on the board and could not be tagged at
+all. Remember `linkJobTags` creates missing tags on write, so new options here
+reach the DB the first time someone saves a job using them; the picker stays a
+closed list.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
@@ -896,11 +1030,14 @@ Numbered as one list (the old one restarted at 2 halfway down — merged here).
    (security backlog #6). Live risk now that `test` is used routinely.
 7. **No error monitoring** (no Sentry or equivalent). A crash in the apply flow
    is invisible unless a user reports it. Given #4, higher priority than it looks.
-8. Delete the **six** stale `claude/*` branches on GitHub (sandbox can't — proxy
-   rejects deletes): `analyze-design-system-Y5y44`, `compact-card-layout-92qmqy`,
-   `connect-database-7OQd6`, `connect-database-MZ1XL`,
-   `cyprus-tech-jobs-context-elmi9o`, and `cyprus-tech-jobs-repo-s9ar6h` (the new
-   one — see Branches history). All superseded / contained in `main`.
+8. Delete the **eight** stale `claude/*` branches on GitHub (sandbox can't —
+   proxy rejects deletes): `analyze-design-system-Y5y44`,
+   `compact-card-layout-92qmqy`, `connect-database-7OQd6`,
+   `connect-database-MZ1XL`, `cyprus-tech-jobs-context-elmi9o`,
+   `cyprus-tech-jobs-repo-s9ar6h`, `context-md-review-8yvpxp` and
+   `cyprus-tech-jobs-context-nrt0cp`. All superseded / contained in `main`.
+   Enumerate with `git ls-remote origin` before deleting — the count has grown
+   every time this list was written down; see Branches history for why.
 9. **Status colours have no dark-mode variants.** `--success-bg`, `--warning-bg`,
    `--error-bg`, `--info-bg` stay pale on dark surfaces — visible on
    `/style-guide` in dark mode.
@@ -912,6 +1049,9 @@ Numbered as one list (the old one restarted at 2 halfway down — merged here).
 13. Editing a legacy listing with no salary now forces one to be added — a
     consequence of the mandatory-salary change worth watching for.
 14. The SEO items listed as "still open" above.
+15. **Release the GA4 client-side page-view fix.** `test` is one commit ahead of
+    `main` (`234ba8c`); until it ships, production GA4 undercounts every visit to
+    a single page view, so don't read anything into the numbers yet.
 
 **DONE this session (was on the list):** `CRON_SECRET` confirmed set (item was
 "must be set"); admin sign-in completed end to end (was "still never completed").
