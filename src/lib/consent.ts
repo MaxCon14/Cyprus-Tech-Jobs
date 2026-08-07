@@ -65,7 +65,21 @@ function writeConsent(analytics: AnalyticsConsent): void {
  *  worth accepting for "granted". */
 export function updateAnalyticsConsent(analytics: AnalyticsConsent): void {
   writeConsent(analytics);
-  if (typeof window !== "undefined" && typeof window.gtag === "function") {
-    window.gtag("consent", "update", { analytics_storage: analytics });
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+
+  window.gtag("consent", "update", { analytics_storage: analytics });
+
+  /* Clicking Accept doesn't navigate anywhere, so GoogleAnalyticsPageview's
+   * route-change effect won't fire again on its own — without this, a
+   * visitor who accepts and then leaves without clicking anything else
+   * generates zero events. gtag.js's automatic page_view already fired once
+   * at initial load while still denied (and was correctly suppressed, not
+   * queued), so this is the one that actually reaches Google for this visit. */
+  if (analytics === "granted") {
+    window.gtag("event", "page_view", {
+      page_path:     window.location.pathname + window.location.search,
+      page_location: window.location.href,
+      page_title:    document.title,
+    });
   }
 }

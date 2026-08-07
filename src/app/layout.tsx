@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Figtree, Fragment_Mono } from "next/font/google";
 import "./globals.css";
@@ -9,6 +10,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { CookieNotice } from "@/components/layout/CookieNotice";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { GoogleAnalyticsPageview } from "@/components/analytics/GoogleAnalyticsPageview";
 import { getNavCategories } from "@/lib/queries";
 
 const figtree = Figtree({
@@ -77,6 +79,11 @@ export default async function RootLayout({
         </Providers>
         <CookieNotice />
         <GoogleAnalytics />
+        {/* useSearchParams requires a Suspense boundary in the App Router,
+            or the build opts the whole tree out of static rendering. */}
+        <Suspense fallback={null}>
+          <GoogleAnalyticsPageview />
+        </Suspense>
         <SpeedInsights />
         <Analytics />
       </body>

@@ -56,8 +56,13 @@ export function GoogleAnalytics() {
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
         strategy="afterInteractive"
       />
+      {/* send_page_view: false — this is a client-routed Next.js app, so the
+          automatic page_view gtag.js would otherwise fire here only ever
+          fires once, on this initial full page load. GoogleAnalyticsPageview
+          sends every page_view explicitly instead, including this first one,
+          so client-side navigations between pages actually get tracked. */}
       <Script id="ga-config" strategy="afterInteractive">
-        {`gtag("config", "${GA_MEASUREMENT_ID}");`}
+        {`gtag("config", "${GA_MEASUREMENT_ID}", { send_page_view: false });`}
       </Script>
     </>
   );
