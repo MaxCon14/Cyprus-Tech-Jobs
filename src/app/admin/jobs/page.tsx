@@ -31,6 +31,8 @@ export default async function AdminJobsPage() {
           status: j.status,
           _count: { applyClicks: j._count.applyClicks },
           postedAt: j.postedAt?.toISOString() ?? null,
+          applyUrlBroken: j.applyUrlBroken,
+          applyUrlCheckedAt: j.applyUrlCheckedAt?.toISOString() ?? null,
         }))}
       />
     </div>
