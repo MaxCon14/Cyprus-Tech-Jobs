@@ -114,7 +114,7 @@ const SIBLINGS = [
 ] as const;
 
 export function LegalPage({
-  eyebrow, title, intro, sections, current,
+  eyebrow, title, intro, sections, current, children,
 }: {
   eyebrow: string;
   title: string;
@@ -122,6 +122,10 @@ export function LegalPage({
   sections: LegalSection[];
   /** This page's own path, so the footer links to the other two only. */
   current: "/terms" | "/privacy" | "/cookies";
+  /** Optional — rendered between the intro and the table of contents. Used
+   *  by /cookies for the interactive cookie-preferences control; nothing
+   *  else needs it today, but any legal page can use the slot. */
+  children?: React.ReactNode;
 }) {
   const others = SIBLINGS.filter(s => s.href !== current);
   return (
@@ -137,6 +141,8 @@ export function LegalPage({
               {`LAST UPDATED ${LAST_UPDATED.toUpperCase()}`}
             </p>
           </div>
+
+          {children && <div style={{ marginBottom: "clamp(24px, 3vw, 36px)" }}>{children}</div>}
 
           {/* Contents — these documents are long enough that landing at the top
               with no map is its own accessibility problem. */}

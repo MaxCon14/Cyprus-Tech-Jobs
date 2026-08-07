@@ -145,6 +145,7 @@ const SECTIONS: LegalSection[] = [
           ["Stripe", "Card payments for listing slots", "EU / US"],
           ["Anthropic", "CV parsing and CV review, only when used", "US"],
           ["Google", "Notified of job listing URLs for search indexing. No personal data is sent", "US"],
+          ["Google Analytics", "Website usage analytics — runs only if you accept it in the cookie notice; see our Cookie Policy", "US"],
         ],
       },
       {

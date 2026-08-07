@@ -8,6 +8,7 @@ import { Providers } from "./providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { CookieNotice } from "@/components/layout/CookieNotice";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { getNavCategories } from "@/lib/queries";
 
 const figtree = Figtree({
@@ -75,6 +76,7 @@ export default async function RootLayout({
           <FooterConditional><Footer /></FooterConditional>
         </Providers>
         <CookieNotice />
+        <GoogleAnalytics />
         <SpeedInsights />
         <Analytics />
       </body>

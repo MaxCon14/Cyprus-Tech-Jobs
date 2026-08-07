@@ -638,11 +638,13 @@ body {
 .cookie-notice-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
   margin-top: 16px;
 }
 .cookie-notice-actions > .btn { min-width: 120px; justify-content: center; }
 
 @media (max-width: 560px) {
+  .cookie-notice-actions { flex-direction: column; }
   .cookie-notice-actions > .btn { width: 100%; }
 }
 
