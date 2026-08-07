@@ -16,6 +16,11 @@ export interface BlogPost {
   category:    string;
   tags:        string[];
   content:     BlogSection[];
+  /** Optional — renders an on-page FAQ accordion plus FAQPage JSON-LD via
+   *  buildFAQSchema (see [slug]/page.tsx). DB-authored posts don't carry this
+   *  yet (no column for it), so it's always undefined for those; static posts
+   *  can opt in. */
+  faqs?:       { question: string; answer: string }[];
 }
 
 export const POSTS: BlogPost[] = [
@@ -383,6 +388,101 @@ export const POSTS: BlogPost[] = [
       { type: "paragraph", text: "The sector that Cyprus built almost by accident — out of a regulatory bet and an EU passport — has turned into one of the most reliable sources of high-quality employment on the island. Whether it keeps that status through the next decade depends on the island solving its housing and concentration problems. But for the person deciding where to point a career in 2026, the opportunity is real, it is broad, and it is hiring." },
 
       { type: "callout", variant: "tip", text: "Looking for a fintech role in Cyprus? CyprusTech.Careers lists every active position with a verified salary range — filter by category, city, or experience level to find payments, compliance, engineering and risk roles across the island's fintech employers." },
+    ],
+  },
+
+  // ── Post 5 ────────────────────────────────────────────────────────────────
+  {
+    slug:        "september-hiring-surge-cyprus-tech-2026",
+    title:       "The September Hiring Surge in Cyprus Tech: How to Get Ahead of It This August",
+    excerpt:     "Cyprus tech hiring doesn't slow down for summer so much as it coils. Here's why fintech, forex and iGaming employers open their September pipelines weeks before the month starts — and the specific, tech-focused steps that get your CV, GitHub and interview readiness in front of them first.",
+    author:      "CyprusTech.Careers Editorial",
+    authorRole:  "Career Research",
+    publishedAt: "2026-08-07",
+    readTime:    10,
+    category:    "Career Advice",
+    tags:        ["Career Advice", "Job Search", "Hiring Trends", "Cyprus", "September Surge"],
+    content: [
+      { type: "paragraph", text: "Cyprus's tech job boards go quiet every August. Postings thin out, response times stretch, and it's easy to read that as the market taking a break. It isn't. Behind the slowdown, hiring managers at the island's fintech platforms, forex brokers and gaming studios are finalising headcount, refreshing job specs, and clearing their calendars for a wave of interviews that starts the moment everyone is back at their desk in September. The candidates who show up prepared on day one of that wave have a real, measurable edge over the ones who start writing their CV after they see the posting." },
+      { type: "paragraph", text: "This isn't a generic career-advice truism that applies equally to accounting, retail and tech alike. The September surge shows up differently — and more predictably — in Cyprus tech specifically, because it's driven by structural forces particular to the island's dominant industries: trading platforms staffing ahead of Q4 volatility, iGaming studios locking in engineering capacity before the holiday release calendar, and an international workforce whose relocation logistics genuinely work better around a September start date. Understanding those forces is what turns August from a wasted month into a planning window." },
+
+      { type: "h2", text: "What the September Hiring Surge Actually Looks Like in Cyprus Tech" },
+      { type: "paragraph", text: "The September hiring surge is the sharp rise in new job postings and active interview processes that Cyprus employers open in the first few weeks after the summer break, concentrated most heavily in fintech, forex/CFD and iGaming — the three industries that between them account for the bulk of the island's tech hiring. It isn't that demand for engineers, data professionals and product people disappears in July and August; it's that decision-makers are travelling, budgets are being finalised for the final quarter, and roles that would otherwise move quickly sit in a holding pattern until everyone is back at their desk." },
+      { type: "paragraph", text: "The practical effect for a job seeker is a compressed, high-competition window: a large share of the year's mid-to-senior openings become active within roughly the same four-to-six-week stretch, and a correspondingly large share of qualified candidates — many of whom have also been quietly job-hunting over the summer — apply the moment those roles go live. Being ready before that window opens, rather than reacting once it has, is the entire strategic advantage on offer." },
+
+      { type: "h2", text: "Why Cyprus Tech Employers Front-Load Hiring Before Q4" },
+      { type: "paragraph", text: "Ask a hiring manager at a Limassol trading platform or a Nicosia gaming studio why September specifically, and the answer is rarely \"everyone's back from holiday.\" It's more concrete than that, and it's worth understanding if you want to time your search well." },
+
+      { type: "h3", text: "Trading Platforms Staff Up Before Q4 Volatility" },
+      { type: "paragraph", text: "Forex and CFD trading volumes historically pick up through the final quarter of the year, driven by a mix of seasonal liquidity patterns and whatever macro events happen to be unfolding. The brokers and platforms that dominate Limassol's tech scene plan their engineering and risk-systems headcount ahead of that expected demand, not in reaction to it. A backend engineer or trading-infrastructure specialist hired in September has time to onboard, learn the systems, and be genuinely useful before the quarter that matters most for the business." },
+
+      { type: "h3", text: "iGaming Studios Lock In Engineering Capacity Before the Holiday Push" },
+      { type: "paragraph", text: "Gaming and iGaming platforms — a cluster with a strong footprint in Nicosia and a growing one in Limassol — run their busiest commercial calendar from late November through January, driven by holiday promotions, new releases and live-ops events. Engineering, backend and data hiring for that push needs to land months in advance, which puts September squarely in the critical path. A studio that waits until November to hire the engineer it needs for its Christmas campaign has already missed its own deadline." },
+
+      { type: "h3", text: "September Is When International Budgets Actually Reset" },
+      { type: "paragraph", text: "A large share of Cyprus's tech employers are subsidiaries or regional hubs of companies headquartered elsewhere in the EU, the UK or further afield. Many of those parent organisations run planning cycles that treat the run-up to Q4 as the point where next year's headcount gets provisionally approved and this year's remaining budget gets spent before it's lost. Locally, that translates into a burst of newly-approved requisitions landing on job boards within days of each other — which is exactly the compressed window candidates experience as \"the surge.\"" },
+
+      { type: "h3", text: "The Local Graduate Pipeline Arrives on the Same Schedule" },
+      { type: "paragraph", text: "Cyprus's universities graduate their computer science, engineering and data cohorts around the same late-summer window, which means a fresh supply of junior local talent enters the market at precisely the moment employers are opening junior and graduate roles. If you're early-career and Cyprus-based, this is genuinely good news — it's the one point in the year when the market is actively built to absorb people at your level." },
+
+      { type: "h3", text: "Relocation Logistics Genuinely Favour a September Start" },
+      { type: "paragraph", text: "For the large share of Cyprus tech hires who are relocating from abroad, September lines up with the start of the school year — which matters enormously to anyone moving with a family — and with the tail end of the Cyprus work-permit process for non-EU applicants, which typically runs eight to twelve weeks once an employer sponsors it. Work backward from a September start and the practical deadline to begin that paperwork sits in June or July. If you're reading this in August and relocation is part of your plan, the honest advice is to start the conversation with employers now rather than waiting for a specific posting." },
+
+      { type: "h2", text: "Your August Checklist, Built for Tech Roles" },
+      { type: "paragraph", text: "Generic career advice tends to stop at \"update your CV and LinkedIn.\" That's necessary but nowhere near sufficient for a technical hiring process, where a recruiter's first serious signal about you is often your GitHub, not your resume. Here's what actually moves the needle before the surge hits." },
+
+      { type: "h3", text: "Rebuild Your CV Around Scale and Impact, Not Titles" },
+      { type: "paragraph", text: "A title tells a hiring manager almost nothing; a system tells them everything. Replace \"Backend Engineer, Company X\" bullet points with the actual shape of what you built — the scale of traffic or data it handled, the specific problem it solved, the measurable outcome. \"Reduced p99 API latency by 40% by redesigning the caching layer\" does more work in a fifteen-second CV scan than any job title ever will, and it's the detail that survives into the technical interview when someone asks you to walk through it." },
+
+      { type: "h3", text: "Make Your GitHub Do Some of the Interviewing For You" },
+      { type: "paragraph", text: "For engineering, data and DevOps roles specifically, a stale or empty GitHub profile is a missed opportunity, not a neutral non-factor. Pin the two or three repositories that best represent the work you want to be hired for, make sure their READMEs actually explain what the project does and why, and remove or archive anything years-old that no longer reflects your current skill level. A recruiter scanning candidates before the surge hits will often check this before they check your CV — an active, legible contribution history is a genuine differentiator, and it costs an afternoon in August to put in order." },
+
+      { type: "h3", text: "Get Your LinkedIn — and Your CyprusTech.Careers Profile — Current" },
+      { type: "paragraph", text: "LinkedIn remains where Cyprus tech recruiters do their first pass of outbound sourcing, so an out-of-date headline or a skills section missing the stack you actually work in costs you searches you'd otherwise appear in. The same logic applies to your candidate profile on any platform you're actively using to job-hunt: an accurate, current skill set and salary expectation is what lets employers find and shortlist you directly, rather than you finding every relevant posting yourself." },
+
+      { type: "h3", text: "Get Back Into Technical-Interview Shape" },
+      { type: "paragraph", text: "Technical interview muscle atrophies faster than people expect, especially after a few months in the same role without a live search. Before September, deliberately revisit the fundamentals: run through a handful of system-design problems even if you're not senior yet, refresh the data-structure and algorithm basics if your target companies still screen for them, and — this is the step most candidates skip — go back through your own recent projects and rehearse explaining the design decisions out loud. Being unable to defend a choice you actually made, under mild interview pressure, is a far more common failure mode than not knowing an algorithm." },
+
+      { type: "h3", text: "Know Your Number Before They Ask" },
+      { type: "paragraph", text: "Walking into a September interview loop without a clear, market-grounded salary figure in mind is the single most avoidable mistake candidates make, and it's entirely fixable in advance. Cyprus's tech salary bands vary meaningfully by role, seniority and sector — a mid-level engineer at a Limassol trading platform and a mid-level engineer at a smaller Nicosia studio are not being benchmarked against the same number. The Cyprus Tech Salary Guide breaks this down by role and experience level specifically so you're negotiating from data rather than guesswork." },
+
+      { type: "h2", text: "Where the September Demand Will Actually Land" },
+      { type: "paragraph", text: "Not every category sees the surge equally. Based on the pattern of active postings each year, four areas consistently see the sharpest September increase:" },
+      { type: "list", items: [
+        "Backend and platform engineering — the direct beneficiary of trading platforms and iGaming studios scaling infrastructure ahead of Q4.",
+        "Data engineering and analytics — risk, pricing and player-behaviour teams both expand headcount on the same pre-Q4 timeline.",
+        "DevOps and site reliability — capacity planning for a high-traffic quarter starts with the infrastructure team, not the feature team.",
+        "Compliance-adjacent technical roles — AML/KYC systems and regulatory reporting tooling see steady demand as licensed brokers scale.",
+      ]},
+      { type: "paragraph", text: "Geographically, Limassol continues to absorb the largest share of this activity given its concentration of fintech and forex employers, with Nicosia a close second on the back of its gaming cluster. Remote-eligible roles within Cyprus-registered companies have also grown as a share of September postings, which is worth checking specifically if relocation isn't part of your plan this year." },
+
+      { type: "callout", variant: "tip", text: "CyprusTech.Careers lists every active tech role in Cyprus with a verified salary range attached — filter by category, city or experience level now, before the September surge hits, and set up alerts so new postings reach you the moment they go live." },
+    ],
+    faqs: [
+      {
+        question: "Is September really the best time to look for a tech job in Cyprus?",
+        answer: "For most technical roles, yes — September sees the sharpest rise in new postings across Cyprus's fintech, forex and iGaming employers, driven by Q4 budget and staffing cycles. That also means competition from other candidates peaks at the same time, so the real advantage goes to people who prepare in August rather than those who wait for postings to appear.",
+      },
+      {
+        question: "Should I apply for tech jobs in Cyprus during August, or wait until September?",
+        answer: "Apply in August if you see a role you want — hiring processes don't stop entirely over summer, and being early in the pipeline is an advantage. But use August primarily to prepare: a current CV, an updated GitHub, and a clear salary expectation, so you can move quickly the moment September postings open.",
+      },
+      {
+        question: "Do Cyprus fintech and iGaming companies actually hire during the summer?",
+        answer: "Yes, but at a reduced pace. Decision-makers are frequently travelling and final budget approval for Q4 headcount is often still in progress, so processes that would normally move in days can take weeks. Roles do get filled over summer — they just move slower, and there are structurally fewer of them than in September.",
+      },
+      {
+        question: "What tech roles see the most hiring during Cyprus's September surge?",
+        answer: "Backend and platform engineering, data engineering and analytics, DevOps/site reliability, and compliance-adjacent technical roles consistently see the sharpest increase, tracking the pre-Q4 scaling needs of trading platforms and iGaming studios specifically.",
+      },
+      {
+        question: "How long does the tech hiring process usually take in Cyprus?",
+        answer: "It varies by employer and seniority, but a straightforward local hire typically moves through initial screening, a technical round and a final interview within two to four weeks. For roles that involve relocation, add the work-permit processing time on top — typically eight to twelve weeks for non-EU applicants once an employer sponsors the application.",
+      },
+      {
+        question: "I'm relocating to Cyprus for a tech role — does the September timing affect my visa or work permit planning?",
+        answer: "It can. Non-EU work permits typically take eight to twelve weeks to process once an employer sponsors you, so if you're targeting a September start, the practical deadline to have an offer and begin that paperwork is around June or July. EU/EEA nationals don't need a work permit and aren't affected by this timeline.",
+      },
     ],
   },
 ];

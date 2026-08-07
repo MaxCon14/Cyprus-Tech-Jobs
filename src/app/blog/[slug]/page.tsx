@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAnyPost, type BlogSection } from "@/lib/blog";
 import { ChevronLeft, Clock, Info, Lightbulb, AlertTriangle } from "lucide-react";
-import { buildArticleSchema, buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
+import { buildArticleSchema, buildBreadcrumbSchema, buildFAQSchema, jsonLd } from "@/lib/schema";
+import { FaqAccordion } from "@/components/home/FaqAccordion";
 import type { Metadata } from "next";
 
 export const revalidate = 3600;
@@ -37,6 +38,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   "Market Insights": { bg: "var(--accent-soft)",  color: "var(--accent)" },
   "Employer Guides": { bg: "var(--success-bg)",   color: "var(--success)" },
   "Regulation":      { bg: "var(--warning-bg)",   color: "var(--warning)" },
+  "Career Advice":   { bg: "var(--info-bg, #eff6ff)", color: "#1e40af" },
 };
 
 function formatDate(iso: string) {
@@ -61,11 +63,19 @@ export default async function BlogPostPage({ params }: Props) {
     { name: "Blog", path: "/blog" },
     { name: post.title, path: `/blog/${slug}` },
   ]);
+  // Optional — only static posts that opt in carry this (see BlogPost.faqs in
+  // lib/blog.ts). Powers both the on-page accordion below and FAQPage JSON-LD,
+  // which is what answer engines/AI overviews actually key off when quoting a
+  // direct answer rather than the page as a whole.
+  const faqSchema = post.faqs && post.faqs.length > 0 ? buildFAQSchema(post.faqs) : null;
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbSchema) }} />
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
+      )}
     <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
       {/* Breadcrumb */}
@@ -122,6 +132,14 @@ export default async function BlogPostPage({ params }: Props) {
               <ContentSection key={i} section={section} />
             ))}
           </div>
+
+          {/* FAQ — mirrors the FAQPage schema emitted above */}
+          {post.faqs && post.faqs.length > 0 && (
+            <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+              <h2 className="h1" style={{ marginBottom: 16 }}>Frequently Asked Questions</h2>
+              <FaqAccordion faqs={post.faqs.map(f => ({ q: f.question, a: f.answer }))} />
+            </div>
+          )}
 
           {/* Tags */}
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 40, paddingTop: 28, borderTop: "1px solid var(--border)" }}>

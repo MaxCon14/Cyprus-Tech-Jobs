@@ -25,6 +25,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
   "Market Insights": { bg: "var(--accent-soft)",  color: "var(--accent)" },
   "Employer Guides": { bg: "var(--success-bg)",   color: "var(--success)" },
   "Regulation":      { bg: "var(--warning-bg)",   color: "var(--warning)" },
+  "Career Advice":   { bg: "var(--info-bg, #eff6ff)", color: "#1e40af" },
 };
 
 function formatDate(iso: string) {
