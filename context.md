@@ -1035,6 +1035,56 @@ actually moves rankings.
 
 ---
 
+## Session: the link checker's false positives
+
+Two Bolt listings showed a red **"Broken"** badge in admin while both pages
+were open and fine in a browser. The bug is worth understanding because the
+shape of it recurs: **a heuristic was given the same authority as a fact.**
+
+`checkApplyUrl` has always returned a `reason` separating a real HTTP 404/410
+from a guess based on the page's wording — and `check-links/route.ts` **threw
+that reason away**, storing only `applyUrlBroken: boolean`. Both collapsed into
+one red badge, so neither the admin nor a later investigation could tell which
+had happened.
+
+Two ways the heuristic was too eager, both reproduced as failing cases against
+the old code:
+- **It searched `<h2>`.** That is routinely an ordinary section heading. A
+  careers page whose h2 reads *"Not found what you were looking for? See all
+  roles"* was enough to retire a live job. Now **`<title>` and `<h1>` only**.
+- **It read raw HTML.** A client-rendered careers site that inlines its own
+  error-page markup into serialised state — *before* the document's real
+  `<title>`, which the first-match extraction reaches first — flagged a live
+  listing on a string no visitor sees. Script, style, noscript and comment
+  content is now stripped before any tag is read.
+
+**The structural fix, and the bit to preserve:** a heuristic match can no
+longer set `applyUrlBroken`. It sets `applyUrlCheckReason = "soft-404"` and
+renders as an amber **"Check"** badge whose tooltip says it is a guess. Only a
+server's own 404/410 gets red **"Broken"**, now showing the code. Don't
+collapse these two states back into one badge — that *is* the bug.
+
+New nullable column **`applyUrlCheckReason`** (`"http-404" | "http-410" |
+"soft-404"`), migration `20260809000000_add_apply_url_check_reason`. **Applied
+to the live database via the Supabase MCP at the time of writing**, ahead of
+the deploy — required, because preview deployments share the production DB, so
+`test` would have hit a missing column. The two false flags were cleared in the
+same pass.
+
+**What could not be established:** which of the two paths actually flagged the
+Bolt URLs. `bolt.eu` is blocked by the sandbox **egress proxy** — no `curl`, no
+`WebFetch` — so the pages cannot be read from here at all. The `h2` path is the
+likelier candidate. Resisting the temptation to add a probe route was
+deliberate: that is exactly how the SSRF-shaped endpoint in the earlier
+soft-404 investigation came to sit on production. **The persisted reason is the
+supported way to answer this** — re-run the check and the badge says which.
+
+`scripts/verify-link-check.ts` serves fixtures from a local HTTP server and
+covers the whole path: real 404/410 authoritative, genuine soft 404 a suspicion
+only, both false-positive shapes clean, 403/5xx/unreachable inconclusive.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
