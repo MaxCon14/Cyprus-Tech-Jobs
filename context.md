@@ -1117,6 +1117,62 @@ only, both false-positive shapes clean, 403/5xx/unreachable inconclusive.
 
 ---
 
+## Session: IT & Systems added to the taxonomy
+
+The board covered engineering, and separately the business functions a Cyprus
+fintech hires for, but **corporate IT fell between them** and had no home. The
+nearest existing parents were both wrong, and the distinction is worth keeping:
+**DevOps & Cloud is product infrastructure** — the systems the company sells run
+on — whereas IT is **the systems the company runs ON**. A sysadmin and an SRE
+are not interchangeable hires; Security covers infosec engineering, not a
+helpdesk. An IT Operations Manager was unfileable.
+
+New parent **`IT & Systems` (slug `it`)** with 14 roles: IT Support Specialist,
+IT Helpdesk Technician, Desktop Support Engineer, Service Desk Analyst, System
+Administrator, Network Engineer, Network Administrator, Database Administrator,
+IT Operations Engineer, IT Operations Manager, IT Project Manager, Solutions
+Architect, IT Manager, Head of IT. Taxonomy is now **22 parents / 152 roles**.
+
+The `"IT "` prefix appears **only where an unprefixed slug would collide** —
+`it-project-manager` against Operations' `project-manager`,
+`it-operations-manager` against Operations' `operations-manager`. Slugs were
+checked against the table before inserting.
+
+**Written straight to the live `categories` table** (the source of truth for
+nav, homepage grid and all three job pickers), same as the earlier broad-taxonomy
+session — so the roles are selectable immediately, ahead of any deploy. Same
+caveat as last time: the **nav dropdown is cached** (`getNavCategories`,
+`unstable_cache`, tag `CATEGORY_CACHE_TAG`), and a direct SQL insert does not
+bust it, so the new parent reaches the nav within ~1h or on the next deploy.
+The pickers and homepage grid read uncached queries and show it now.
+
+`prisma/seed.ts` updated to match, and **verified by diffing the seed tree
+against the live table — 174 entries, exact match.** Worth repeating that check
+whenever the taxonomy is touched; it is the only thing keeping a fresh database
+reproducible.
+
+**The skill picker needed widening too, and this is the easy half to miss.**
+`TECH_STACK_OPTIONS` is a **closed list**, so an IT role could be filed but not
+tagged — no Active Directory, Windows Server, VMware or ITIL existed. Added
+~31 IT entries (AD/Group Policy/M365/Intune/Exchange/Entra/SCCM, VMware/Hyper-V/
+Citrix/Veeam/Proxmox, Cisco/Fortinet/pfSense/VPN/DNS/DHCP/TCP-IP/VoIP, ITIL/
+ServiceNow/JSM/Zendesk/Freshservice, backup & DR, endpoint management, helpdesk,
+hardware troubleshooting, macOS admin). Icons only where a real brand icon
+exists — `resolveSkillIcon` falls back, which reads better than a wrong logo.
+358 options total, no duplicates.
+
+**A pleasant interaction with the SEO fix:** all 15 new categories are empty on
+day one, so `noindexWhenEmpty` marks them `noindex` and the sitemap omits them
+automatically. Adding a whole taxonomy branch no longer creates thin pages —
+each one starts appearing to Google only once it has a job.
+
+Verified against a scratch Postgres with the app running: the grid tile renders
+with its icon and links to `/jobs/category/it`; that page and a child role page
+return 200 with correct titles; the picker query is unfiltered so it lists the
+new roles; the empty pages are `noindex` and absent from the sitemap.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
