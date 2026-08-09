@@ -301,6 +301,10 @@ real `FilterBar` back.
 ISR; no `hreflang` for `el-CY`/`en-CY`; robots doesn't disallow filter query
 params (low risk — filtered views canonicalise to the base page).
 
+**Closed since:** empty category/city/job-type landing pages are no longer
+submitted or indexable — see the soft-404 session below, which is also the
+answer to any future "Discovered – currently not indexed" mail.
+
 **Closed since** (see the "title/robots/GfJ + role×city" session below): role×city
 "money pages" now exist as dedicated indexable pages (`/jobs/category/<slug>/<city>`);
 the two test company records are gone from the sitemap (`getCompanySlugs` now
@@ -948,6 +952,86 @@ it is one of the most-requested skills on the board and could not be tagged at
 all. Remember `linkJobTags` creates missing tags on write, so new options here
 reach the DB the first time someone saves a job using them; the picker stays a
 closed list.
+
+---
+
+## Session: the empty-landing-page / soft-404 fix
+
+Prompted by three Search Console emails. Two of them had the same single cause;
+the third was a false alarm. Worth reading before acting on any future GSC mail.
+
+**"Discovered – currently not indexed" (174 URLs) and a failed Soft 404 fix
+validation were the same bug.** The site published a landing page for every
+category, city and employment type regardless of whether a job sat behind it.
+An empty page that returns 200 saying "No jobs found" is what Google classifies
+as a **soft 404**, and it stops crawling the rest once it has sampled a few.
+Measured against the live DB at the time: **159 categories, 27 active jobs, 129
+categories with nothing behind them**; four of the five job-type pages empty
+(every active job was `FULL_TIME`); Larnaca and Paphos empty.
+
+The galling part is that the rule already existed — `sitemap.ts` carried a
+comment explaining why empty role×city combos are withheld — but it had never
+been applied to the category, city and job-type pages those combos are built
+from.
+
+Fixed in `f6ce7f7`:
+- **`src/app/jobs/_shared/seo.ts` → `noindexWhenEmpty(filter)`**, one
+  implementation now shared by the category, city, job-type and role×city
+  routes. Emits `noindex, follow` — crawlable, just not indexable, the same
+  reasoning as the robots.txt fix (to keep a *linked* page out of the index use
+  noindex, never a block).
+- **It fails open.** The role×city version it replaced did `.catch(() => 0)`,
+  so a transient DB error would have noindexed every one of those pages.
+  Deindexing is slow to undo; a briefly-indexed empty page costs almost
+  nothing. If you touch this helper, keep that direction.
+- The five **city routes moved from `export const metadata` to
+  `generateMetadata`** so they can read a count. Their metadata values are
+  otherwise unchanged.
+- **`sitemap.ts`**: categories filtered to those with a live job (the `OR`
+  mirrors `getJobCount`, so a parent stays listed while any child has one);
+  city and job-type URLs moved out of the hardcoded `STATIC` array and gated on
+  the same counts.
+- **`sitemap.ts` gained `revalidate = 3600`.** This is the non-obvious one:
+  every query in that file runs **at build time** and the output was then frozen
+  until the next deploy — visible as `○ /sitemap.xml` with no revalidate column
+  in `next build` output, next to `○ /llms.txt  1h  1y`. Tolerable when the
+  contents were a fixed list; not once entries appear and disappear with live
+  job counts. **If you add anything data-driven to a sitemap or a route like it,
+  check the build output for that column.**
+- **`/jobs/famagusta` deleted.** An orphan `redirect("/jobs")` nothing linked
+  to. Redirecting a URL to a generic page is itself a soft-404 signal; it now
+  404s honestly. (The `Famagusta` entries in `schema.ts` are the district map
+  for `addressRegion` — unrelated, leave them.)
+
+**Verified against a scratch Postgres, on rendered HTML rather than by
+reasoning** — one job seeded under a child category, then all 14 cases checked:
+a category with its own job and a parent whose child holds the job both stay
+indexable; two empty categories, four cities, empty job types and an empty
+role×city combo all emit `noindex, follow` while still returning 200 with their
+"browse all" content; the sitemap lists only non-empty URLs; famagusta 404s.
+
+**The third email was a false alarm — don't chase it.** "Job Postings structured
+data issues: Missing `streetAddress` / `postalCode` in `jobLocation.address`."
+Google's own email labels these **non-critical**; rich-result eligibility is
+unaffected. The `Job` model holds only `city`, so `addressLocality`,
+`addressCountry` and `addressRegion` are already everything that can be filled
+honestly. Collecting a street address would contradict `804b27d` ("stop implying
+an employer needs a company address"), is meaningless for remote/hybrid roles,
+and is unavailable for curated listings. **Do not fill `postalCode` with a
+generic city code** — inventing location data in structured markup is worse than
+omitting an optional field.
+
+**Two notes for the next Search Console round:**
+- **Don't click "Validate Fix" before the fix is deployed.** The failed
+  validation happened because nothing had shipped; Google re-crawls a sample,
+  sees no change, fails it, and gets slower to re-check.
+- The soft-404 logic in `src/lib/link-check.ts` is **unrelated** to this. That
+  detects soft 404s on *employers' external careers pages*. Same term, opposite
+  direction — easy to assume one covered the other.
+
+**Still the real constraint:** 27 live jobs does not support 159 landing pages.
+The gate makes the indexable surface honest (~30 pages), but inventory is what
+actually moves rankings.
 
 ---
 
