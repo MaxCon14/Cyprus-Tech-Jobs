@@ -37,27 +37,35 @@ const badgeStyle = (color: string, background: string) => ({
   padding: "2px 7px", borderRadius: 4, color, background,
 });
 
+/* Deliberately one advisory state, in amber, never red, and never the word
+   "broken". The checker runs from a datacenter and cannot tell a retired
+   listing apart from a site refusing automated requests — Bolt answers it 404
+   for jobs that are live in a browser. Presenting that as a verdict invites
+   unpublishing a listing an employer is paying for, so the badge reports what
+   was seen and leaves the judgement to the person reading it.
+   If you are tempted to add a red "Broken" state back, read checkApplyUrl. */
+const REASON_LABEL: Record<string, { label: string; hint: string }> = {
+  "http-404": {
+    label: "404",
+    hint:  "Our server got HTTP 404. Some careers sites return 404 to automated requests even when the page is live — open it before acting.",
+  },
+  "http-410": {
+    label: "410",
+    hint:  "Our server got HTTP 410 (gone). Usually genuine, but confirm in a browser before unpublishing.",
+  },
+  "soft-404": {
+    label: "reads as empty",
+    hint:  "The page loaded normally but its title or heading reads like a not-found page. This is a guess about their markup — open it before acting.",
+  },
+};
+
 function LinkBadge({ job }: { job: Job }) {
-  /* Two distinct states, and the difference matters to whoever acts on it:
-     "Broken" is the server's own 404/410 and can be trusted. "Check" is our
-     guess from the page's wording and has produced false positives on live
-     listings, so it asks for a look rather than asserting the job is dead.
-     Never collapse these back into one badge. */
-  if (job.applyUrlBroken) {
-    const code = job.applyUrlCheckReason === "http-410" ? "410" : "404";
+  const reason = job.applyUrlCheckReason ? REASON_LABEL[job.applyUrlCheckReason] : undefined;
+
+  if (reason) {
     return (
-      <span style={badgeStyle("#ef4444", "#fef2f2")} title={`Server returned HTTP ${code}`}>
-        <AlertTriangle size={10} /> Broken · {code}
-      </span>
-    );
-  }
-  if (job.applyUrlCheckReason === "soft-404") {
-    return (
-      <span
-        style={badgeStyle("#b45309", "#fffbeb")}
-        title="Page loaded with HTTP 200 but its title or heading reads like a not-found page. This is a guess — open the link before acting on it."
-      >
-        <HelpCircle size={10} /> Check
+      <span style={badgeStyle("#b45309", "#fffbeb")} title={reason.hint}>
+        <HelpCircle size={10} /> Check · {reason.label}
       </span>
     );
   }
@@ -72,9 +80,11 @@ export function JobsTableClient({ jobs }: Props) {
   const [query, setQuery]           = useState("");
   const [flaggedOnly, setFlaggedOnly] = useState(false);
   const [checking, setChecking]       = useState(false);
-  const [result, setResult]           = useState<{ checked: number; broken: number; suspect: number } | null>(null);
+  const [result, setResult]           = useState<{ checked: number; flagged: number } | null>(null);
 
-  const isFlagged = (j: Job) => j.applyUrlBroken || j.applyUrlCheckReason === "soft-404";
+  // Reason is the single source of truth; applyUrlBroken is a legacy name for
+  // the same thing (see the schema comment) and is not read here.
+  const isFlagged = (j: Job) => j.applyUrlCheckReason !== null;
 
   const filtered = jobs
     .filter(j => !flaggedOnly || isFlagged(j))
@@ -83,9 +93,7 @@ export function JobsTableClient({ jobs }: Props) {
       j.companyDisplay.toLowerCase().includes(query.toLowerCase())
     );
 
-  const brokenCount  = jobs.filter(j => j.applyUrlBroken).length;
-  const suspectCount = jobs.filter(j => j.applyUrlCheckReason === "soft-404").length;
-  const flaggedCount = brokenCount + suspectCount;
+  const flaggedCount = jobs.filter(isFlagged).length;
 
   async function runCheck() {
     setChecking(true);
@@ -93,7 +101,7 @@ export function JobsTableClient({ jobs }: Props) {
     try {
       const res  = await fetch("/api/admin/jobs/check-links", { method: "POST" });
       const data = await res.json().catch(() => null);
-      if (res.ok && data) setResult({ checked: data.checked, broken: data.broken, suspect: data.suspect ?? 0 });
+      if (res.ok && data) setResult({ checked: data.checked, flagged: data.flagged ?? 0 });
       router.refresh();
     } finally {
       setChecking(false);
@@ -105,11 +113,8 @@ export function JobsTableClient({ jobs }: Props) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
         <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
           {filtered.length}{query || flaggedOnly ? ` of ${jobs.length}` : ""} listings
-          {brokenCount > 0 && (
-            <span style={{ color: "#ef4444", fontWeight: 600 }}> · {brokenCount} broken</span>
-          )}
-          {suspectCount > 0 && (
-            <span style={{ color: "#b45309", fontWeight: 600 }}> · {suspectCount} to check</span>
+          {flaggedCount > 0 && (
+            <span style={{ color: "#b45309", fontWeight: 600 }}> · {flaggedCount} apply link{flaggedCount === 1 ? "" : "s"} to check</span>
           )}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -127,13 +132,11 @@ export function JobsTableClient({ jobs }: Props) {
       </div>
 
       {result && (
-        <p className="mono-s" style={{ color: result.broken > 0 ? "#ef4444" : result.suspect > 0 ? "#b45309" : "var(--success)", marginBottom: 12 }}>
+        <p className="mono-s" style={{ color: result.flagged > 0 ? "#b45309" : "var(--success)", marginBottom: 12 }}>
           Checked {result.checked} listing{result.checked === 1 ? "" : "s"} —{" "}
-          {result.broken === 0 && result.suspect === 0 && "no broken apply links found."}
-          {result.broken > 0 &&
-            `${result.broken} came back 404/410 and can be unpublished. `}
-          {result.suspect > 0 &&
-            `${result.suspect} loaded fine but read like a not-found page — open ${result.suspect === 1 ? "it" : "them"} before acting, this check can be wrong.`}
+          {result.flagged === 0
+            ? "every apply link responded normally."
+            : `${result.flagged} worth a look. Open ${result.flagged === 1 ? "it" : "them"} before unpublishing — some careers sites answer automated checks with a 404 even when the page is live.`}
         </p>
       )}
 

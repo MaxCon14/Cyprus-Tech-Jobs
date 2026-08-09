@@ -121,11 +121,12 @@ model Job {
   applyUrl            String?
   applyEmail          String?
   // Set by /api/admin/jobs/check-links. Only ever written by that route;
-  // never set on job create/edit.
-  // applyUrlBroken is AUTHORITATIVE — the server returned 404/410.
-  // applyUrlCheckReason records why ("http-404" | "http-410" | "soft-404");
-  // "soft-404" is a heuristic read of the page's own wording and leaves
-  // applyUrlBroken false, because it is a guess about someone else's markup.
+  // never set on job create/edit, and never acted on automatically.
+  // NOTE the name is a leftover: applyUrlBroken means "flagged for review",
+  // NOT "confirmed dead". Nothing the checker sees can establish that — Bolt
+  // serves it a 404 for listings that are live in a browser. Rename when
+  // something else needs a migration; don't spend one on it alone.
+  // applyUrlCheckReason says why: "http-404" | "http-410" | "soft-404".
   applyUrlBroken      Boolean         @default(false)
   applyUrlCheckedAt   DateTime?
   applyUrlCheckReason String?

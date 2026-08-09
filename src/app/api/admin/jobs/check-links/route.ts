@@ -13,15 +13,15 @@ export const maxDuration = 60;
 const CONCURRENCY = 6;
 
 /**
- * On-demand: check every active job's external apply URL. Triggered from the
- * admin Jobs page ("Check apply links"), not on a schedule — see the button in
- * JobsTableClient for why.
+ * On-demand: look at every active job's external apply URL and record which
+ * ones are worth a human checking. Triggered from the admin Jobs page ("Check
+ * apply links"), not on a schedule — see the button in JobsTableClient.
  *
- * Two outcomes, kept separate on purpose. `applyUrlBroken` is only ever set by
- * an authoritative 404/410. A soft-404 heuristic match is recorded in
- * `applyUrlCheckReason` and surfaces as "Check", because it is an inference
- * about someone else's HTML — two live Bolt listings were previously shown as
- * definitively "Broken" on the strength of it.
+ * The result is **advisory**, including an HTTP 404. Bolt returns 404 to this
+ * checker for listings that are live in a browser, so a status code from here
+ * is a signal and not a verdict — see checkApplyUrl. Nothing in this route may
+ * mark a job as confirmed-dead, and nothing acts on the result automatically:
+ * unpublishing stays a human decision.
  */
 export async function POST() {
   if (!await getAdminUser()) return adminUnauthorized();
@@ -32,21 +32,19 @@ export async function POST() {
   });
 
   const now = new Date();
-  const brokenIds:  string[] = [];
-  const suspectIds: string[] = [];
+  const flaggedIds: string[] = [];
   let cursor = 0;
 
   async function worker() {
     while (cursor < jobs.length) {
       const job = jobs[cursor++];
-      const { broken, reason } = await checkApplyUrl(job.applyUrl!);
+      const { flagged, reason } = await checkApplyUrl(job.applyUrl!);
       await prisma.job.update({
         where: { id: job.id },
-        // reason is always rewritten, so a link that recovers clears its flag.
-        data:  { applyUrlBroken: broken, applyUrlCheckedAt: now, applyUrlCheckReason: reason },
+        // Always rewritten, so a link that recovers clears its own flag.
+        data:  { applyUrlBroken: flagged, applyUrlCheckedAt: now, applyUrlCheckReason: reason },
       });
-      if (broken) brokenIds.push(job.id);
-      else if (reason === "soft-404") suspectIds.push(job.id);
+      if (flagged) flaggedIds.push(job.id);
     }
   }
 
@@ -54,11 +52,5 @@ export async function POST() {
     Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker)
   );
 
-  return NextResponse.json({
-    checked: jobs.length,
-    broken:  brokenIds.length,
-    suspect: suspectIds.length,
-    brokenIds,
-    suspectIds,
-  });
+  return NextResponse.json({ checked: jobs.length, flagged: flaggedIds.length, flaggedIds });
 }

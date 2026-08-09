@@ -1,9 +1,12 @@
 /**
- * Checks that the apply-link checker only calls a listing dead when the server
- * says so, and that its soft-404 heuristic does not fire on live pages.
+ * Checks what the apply-link checker flags, and — just as importantly — that
+ * it never claims a listing is dead.
  *
  * Written after two live Bolt listings were shown in the admin panel as
- * definitively "Broken" while both pages were open and fine in a browser.
+ * "Broken", first from the soft-404 heuristic and then from a genuine HTTP
+ * 404 that Bolt's edge serves to automated clients while showing a browser the
+ * real page. The second round is why there is no "broken" verdict left: a
+ * status code from a datacenter cannot tell those two situations apart.
  * Serves fixture pages from a local HTTP server so the whole path runs —
  * status handling, redirects and HTML parsing — not just the regex.
  *
@@ -22,7 +25,7 @@ const OK_JOB_BODY = `
 interface Fixture { status: number; body: string }
 
 const FIXTURES: Record<string, Fixture> = {
-  /* Authoritative dead links. */
+  /* Status codes worth flagging — worth a look, not proof of anything. */
   "/gone-404": { status: 404, body: "<title>Not found</title><h1>Not found</h1>" },
   "/gone-410": { status: 410, body: "<title>Gone</title><h1>Gone</h1>" },
 
@@ -73,21 +76,19 @@ const FIXTURES: Record<string, Fixture> = {
   "/error-500":    { status: 500, body: "<title>Server error</title>" },
 };
 
-type Expected = { broken: boolean; suspect: boolean };
-
-const CASES: Array<[path: string, expected: Expected, why: string]> = [
-  ["/gone-404", { broken: true,  suspect: false }, "a real 404 is authoritative"],
-  ["/gone-410", { broken: true,  suspect: false }, "a real 410 is authoritative"],
-  ["/soft-404", { broken: false, suspect: true  }, "soft 404 is a suspicion, never 'broken'"],
-  ["/live-spa-bundling-its-error-copy", { broken: false, suspect: false },
+const CASES: Array<[path: string, flagged: boolean, reason: string, why: string]> = [
+  ["/gone-404", true,  "http-404", "a 404 is worth a look"],
+  ["/gone-410", true,  "http-410", "a 410 is worth a look"],
+  ["/soft-404", true,  "soft-404", "wording that reads as not-found is worth a look"],
+  ["/live-spa-bundling-its-error-copy", false, "none",
     "error copy inside <script> must not flag a live job"],
-  ["/live-with-innocent-h2", { broken: false, suspect: false },
+  ["/live-with-innocent-h2", false, "none",
     "an h2 section heading must not flag a live job"],
-  ["/live-with-comment", { broken: false, suspect: false },
+  ["/live-with-comment", false, "none",
     "comments and CSS must not flag a live job"],
-  ["/live-plain",  { broken: false, suspect: false }, "healthy page is clean"],
-  ["/blocked-403", { broken: false, suspect: false }, "403 is inconclusive, not dead"],
-  ["/error-500",   { broken: false, suspect: false }, "5xx is inconclusive, not dead"],
+  ["/live-plain",  false, "none", "healthy page is clean"],
+  ["/blocked-403", false, "none", "403 is inconclusive, not dead"],
+  ["/error-500",   false, "none", "5xx is inconclusive, not dead"],
 ];
 
 async function main() {
@@ -102,23 +103,33 @@ async function main() {
   const { port } = server.address() as { port: number };
 
   let failures = 0;
-  for (const [path, expected, why] of CASES) {
-    const got = await checkApplyUrl(`http://127.0.0.1:${port}${path}`);
-    const pass = got.broken === expected.broken && got.suspect === expected.suspect;
+  for (const [path, flagged, reason, why] of CASES) {
+    const got  = await checkApplyUrl(`http://127.0.0.1:${port}${path}`);
+    const pass = got.flagged === flagged && (got.reason ?? "none") === reason;
     if (!pass) failures++;
     console.log(
-      `${pass ? "✓" : "✗"} ${path.padEnd(36)} broken=${got.broken} suspect=${got.suspect} ` +
-      `reason=${got.reason ?? "none"}${pass ? "" : `  EXPECTED broken=${expected.broken} suspect=${expected.suspect}  (${why})`}`
+      `${pass ? "✓" : "✗"} ${path.padEnd(36)} flagged=${got.flagged} reason=${got.reason ?? "none"}` +
+      `${pass ? "" : `  EXPECTED flagged=${flagged} reason=${reason}  (${why})`}`
     );
+  }
+
+  /* The Bolt case: a live listing behind a stealth block that answers our
+     server 404. Indistinguishable here from a retired posting — which is the
+     whole reason no caller may treat this as proof the job is gone. */
+  {
+    const got = await checkApplyUrl(`http://127.0.0.1:${port}/gone-404`);
+    const ok  = got.flagged && !("broken" in got);
+    if (!ok) failures++;
+    console.log(`${ok ? "✓" : "✗"} ${"(no 'broken' verdict exists)".padEnd(36)} result keys: ${Object.keys(got).join(",")}`);
   }
 
   /* An unreachable host is inconclusive, not dead — closing the server first
      is the cheapest way to exercise the catch branch. */
   await new Promise<void>(resolve => server.close(() => resolve()));
   const unreachable = await checkApplyUrl(`http://127.0.0.1:${port}/live-plain`);
-  const unreachableOk = !unreachable.broken && !unreachable.suspect;
+  const unreachableOk = !unreachable.flagged;
   if (!unreachableOk) failures++;
-  console.log(`${unreachableOk ? "✓" : "✗"} ${"(unreachable host)".padEnd(36)} broken=${unreachable.broken} suspect=${unreachable.suspect}`);
+  console.log(`${unreachableOk ? "✓" : "✗"} ${"(unreachable host)".padEnd(36)} flagged=${unreachable.flagged}`);
 
   console.log(failures === 0 ? "\nAll link-check cases passed." : `\n${failures} case(s) FAILED.`);
   process.exit(failures === 0 ? 0 : 1);
