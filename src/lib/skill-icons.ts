@@ -356,6 +356,27 @@ export const SKILL_ICONS: Record<string, string> = {
   "Kanban":             "trello",
   "Product Management": "notion",
   "UX Research":        "figma",
+
+  /* IT & Systems. Several have no brand icon of their own (ITIL, VPN, DHCP,
+     Help Desk Support…) and are deliberately absent — resolveSkillIcon falls
+     back for anything unmapped, which reads better than a wrong logo. */
+  "Windows Server":     "windows",
+  "Active Directory":   "windows",
+  "Group Policy":       "windows",
+  "Microsoft 365":      "microsoftoffice",
+  "Microsoft Intune":   "microsoftoffice",
+  "Microsoft Exchange": "microsoftexchange",
+  "Entra ID":           "microsoftazure",
+  "VMware":             "vmware",
+  "Proxmox":            "proxmox",
+  "Cisco":              "cisco",
+  "Fortinet":           "fortinet",
+  "pfSense":            "pfsense",
+  "ServiceNow":         "servicenow",
+  "Jira Service Management": "jira",
+  "Zendesk":            "zendesk",
+  "Freshservice":       "freshworks",
+  "macOS Administration":    "apple",
 };
 
 /** Returns a full icon URL for a skill name, or null if no icon is available. */

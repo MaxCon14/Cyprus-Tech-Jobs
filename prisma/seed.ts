@@ -47,6 +47,30 @@ async function main() {
       { name: "Kubernetes Engineer", slug: "kubernetes-engineer" },
       { name: "Site Reliability Engineer", slug: "sre-engineer" },
     ] },
+    /* Corporate/internal IT, deliberately separate from DevOps & Cloud above.
+       DevOps is product infrastructure — the systems the company sells run on.
+       This is the systems the company runs ON: helpdesk, endpoints, networks,
+       AD, internal ops. A sysadmin and an SRE are not interchangeable hires,
+       and lumping them together is why neither side finds the other's roles.
+       Names are prefixed "IT " where an unprefixed one would collide with an
+       existing role (it-project-manager vs Operations' project-manager,
+       it-operations-manager vs Operations' operations-manager). */
+    { name: "IT & Systems", slug: "it", children: [
+      { name: "IT Support Specialist", slug: "it-support-specialist" },
+      { name: "IT Helpdesk Technician", slug: "it-helpdesk-technician" },
+      { name: "Desktop Support Engineer", slug: "desktop-support-engineer" },
+      { name: "Service Desk Analyst", slug: "service-desk-analyst" },
+      { name: "System Administrator", slug: "system-administrator" },
+      { name: "Network Engineer", slug: "network-engineer" },
+      { name: "Network Administrator", slug: "network-administrator" },
+      { name: "Database Administrator", slug: "database-administrator" },
+      { name: "IT Operations Engineer", slug: "it-operations-engineer" },
+      { name: "IT Operations Manager", slug: "it-operations-manager" },
+      { name: "IT Project Manager", slug: "it-project-manager" },
+      { name: "Solutions Architect", slug: "solutions-architect" },
+      { name: "IT Manager", slug: "it-manager" },
+      { name: "Head of IT", slug: "head-of-it" },
+    ] },
     { name: "Data & AI", slug: "data", children: [
       { name: "AI Engineer", slug: "ai-engineer" },
       { name: "BI Analyst", slug: "bi-analyst" },

@@ -497,6 +497,17 @@ export const TECH_STACK_OPTIONS = [
   "NIST Cybersecurity Framework", "CISSP", "CISM", "CISA", "CEH",
   "CompTIA Security+", "OSCP", "CCSP",
 
+  // IT & Systems — corporate/internal IT, not product infrastructure. Added
+  // with the IT & Systems category: the picker is a closed list, so without
+  // these an IT Support or sysadmin listing could not be tagged at all.
+  "Windows Server", "Active Directory", "Group Policy", "Microsoft 365",
+  "Microsoft Intune", "Microsoft Exchange", "SCCM", "Entra ID",
+  "VMware", "Hyper-V", "Citrix", "Veeam", "Proxmox",
+  "Cisco", "Fortinet", "pfSense", "VPN", "DNS", "DHCP", "TCP/IP", "VoIP",
+  "ITIL", "ServiceNow", "Jira Service Management", "Zendesk", "Freshservice",
+  "Backup & Recovery", "Disaster Recovery", "Endpoint Management",
+  "Help Desk Support", "Hardware Troubleshooting", "macOS Administration",
+
   // Payments & integrations
   "Stripe", "Twilio", "SendGrid", "Auth0", "Clerk",
 
