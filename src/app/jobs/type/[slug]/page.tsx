@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JobTypePage, type JobTypeConfig, type JobTypeSearchParams } from "../../_shared/JobTypePage";
+import { noindexWhenEmpty } from "../../_shared/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: { canonical: url },
     openGraph:  { title, description, url, type: "website" },
     twitter:    { card: "summary_large_image", title, description },
+    // Only full-time listings exist today, so the other four types are empty
+    // pages Google reads as soft 404s — see _shared/seo.ts.
+    ...(await noindexWhenEmpty({ employmentType: cfg.employment })),
   };
 }
 

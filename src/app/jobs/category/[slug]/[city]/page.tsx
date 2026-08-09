@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { getJobCount } from "@/lib/queries";
 import { CategoryCityPage, ROLE_CITIES, type FixedCity } from "../../../_shared/CategoryCityPage";
+import { noindexWhenEmpty } from "../../../_shared/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +22,11 @@ async function getCategory(slug: string) {
   });
 }
 
-async function comboCount(categorySlug: string, city: FixedCity) {
-  return getJobCount({
+function comboFilter(categorySlug: string, city: FixedCity) {
+  return {
     categorySlug,
     ...(city.isRemote ? { remoteType: "REMOTE" } : { city: city.name }),
-  }).catch(() => 0);
+  };
 }
 
 export async function generateMetadata(
@@ -43,11 +43,6 @@ export async function generateMetadata(
   const description = `Find ${cat.name} jobs ${where} — every listing with a verified salary, updated daily. Browse open ${cat.name.toLowerCase()} roles and apply directly on CyprusTech.Careers.`;
   const url     = `${BASE}/jobs/category/${slug}/${citySlug}`;
 
-  // Empty combos still render (with a helpful "browse all" state) but must not
-  // be indexed — a page with no listings is thin content. Only combos with at
-  // least one live job are indexable, matching what the sitemap submits.
-  const count = await comboCount(slug, city);
-
   return {
     // The root layout's `%s | CyprusTech.Careers` template adds the brand, so
     // the title must not include it here (that would double it).
@@ -56,7 +51,9 @@ export async function generateMetadata(
     alternates: { canonical: url },
     openGraph:  { title: heading, description, url, type: "website" },
     twitter:    { card: "summary_large_image", title: heading, description },
-    ...(count === 0 && { robots: { index: false, follow: true } }),
+    // Empty combos still render a helpful "browse all" state but must not be
+    // indexed. Shared with every other landing page — see _shared/seo.ts.
+    ...(await noindexWhenEmpty(comboFilter(slug, city))),
   };
 }
 

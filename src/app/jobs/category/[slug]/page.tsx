@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { CategoryPage } from "../../_shared/CategoryPage";
+import { noindexWhenEmpty } from "../../_shared/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: { canonical: url },
     openGraph:  { title: `${cat.name} Jobs in Cyprus`, description, url, type: "website" },
     twitter:    { card: "summary_large_image", title: `${cat.name} Jobs in Cyprus`, description },
+    // A category with nothing behind it is a soft 404 to Google — see
+    // _shared/seo.ts. getJobCount treats a parent slug as matching its
+    // children's jobs, so a parent stays indexable while any child has one.
+    ...(await noindexWhenEmpty({ categorySlug: slug })),
   };
 }
 
