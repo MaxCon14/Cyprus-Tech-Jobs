@@ -1071,13 +1071,45 @@ the deploy — required, because preview deployments share the production DB, so
 `test` would have hit a missing column. The two false flags were cleared in the
 same pass.
 
-**What could not be established:** which of the two paths actually flagged the
-Bolt URLs. `bolt.eu` is blocked by the sandbox **egress proxy** — no `curl`, no
-`WebFetch` — so the pages cannot be read from here at all. The `h2` path is the
-likelier candidate. Resisting the temptation to add a probe route was
-deliberate: that is exactly how the SSRF-shaped endpoint in the earlier
-soft-404 investigation came to sit on production. **The persisted reason is the
-supported way to answer this** — re-run the check and the badge says which.
+**Round two — the first fix was wrong about the cause, and the real one is
+worse.** The guess above ("the `h2` path is the likelier candidate") was
+mistaken. With the reason persisted, the next run said **`http-404`**: Bolt's
+edge genuinely answers this checker with a 404 while serving a browser the live
+page. A **stealth block** — indistinguishable at this layer from a retired
+posting. Only Bolt does it; the other ~25 curated links check clean.
+
+That falsified the assumption the first fix rested on, that a 404/410 is
+authoritative. The request leaves a **datacenter IP without a browser's TLS
+fingerprint, header order or JS**, and a site objecting to any of that answers
+however it likes. **No status code obtained this way can prove a listing is
+dead.** So the feature is now advisory end to end:
+- `checkApplyUrl` returns `{ flagged, status, reason }` — **there is no
+  `broken` field**, so no caller can promote a signal to a verdict. A test
+  asserts the key is absent. Don't reintroduce it.
+- One amber badge: `Check · 404` / `Check · 410` / `Check · reads as empty`,
+  each with a tooltip saying what was seen and that some careers sites answer
+  automated checks with a 404 even when live. No red state, no "broken" in the
+  UI, no automatic action — unpublishing stays a human decision.
+- The asymmetry that settles it: a false positive costs an employer a live paid
+  listing; a false "check" costs one click.
+- The UA still identifies itself honestly rather than impersonating a browser
+  to get past a site that has chosen to refuse bots — which would not reliably
+  beat fingerprinting anyway. `Accept-Language` and a fuller `Accept` are sent.
+- `applyUrlBroken` now means "flagged for review" despite its name; the schema
+  says not to spend a migration on the rename alone. The UI reads
+  `applyUrlCheckReason` only.
+
+**Sandbox limitation that shaped all of this:** `bolt.eu` is blocked by the
+**egress proxy** — no `curl`, no `WebFetch` — so its pages cannot be read from
+here at all, and the cause was only identifiable once the reason was persisted
+and the admin re-ran the check. Adding a probe route to see for myself was
+deliberately refused: that is exactly how the SSRF-shaped endpoint in the
+earlier soft-404 investigation ended up on production. **Persisting the
+observation and reading it back is the supported way to debug this.**
+
+**Open, if the amber flags on the two Bolt links become annoying:** there is no
+"ignore this link" affordance, so they will re-flag on every run. That needs a
+column; worth pairing with the `applyUrlBroken` rename.
 
 `scripts/verify-link-check.ts` serves fixtures from a local HTTP server and
 covers the whole path: real 404/410 authoritative, genuine soft 404 a suspicion
