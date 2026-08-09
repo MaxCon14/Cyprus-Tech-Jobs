@@ -120,10 +120,15 @@ model Job {
   applyType           String          @default("URL")
   applyUrl            String?
   applyEmail          String?
-  // Set by /api/admin/jobs/check-links — a GET against applyUrl came back
-  // 404/410. Only ever written by that route; never set on job create/edit.
+  // Set by /api/admin/jobs/check-links. Only ever written by that route;
+  // never set on job create/edit.
+  // applyUrlBroken is AUTHORITATIVE — the server returned 404/410.
+  // applyUrlCheckReason records why ("http-404" | "http-410" | "soft-404");
+  // "soft-404" is a heuristic read of the page's own wording and leaves
+  // applyUrlBroken false, because it is a guess about someone else's markup.
   applyUrlBroken      Boolean         @default(false)
   applyUrlCheckedAt   DateTime?
+  applyUrlCheckReason String?
   coverLetter         String          @default("OPTIONAL")
   featured            Boolean         @default(false)
   isCurated           Boolean         @default(false)

@@ -33,6 +33,7 @@ export default async function AdminJobsPage() {
           postedAt: j.postedAt?.toISOString() ?? null,
           applyUrlBroken: j.applyUrlBroken,
           applyUrlCheckedAt: j.applyUrlCheckedAt?.toISOString() ?? null,
+          applyUrlCheckReason: j.applyUrlCheckReason,
         }))}
       />
     </div>

@@ -13,9 +13,15 @@ export const maxDuration = 60;
 const CONCURRENCY = 6;
 
 /**
- * On-demand: check every active job's external apply URL and flag the ones
- * that now 404/410. Triggered from the admin Jobs page ("Check apply links"),
- * not on a schedule — see the button in JobsTableClient for why.
+ * On-demand: check every active job's external apply URL. Triggered from the
+ * admin Jobs page ("Check apply links"), not on a schedule — see the button in
+ * JobsTableClient for why.
+ *
+ * Two outcomes, kept separate on purpose. `applyUrlBroken` is only ever set by
+ * an authoritative 404/410. A soft-404 heuristic match is recorded in
+ * `applyUrlCheckReason` and surfaces as "Check", because it is an inference
+ * about someone else's HTML — two live Bolt listings were previously shown as
+ * definitively "Broken" on the strength of it.
  */
 export async function POST() {
   if (!await getAdminUser()) return adminUnauthorized();
@@ -26,18 +32,21 @@ export async function POST() {
   });
 
   const now = new Date();
-  const brokenIds: string[] = [];
+  const brokenIds:  string[] = [];
+  const suspectIds: string[] = [];
   let cursor = 0;
 
   async function worker() {
     while (cursor < jobs.length) {
       const job = jobs[cursor++];
-      const { broken } = await checkApplyUrl(job.applyUrl!);
+      const { broken, reason } = await checkApplyUrl(job.applyUrl!);
       await prisma.job.update({
         where: { id: job.id },
-        data:  { applyUrlBroken: broken, applyUrlCheckedAt: now },
+        // reason is always rewritten, so a link that recovers clears its flag.
+        data:  { applyUrlBroken: broken, applyUrlCheckedAt: now, applyUrlCheckReason: reason },
       });
       if (broken) brokenIds.push(job.id);
+      else if (reason === "soft-404") suspectIds.push(job.id);
     }
   }
 
@@ -45,5 +54,11 @@ export async function POST() {
     Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker)
   );
 
-  return NextResponse.json({ checked: jobs.length, broken: brokenIds.length, brokenIds });
+  return NextResponse.json({
+    checked: jobs.length,
+    broken:  brokenIds.length,
+    suspect: suspectIds.length,
+    brokenIds,
+    suspectIds,
+  });
 }

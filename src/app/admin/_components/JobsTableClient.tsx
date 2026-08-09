@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AlertTriangle, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, HelpCircle, Loader2, RefreshCw } from "lucide-react";
 import { AdminTable, AdminTr, AdminTd, StatusBadge } from "./AdminTable";
 import { RowActions } from "./RowActions";
 import { AdminSearchInput } from "./AdminSearchInput";
@@ -17,6 +17,7 @@ interface Job {
   postedAt: string | null;
   applyUrlBroken: boolean;
   applyUrlCheckedAt: string | null;
+  applyUrlCheckReason: string | null;
 }
 
 interface Props { jobs: Job[] }
@@ -30,19 +31,33 @@ function timeAgoShort(iso: string): string {
   return `${Math.round(hours / 24)}d ago`;
 }
 
+const badgeStyle = (color: string, background: string) => ({
+  display: "inline-flex", alignItems: "center", gap: 4,
+  fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+  padding: "2px 7px", borderRadius: 4, color, background,
+});
+
 function LinkBadge({ job }: { job: Job }) {
-  // Covers both a genuine HTTP 404/410 and a "soft 404" — a 200 response
-  // whose title/heading reads as a not-found page — so the badge says
-  // "Broken" rather than a literal status code that wouldn't be accurate
-  // for the soft-404 case.
+  /* Two distinct states, and the difference matters to whoever acts on it:
+     "Broken" is the server's own 404/410 and can be trusted. "Check" is our
+     guess from the page's wording and has produced false positives on live
+     listings, so it asks for a look rather than asserting the job is dead.
+     Never collapse these back into one badge. */
   if (job.applyUrlBroken) {
+    const code = job.applyUrlCheckReason === "http-410" ? "410" : "404";
     return (
-      <span style={{
-        display: "inline-flex", alignItems: "center", gap: 4,
-        fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-        padding: "2px 7px", borderRadius: 4, color: "#ef4444", background: "#fef2f2",
-      }}>
-        <AlertTriangle size={10} /> Broken
+      <span style={badgeStyle("#ef4444", "#fef2f2")} title={`Server returned HTTP ${code}`}>
+        <AlertTriangle size={10} /> Broken · {code}
+      </span>
+    );
+  }
+  if (job.applyUrlCheckReason === "soft-404") {
+    return (
+      <span
+        style={badgeStyle("#b45309", "#fffbeb")}
+        title="Page loaded with HTTP 200 but its title or heading reads like a not-found page. This is a guess — open the link before acting on it."
+      >
+        <HelpCircle size={10} /> Check
       </span>
     );
   }
@@ -55,18 +70,22 @@ function LinkBadge({ job }: { job: Job }) {
 export function JobsTableClient({ jobs }: Props) {
   const router = useRouter();
   const [query, setQuery]           = useState("");
-  const [brokenOnly, setBrokenOnly] = useState(false);
-  const [checking, setChecking]     = useState(false);
-  const [result, setResult]         = useState<{ checked: number; broken: number } | null>(null);
+  const [flaggedOnly, setFlaggedOnly] = useState(false);
+  const [checking, setChecking]       = useState(false);
+  const [result, setResult]           = useState<{ checked: number; broken: number; suspect: number } | null>(null);
+
+  const isFlagged = (j: Job) => j.applyUrlBroken || j.applyUrlCheckReason === "soft-404";
 
   const filtered = jobs
-    .filter(j => !brokenOnly || j.applyUrlBroken)
+    .filter(j => !flaggedOnly || isFlagged(j))
     .filter(j => !query ||
       j.title.toLowerCase().includes(query.toLowerCase()) ||
       j.companyDisplay.toLowerCase().includes(query.toLowerCase())
     );
 
-  const brokenCount = jobs.filter(j => j.applyUrlBroken).length;
+  const brokenCount  = jobs.filter(j => j.applyUrlBroken).length;
+  const suspectCount = jobs.filter(j => j.applyUrlCheckReason === "soft-404").length;
+  const flaggedCount = brokenCount + suspectCount;
 
   async function runCheck() {
     setChecking(true);
@@ -74,7 +93,7 @@ export function JobsTableClient({ jobs }: Props) {
     try {
       const res  = await fetch("/api/admin/jobs/check-links", { method: "POST" });
       const data = await res.json().catch(() => null);
-      if (res.ok && data) setResult({ checked: data.checked, broken: data.broken });
+      if (res.ok && data) setResult({ checked: data.checked, broken: data.broken, suspect: data.suspect ?? 0 });
       router.refresh();
     } finally {
       setChecking(false);
@@ -85,9 +104,12 @@ export function JobsTableClient({ jobs }: Props) {
     <>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
         <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
-          {filtered.length}{query || brokenOnly ? ` of ${jobs.length}` : ""} listings
+          {filtered.length}{query || flaggedOnly ? ` of ${jobs.length}` : ""} listings
           {brokenCount > 0 && (
-            <span style={{ color: "#ef4444", fontWeight: 600 }}> · {brokenCount} with a broken apply link</span>
+            <span style={{ color: "#ef4444", fontWeight: 600 }}> · {brokenCount} broken</span>
+          )}
+          {suspectCount > 0 && (
+            <span style={{ color: "#b45309", fontWeight: 600 }}> · {suspectCount} to check</span>
           )}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -105,25 +127,27 @@ export function JobsTableClient({ jobs }: Props) {
       </div>
 
       {result && (
-        <p className="mono-s" style={{ color: result.broken > 0 ? "#ef4444" : "var(--success)", marginBottom: 12 }}>
+        <p className="mono-s" style={{ color: result.broken > 0 ? "#ef4444" : result.suspect > 0 ? "#b45309" : "var(--success)", marginBottom: 12 }}>
           Checked {result.checked} listing{result.checked === 1 ? "" : "s"} —{" "}
-          {result.broken > 0
-            ? `${result.broken} apply link${result.broken === 1 ? "" : "s"} came back 404/410. Unpublish or delete them below.`
-            : "no broken apply links found."}
+          {result.broken === 0 && result.suspect === 0 && "no broken apply links found."}
+          {result.broken > 0 &&
+            `${result.broken} came back 404/410 and can be unpublished. `}
+          {result.suspect > 0 &&
+            `${result.suspect} loaded fine but read like a not-found page — open ${result.suspect === 1 ? "it" : "them"} before acting, this check can be wrong.`}
         </p>
       )}
 
-      {brokenCount > 0 && (
+      {flaggedCount > 0 && (
         <label style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)", cursor: "pointer" }}>
-          <input type="checkbox" checked={brokenOnly} onChange={e => setBrokenOnly(e.target.checked)} />
-          Show broken links only
+          <input type="checkbox" checked={flaggedOnly} onChange={e => setFlaggedOnly(e.target.checked)} />
+          Show flagged links only
         </label>
       )}
 
       <AdminTable columns={["Title", "Company", "Category", "Status", "Apply link", "Clicks", "Posted", "Actions"]}>
         {filtered.length === 0 ? (
           <tr><td colSpan={8} style={{ padding: "24px 16px", textAlign: "center", fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-subtle)" }}>
-            {brokenOnly ? "No broken apply links." : `No jobs match "${query}"`}
+            {flaggedOnly ? "No flagged apply links." : `No jobs match "${query}"`}
           </td></tr>
         ) : filtered.map(j => (
           <AdminTr key={j.id}>
