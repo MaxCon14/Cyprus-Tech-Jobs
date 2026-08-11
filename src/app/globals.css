@@ -497,11 +497,20 @@ body {
 }
 
 /* Curated is the quieter of the two: it describes where the listing came from,
-   where FEATURED is a paid promotion and should stay the loud one. */
+   where FEATURED is a paid promotion and should stay the loud one.
+
+   Solid neutral, and deliberately NOT a pale fill with a 1px outline. That
+   version looked cut off: the outline drew a hard seam where the two badges
+   met, and on a light fill the container's square top-left against its rounded
+   bottom-left read as a shape someone had sliced. Two solid segments read as
+   one ribbon instead. Removing the outline without also going solid is worse
+   again — a pale chip on a white card has no left edge at all.
+
+   text/surface rather than literal colours so it inverts with the theme: dark
+   chip with light type in light mode, the reverse in dark. */
 .job-card-badge--curated {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--text);
+  color: var(--surface);
 }
 
 /* Input / form primitives */
