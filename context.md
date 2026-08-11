@@ -1173,6 +1173,70 @@ new roles; the empty pages are `noindex` and absent from the sitemap.
 
 ---
 
+## Session: readable job URLs, and the AI-endpoint SSRF closed
+
+**Job URLs are now `company-role-city`** — `/jobs/exness-data-analyst-limassol`.
+They were `slugify(title) + Date.now().toString(36)` from the admin route
+(`data-analyst-msdjd3yn` — that suffix decodes to the creation timestamp) or
+`title-company` from the employer routes. Three generators, none matching what
+anyone types into Google.
+
+- One helper, `src/lib/job-slug.ts`, used by all three creation routes.
+- Remote with no city gets `remote`; neither gets no location segment.
+  Duplicates take a counter (`…-limassol-2`). Capped at 90 chars, trimming the
+  title on a hyphen so company and location survive.
+- **A slug is assigned once and does NOT follow later edits** to title, city or
+  company. A URL moving under an indexed page costs more than a fresh slug
+  gains.
+
+**The redirect layer is the part that matters — do not remove it.** New
+`JobSlugHistory` table holds every slug a job has ever had; `/jobs/[slug]`
+falls back to it and issues `permanentRedirect` (308, which Google treats as a
+301). Renaming without this would have 404'd every indexed job page and thrown
+away their ranking. **Its unique constraint is load-bearing**: `uniqueJobSlug`
+checks history as well as live slugs, so a new listing can never claim a
+retired URL and silently redirect people to the wrong job.
+
+**Backfill done: all 26 jobs renamed, 26 redirects recorded.** Order mattered
+and is worth repeating if this ever happens again — migration first, then
+deploy the redirect code, *then* rename. Renaming before the code is live means
+every old URL 404s in the gap. Verified after the fact on production: an old
+URL resolves to a 200 whose canonical is the new slug. `scripts/
+backfill-job-slugs.ts` is dry-run by default and re-runnable;
+`scripts/verify-job-slug.ts --db` covers the rules and the redirect path.
+
+**Security backlog #1 is closed — the SSRF and the unmetered AI spend.**
+`candidates/parse-cv` and `cv-review` both took a URL from an unauthenticated
+body, fetched it, and returned Claude's reading of the response. Requiring
+sign-in was never the fix (parse-cv runs at onboarding step 7, before
+verification at step 8; cv-review sits on public job pages). The observation
+that made it easy: **a real CV has always come from our own storage**, so the
+URL never needed to be arbitrary. `src/lib/cv-url.ts` pins it to the `cvs`
+bucket on the project's Supabase host — https only, no credentials in the URL,
+exact hostname, path under `/storage/v1/object/public/cvs/`.
+
+- **It fails CLOSED**, deliberately unlike `rate-limit.ts`, which fails open. A
+  counter that cannot be read should not take the site down; an allowlist that
+  cannot be evaluated must not wave requests through.
+- Both routes now carry `enforceIpLimit` at 12/hour. On `cv-review` it sits at
+  the POST entry so the **file-upload branch is metered too** — that path calls
+  Anthropic as well and is easy to forget.
+- Refusals log their reason server-side but return the routes' existing generic
+  message, so the allowlist cannot be mapped by probing.
+- `scripts/verify-cv-url.ts` — 16 cases weighted at the bypasses:
+  `169.254.169.254`, localhost, `host@evil.com` credentials trick, lookalike
+  subdomain, host as a path segment, http on the right host, right host wrong
+  bucket, right host pointed at the REST API, `..` traversal. **Also checked
+  the three real CV URLs in the production database against the allowlist
+  before shipping** — a pattern that refused genuine uploads would have broken
+  CV parsing silently.
+
+**Still open on the AI endpoints:** rate limits are per-IP, so they cap a
+casual abuser rather than a distributed one, and the Anthropic spend is capped
+only by that. Fine for now; revisit if the bill ever looks odd.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
@@ -1228,9 +1292,10 @@ counter can't serve the request either), so it is not a defence during an outage
 
 Numbered as one list (the old one restarted at 2 halfway down — merged here).
 
-1. **Security backlog #1 — the AI-endpoint SSRF / unmetered spend.** Top launch
-   blocker; approach decided (restrict fetch URL to Supabase storage + rate
-   limit, no sign-in requirement). See the Security backlog section.
+1. ~~**Security backlog #1 — the AI-endpoint SSRF / unmetered spend.**~~
+   **DONE** — `src/lib/cv-url.ts` allowlist + `enforceIpLimit` on both routes,
+   shipped and verified against the real CV URLs in production. See the
+   "readable job URLs" session below.
 2. **Fix the position-picker dropdown z-index bug** (see the latest session
    section). Small, visible, employer-facing; reproduce before claiming done.
 3. **Fill in `src/lib/legal.ts`** — `registeredName` and `registeredAddress` are
