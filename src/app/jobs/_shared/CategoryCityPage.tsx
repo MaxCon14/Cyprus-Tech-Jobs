@@ -134,9 +134,9 @@ export async function CategoryCityPage({ category, city, searchParams }: Props) 
 
   const intro = isRemote
     ? `Browse ${comboTotal > 0 ? `${comboTotal} ` : ""}remote ${name.toLowerCase()} job${comboTotal === 1 ? "" : "s"} in Cyprus. `
-      + `Find ${name.toLowerCase()} roles you can do from anywhere in Cyprus — every listing with a verified salary, updated daily.`
+      + `Find ${name.toLowerCase()} roles you can do from anywhere in Cyprus — with pay shown wherever the employer publishes it, updated daily.`
     : `Browse ${comboTotal > 0 ? `${comboTotal} ` : ""}${name} job${comboTotal === 1 ? "" : "s"} in ${cityName}, Cyprus. `
-      + `Find ${name.toLowerCase()} roles at leading ${cityName} companies — every listing with a verified salary, updated daily.`;
+      + `Find ${name.toLowerCase()} roles at leading ${cityName} companies — with pay shown wherever the employer publishes it, updated daily.`;
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home",         path: "" },
@@ -161,7 +161,7 @@ export async function CategoryCityPage({ category, city, searchParams }: Props) 
   const faqs = isRemote
     ? [
         { question: `How many remote ${name} jobs are available in Cyprus?`,
-          answer: `There ${comboTotal === 1 ? "is" : "are"} currently ${comboTotal} remote ${name} job${comboTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily. Every listing shows a verified salary and can be done from anywhere in Cyprus.` },
+          answer: `There ${comboTotal === 1 ? "is" : "are"} currently ${comboTotal} remote ${name} job${comboTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily. Pay is shown wherever the employer publishes it, and these roles can be done from anywhere in Cyprus.` },
         { question: `What do remote ${name} roles in Cyprus pay?`,
           answer: `Remote ${name} salaries in Cyprus typically range from about €35,000 for junior positions to €120,000+ for senior and lead roles, with fintech and forex companies paying at the top. Every listing on CyprusTech.Careers shows the salary up front.` },
         { question: `Do I need to live in Cyprus for these remote ${name} jobs?`,
@@ -169,7 +169,7 @@ export async function CategoryCityPage({ category, city, searchParams }: Props) 
       ]
     : [
         { question: `How many ${name} jobs are available in ${cityName}?`,
-          answer: `There ${comboTotal === 1 ? "is" : "are"} currently ${comboTotal} ${name} job${comboTotal === 1 ? "" : "s"} in ${cityName} on CyprusTech.Careers, updated daily. Every listing shows a verified salary.` },
+          answer: `There ${comboTotal === 1 ? "is" : "are"} currently ${comboTotal} ${name} job${comboTotal === 1 ? "" : "s"} in ${cityName} on CyprusTech.Careers, updated daily. Pay is shown wherever the employer publishes it.` },
         { question: `What salary do ${name} roles in ${cityName} pay?`,
           answer: `${name} salaries in ${cityName} typically range from about €35,000 for junior positions to €120,000+ for senior and lead roles${cityName === "Limassol" ? ", with the city's fintech and forex cluster paying at the top of the range" : ""}. Every listing on CyprusTech.Careers shows the salary up front.` },
         { question: `Are there remote ${name} jobs as well as ${cityName}-based ones?`,

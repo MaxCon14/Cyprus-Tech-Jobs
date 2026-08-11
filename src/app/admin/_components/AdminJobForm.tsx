@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Zap, Star, Building2, Check, Loader2, AlertCircle, DollarSign, Tag, Upload, X } from "lucide-react";
+import { Zap, Star, Building2, Check, Loader2, AlertCircle, DollarSign, Tag, Upload, X, Wand2, Info } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { CategoryCombobox } from "@/components/ui/CategoryCombobox";
 import { RichTextEditor } from "@/components/ui/RichTextEditor";
@@ -72,6 +72,65 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
   // Single searchable category. An existing job carries the exact category id
   // (parent or role); a new job defaults to the first category, as before.
   const initCategoryId = initial?.categoryId ?? categories[0]?.id ?? "";
+
+  /* Import prefill. The text inputs, RichTextEditor and SkillTagSelector are
+     all uncontrolled with `defaultValue` / `initial*` props, so the cheapest
+     correct way to prefill them is to merge the draft over `initial` and bump
+     `formKey`, remounting the subtree. Rewriting the whole form as controlled
+     state would be a much larger change for no gain. */
+  const [draft,    setDraft]    = useState<Partial<InitialValues> & { tags?: string[] } | null>(null);
+  const [formKey,  setFormKey]  = useState(0);
+  const [importUrl, setImportUrl] = useState("");
+  const [importBusy, setImportBusy] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importNote, setImportNote] = useState<string | null>(null);
+
+  const v = { ...initial, ...draft };
+
+  async function runImport() {
+    if (!importUrl.trim()) return;
+    setImportBusy(true); setImportError(null); setImportNote(null);
+    try {
+      const res  = await fetch("/api/admin/jobs/import", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ url: importUrl.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setImportError(data.error ?? "Import failed."); setImportBusy(false); return; }
+
+      const d = data.draft;
+      setDraft({
+        title:       d.title,
+        companyName: d.companyName,
+        description: d.descriptionHtml,
+        applyUrl:    d.applyUrl,
+        salaryMin:   d.salaryMin != null ? String(d.salaryMin) : "",
+        salaryMax:   d.salaryMax != null ? String(d.salaryMax) : "",
+        // The picker is a closed list; drop anything it does not know rather
+        // than showing a tag that cannot be selected again after removal.
+        tags:        (d.tags ?? []).filter((t: string) => allTags.includes(t)),
+      });
+      if (d.categoryId) setCategoryId(d.categoryId);
+      setRemoteType(d.remoteType);
+      setEmploymentType(d.employmentType);
+      setExperienceLevel(d.experienceLevel);
+      setCity(d.city ?? "");
+      // Salary is only ever imported when the source published one, so the
+      // toggle follows the data rather than defaulting to "shown" and leaving
+      // an empty range on the listing.
+      setSalaryDisclosed(d.salaryMin != null || d.salaryMax != null);
+      setImportNote(
+        (d.salaryMin == null && d.salaryMax == null ? "No salary was published on that page. " : "") +
+        (d.notes ? d.notes + " " : "") +
+        "The description was written fresh from the posting — read it before saving."
+      );
+      setFormKey(k => k + 1);
+    } catch {
+      setImportError("Import failed. Please try again.");
+    }
+    setImportBusy(false);
+  }
 
   // Controlled select/toggle state
   const [categoryId, setCategoryId] = useState(initCategoryId);
@@ -152,7 +211,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
   }
 
   return (
-    <form onSubmit={submit} noValidate style={{ maxWidth: 760 }}>
+    <form key={formKey} onSubmit={submit} noValidate style={{ maxWidth: 760 }}>
       {serverError && (
         <div style={{ background: "var(--error-bg)", border: "1px solid var(--error)", borderRadius: 8, padding: "12px 16px", marginBottom: 16, display: "flex", gap: 10, alignItems: "flex-start" }}>
           <AlertCircle size={14} style={{ color: "var(--error)", flexShrink: 0, marginTop: 1 }} />
@@ -160,10 +219,56 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
         </div>
       )}
 
+      {/* Import only makes sense when creating — on an edit it would blow away
+          whatever is already there. */}
+      {!jobId && (
+        <FormSection icon={<Wand2 size={14} />} title="Import from a job posting">
+          <Field
+            label="Job posting URL"
+            hint="PASTE THE EMPLOYER'S OWN LISTING. FILLS THE FORM BELOW FOR YOU TO REVIEW — NOTHING IS SAVED UNTIL YOU SUBMIT."
+          >
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <input
+                className="input"
+                style={{ flex: "1 1 260px" }}
+                value={importUrl}
+                onChange={e => setImportUrl(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); runImport(); } }}
+                placeholder="https://company.com/careers/senior-engineer"
+              />
+              <button
+                type="button"
+                onClick={runImport}
+                disabled={importBusy || !importUrl.trim()}
+                className="btn btn-outline"
+                style={{ display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
+              >
+                {importBusy
+                  ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Reading…</>
+                  : <><Wand2 size={13} /> Import</>}
+              </button>
+            </div>
+          </Field>
+
+          {importError && (
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <AlertCircle size={13} style={{ color: "var(--error)", flexShrink: 0, marginTop: 2 }} />
+              <span className="body-s" style={{ color: "var(--error)" }}>{importError}</span>
+            </div>
+          )}
+          {importNote && (
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+              <Info size={13} style={{ color: "var(--text-subtle)", flexShrink: 0, marginTop: 2 }} />
+              <span className="body-s" style={{ color: "var(--text-muted)" }}>{importNote}</span>
+            </div>
+          )}
+        </FormSection>
+      )}
+
       {/* ── Job details ── */}
       <FormSection icon={<Zap size={14} />} title="Job details">
         <Field label="Job title" required>
-          <input className="input" name="title" required defaultValue={initial?.title ?? ""} placeholder="e.g. Senior Backend Engineer" />
+          <input className="input" name="title" required defaultValue={v.title ?? ""} placeholder="e.g. Senior Backend Engineer" />
         </Field>
 
         {/* One searchable picker across every category and role. */}
@@ -239,7 +344,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
         <Field label="Job description" required>
           <RichTextEditor
             name="description"
-            initialContent={initial?.description ?? ""}
+            initialContent={v.description ?? ""}
             placeholder="Describe the role, responsibilities, and requirements…"
           />
         </Field>
@@ -250,7 +355,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
         <p className="body-s" style={{ color: "var(--text-muted)", marginTop: -4 }}>
           Select the skills and technologies required for this role.
         </p>
-        <SkillTagSelector name="tags" allTags={allTags} initialSelected={initialTags} showAll />
+        <SkillTagSelector name="tags" allTags={allTags} initialSelected={draft?.tags ?? initialTags} showAll />
       </FormSection>
 
       {/* ── Company ── */}
@@ -258,7 +363,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
         <Field label="Company name" required hint="SHOWN ON THE LISTING. CURATED JOBS DO NOT CREATE A COMPANY PROFILE.">
           <input
             className="input" name="companyName" required
-            defaultValue={initial?.companyName ?? ""}
+            defaultValue={v.companyName ?? ""}
             placeholder="e.g. Revolut, Exness, Cyta…"
           />
         </Field>
@@ -301,7 +406,7 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
         <Field label="Original job posting URL" required hint="CANDIDATES ARE REDIRECTED HERE WHEN THEY CLICK APPLY.">
           <input
             className="input" name="applyUrl" required
-            defaultValue={initial?.applyUrl ?? ""}
+            defaultValue={v.applyUrl ?? ""}
             placeholder="https://careers.company.com/job/…"
           />
         </Field>
@@ -338,10 +443,10 @@ export function AdminJobForm({ categories, allTags, initialTags = [], initial, j
           <>
             <div className="admin-grid-2">
               <Field label="Salary min (€/year)">
-                <input className="input" name="salaryMin" type="number" defaultValue={initial?.salaryMin ?? ""} placeholder="e.g. 60000" />
+                <input className="input" name="salaryMin" type="number" defaultValue={v.salaryMin ?? ""} placeholder="e.g. 60000" />
               </Field>
               <Field label="Salary max (€/year)">
-                <input className="input" name="salaryMax" type="number" defaultValue={initial?.salaryMax ?? ""} placeholder="e.g. 90000" />
+                <input className="input" name="salaryMax" type="number" defaultValue={v.salaryMax ?? ""} placeholder="e.g. 90000" />
               </Field>
             </div>
             <p className="mono-s" style={{ color: "var(--text-subtle)", marginTop: -8 }}>

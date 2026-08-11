@@ -40,7 +40,7 @@ export async function generateMetadata(
 
   const heading = city.isRemote ? `Remote ${cat.name} Jobs in Cyprus` : `${cat.name} Jobs in ${city.name}`;
   const where   = city.isRemote ? "remote across Cyprus" : `in ${city.name}, Cyprus`;
-  const description = `Find ${cat.name} jobs ${where} — every listing with a verified salary, updated daily. Browse open ${cat.name.toLowerCase()} roles and apply directly on CyprusTech.Careers.`;
+  const description = `Find ${cat.name} jobs ${where} — with pay shown wherever the employer publishes it, updated daily. Browse open ${cat.name.toLowerCase()} roles and apply directly on CyprusTech.Careers.`;
   const url     = `${BASE}/jobs/category/${slug}/${citySlug}`;
 
   return {

@@ -166,7 +166,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 24, background: "var(--surface)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>LOOKING FOR A ROLE?</div>
             <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
-              Browse all active tech roles in Cyprus with verified salaries.
+              Browse all active tech roles in Cyprus.
             </p>
             <Link href="/jobs" className="btn btn-outline" style={{ width: "100%", justifyContent: "center" }}>
               Browse open roles

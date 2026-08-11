@@ -151,7 +151,7 @@ export async function CityPage({ config, searchParams }: Props) {
   /* City-specific FAQ — unique content per page (name + live count) and FAQ schema. */
   const cityFaqs = [
     { question: `How many tech jobs are available in ${displayName}?`,
-      answer: `There ${total === 1 ? "is" : "are"} currently ${total} active tech job${total === 1 ? "" : "s"} in ${displayName} on CyprusTech.Careers, updated daily — spanning software engineering, DevOps, design, data and product. Every listing shows a verified salary.` },
+      answer: `There ${total === 1 ? "is" : "are"} currently ${total} active tech job${total === 1 ? "" : "s"} in ${displayName} on CyprusTech.Careers, updated daily — spanning software engineering, DevOps, design, data and product. Pay is shown wherever the employer publishes it.` },
     { question: `What salary can I expect for tech jobs in ${displayName}?`,
       answer: `Tech salaries in ${displayName} typically range from about €35,000 for junior roles to €120,000+ for senior and lead positions, with fintech and forex companies paying at the top of the range. Every listing on CyprusTech.Careers shows the salary up front.` },
     { question: `Are there remote tech jobs in ${displayName}?`,

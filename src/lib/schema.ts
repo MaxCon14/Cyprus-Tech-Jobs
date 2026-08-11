@@ -44,6 +44,30 @@ interface JobSchemaInput {
     logoUrl?: string | null;
   } | null;
   curatedCompanyName?: string | null;
+  curatedCompanyLogoUrl?: string | null;
+  applyUrl?: string | null;
+}
+
+/* Google matches a JobPosting's hiringOrganization to a real company using
+   `sameAs` and `logo`, and shows the logo in the Google for Jobs card. Both
+   used to come only from a `Company` row — which curated listings do not have,
+   so every curated job (all of them, today) shipped an organisation with a
+   bare name and nothing to tie it to the actual employer.
+
+   For a curated listing the apply URL is the employer's own careers page, so
+   its origin is their site. That is an inference rather than a field someone
+   typed, which is why it is only used when there is no Company website to
+   prefer. */
+function organizationSameAs(job: JobSchemaInput): string | undefined {
+  const site = job.company?.website?.trim();
+  if (site) return site.startsWith("http") ? site : `https://${site}`;
+
+  if (!job.applyUrl) return undefined;
+  try {
+    return new URL(job.applyUrl).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 function stripHtml(html: string): string {
@@ -73,12 +97,11 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
     "hiringOrganization": {
       "@type": "Organization",
       "name": job.company?.name ?? job.curatedCompanyName ?? "",
-      ...(job.company?.website && {
-        "sameAs": job.company!.website!.startsWith("http")
-          ? job.company!.website
-          : `https://${job.company!.website}`,
+      ...(organizationSameAs(job) && { "sameAs": organizationSameAs(job) }),
+      // Curated listings carry their own logo instead of a Company record.
+      ...((job.company?.logoUrl ?? job.curatedCompanyLogoUrl) && {
+        "logo": job.company?.logoUrl ?? job.curatedCompanyLogoUrl,
       }),
-      ...(job.company?.logoUrl && { "logo": job.company!.logoUrl }),
     },
     "jobLocation": {
       "@type": "Place",

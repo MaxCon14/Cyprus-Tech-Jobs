@@ -16,7 +16,7 @@ const CONFIG = {
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title:       "Remote Tech Jobs at Cyprus Companies",
-    description: "Find remote software engineering, design and product jobs at Cyprus-based companies. Work from anywhere. Updated daily with verified salaries.",
+    description: "Find remote software engineering, design and product jobs at Cyprus-based companies. Work from anywhere. Updated daily, with pay shown wherever the employer publishes it.",
     alternates:  { canonical: "https://cyprustech.careers/jobs/remote" },
     openGraph: {
       title:       "Remote Tech Jobs at Cyprus Companies",

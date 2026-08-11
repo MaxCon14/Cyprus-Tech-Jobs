@@ -23,20 +23,20 @@ export const metadata: Metadata = {
   // (Verified live: /jobs gets the "| CyprusTech.Careers" suffix, the homepage
   // does not.) So unlike every child page, the brand has to be added here.
   title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
-  description: "Find tech jobs in Cyprus with verified salaries. Browse IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote — everything you need to work in Cyprus tech.",
+  description: "Find tech jobs in Cyprus, with pay shown wherever the employer publishes it. Browse IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote — everything you need to work in Cyprus tech.",
   alternates: { canonical: "https://cyprustech.careers" },
   openGraph: {
     // OpenGraph/Twitter titles don't go through the layout template, so they
     // carry the brand explicitly.
     title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
-    description: "Find tech jobs in Cyprus with verified salaries. IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
+    description: "Find tech jobs in Cyprus, with pay shown wherever the employer publishes it. IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
     url: "https://cyprustech.careers",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
-    description: "Find tech jobs in Cyprus with verified salaries — IT, software, DevOps, design, data and product roles.",
+    description: "Find tech jobs in Cyprus — IT, software, DevOps, design, data and product roles, with pay shown wherever the employer publishes it.",
   },
 };
 
@@ -44,11 +44,11 @@ export const metadata: Metadata = {
 const FAQS = [
   {
     q: "What tech jobs are available in Cyprus?",
-    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Key sectors include fintech, forex trading, gaming, and a growing startup ecosystem. CyprusTech.Careers lists all active roles with verified salaries.",
+    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Key sectors include fintech, forex trading, gaming, and a growing startup ecosystem. CyprusTech.Careers lists active roles across all of these, with pay shown wherever the employer publishes it.",
   },
   {
     q: "What is the average salary for software engineers in Cyprus?",
-    a: "Software engineers in Cyprus earn between €35,000–€120,000 annually depending on level and specialisation. Junior developers typically earn €30,000–€50,000, mid-level engineers €50,000–€80,000, and senior engineers €75,000–€120,000+. Limassol commands the highest salaries, particularly at fintech companies. All salaries on this platform are verified and shown upfront.",
+    a: "Software engineers in Cyprus earn between €35,000–€120,000 annually depending on level and specialisation. Junior developers typically earn €30,000–€50,000, mid-level engineers €50,000–€80,000, and senior engineers €75,000–€120,000+. Limassol commands the highest salaries, particularly at fintech companies. Where an employer publishes a range, it is shown upfront on the listing rather than hidden until interview.",
   },
   {
     q: "Which cities in Cyprus have the most tech jobs?",
@@ -68,7 +68,7 @@ const FAQS = [
   },
   {
     q: "How do I find a software developer job in Cyprus?",
-    a: "Create a free candidate profile on CyprusTech.Careers, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Our listings always include salaries — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
+    a: "Create a free candidate profile on CyprusTech.Careers, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Where an employer publishes a salary, it is on the listing — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
   },
   {
     q: "What is the cost of living in Cyprus compared to salaries?",

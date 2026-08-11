@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   // The root layout applies a `%s | CyprusTech.Careers` template, so the title
   // must NOT repeat the suffix here.
   const title       = `${cfg.displayName} Tech Jobs in Cyprus`;
-  const description = `Find ${cfg.displayName.toLowerCase()} tech jobs in Cyprus — open roles in Limassol, Nicosia, Larnaca and remote, every listing with a verified salary. Updated daily.`;
+  const description = `Find ${cfg.displayName.toLowerCase()} tech jobs in Cyprus — open roles in Limassol, Nicosia, Larnaca and remote, with pay shown wherever the employer publishes it. Updated daily.`;
   const url         = `${BASE}/jobs/type/${slug}`;
 
   return {

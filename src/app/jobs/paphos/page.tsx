@@ -16,7 +16,7 @@ const CONFIG = {
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title:       "Tech Jobs in Paphos, Cyprus",
-    description: "Find the latest software engineering, IT and digital jobs in Paphos, Cyprus. Updated daily with verified salaries.",
+    description: "Find the latest software engineering, IT and digital jobs in Paphos, Cyprus. Updated daily, with pay shown wherever the employer publishes it.",
     alternates:  { canonical: "https://cyprustech.careers/jobs/paphos" },
     openGraph: {
       title:       "Tech Jobs in Paphos, Cyprus",

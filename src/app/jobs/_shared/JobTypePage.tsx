@@ -162,7 +162,7 @@ export async function JobTypePage({ config, searchParams }: Props) {
 
   const faqs = [
     { question: `How many ${lower} tech jobs are available in Cyprus?`,
-      answer: `There ${typeTotal === 1 ? "is" : "are"} currently ${typeTotal} ${lower} tech job${typeTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily — across software engineering, DevOps, design, data and product. Every listing shows a verified salary.` },
+      answer: `There ${typeTotal === 1 ? "is" : "are"} currently ${typeTotal} ${lower} tech job${typeTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily — across software engineering, DevOps, design, data and product. Pay is shown wherever the employer publishes it.` },
     { question: `Where are ${lower} tech jobs in Cyprus based?`,
       answer: `${displayName} tech roles are concentrated in Limassol and Nicosia, with a growing number in Larnaca and Paphos, plus fully remote positions open to candidates anywhere in Cyprus. Use the city filter to narrow by location.` },
     { question: `What salary do ${lower} tech jobs in Cyprus pay?`,

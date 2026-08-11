@@ -133,7 +133,7 @@ export async function CategoryPage({ category, searchParams }: Props) {
   /* Unique intro copy per category — name, real count, cities. Uses the whole
      category total (not the filtered count) so the SEO copy stays stable. */
   const intro = `Browse ${categoryTotal > 0 ? `${categoryTotal} ` : ""}${name} job${categoryTotal === 1 ? "" : "s"} in Cyprus. `
-    + `Find ${name.toLowerCase()} roles at leading companies in Limassol, Nicosia, Larnaca and remote — every listing with a verified salary, updated daily.`;
+    + `Find ${name.toLowerCase()} roles at leading companies in Limassol, Nicosia, Larnaca and remote — with pay shown wherever the employer publishes it, updated daily.`;
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Home",     path: "" },
@@ -157,7 +157,7 @@ export async function CategoryPage({ category, searchParams }: Props) {
      FAQ schema, matching the depth of the city pages. */
   const faqs = [
     { question: `How many ${name} jobs are available in Cyprus?`,
-      answer: `There ${categoryTotal === 1 ? "is" : "are"} currently ${categoryTotal} ${name} job${categoryTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily. Roles span Limassol, Nicosia, Larnaca and remote, and every listing shows a verified salary.` },
+      answer: `There ${categoryTotal === 1 ? "is" : "are"} currently ${categoryTotal} ${name} job${categoryTotal === 1 ? "" : "s"} in Cyprus on CyprusTech.Careers, updated daily. Roles span Limassol, Nicosia, Larnaca and remote, and pay is shown wherever the employer publishes it.` },
     { question: `What salary do ${name} roles in Cyprus pay?`,
       answer: `${name} salaries in Cyprus typically range from about €35,000 for junior positions to €120,000+ for senior and lead roles, with fintech and forex companies paying at the top of the range. Every listing on CyprusTech.Careers shows the salary up front.` },
     { question: `Which cities have the most ${name} jobs in Cyprus?`,
