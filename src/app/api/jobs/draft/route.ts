@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sanitizeJobHtml } from "@/lib/sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+import { createJobSlug } from "@/lib/job-slug";
 import { findCategoryBySlug } from "@/lib/queries";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 import { linkJobTags, parseTagNames } from "@/lib/job-tags";
@@ -75,11 +76,15 @@ export async function POST(req: NextRequest) {
     const category = await findCategoryBySlug(categorySlug);
     if (!category) return NextResponse.json({ error: UNKNOWN_CATEGORY_MESSAGE }, { status: 422 });
 
-    const baseSlug    = slugify(`${jobTitle}-${companyName}`);
-    const existingJob = await prisma.job.findUnique({ where: { slug: baseSlug } });
-    const jobSlug     = existingJob
-      ? `${baseSlug}-draft-${Date.now().toString(36).slice(-4)}`
-      : baseSlug;
+    /* Same company-role-city scheme as a published listing, so a draft that
+       goes live keeps the URL it was created with. The mapped enum, not the
+       raw form label — buildJobSlug tests for "REMOTE". */
+    const jobSlug = await createJobSlug({
+      companyName: companyName as string,
+      title:       jobTitle as string,
+      city:        (body.city as string) || null,
+      remoteType:  REMOTE_TYPE_MAP[(body.remoteType as string) ?? ""] ?? "ON_SITE",
+    });
 
     const salaryDisclosed = body.salaryDisclosed !== false;
 

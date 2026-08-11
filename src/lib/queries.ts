@@ -103,6 +103,20 @@ export async function getJobBySlug(slug: string) {
   });
 }
 
+/**
+ * Given a slug that matches no live job, return the current slug of the job
+ * that used to own it — or null. Backs the permanent redirect on /jobs/[slug]
+ * so URLs that were indexed under an older naming scheme keep their ranking
+ * instead of 404ing.
+ */
+export async function getJobSlugRedirect(slug: string): Promise<string | null> {
+  const historic = await prisma.jobSlugHistory.findUnique({
+    where:  { slug },
+    select: { job: { select: { slug: true } } },
+  });
+  return historic?.job.slug ?? null;
+}
+
 export async function getFeaturedJobs(take = 5) {
   return prisma.job.findMany({
     where: { status: "ACTIVE", featured: true },

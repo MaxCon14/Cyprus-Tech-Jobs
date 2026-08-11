@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sanitizeJobHtml } from "@/lib/sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify, validateSalaryRange } from "@/lib/utils";
+import { createJobSlug } from "@/lib/job-slug";
 import { findCategoryBySlug } from "@/lib/queries";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 import { linkJobTags, parseTagNames } from "@/lib/job-tags";
@@ -126,9 +127,14 @@ export async function POST(req: NextRequest) {
       await prisma.employer.update({ where: { id: employer.id }, data: { companyId: company.id } });
     }
 
-    const baseSlug   = slugify(`${(jobTitle as string).trim()}-${(companyName as string).trim()}`);
-    const existingJob = await prisma.job.findUnique({ where: { slug: baseSlug } });
-    const jobSlug    = existingJob ? `${baseSlug}-${Date.now().toString(36).slice(-4)}` : baseSlug;
+    /* The mapped enum, not the raw form label — buildJobSlug tests for
+       "REMOTE" and the form sends "Remote"/"Hybrid"/"On-site". */
+    const jobSlug = await createJobSlug({
+      companyName: companyName as string,
+      title:       jobTitle as string,
+      city:        (city as string) || null,
+      remoteType:  REMOTE_TYPE_MAP[remoteType as string] ?? "ON_SITE",
+    });
 
     const now       = new Date();
     const expiresAt = new Date(now);

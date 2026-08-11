@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getJobBySlug, getSimilarJobs } from "@/lib/queries";
+import { notFound, permanentRedirect } from "next/navigation";
+import { getJobBySlug, getJobSlugRedirect, getSimilarJobs } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { formatSalary, remoteLabel, timeAgo } from "@/lib/utils";
@@ -56,7 +56,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function JobDetailPage({ params }: Props) {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
-  if (!job) notFound();
+  /* Not a live slug: it may be one this job used to have. Job URLs were
+     renamed to company-role-city, and anything already indexed or shared has
+     to keep working — a 404 there throws away the ranking the old URL had.
+     permanentRedirect emits a 308, which Google treats as a 301 and follows
+     to consolidate signals onto the new URL. */
+  if (!job) {
+    const previous = await getJobSlugRedirect(slug);
+    if (previous) permanentRedirect(`/jobs/${previous}`);
+    notFound();
+  }
 
   const similarRaw  = await getSimilarJobs(job.id, job.categoryId, 3);
   const similar     = similarRaw.map(serialiseJob);

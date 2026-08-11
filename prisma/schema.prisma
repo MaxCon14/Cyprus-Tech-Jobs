@@ -150,11 +150,31 @@ model Job {
   category    Category     @relation(fields: [categoryId], references: [id])
   tags        JobTag[]
   applyClicks ApplyClick[]
+  slugHistory JobSlugHistory[]
 
   @@index([status, postedAt])
   @@index([categoryId])
   @@index([remoteType])
   @@map("jobs")
+}
+
+/// Every slug a job has ever had, so a URL that has been indexed or shared
+/// keeps working. /jobs/[slug] falls back to this table on a miss and issues a
+/// permanent redirect to the job's current URL.
+///
+/// The unique constraint is the important part: uniqueJobSlug checks it as
+/// well as jobs.slug, so a new listing can never claim a retired URL and
+/// silently redirect people to the wrong job.
+model JobSlugHistory {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  jobId     String
+  createdAt DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("job_slug_history")
 }
 
 // ─────────────────────────────────────────────

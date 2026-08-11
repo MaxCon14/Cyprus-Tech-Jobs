@@ -5,14 +5,12 @@ import { getAdminUser, adminUnauthorized } from "@/lib/admin-auth";
 import { linkJobTags, parseTagNames } from "@/lib/job-tags";
 import { UNKNOWN_CATEGORY_MESSAGE } from "@/lib/taxonomy";
 import { notifyGoogle } from "@/lib/google-indexing";
+import { createJobSlug } from "@/lib/job-slug";
 
-function slugify(str: string) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-function jobSlug(title: string) {
-  return slugify(title) + "-" + Date.now().toString(36);
-}
+/* Was a local slugify plus a base-36 timestamp, which is where URLs like
+   /jobs/data-analyst-msdjd3yn came from — unreadable, and matching nothing a
+   searcher would ever type. Curated listings now get the same
+   company-role-city slug as employer-posted ones. */
 
 export async function POST(req: NextRequest) {
   if (!await getAdminUser()) return adminUnauthorized();
@@ -38,7 +36,12 @@ export async function POST(req: NextRequest) {
 
   const job = await prisma.job.create({
     data: {
-      slug:               jobSlug(title),
+      slug:               await createJobSlug({
+        companyName: companyName.trim(),
+        title,
+        city:        city || null,
+        remoteType,
+      }),
       title,
       description:        sanitizeJobHtml(description),
       isCurated:          true,
