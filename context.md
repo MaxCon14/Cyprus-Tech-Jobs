@@ -1235,6 +1235,28 @@ exact hostname, path under `/storage/v1/object/public/cvs/`.
 casual abuser rather than a distributed one, and the Anthropic spend is capped
 only by that. Fine for now; revisit if the bill ever looks odd.
 
+**Caught right after: `job_slug_history` shipped without RLS.** Supabase's
+advisor flagged it CRITICAL and was right. **Every table in `public` is exposed
+through PostgREST, and the anon key ships in the browser bundle** — the grants
+on the new table were the Supabase default, `SELECT/INSERT/UPDATE/DELETE/
+TRUNCATE` for `anon`. So anyone could have minted unlimited slugs redirecting
+to real listings (SEO spam through our own domain), or deleted the rows and
+404'd all 26 previously indexed job URLs.
+
+Fixed with `ENABLE ROW LEVEL SECURITY` and **zero policies**, matching
+`apply_clicks` / `job_alerts` / `rate_limits`: the table is only ever touched by
+the server through Prisma, which connects as the owner and bypasses RLS, so no
+policy is needed and anon/authenticated are denied outright. Verified with
+`set local role anon` — owner still sees 26 rows, anon sees 0, an anon INSERT
+probe left nothing behind, and an old job URL still redirects on production.
+
+**The lesson, because this will recur: a table created by raw SQL through the
+Supabase MCP does not get RLS.** Prisma migrations do not emit it either — every
+other table has RLS because someone turned it on deliberately. **Any new table
+in `public` needs an explicit `ENABLE ROW LEVEL SECURITY` in the same
+migration**, and the repo migration for this one now carries it so a fresh
+database is not born with the hole.
+
 ---
 
 ## Security backlog — found in an audit
