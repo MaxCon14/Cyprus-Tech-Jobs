@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getJobBySlug } from "@/lib/queries";
+import { checkCvUrl } from "@/lib/cv-url";
+import { enforceIpLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -207,11 +209,20 @@ async function handleCvUrl(jobSlug: string, cvUrl: string): Promise<ReviewResult
   const built = await buildPrompt(jobSlug);
   if (!built) return NextResponse.json({ error: "Job not found." }, { status: 404 });
 
-  const url = cvUrl.startsWith("http") ? cvUrl : `https://${cvUrl}`;
+  /* Only our own CV bucket — see lib/cv-url. This endpoint sits on public job
+     pages with no sign-in, so the URL is attacker-controlled by definition. */
+  const checked = checkCvUrl(cvUrl);
+  if (!checked.ok) {
+    console.warn("[cv-review] refused cvUrl:", checked.reason);
+    return NextResponse.json(
+      { error: "Could not fetch your saved CV. Please upload it manually." },
+      { status: 422 },
+    );
+  }
 
   let cvRes: Response;
   try {
-    cvRes = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+    cvRes = await fetch(checked.url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   } catch {
     return NextResponse.json(
       { error: "Could not fetch your saved CV. Please upload it manually." },
@@ -237,7 +248,19 @@ async function handleCvUrl(jobSlug: string, cvUrl: string): Promise<ReviewResult
 
 // ── Route ──────────────────────────────────────────────────────────────────────
 
+/* Public and unauthenticated by design — this sits on the job page for
+   signed-out visitors — and every path through it costs an Anthropic call.
+   Applied at the entry point so the file-upload branch is covered too, not
+   just the URL one. */
+const CV_REVIEW_LIMIT = { name: "cv-review", limit: 12, windowSeconds: 3600 };
+
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpLimit(
+    req, CV_REVIEW_LIMIT,
+    "Too many CV reviews from this network. Please wait a few minutes and try again.",
+  );
+  if (limited) return limited;
+
   try {
     const contentType = req.headers.get("content-type") ?? "";
 

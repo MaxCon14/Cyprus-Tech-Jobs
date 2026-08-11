@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { checkCvUrl } from "@/lib/cv-url";
+import { enforceIpLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -133,7 +135,18 @@ async function extractPositions(base64: string): Promise<ParsedPosition[]> {
 
 // ── Route ─────────────────────────────────────────────────────────────────────
 
+/* Anyone can call this — it runs at onboarding step 7, before verification at
+   step 8 — and every call costs an Anthropic request. The cap is per IP and
+   generous for the one-or-two parses a real signup needs. */
+const PARSE_CV_LIMIT = { name: "parse-cv", limit: 12, windowSeconds: 3600 };
+
 export async function POST(req: NextRequest) {
+  const limited = await enforceIpLimit(
+    req, PARSE_CV_LIMIT,
+    "Too many CV parses from this network. Please wait a few minutes and try again.",
+  );
+  if (limited) return limited;
+
   try {
     const body  = await req.json();
     const cvUrl = typeof body.cvUrl === "string" ? body.cvUrl.trim() : "";
@@ -142,11 +155,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "cvUrl is required." }, { status: 422 });
     }
 
-    const url = cvUrl.startsWith("http") ? cvUrl : `https://${cvUrl}`;
+    /* Only our own CV bucket — see lib/cv-url. The message stays generic: the
+       caller does not need to know why a URL was refused, and a precise one
+       would help someone probe the allowlist. */
+    const checked = checkCvUrl(cvUrl);
+    if (!checked.ok) {
+      console.warn("[parse-cv] refused cvUrl:", checked.reason);
+      return NextResponse.json(
+        { error: "Could not download your CV. Please try re-uploading it." },
+        { status: 422 },
+      );
+    }
 
     let cvRes: Response;
     try {
-      cvRes = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+      cvRes = await fetch(checked.url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
     } catch {
       return NextResponse.json(
         { error: "Could not download your CV. Please try re-uploading it." },
