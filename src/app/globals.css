@@ -464,16 +464,44 @@ body {
   justify-content: center;
 }
 
-.job-card-featured {
+/* Corner badges. A listing can be BOTH featured and curated — an admin can
+   promote a curated listing — and each badge used to be its own absolutely
+   positioned ribbon at top:-1px/right:-1px, so the two landed on exactly the
+   same coordinates and painted over each other. They share one container now
+   and sit side by side. The container carries the card's corner shape and
+   clips the children, so the badges keep the flush-ribbon look whether there
+   is one of them or two. */
+.job-card-badges {
   position: absolute;
   top: -1px; right: -1px;
+  display: flex;
+  align-items: stretch;
+  /* No gap: the two badges butt together as one ribbon. A gap lets the card
+     show through and reads as two loose chips pinned near the corner. */
+  gap: 0;
+  max-width: calc(100% - 2px);
+  border-radius: 0 var(--radius-md) 0 var(--radius-sm);
+  overflow: hidden;
+}
+
+.job-card-badge {
+  display: inline-flex;
+  align-items: center;
   padding: 4px 10px;
   background: var(--accent);
   color: var(--white);
   font: 400 10px/1 var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  border-radius: 0 var(--radius-md) 0 var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* Curated is the quieter of the two: it describes where the listing came from,
+   where FEATURED is a paid promotion and should stay the loud one. */
+.job-card-badge--curated {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 /* Input / form primitives */

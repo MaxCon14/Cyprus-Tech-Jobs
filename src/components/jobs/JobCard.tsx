@@ -83,8 +83,14 @@ export function JobCard({
 
   return (
     <Link href={`/jobs/${slug}`} className="job-card">
-      {featured && <span className="job-card-featured">FEATURED</span>}
-      {isCurated && <span className="job-card-featured" style={{ background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid var(--accent)" }}>CURATED</span>}
+      {/* One container, so a listing that is both does not stack two ribbons
+          on the same spot. FEATURED sits at the corner as the louder signal. */}
+      {(featured || isCurated) && (
+        <span className="job-card-badges">
+          {isCurated && <span className="job-card-badge job-card-badge--curated">CURATED</span>}
+          {featured && <span className="job-card-badge">FEATURED</span>}
+        </span>
+      )}
 
       {/* Header: logo + company + time + save */}
       <div className="job-card-head">
