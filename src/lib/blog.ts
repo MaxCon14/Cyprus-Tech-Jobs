@@ -485,6 +485,145 @@ export const POSTS: BlogPost[] = [
       },
     ],
   },
+  // ── Post 6 ────────────────────────────────────────────────────────────────
+  {
+    slug:        "moving-to-cyprus-tech-worker-guide",
+    title:       "Moving to Cyprus as a Tech Worker: Visas, Tax, Cost of Living and What Nobody Tells You",
+    excerpt:     "A practical guide for engineers, designers and product people considering a move to Cyprus. What you legally need, what you will actually keep after tax, what it really costs to live here, and the parts people only find out after they arrive.",
+    author:      "CyprusTech.Careers Editorial",
+    authorRole:  "Market Research",
+    publishedAt: "2026-08-12",
+    readTime:    14,
+    category:    "Relocation",
+    tags:        ["Relocation", "Visas", "Tax", "Cost of Living", "Non-Dom", "Cyprus"],
+    content: [
+      { type: "paragraph", text: "Most guides about moving to Cyprus are written for retirees or for people buying property. This one is not. It is written for the software engineer weighing an offer from a Limassol fintech, the designer wondering whether a Nicosia gaming studio is worth relocating for, and the data engineer who has been told the tax situation is good but has not been told what that actually means in a payslip." },
+      { type: "paragraph", text: "Cyprus has spent the last decade quietly assembling one of the more interesting tech job markets in Europe — largely on the back of fintech, forex and iGaming companies that chose the island for its EU membership, its corporate tax rate and its regulatory maturity. Those companies now need people, and a meaningful share of the ones they hire come from abroad." },
+      { type: "paragraph", text: "This guide covers what you need to be allowed to work here, what you will keep after tax, what living here costs, and the practical realities that only surface after you land. Where something is a firm legal or structural fact, it is stated plainly. Where something varies by person, employer or year — tax thresholds, rents, processing times — it is flagged as such, because the difference matters when you are making a decision this size." },
+
+      { type: "h2", text: "First: Do You Have the Right to Work Here?" },
+      { type: "paragraph", text: "This is the question that determines everything else, and the answer splits cleanly in two." },
+
+      { type: "h3", text: "If You Hold an EU, EEA or Swiss Passport" },
+      { type: "paragraph", text: "You do not need a work permit. Cyprus has been an EU member state since 2004, so freedom of movement applies: you can arrive, accept a job and start working. You will need to register for a residence certificate once you intend to stay beyond three months, and you will need a tax identification number and a social insurance number to be paid properly, but none of that gates your ability to take the job." },
+      { type: "paragraph", text: "In practice this makes EU candidates dramatically faster to hire, and it is worth understanding that employers know this. If you are competing for a role against an EU passport holder and you are not one, the employer is weighing several months of paperwork against an immediate start." },
+
+      { type: "h3", text: "If You Are a Third-Country National" },
+      { type: "paragraph", text: "You will need a work permit, and — this is the important part — you cannot apply for one yourself. The permit is employer-sponsored. It attaches to a specific job at a specific company, which means the sequence is always: secure the offer first, then begin the paperwork." },
+      { type: "paragraph", text: "Cyprus has deliberately streamlined this route for the technology sector. Companies that qualify as foreign-interest entities — broadly, those with significant non-Cypriot ownership, which describes a large share of the fintech and iGaming employers here — can hire third-country nationals through a faster track than the general immigration system, with defined quotas for highly skilled staff and minimum salary thresholds attached. Most established tech employers in Limassol and Nicosia have done this many times and have either in-house people or a law firm who handle it as routine." },
+      { type: "callout", variant: "tip", text: "When you interview with a Cyprus employer as a non-EU candidate, ask directly: have you sponsored work permits before, roughly how long did the last one take, and do you cover the legal costs? A company that has done it ten times is a completely different experience from one that would be figuring it out for the first time with you." },
+      { type: "paragraph", text: "Budget a meaningful number of weeks between signed offer and legal start date. Timelines move with policy and caseload, so treat any specific figure you read online — including from employers — as an estimate rather than a commitment, and plan your notice period and finances with slack in them." },
+
+      { type: "h3", text: "The Digital Nomad Route" },
+      { type: "paragraph", text: "Cyprus operates a Digital Nomad Visa for third-country nationals who work remotely for employers or clients based outside Cyprus. It is capped in number, requires proof of a minimum monthly income and of health coverage, and permits family members to join, though it does not by itself grant them the right to work locally." },
+      { type: "paragraph", text: "Be clear about what this route is and is not. It is for keeping your existing foreign job while living here. It is not a path into local employment — if you want to work for a Cyprus company, you need the employer-sponsored permit above." },
+
+      { type: "h2", text: "Tax: What You Will Actually Keep" },
+      { type: "paragraph", text: "Cyprus's tax treatment of incoming professionals is genuinely favourable, and it is also the area where people arrive with the vaguest understanding. Here is the shape of it." },
+
+      { type: "h3", text: "Personal Income Tax" },
+      { type: "paragraph", text: "Cyprus applies progressive income tax with a meaningful tax-free band at the bottom and a top rate of 35% that begins at €60,000. Compared with much of western and northern Europe, the top rate arrives at a higher income and is lower when it does. For a mid-to-senior engineering salary, that difference is not marginal." },
+
+      { type: "h3", text: "The Non-Domicile Regime" },
+      { type: "paragraph", text: "This is the piece people have usually heard about without knowing what it does. Cyprus distinguishes between tax residence and domicile. An individual who becomes tax resident in Cyprus but is not domiciled here can qualify for non-dom status for a long fixed period — commonly cited as up to 17 years." },
+      { type: "paragraph", text: "What non-dom status exempts you from is the Special Defence Contribution, the levy that would otherwise apply to dividend and interest income. For a salaried engineer with no investment income, this changes very little. For someone with dividends, savings interest, or equity in a company, it can change a great deal. Know which of those two people you are before you weight it in your decision." },
+
+      { type: "h3", text: "The Incoming-Employment Exemption" },
+      { type: "paragraph", text: "Cyprus offers a substantial income tax exemption on employment income for people taking up first employment in Cyprus above a defined salary threshold, running for a fixed number of years. This is the provision that makes senior packages here look unusually strong on a net basis." },
+      { type: "callout", variant: "warning", text: "The thresholds, percentages and duration of this exemption have been revised more than once in recent years, and eligibility depends on your specific circumstances and start date. Do not plan a relocation around a figure you read in a blog post — including this one. Get the current position confirmed in writing by a Cyprus tax accountant, and ideally have your prospective employer state in the offer how they expect it to apply to you." },
+
+      { type: "h3", text: "Social Insurance and Healthcare Contributions" },
+      { type: "paragraph", text: "Beyond income tax, expect deductions for social insurance and for GESY, the General Healthcare System introduced in 2019. Both are percentages of earnings and both are shared between employee and employer. They are not large by European standards, but they are real, and a headline gross figure that ignores them will overstate what lands in your account." },
+      { type: "callout", variant: "info", text: "When you compare a Cyprus offer against one elsewhere, insist on a net monthly estimate rather than a gross annual figure. Between the tax bands, the exemption, non-dom status and the contribution rates, gross-to-net in Cyprus is genuinely hard to eyeball — and the gap between what people assume and what arrives is usually wide enough to change a decision." },
+
+      { type: "h2", text: "What It Actually Costs to Live Here" },
+      { type: "paragraph", text: "The honest summary: Cyprus is cheaper than London, Amsterdam, Dublin or Zurich, and it is not cheap. Anyone telling you it is a low-cost country is either quoting figures from a decade ago or has not tried to rent in Limassol recently." },
+
+      { type: "h3", text: "Housing Is the Real Constraint" },
+      { type: "paragraph", text: "Rent is the line item that will surprise you, and it varies enormously by city. Limassol is by a wide margin the most expensive place to live on the island — a direct consequence of the same corporate influx that created the jobs. Nicosia costs meaningfully less for comparable space. Larnaca and Paphos less again." },
+      { type: "paragraph", text: "Two practical points that catch people out. Landlords frequently expect several months upfront, and furnished short-term lets aimed at the corporate market are priced well above what a local twelve-month contract costs — so the figure you see while apartment-hunting from abroad is often not the figure you would pay once settled. Budget for a temporary arrangement while you look properly on the ground." },
+
+      { type: "h3", text: "Everything Else" },
+      { type: "paragraph", text: "Groceries and eating out are moderate and cheaper than northern Europe. Electricity is not: Cyprus has some of the higher electricity prices in the EU, and summer air conditioning is not optional — it is a genuine, recurring line in your budget from roughly June to September." },
+      { type: "paragraph", text: "You will almost certainly need a car. Public transport exists but is limited and infrequent outside the main urban routes, and the island is built around driving. Factor in purchase or lease, insurance, and fuel." },
+
+      { type: "h2", text: "Choosing Where to Live" },
+      { type: "paragraph", text: "The city you pick shapes your experience more than people expect, because the tech scene is not evenly distributed." },
+      { type: "list", items: [
+        "Limassol — the centre of gravity for fintech, forex and financial services, and where the largest share of tech roles sits. The most international, the most expensive, and the easiest place to find both a job and other people who moved here for one.",
+        "Nicosia — the capital, inland, and home to a strong gaming and public-sector technology cluster alongside banking. Cheaper, more Cypriot in daily texture, and no coast. Hotter in summer without the sea breeze.",
+        "Larnaca — the main international airport, a growing but much smaller tech presence, and noticeably lower living costs. Popular with people who commute to Nicosia or work remotely.",
+        "Paphos — the quietest of the four, with a small tech scene and the lowest costs. A genuine option for remote workers; a harder one if you need a local job market.",
+      ] },
+      { type: "paragraph", text: "Distances are short. Limassol to Nicosia is under an hour by car, and a lot of people live in one and work in the other. That flexibility is worth remembering when a role in a city you had not considered comes up." },
+
+      { type: "h2", text: "Healthcare, Schools and the Practical Layer" },
+      { type: "paragraph", text: "GESY gives residents who contribute access to public healthcare, with private insurance widely offered on top as an employer benefit — worth checking what is included in an offer, since it varies. Private care is available and reasonably priced by European standards, and English is spoken in most medical settings." },
+      { type: "paragraph", text: "For families, private international schools are concentrated in Limassol and Nicosia, teaching in English and following British or international curricula. They are a significant recurring cost and places are not always immediately available, so start that conversation early if it applies to you." },
+      { type: "paragraph", text: "On daily life: English is very widely spoken, a legacy of the British colonial period, and you can function professionally and socially without Greek — though learning some will change how the place feels. Cars drive on the left, another British inheritance, which takes most Europeans a few days to adjust to. The currency is the euro." },
+
+      { type: "h2", text: "What the Job Market Actually Looks Like" },
+      { type: "paragraph", text: "Be realistic about the shape of it. Cyprus is a small market. The concentration in fintech, forex, iGaming and corporate services means demand is strong and consistent in some specialisations and thin in others." },
+      { type: "paragraph", text: "Backend and platform engineering, data engineering and analytics, DevOps and site reliability, security, and compliance-adjacent technical roles are consistently in demand, because they map directly onto what regulated financial platforms and gaming operators need to run. If your background is in one of those, you will find options." },
+      { type: "paragraph", text: "If your specialisation is narrower — deep research ML, hardware, or a niche without a local industry behind it — the local market may be genuinely thin, and remote work for a foreign employer might be the better route in. That is not a reason to rule Cyprus out. It is a reason to check the actual listings for your specific skill set before you commit to anything." },
+      { type: "callout", variant: "tip", text: "Before you make any decision, spend twenty minutes reading real listings in your field rather than general market commentary. Filter by your category and city on CyprusTech.Careers and look at what is genuinely open, what it pays where employers publish that, and which companies keep appearing. That tells you more than any guide can." },
+
+      { type: "h2", text: "Your First Ninety Days: A Practical Checklist" },
+      { type: "paragraph", text: "In rough order, this is what actually has to happen once you have decided to come:" },
+      { type: "list", items: [
+        "Get the offer in writing, including how your employer expects the incoming-employment tax exemption to apply to you.",
+        "If you are a third-country national, start the permit process immediately — it is the long pole and everything else waits on it.",
+        "Arrange temporary accommodation for your first weeks rather than signing a long lease from abroad.",
+        "On arrival, register for a tax identification number and a social insurance number. You cannot be paid properly without both.",
+        "Register with GESY so healthcare is in place before you need it, not after.",
+        "Open a local bank account — expect to provide proof of address and employment, and expect it to take longer than you think.",
+        "EU nationals: apply for your residence certificate once you pass the three-month mark.",
+        "Sort out transport. Assume you need a car unless you have specifically chosen to live somewhere you do not.",
+        "Only then sign a twelve-month lease, once you have seen the neighbourhoods and know your actual commute.",
+      ] },
+
+      { type: "h2", text: "Is It Worth It?" },
+      { type: "paragraph", text: "For a lot of people in tech, yes — with clear eyes about the trade-offs." },
+      { type: "paragraph", text: "What you gain: a favourable tax position that is particularly strong at senior salaries, EU membership and the mobility that comes with it, an English-speaking working environment, roughly three hundred days of sunshine, and short commutes in a place where the sea is genuinely part of daily life rather than a holiday." },
+      { type: "paragraph", text: "What you trade: a small market with real concentration risk if your specialisation does not match local demand, housing costs in Limassol that will surprise anyone expecting a cheap Mediterranean island, summers that are properly hot, and the ordinary friction of building a life somewhere you have no existing network." },
+      { type: "paragraph", text: "The people who settle well here tend to be the ones who came for a specific job at a specific company having done this arithmetic honestly — not the ones who came for the idea of the Mediterranean and worked out the rest afterwards." },
+      { type: "callout", variant: "info", text: "This guide is general information, not legal, immigration or tax advice. Permit routes, tax thresholds and exemption rules change, and how they apply depends on your individual circumstances. Confirm anything you are relying on with a Cyprus-qualified accountant or immigration lawyer before you commit." },
+    ],
+    faqs: [
+      {
+        question: "Do I need a work permit to work in tech in Cyprus?",
+        answer: "It depends on your passport. EU, EEA and Swiss citizens do not need a work permit — Cyprus has been an EU member state since 2004, so freedom of movement applies and you can accept a job and start working, registering for a residence certificate if you stay beyond three months. Third-country nationals do need a permit, and it is sponsored by the employer rather than something you can apply for yourself, so you need the job offer first.",
+      },
+      {
+        question: "How long does a Cyprus work permit take for a non-EU tech worker?",
+        answer: "Plan for a meaningful number of weeks between signed offer and legal start date, and treat any specific figure as an estimate rather than a commitment — timelines move with policy and caseload. Many established tech employers, particularly foreign-interest companies in Limassol and Nicosia, use a streamlined route for highly skilled staff and have sponsored permits many times. Ask a prospective employer directly how long their last one took and whether they cover the legal costs.",
+      },
+      {
+        question: "What is the Cyprus non-dom regime and will it help me as a software engineer?",
+        answer: "Non-domicile status exempts qualifying tax residents from the Special Defence Contribution, the levy on dividend and interest income, for a long fixed period commonly cited as up to 17 years. If you are a salaried engineer with no significant investment income, it changes very little. If you hold dividends, savings interest or equity in a company, it can matter a great deal. Work out which of those describes you before weighting it in a decision.",
+      },
+      {
+        question: "How much does it cost to live in Cyprus compared to the salary?",
+        answer: "Cyprus is cheaper than London, Amsterdam, Dublin or Zurich, and it is not a low-cost country. Rent is the dominant variable and Limassol is by a wide margin the most expensive city, a direct consequence of the corporate influx that created the tech jobs; Nicosia costs meaningfully less, and Larnaca and Paphos less again. Budget separately for electricity, which is expensive in Cyprus and unavoidable with summer air conditioning, and for a car, since public transport is limited outside main urban routes.",
+      },
+      {
+        question: "Which city in Cyprus has the most tech jobs?",
+        answer: "Limassol, by a wide margin. It is the centre of gravity for fintech, forex and financial services and holds the largest share of tech roles on the island. Nicosia, the capital, has a strong gaming and public-sector technology cluster alongside banking, and costs less to live in. Larnaca and Paphos have much smaller tech scenes. Distances are short — Limassol to Nicosia is under an hour by car — so living in one city and working in another is common.",
+      },
+      {
+        question: "Can I move to Cyprus as a digital nomad and work for a foreign company?",
+        answer: "Yes. Cyprus operates a Digital Nomad Visa for third-country nationals working remotely for employers or clients based outside Cyprus. It is capped in number and requires proof of a minimum monthly income and of health coverage, and family members can join though it does not by itself grant them the right to work locally. It is a route for keeping an existing foreign job while living here, not a path into local employment — for that you need an employer-sponsored work permit.",
+      },
+      {
+        question: "Do I need to speak Greek to work in tech in Cyprus?",
+        answer: "No. English is very widely spoken, a legacy of the British colonial period, and the international tech companies in Limassol and Nicosia operate in English day to day. You can work and live without Greek, though learning some will change how connected you feel outside the office.",
+      },
+      {
+        question: "Which tech skills are actually in demand in Cyprus?",
+        answer: "Backend and platform engineering, data engineering and analytics, DevOps and site reliability, security, and compliance-adjacent technical roles are consistently in demand, because they map onto what regulated financial platforms and gaming operators need to run. Narrower specialisations without a local industry behind them — deep research ML or hardware, for example — can find the market genuinely thin. Check current listings in your specific field before committing rather than relying on general market commentary.",
+      },
+    ],
+  },
 ];
 
 export function getPost(slug: string): BlogPost | undefined {
