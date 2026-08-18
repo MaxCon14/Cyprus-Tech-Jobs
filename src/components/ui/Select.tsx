@@ -6,6 +6,8 @@ import { ChevronDown, Check } from "lucide-react";
 export interface SelectOption {
   label: string;
   value: string;
+  /** Optional heading — consecutive options sharing a group render under one label. */
+  group?: string;
 }
 
 interface SelectProps {
@@ -129,37 +131,55 @@ export function Select({
             borderRadius: "var(--radius-sm)",
             boxShadow:  "0 8px 24px rgba(0,0,0,0.12)",
             zIndex:     200,
-            overflow:   "hidden",
+            overflow:   "hidden auto",
+            maxHeight:  320,
             minWidth:   160,
           }}
         >
-          {options.map(opt => {
+          {options.map((opt, i) => {
             const isSelected = opt.value === current;
+            const newGroup   = opt.group && opt.group !== options[i - 1]?.group;
             return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => pick(opt.value)}
-                style={{
-                  width:      "100%",
-                  padding:    "10px 14px",
-                  font:       "400 14px/1.4 var(--font-sans)",
-                  color:      isSelected ? "var(--accent)" : "var(--text)",
-                  background: isSelected ? "var(--accent-soft)" : "transparent",
-                  border:     "none",
-                  cursor:     "pointer",
-                  textAlign:  "left",
-                  display:    "flex",
-                  alignItems: "center",
-                  gap:        10,
-                  transition: "background 100ms",
-                }}
-                onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "var(--bg-muted)"; }}
-                onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
-              >
-                <span style={{ flex: 1 }}>{opt.label}</span>
-                {isSelected && <Check size={13} style={{ color: "var(--accent)", flexShrink: 0 }} />}
-              </button>
+              <div key={opt.value}>
+                {newGroup && (
+                  <div
+                    className="mono-s"
+                    style={{
+                      padding:       "10px 14px 6px",
+                      color:         "var(--text-subtle)",
+                      background:    "var(--bg-alt)",
+                      borderTop:     i === 0 ? "none" : "1px solid var(--border)",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {opt.group}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => pick(opt.value)}
+                  style={{
+                    width:      "100%",
+                    padding:    "10px 14px",
+                    font:       "400 14px/1.4 var(--font-sans)",
+                    color:      isSelected ? "var(--accent)" : "var(--text)",
+                    background: isSelected ? "var(--accent-soft)" : "transparent",
+                    border:     "none",
+                    cursor:     "pointer",
+                    textAlign:  "left",
+                    display:    "flex",
+                    alignItems: "center",
+                    gap:        10,
+                    transition: "background 100ms",
+                  }}
+                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = "var(--bg-muted)"; }}
+                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <span style={{ flex: 1 }}>{opt.label}</span>
+                  {isSelected && <Check size={13} style={{ color: "var(--accent)", flexShrink: 0 }} />}
+                </button>
+              </div>
             );
           })}
         </div>

@@ -2,19 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
-
-const CATEGORY_NAMES: Record<string, string> = {
-  frontend:    "Frontend",
-  backend:     "Backend",
-  devops:      "DevOps",
-  design:      "Design",
-  data:        "Data",
-  mobile:      "Mobile",
-  product:     "Product",
-  security:    "Security",
-  qa:          "QA",
-  "full-stack":"Full Stack",
-};
+import { categoryLabel, isCategorySlug } from "@/lib/categories";
 
 const REMOTE_TYPE_MAP: Record<string, string> = {
   Remote:   "REMOTE",
@@ -85,6 +73,7 @@ export async function POST(req: NextRequest) {
   if (!(companyName as string)?.trim()) errors.push("Company name is required.");
   if (!(jobTitle as string)?.trim()) errors.push("Job title is required.");
   if (!categorySlug) errors.push("Category is required.");
+  else if (!isCategorySlug(categorySlug as string)) errors.push("Unknown category.");
   if (!experienceLevel) errors.push("Experience level is required.");
   if (!remoteType) errors.push("Work type is required.");
   if (!employmentType) errors.push("Employment type is required.");
@@ -102,7 +91,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const categoryName = CATEGORY_NAMES[categorySlug as string] ?? (categorySlug as string);
+    const categoryName = categoryLabel(categorySlug as string);
     const category = await prisma.category.upsert({
       where:  { slug: categorySlug as string },
       create: { name: categoryName, slug: categorySlug as string },

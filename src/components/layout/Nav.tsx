@@ -6,25 +6,14 @@ import { useEffect, useRef, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   LogOut, LayoutDashboard, ChevronDown, ChevronRight, Menu, X,
-  Briefcase, MapPin, Clock, ArrowRight, Zap, Star,
+  Briefcase, MapPin, Clock, ArrowRight, Zap, Star, Gamepad2,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { TECH_CATEGORIES, GAMING_CATEGORIES } from "@/lib/categories";
 
 const supabase = createSupabaseBrowserClient();
 
 /* ── Data ─────────────────────────────────────────────────────────────────── */
-
-const CATEGORIES = [
-  { label: "Frontend",         slug: "frontend" },
-  { label: "Backend",          slug: "backend" },
-  { label: "DevOps & Cloud",   slug: "devops" },
-  { label: "UI/UX Design",     slug: "design" },
-  { label: "Data & Analytics", slug: "data" },
-  { label: "Mobile",           slug: "mobile" },
-  { label: "Product",          slug: "product" },
-  { label: "Security",         slug: "security" },
-  { label: "QA & Testing",     slug: "qa" },
-];
 
 const JOB_TYPES = [
   { label: "Full-time",  value: "FULL_TIME" },
@@ -41,16 +30,18 @@ const staticLinks = [
 
 /* ── Jobs Dropdown — desktop flyout ──────────────────────────────────────── */
 
-type FlyoutSection = "category" | "type" | "city";
+type FlyoutSection = "category" | "gaming" | "type" | "city";
 
 const FLYOUT_SECTIONS: { key: FlyoutSection; label: string; icon: React.ReactNode }[] = [
   { key: "category", label: "By Category", icon: <Briefcase size={13} /> },
+  { key: "gaming",   label: "Gaming",      icon: <Gamepad2 size={13} /> },
   { key: "type",     label: "Job Type",    icon: <Clock size={13} /> },
   { key: "city",     label: "City",        icon: <MapPin size={13} /> },
 ];
 
 const FLYOUT_ITEMS: Record<FlyoutSection, { label: string; href: string }[]> = {
-  category: CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
+  category: TECH_CATEGORIES.map(c   => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
+  gaming:   GAMING_CATEGORIES.map(c => ({ label: c.label, href: `/jobs?category=${c.slug}` })),
   type:     JOB_TYPES.map(t => ({ label: t.label,  href: `/jobs?type=${t.value}` })),
   city:     CITIES.map(c =>    ({ label: c,         href: `/jobs?city=${c}` })),
 };
@@ -114,6 +105,7 @@ export function Nav() {
   const [mobileOpen,     setMobileOpen]     = useState(false);
   const [mobileJobsOpen, setMobileJobsOpen] = useState(false);
   const [mobileCatOpen,  setMobileCatOpen]  = useState(false);
+  const [mobileGamingOpen, setMobileGamingOpen] = useState(false);
   const [mobileTypeOpen, setMobileTypeOpen] = useState(false);
   const [mobileCityOpen, setMobileCityOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -305,7 +297,26 @@ export function Nav() {
                 </button>
                 <div className={`mobile-menu-sub${mobileCatOpen ? " open" : ""}`}>
                   <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
-                    {CATEGORIES.map(cat => (
+                    {TECH_CATEGORIES.map(cat => (
+                      <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="mobile-menu-link">
+                        {cat.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Gaming sub-section */}
+                <button
+                  className="mobile-sub-section-btn"
+                  onClick={() => setMobileGamingOpen(v => !v)}
+                >
+                  <Gamepad2 size={13} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                  <span>Gaming</span>
+                  <ChevronDown size={13} className={`nav-chevron${mobileGamingOpen ? " open" : ""}`} style={{ color: "var(--text-muted)", marginLeft: "auto" }} />
+                </button>
+                <div className={`mobile-menu-sub${mobileGamingOpen ? " open" : ""}`}>
+                  <div style={{ paddingLeft: 12, paddingBottom: 8 }}>
+                    {GAMING_CATEGORIES.map(cat => (
                       <Link key={cat.slug} href={`/jobs?category=${cat.slug}`} className="mobile-menu-link">
                         {cat.label}
                       </Link>

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { slugify } from "../src/lib/utils";
+import { JOB_CATEGORIES } from "../src/lib/categories";
 
 const prisma = new PrismaClient();
 
@@ -9,24 +10,16 @@ async function main() {
 
   // ─── Categories ───────────────────────────────────────────
   console.log("Creating categories…");
-  const categories = await Promise.all([
-    { name: "Frontend",  slug: "frontend"  },
-    { name: "Backend",   slug: "backend"   },
-    { name: "DevOps",    slug: "devops"    },
-    { name: "Design",    slug: "design"    },
-    { name: "Data",      slug: "data"      },
-    { name: "Mobile",    slug: "mobile"    },
-    { name: "Product",   slug: "product"   },
-    { name: "Security",  slug: "security"  },
-    { name: "QA",        slug: "qa"        },
-    { name: "Full Stack",slug: "full-stack"},
-  ].map(c =>
-    prisma.category.upsert({
-      where: { slug: c.slug },
-      update: {},
-      create: c,
-    })
-  ));
+  const categories = await Promise.all(
+    JOB_CATEGORIES.map(c =>
+      prisma.category.upsert({
+        where:  { slug: c.slug },
+        // Keep names in sync with src/lib/categories.ts on every re-seed.
+        update: { name: c.label },
+        create: { name: c.label, slug: c.slug },
+      })
+    )
+  );
 
   const catMap = Object.fromEntries(categories.map(c => [c.slug, c.id]));
   console.log(`  ✓ ${categories.length} categories\n`);
@@ -39,6 +32,8 @@ async function main() {
     "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch",
     "AWS", "GCP", "Azure", "Kubernetes", "Docker", "Terraform", "Ansible",
     "GraphQL", "REST", "gRPC", "Kafka", "RabbitMQ",
+    "Unity", "Unreal Engine", "Godot", "Blender", "Maya", "3ds Max", "ZBrush",
+    "Substance Painter", "Houdini", "Shader Graph", "HLSL", "Perforce",
     "Figma", "Design Systems", "Prototyping", "User Research",
     "dbt", "Spark", "Airflow", "BigQuery", "Snowflake",
     "React Native", "Flutter", "iOS", "Android",

@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-const CATEGORY_NAMES: Record<string, string> = {
-  frontend: "Frontend", backend: "Backend", devops: "DevOps & Cloud",
-  design: "UI/UX Design", data: "Data & Analytics", mobile: "Mobile",
-  product: "Product", security: "Security", qa: "QA & Testing",
-};
+import { categoryLabel } from "@/lib/categories";
 
 export async function PATCH(
   req: NextRequest,
@@ -60,7 +56,7 @@ export async function PATCH(
 
   const category = await prisma.category.upsert({
     where:  { slug: categorySlug as string },
-    create: { name: CATEGORY_NAMES[categorySlug as string] ?? String(categorySlug), slug: categorySlug as string },
+    create: { name: categoryLabel(String(categorySlug)), slug: categorySlug as string },
     update: {},
   });
 

@@ -3,6 +3,7 @@ import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { CITIES } from "@/lib/placeholder-data";
+import { CATEGORY_LABELS } from "@/lib/categories";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FiltersPanel } from "./FiltersPanel";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -39,18 +40,6 @@ const TYPE_LABELS: Record<string, string> = {
   FULL_TIME: "Full-time",
   PART_TIME: "Part-time",
   CONTRACT:  "Contract",
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  frontend: "Frontend",
-  backend:  "Backend",
-  devops:   "DevOps & Cloud",
-  design:   "UI/UX Design",
-  data:     "Data & Analytics",
-  mobile:   "Mobile",
-  product:  "Product",
-  security: "Security",
-  qa:       "QA & Testing",
 };
 
 const PAGE_SIZE = 20;

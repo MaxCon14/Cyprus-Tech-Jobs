@@ -1,17 +1,7 @@
 // Centralised placeholder data — swap each export for a DB query when ready.
 
-export const CATEGORIES = [
-  { label: "All jobs",  slug: "",           count: 248 },
-  { label: "Frontend",  slug: "frontend",   count: 62 },
-  { label: "Backend",   slug: "backend",    count: 48 },
-  { label: "DevOps",    slug: "devops",     count: 24 },
-  { label: "Design",    slug: "design",     count: 18 },
-  { label: "Data",      slug: "data",       count: 15 },
-  { label: "Mobile",    slug: "mobile",     count: 11 },
-  { label: "Product",   slug: "product",    count: 9 },
-  { label: "Security",  slug: "security",   count: 7 },
-  { label: "QA",        slug: "qa",         count: 5 },
-];
+// Categories now live in src/lib/categories.ts — the single source of truth
+// shared by the post form, filters, nav and seed script.
 
 export const CITIES = ["Limassol", "Nicosia", "Larnaca", "Paphos", "Remote"];
 

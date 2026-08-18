@@ -1,3 +1,5 @@
+import { JOB_CATEGORIES } from "./categories";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // EMPLOYER WIZARD
 // ─────────────────────────────────────────────────────────────────────────────
@@ -391,6 +393,10 @@ export const TECH_STACK_OPTIONS = [
   "GitHub Actions", "CircleCI", "Jenkins", "Datadog", "Grafana",
   // Mobile
   "React Native", "Flutter", "iOS", "Android",
+  // Game engines & tools
+  "Unity", "Unreal Engine", "Godot", "Blender", "Maya", "3ds Max", "ZBrush",
+  "Substance Painter", "Houdini", "Cinema 4D", "Marmoset Toolbag",
+  "Photoshop", "Spine", "Shader Graph", "HLSL", "Perforce", "Playfab",
   // Other
   "gRPC", "Kafka", "RabbitMQ", "WebSockets", "Stripe", "Twilio",
 ];
@@ -403,14 +409,7 @@ export const EXPERIENCE_LEVEL_OPTIONS = [
   { value: "EXECUTIVE", label: "Executive", description: "VP / Director / C-suite" },
 ] as const;
 
-export const CATEGORY_OPTIONS = [
-  { label: "Frontend",  slug: "frontend" },
-  { label: "Backend",   slug: "backend" },
-  { label: "DevOps",    slug: "devops" },
-  { label: "Design",    slug: "design" },
-  { label: "Data",      slug: "data" },
-  { label: "Mobile",    slug: "mobile" },
-  { label: "Product",   slug: "product" },
-  { label: "Security",  slug: "security" },
-  { label: "QA",        slug: "qa" },
-];
+export const CATEGORY_OPTIONS = JOB_CATEGORIES.map(c => ({
+  label: c.short,
+  slug:  c.slug,
+}));

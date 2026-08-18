@@ -98,6 +98,22 @@ export const SKILL_ICONS: Record<string, string> = {
   "RabbitMQ":       "rabbitmq",
   "dbt":            "dbt",
 
+  /* Game engines & art tools */
+  "Unity":              "unity",
+  "Unreal Engine":      "unrealengine",
+  "Godot":              "godotengine",
+  "Blender":            "blender",
+  "Autodesk Maya":      "autodeskmaya",
+  "Maya":               "autodeskmaya",
+  "3ds Max":            "autodesk",
+  "ZBrush":             "zbrush",
+  "Substance Painter":  "adobe",
+  "Houdini":            "houdini",
+  "Cinema 4D":          "cinema4d",
+  "Photoshop":          "adobephotoshop",
+  "Perforce":           "perforce",
+  "Playfab":            "microsoftazure",
+
   /* Tools */
   "Figma":          "figma",
   "Git":            "git",

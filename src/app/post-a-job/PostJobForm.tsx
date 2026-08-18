@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CATEGORIES } from "@/lib/placeholder-data";
+import { CATEGORY_SELECT_OPTIONS, categoryRoleHint } from "@/lib/categories";
 import { Check, Zap, Star, Building2, Loader2, ShoppingBag, AlertCircle } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 
@@ -32,6 +32,7 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
   const [loading, setLoading]         = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [category, setCategory]       = useState("");
 
   function validate(form: FormData): FormErrors {
     const errs: FormErrors = {};
@@ -238,7 +239,13 @@ export function PostJobForm({ standardSlots, featuredSlots }: Props) {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <Field label="Category" required error={fieldErrors.category}>
                 <Select name="category" placeholder="Select category"
-                  options={CATEGORIES.slice(1).map(c => ({ label: c.label, value: c.slug }))} />
+                  options={CATEGORY_SELECT_OPTIONS}
+                  onChange={setCategory} />
+                {category && !fieldErrors.category && (
+                  <p style={{ color: "var(--text-subtle)", fontSize: 11, marginTop: 5, fontFamily: "var(--font-sans)", lineHeight: 1.4 }}>
+                    {categoryRoleHint(category)}
+                  </p>
+                )}
               </Field>
               <Field label="Experience level" required error={fieldErrors.experienceLevel}>
                 <Select name="experienceLevel" placeholder="Select level"

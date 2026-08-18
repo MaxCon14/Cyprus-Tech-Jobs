@@ -2,6 +2,7 @@ import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
+import { FEATURED_CATEGORIES } from "@/lib/categories";
 import { Search, MapPin, Bell, UserPlus, Zap, Target } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
@@ -47,18 +48,6 @@ const FAQS = [
   },
 ];
 
-/* ── Category icons (emoji-free, SVG-based categories list) ── */
-const CATEGORY_GRID = [
-  { label: "Frontend",          slug: "frontend",  icon: "⌨️",  count: 62 },
-  { label: "Backend",           slug: "backend",   icon: "⚙️",  count: 48 },
-  { label: "DevOps & Cloud",    slug: "devops",    icon: "☁️",  count: 24 },
-  { label: "UI/UX Design",      slug: "design",    icon: "🎨",  count: 18 },
-  { label: "Data & Analytics",  slug: "data",      icon: "📊",  count: 15 },
-  { label: "Mobile",            slug: "mobile",    icon: "📱",  count: 11 },
-  { label: "Product",           slug: "product",   icon: "🗂️",  count: 9  },
-  { label: "Security",          slug: "security",  icon: "🔐",  count: 7  },
-];
-
 export default async function HomePage() {
   const [jobs, companies, categories] = await Promise.all([
     getJobs({ take: 5 }),
@@ -68,6 +57,9 @@ export default async function HomePage() {
 
   const serialisedJobs = jobs.map(serialiseJob);
   const totalJobs      = categories[0]?.count ?? 0;
+
+  // Live open-role counts, keyed by slug, for the category grid below.
+  const countBySlug = new Map(categories.map(c => [c.slug, c.count]));
 
   let savedJobIds: string[] | undefined;
   try {
@@ -283,7 +275,7 @@ export default async function HomePage() {
             <Link href="/jobs" className="btn btn-outline btn-sm">All jobs →</Link>
           </div>
           <div className="grid-4" style={{ gap: "clamp(10px, 2vw, 16px)" }}>
-            {CATEGORY_GRID.map(cat => (
+            {FEATURED_CATEGORIES.map(cat => (
               <Link
                 key={cat.slug}
                 href={`/jobs?category=${cat.slug}`}
@@ -292,7 +284,7 @@ export default async function HomePage() {
               >
                 <div style={{ fontSize: 26, marginBottom: 12, lineHeight: 1 }}>{cat.icon}</div>
                 <div style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text)", marginBottom: 4 }}>{cat.label}</div>
-                <div className="mono-s" style={{ color: "var(--accent)" }}>{cat.count} open roles</div>
+                <div className="mono-s" style={{ color: "var(--accent)" }}>{countBySlug.get(cat.slug) ?? 0} open roles</div>
               </Link>
             ))}
           </div>
