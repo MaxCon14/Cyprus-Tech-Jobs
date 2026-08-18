@@ -474,6 +474,14 @@ export const TECH_STACK_OPTIONS = [
 
   // 3D, Motion & Game
   "Blender", "Cinema 4D", "Unity", "Unreal Engine", "DaVinci Resolve", "Spline",
+  "Godot", "CryEngine", "Autodesk Maya", "Autodesk 3ds Max", "ZBrush",
+  "Substance 3D Painter", "Substance 3D Designer", "Houdini", "Marmoset Toolbag",
+  "Marvelous Designer", "SpeedTree", "Spine", "Toon Boom Harmony",
+  "Shader Graph", "HLSL", "GLSL", "Havok", "PhysX",
+  "FMOD", "Wwise", "PlayFab", "Photon", "Perforce", "Plastic SCM",
+  "Unity Netcode", "Unreal Blueprints", "Level Design", "Game Economy Design",
+  "Technical Art", "Character Rigging", "3D Modelling", "Texturing", "UV Mapping",
+  "Motion Capture", "Retopology", "PBR Workflow",
 
   // Marketing & SEO
   "Google Analytics", "Google Ads", "HubSpot", "Mailchimp", "Mixpanel", "Amplitude",

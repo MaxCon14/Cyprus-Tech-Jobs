@@ -319,6 +319,20 @@ export const SKILL_ICONS: Record<string, string> = {
   "DaVinci Resolve":    "davinciresolve",
   "Spline":             "figma",
 
+  /* Game engines & art tools. Most of this branch (ZBrush, Houdini, Marmoset,
+     SpeedTree, Wwise, FMOD, Spine…) has no simple-icons entry, and the craft
+     skills — 3D Modelling, Texturing, PBR Workflow — are not brands at all, so
+     both are deliberately unmapped and fall back. Where a tool is a feature of
+     an engine or suite, it borrows that parent's icon, the same way the IT
+     block maps Group Policy to windows. */
+  "Godot":              "godotengine",
+  "Autodesk Maya":      "autodesk",
+  "Autodesk 3ds Max":   "autodesk",
+  "Substance 3D Painter":  "adobe",
+  "Substance 3D Designer": "adobe",
+  "Unity Netcode":      "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg",
+  "Unreal Blueprints":  "unrealengine",
+
   /* Marketing & Analytics */
   "Google Analytics":   "googleanalytics",
   "Google Ads":         "googleads",

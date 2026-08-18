@@ -86,6 +86,41 @@ async function main() {
       { name: "UI/UX Designer", slug: "uiux-designer" },
       { name: "Visual Designer", slug: "visual-designer" },
     ] },
+    /* Gaming is a hiring vertical, not a discipline — Cyprus has real studio
+       headcount (Wargaming and the Limassol/Nicosia studios around it) and those
+       roles were unfileable. A 3D character artist is not a Graphic Designer, a
+       gameplay programmer is not a Backend Engineer, and a game economy designer
+       is not a Data Analyst — the tools, portfolios and pipelines differ. Kept as
+       one parent because the picker flattens the tree and searches it, so "3d",
+       "unreal" or "economy" finds the role without anyone guessing a parent. */
+    { name: "Gaming", slug: "gaming", children: [
+      { name: "3D Artist", slug: "3d-artist" },
+      { name: "3D Character Artist", slug: "3d-character-artist" },
+      { name: "3D Environment Artist", slug: "3d-environment-artist" },
+      { name: "Animator", slug: "animator" },
+      { name: "Art Director", slug: "art-director" },
+      { name: "Concept Artist", slug: "concept-artist" },
+      { name: "Game Analyst", slug: "game-analyst" },
+      { name: "Game Backend Engineer", slug: "game-backend-engineer" },
+      { name: "Game Designer", slug: "game-designer" },
+      { name: "Game Economy Designer", slug: "game-economy-designer" },
+      { name: "Game Producer", slug: "game-producer" },
+      { name: "Game QA Tester", slug: "game-qa-tester" },
+      { name: "Gameplay Programmer", slug: "gameplay-programmer" },
+      { name: "Graphics Programmer", slug: "graphics-programmer" },
+      { name: "Level Designer", slug: "level-designer" },
+      { name: "LiveOps Manager", slug: "liveops-manager" },
+      { name: "Monetisation Manager", slug: "monetisation-manager" },
+      { name: "Narrative Designer", slug: "narrative-designer" },
+      { name: "Rigging Artist", slug: "rigging-artist" },
+      { name: "Systems Designer", slug: "systems-designer" },
+      { name: "Technical Artist", slug: "technical-artist" },
+      { name: "Tools Programmer", slug: "tools-programmer" },
+      { name: "UI Artist", slug: "ui-artist" },
+      { name: "Unity Developer", slug: "unity-developer" },
+      { name: "Unreal Developer", slug: "unreal-developer" },
+      { name: "VFX Artist", slug: "vfx-artist" },
+    ] },
     { name: "Product", slug: "product", children: [
       { name: "Business Analyst", slug: "business-analyst" },
       { name: "Head of Product", slug: "head-of-product" },

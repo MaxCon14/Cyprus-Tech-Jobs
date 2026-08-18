@@ -7,7 +7,7 @@ import {
   Code2, Server, Cloud, PenTool, BarChart2, Smartphone, Layers, ShieldCheck,
   Blocks, CandlestickChart, UsersRound, TestTube2, Briefcase,
   Headphones, ShieldAlert, Gauge, Scale, Calculator, Users, Megaphone, TrendingUp, Workflow,
-  MonitorCog,
+  MonitorCog, Gamepad2,
 } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
@@ -105,6 +105,7 @@ const CATEGORY_ICONS: Record<string, typeof Code2> = {
   sales:        TrendingUp,
   operations:   Workflow,
   it:           MonitorCog,
+  gaming:       Gamepad2,
 };
 
 export default async function HomePage() {
