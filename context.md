@@ -1259,6 +1259,150 @@ database is not born with the hole.
 
 ---
 
+## Session: traffic diagnosis, assisted job import, honest salary copy
+
+Prompted by "the site is not getting enough traffic — how do I rank for *it
+jobs cyprus*, *software developer job nicosia*, *web design jobs larnaca*".
+
+**The honest diagnosis, and the number that governs everything else.** Measured
+at the time: **26 active jobs, 6 distinct employers, 0 employer-posted (all
+curated), oldest listing 12 days old, 0 jobs in Larnaca or Paphos, 2 candidates,
+2 applications.** The SEO scaffolding built over previous sessions is good and
+is **no longer the constraint**. Google ranks job boards on inventory breadth,
+freshness and domain authority; the site is weeks old with six companies on it.
+
+Ranking #1 for a head term against Indeed, LinkedIn, Glassdoor and ergodotisi is
+not achievable at that size and no code delivers it — say so plainly rather than
+shipping more pages. Two things *are* winnable: **Google for Jobs** (ranks
+individual listings on structured-data quality and freshness, **not** domain
+authority, which is why a new board can beat incumbents there) and long-tail
+role×city queries **that have a job behind them**. *web design jobs larnaca* is
+unwinnable today — zero Larnaca jobs, zero web-design jobs — and the
+thin-content gate correctly `noindex`es it.
+
+### The salary promise was false site-wide
+
+**11 places claimed "every listing with a verified salary" while 0 of 26
+listings had one** — including inside **FAQPage JSON-LD**, so a factually false
+statement was being asserted to Google, and every searcher who clicked through
+met "Undisclosed". Reworded everywhere to *"pay shown wherever the employer
+publishes it"*, which is true now and stays true as imported listings bring real
+figures. The two employer-facing CTAs in `blog/[slug]/page.tsx` keep the
+stronger wording deliberately: posting a job **does** require a salary range.
+
+### JobPosting `hiringOrganization` was thin on every live listing
+
+`logo` and `sameAs` only came from a `Company` row — which curated listings do
+not have — so all 26 shipped an organisation with a bare name. Now falls back to
+`curatedCompanyLogoUrl`, and derives `sameAs` from the apply URL's origin, which
+for a curated listing is the employer's own careers domain. Google uses both to
+match a posting to a real company and to show a logo in the Google for Jobs card.
+`identifier` was already correct and needed no change; the gap was only the
+organisation fields.
+
+### Assisted job import — the actual bottleneck
+
+Adding a curated job meant ~10 hand-typed fields including a full description,
+with no import path. At 5–10 minutes each, a few hundred jobs is tens of hours,
+and that was the real thing standing between the site and rankings.
+
+`POST /api/admin/jobs/import` takes a job posting URL, reads the page, and
+returns a **draft that prefills the admin form**. It writes nothing — the admin
+reviews and submits through the existing route, which keeps its own validation.
+Parsing lives in **`src/lib/job-import.ts`** so the guards are testable, the same
+split as `link-check.ts` and `cv-url.ts`.
+
+Things that must not be quietly undone:
+
+- **It is the SSRF shape closed in `cv-url.ts`, deliberately.** The point is to
+  read arbitrary careers pages, so no allowlist is possible. What makes it
+  acceptable is that it is **admin-gated before anything is fetched** and rate
+  limited. Verified 401 unauthenticated, 405 on GET. It must never become
+  reachable without that gate.
+- **Descriptions are written fresh by the model from the posting's facts, never
+  reproduced.** This automates the rewrite Maxim was already doing by hand and
+  avoids republishing employers' copyrighted text at scale; original text also
+  ranks better than duplicated text. This was his explicit choice when asked.
+- **Salary is only ever taken from a figure the source actually states.** Never
+  estimated — also his explicit choice ("I don't want to misinform job
+  seekers"). `MIN_PLAUSIBLE_ANNUAL = 10_000` exists because **`unitText` is
+  hardcoded to `YEAR` in `schema.ts`**, so a monthly figure read off a page would
+  publish as an absurd annual salary. A verification case caught €3,500 passing
+  before the floor was raised. It does drop a genuinely tiny annual figure; that
+  is the intended direction, since the admin reviews every draft.
+- Model output is untrusted input: enums coerce to known values, an unknown
+  category slug is dropped rather than created, and the description goes through
+  `sanitizeJobHtml` on the way in as well as at render.
+
+`scripts/verify-job-import.ts` — 30 cases, weighted at the guards.
+
+### Job card badges looked sliced (`3b16759`)
+
+Follow-up to the overlap fix. The pair still read as one badge with a bite out
+of it: CURATED's pale fill plus a 1px inset outline drew a hard seam where the
+two met, and on a light fill the container's square top-left against its rounded
+bottom-left reads as a cut shape. Removing the outline alone is worse — a pale
+chip on a white card has no left edge. CURATED is now **solid neutral**
+(`--text` on `--surface`, so it inverts with the theme), giving one two-tone
+ribbon. Don't reintroduce the outline.
+
+### Blog post 6 — the relocation guide
+
+*"Moving to Cyprus as a Tech Worker: Visas, Tax, Cost of Living and What Nobody
+Tells You"* (`moving-to-cyprus-tech-worker-guide`, new **Relocation** category).
+
+Chosen over another market-commentary post on purpose. The existing five are all
+employer guides or market analysis, and **on a domain this young another one
+would not rank** — ranking commentary is a function of authority the site does
+not have. This targets queries the site can plausibly win (contested by generic
+expat sites, not by Indeed), needs no inventory or salary data, and is the format
+that actually **attracts links** — which is the input that lifts every other page.
+
+Uses the optional **`faqs`** field (only one other static post does), rendering
+an accordion plus `FAQPage` JSON-LD — the realistic route to a featured snippet
+on questions like *can non-EU citizens work in Cyprus tech*.
+
+House rule on figures applied hard: structural facts stated plainly (EU
+membership since 2004, employer-sponsored permits, foreign-interest company
+route, non-dom exempting the Special Defence Contribution, GESY, 35% band from
+€60,000), everything variable hedged. **The incoming-employment tax exemption
+carries an explicit warning callout** telling readers to confirm with a Cyprus
+accountant, because its thresholds and duration have been revised more than once
+and publishing a stale number would mislead someone making a large decision.
+
+**The linkable asset to build toward: a Cyprus tech salary report.** It is the
+most-cited thing a job board can publish and cannot be written honestly while 0
+of 26 listings carry pay. It becomes viable once the importer brings in listings
+that publish salaries.
+
+### Email deliverability — investigated, authentication is healthy
+
+Asked whether mail is landing in spam. Checked rather than guessed:
+
+- Resend domain **verified**, sending enabled, `eu-west-1`
+- **DKIM `resend._domainkey` verified**, signing as `cyprustech.careers` → aligns
+- **SPF on `send.cyprustech.careers` verified** → aligns under DMARC relaxed mode
+- DMARC present at `p=none`; open/click tracking **off**, which helps
+- 40 sent / 39 delivered / 1 bounce (25 July, pre-dating the MX fix) / 0 complaints
+
+**The nuance that matters: "delivered" in Resend means the receiving server
+accepted the message, not that it reached an inbox.** Gmail accepts then files.
+The delivery log cannot answer the question — mail-tester.com and Google
+Postmaster Tools can.
+
+Most likely cause is simply **domain age** (created 22 July, ~40 emails of
+history). Three fixable things remain, all on the TODO list.
+
+**Unresolved and worth checking:** Resend still reports the **root MX as
+`inbound-smtp.eu-west-1.amazonaws.com`, verified** — contradicting the Google
+Workspace switch recorded earlier in this file. Either Resend's view is stale or
+the change was reverted. **Could not be verified from the sandbox**: `dnspython`
+is not installed and there is no Vercel DNS read tool. If the root MX really is
+still Resend, mail to `hello@` is not reaching the Gmail inbox and DMARC reports
+are going nowhere.
+
+---
+
 ## Security backlog — found in an audit
 
 Ordered by how easily someone could do damage. All 49 API routes, every RLS
@@ -1358,12 +1502,52 @@ Numbered as one list (the old one restarted at 2 halfway down — merged here).
 13. Editing a legacy listing with no salary now forces one to be added — a
     consequence of the mandatory-salary change worth watching for.
 14. The SEO items listed as "still open" above.
-15. **Release the GA4 client-side page-view fix.** `test` is one commit ahead of
-    `main` (`234ba8c`); until it ships, production GA4 undercounts every visit to
-    a single page view, so don't read anything into the numbers yet.
+15. ~~Release the GA4 client-side page-view fix.~~ **DONE** — shipped; `main`
+    and `test` are level. GA4 now records client-side navigations, so the
+    numbers are worth reading from that release onward (not before it).
+16. **Email deliverability — three fixes, none done.** Authentication is healthy
+    (see the traffic/import session above); these are the things still working
+    against inbox placement:
+    - **`List-Unsubscribe` on job alerts.** `api/cron/send-alerts/route.ts:96`
+      sends `from`/`to`/`subject`/`html` only. There is an unsubscribe link in
+      the body (`lib/resend.ts:153`) but **no header**, so a recipient who wants
+      out presses *Report spam* — the most damaging signal there is, and it
+      poisons delivery for sign-in codes too. Needs `List-Unsubscribe` +
+      `List-Unsubscribe-Post: List-Unsubscribe=One-Click` on the alert send
+      **only** (codes are transactional and must not carry it).
+    - **No plain-text alternative anywhere.** Every send is HTML-only — a mild
+      spam signal and unreadable to screen readers. Add a `buildAlertText`
+      beside `buildAlertEmail` so the two cannot drift.
+    - **Three sending identities** — `alerts@` (`lib/resend.ts:13`), `noreply@`
+      (`api/contact/route.ts:33`) and Supabase Auth's own for "Confirm Your
+      Signup". On a young domain this splits reputation three ways. Consolidate,
+      and replace Supabase's stock template with `email-templates/otp.html`.
+17. **The unsubscribe route is a GET that permanently deletes the row.**
+    `api/candidates/alert/unsubscribe/route.ts` exports **only `GET`**, reads
+    `token`, and `prisma.jobAlert.delete`s. Two problems: RFC 8058 one-click
+    sends a **POST** (so item 16 needs a POST handler returning **200, not a
+    redirect** — providers read 3xx as failure), and **mail scanners at Gmail
+    and Outlook prefetch links**, which would silently unsubscribe people who
+    never clicked, irreversibly. Either have GET render a confirm page that
+    POSTs, or switch from delete to a deactivate flag so it is recoverable.
+18. **Verify the root MX.** Resend reports it as
+    `inbound-smtp.eu-west-1.amazonaws.com`, contradicting the Google Workspace
+    switch recorded in External services. Cannot be checked from the sandbox (no
+    `dnspython`, no Vercel DNS read tool). If Resend is right, mail to `hello@`
+    is not reaching the Gmail inbox and DMARC reports go nowhere.
+19. **Salary data is the highest-value thing to add.** 0 of 26 listings carry
+    pay. Google for Jobs displays and filters on salary, it is the site's stated
+    differentiator, and a **Cyprus tech salary report** — the most linkable asset
+    a job board can publish — cannot be written honestly until listings have it.
+    The importer now captures salary wherever a source publishes one.
 
-**DONE this session (was on the list):** `CRON_SECRET` confirmed set (item was
-"must be set"); admin sign-in completed end to end (was "still never completed").
+**DONE in the traffic / import session:** item 1 (AI-endpoint SSRF closed) and
+item 15 (GA4 fix released). Added items 16–19, which are mostly email
+deliverability and the salary-data gap.
+
+**DONE in an earlier session (was on the list):** `CRON_SECRET` confirmed set
+(item was "must be set"); admin sign-in completed end to end (was "still never
+completed").
 
 **DONE in the Google go-live / SEO session:** item 5 above (Stripe confirmed end
 to end — live mode, not test); the "no role pages" and "sitemap omits
