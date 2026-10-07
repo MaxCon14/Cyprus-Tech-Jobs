@@ -56,7 +56,7 @@ function SectionEditor({ section, onChange, onRemove }: {
             <option value="warning">Warning</option>
           </select>
         )}
-        <button onClick={onRemove} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 13 }}>✕</button>
+        <button type="button" onClick={onRemove} style={{ marginLeft: "auto", background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 13 }}>✕</button>
       </div>
 
       {section.type === "list" ? (
@@ -73,13 +73,13 @@ function SectionEditor({ section, onChange, onRemove }: {
                 }}
                 placeholder={`List item ${i + 1}`}
               />
-              <button onClick={() => {
+              <button type="button" onClick={() => {
                 const items = (section.items ?? []).filter((_, j) => j !== i);
                 onChange({ ...section, items });
               }} style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer" }}>✕</button>
             </div>
           ))}
-          <button onClick={() => onChange({ ...section, items: [...(section.items ?? []), ""] })}
+          <button type="button" onClick={() => onChange({ ...section, items: [...(section.items ?? []), ""] })}
             style={{ alignSelf: "flex-start", fontSize: 12, color: "var(--accent)", background: "none", border: "none", cursor: "pointer" }}>
             + Add item
           </button>
@@ -117,9 +117,12 @@ export function AdminBlogForm({ initial, postId }: {
     setSections(p => [...p, type === "list" ? { type, items: [""] } : { type }]);
   }
 
+  const [error, setError] = useState("");
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
+    if (busy) return;
+    setBusy(true); setError("");
+    try {
     const payload = {
       ...meta,
       readTime: Number(meta.readTime),
@@ -131,13 +134,15 @@ export function AdminBlogForm({ initial, postId }: {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    setBusy(false);
-    if (res.ok) router.push("/admin/blog");
-    else alert("Error saving post");
+    if (!res.ok) { const data = await res.json().catch(() => null); throw new Error(data?.error || "Could not save this article. Please try again."); }
+    router.push("/admin/blog"); router.refresh();
+    } catch (error) { setError(error instanceof Error ? error.message : "Connection failed. Your draft is still here."); }
+    finally { setBusy(false); }
   }
 
   return (
     <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 800 }}>
+      {error && <div className="adm-notice is-error" role="alert">{error}</div>}
       {/* Meta */}
       <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 20, background: "var(--surface)", display: "flex", flexDirection: "column", gap: 14 }}>
         <h2 style={{ fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Post details</h2>
@@ -188,7 +193,7 @@ export function AdminBlogForm({ initial, postId }: {
 
       <div style={{ display: "flex", gap: 10 }}>
         <button type="submit" disabled={busy} className="btn btn-accent" style={{ opacity: busy ? 0.6 : 1 }}>
-          {busy ? "Saving…" : postId ? "Save changes" : "Publish post"}
+          {busy ? "Saving…" : postId ? "Save changes" : meta.published ? "Publish post" : "Save draft"}
         </button>
         <button type="button" onClick={() => router.push("/admin/blog")} className="btn btn-outline">Cancel</button>
       </div>

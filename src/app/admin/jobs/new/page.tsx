@@ -1,3 +1,4 @@
+import { PageHeading } from "../../_components/AdminUI";
 import { prisma } from "@/lib/prisma";
 import { TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { AdminJobForm } from "../../_components/AdminJobForm";
@@ -16,10 +17,7 @@ export default async function AdminJobNewPage() {
 
   return (
     <div>
-      <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Add curated job</h1>
-      <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 24 }}>
-        Post a job on behalf of a company. Applicants are redirected to the original posting.
-      </p>
+      <PageHeading eyebrow="Grow your job board" title="Add a job" description="Import a posting or build a curated listing. Review the details before publishing." />
       <AdminJobForm categories={categories} allTags={[...new Set([...TECH_STACK_OPTIONS, ...allTagRows.map(t => t.name)])]} />
     </div>
   );

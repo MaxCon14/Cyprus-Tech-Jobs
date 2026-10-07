@@ -2,13 +2,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AlertTriangle, HelpCircle, Loader2, RefreshCw } from "lucide-react";
+import { HelpCircle, Loader2, RefreshCw, Download, ArrowUpRight } from "lucide-react";
 import { AdminTable, AdminTr, AdminTd, StatusBadge } from "./AdminTable";
 import { RowActions } from "./RowActions";
 import { AdminSearchInput } from "./AdminSearchInput";
+import { PAGE_SIZE, Pagination } from "./Pagination";
+import { EmptyState } from "./AdminUI";
+import { csvCell } from "@/lib/admin-metrics";
 
 interface Job {
-  id: string; title: string;
+  id: string; title: string; expiresAt: string | null; applyUrl: string | null;
   isCurated: boolean;
   companyDisplay: string;
   category: { name: string };
@@ -20,10 +23,10 @@ interface Job {
   applyUrlCheckReason: string | null;
 }
 
-interface Props { jobs: Job[] }
+interface Props { jobs: Job[]; initialStatus?: string; initialQuery?: string; initialFlagged?: boolean; initialExpiring?: boolean; referenceTime: string; }
 
-function timeAgoShort(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
+function timeAgoShort(iso: string, referenceTime: string): string {
+  const ms = new Date(referenceTime).getTime() - new Date(iso).getTime();
   const mins = Math.round(ms / 60000);
   if (mins < 60) return `${mins}m ago`;
   const hours = Math.round(mins / 60);
@@ -59,7 +62,7 @@ const REASON_LABEL: Record<string, { label: string; hint: string }> = {
   },
 };
 
-function LinkBadge({ job }: { job: Job }) {
+function LinkBadge({ job, referenceTime }: { job: Job; referenceTime: string }) {
   const reason = job.applyUrlCheckReason ? REASON_LABEL[job.applyUrlCheckReason] : undefined;
 
   if (reason) {
@@ -72,117 +75,59 @@ function LinkBadge({ job }: { job: Job }) {
   if (!job.applyUrlCheckedAt) {
     return <span className="mono-s" style={{ color: "var(--text-subtle)" }}>Not checked</span>;
   }
-  return <span className="mono-s" style={{ color: "var(--text-subtle)" }}>OK · {timeAgoShort(job.applyUrlCheckedAt)}</span>;
+  return <span className="mono-s" style={{ color: "var(--text-subtle)" }}>OK · {timeAgoShort(job.applyUrlCheckedAt, referenceTime)}</span>;
 }
 
-export function JobsTableClient({ jobs }: Props) {
+export function JobsTableClient({ jobs, initialStatus = "ALL", initialQuery = "", initialFlagged = false, initialExpiring = false, referenceTime }: Props) {
   const router = useRouter();
-  const [query, setQuery]           = useState("");
-  const [flaggedOnly, setFlaggedOnly] = useState(false);
-  const [checking, setChecking]       = useState(false);
-  const [result, setResult]           = useState<{ checked: number; flagged: number } | null>(null);
-
-  // Reason is the single source of truth; applyUrlBroken is a legacy name for
-  // the same thing (see the schema comment) and is not read here.
-  const isFlagged = (j: Job) => j.applyUrlCheckReason !== null;
-
-  const filtered = jobs
-    .filter(j => !flaggedOnly || isFlagged(j))
-    .filter(j => !query ||
-      j.title.toLowerCase().includes(query.toLowerCase()) ||
-      j.companyDisplay.toLowerCase().includes(query.toLowerCase())
-    );
-
-  const flaggedCount = jobs.filter(isFlagged).length;
-
+  const [query, setQuery] = useState(initialQuery);
+  const [status, setStatus] = useState(initialStatus);
+  const [flaggedOnly, setFlaggedOnly] = useState(initialFlagged);
+  const [expiringOnly, setExpiringOnly] = useState(initialExpiring);
+  const [category, setCategory] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [checking, setChecking] = useState(false);
+  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
+  const now = new Date(referenceTime).getTime();
+  const categories = [...new Set(jobs.map(j => j.category.name))].sort();
+  const filtered = jobs.filter(j => (status === "ALL" || j.status === status) && (!flaggedOnly || j.applyUrlCheckReason !== null) && (!category || j.category.name === category) &&
+    (!expiringOnly || (j.status === "ACTIVE" && j.expiresAt && new Date(j.expiresAt).getTime() >= now && new Date(j.expiresAt).getTime() <= now + 7 * 86400000)) &&
+    (!query.trim() || `${j.title} ${j.companyDisplay}`.toLowerCase().includes(query.trim().toLowerCase())));
+  if (sort === "clicks") filtered.sort((a, b) => b._count.applyClicks - a._count.applyClicks);
+  if (sort === "title") filtered.sort((a, b) => a.title.localeCompare(b.title));
+  if (sort === "oldest") filtered.reverse();
+  const currentPage = Math.min(page, Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)));
+  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const hasFilters = !!(query || status !== "ALL" || category || flaggedOnly || expiringOnly);
+  function reset() { setQuery(""); setStatus("ALL"); setCategory(""); setFlaggedOnly(false); setExpiringOnly(false); setPage(1); }
   async function runCheck() {
-    setChecking(true);
-    setResult(null);
+    if (checking) return;
+    setChecking(true); setMessage(null);
     try {
-      const res  = await fetch("/api/admin/jobs/check-links", { method: "POST" });
+      const res = await fetch("/api/admin/jobs/check-links", { method: "POST" });
       const data = await res.json().catch(() => null);
-      if (res.ok && data) setResult({ checked: data.checked, flagged: data.flagged ?? 0 });
+      if (!res.ok || !data) throw new Error(data?.error || "Unable to check links. Please try again.");
+      setMessage({ text: `Checked ${data.checked} listings. ${data.flagged ?? 0} links need a manual review. Automated checks are advisory; open a flagged link before unpublishing.`, error: false });
       router.refresh();
-    } finally {
-      setChecking(false);
-    }
+    } catch (error) { setMessage({ text: error instanceof Error ? error.message : "Connection failed. Please try again.", error: true }); }
+    finally { setChecking(false); }
   }
-
-  return (
-    <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 10 }}>
-        <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
-          {filtered.length}{query || flaggedOnly ? ` of ${jobs.length}` : ""} listings
-          {flaggedCount > 0 && (
-            <span style={{ color: "#b45309", fontWeight: 600 }}> · {flaggedCount} apply link{flaggedCount === 1 ? "" : "s"} to check</span>
-          )}
-        </p>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <AdminSearchInput placeholder="Job title or company…" value={query} onChange={setQuery} />
-          <button
-            type="button" onClick={runCheck} disabled={checking}
-            className="btn btn-outline btn-sm"
-            style={{ display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}
-          >
-            {checking
-              ? <><Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Checking…</>
-              : <><RefreshCw size={12} /> Check apply links</>}
-          </button>
-        </div>
-      </div>
-
-      {result && (
-        <p className="mono-s" style={{ color: result.flagged > 0 ? "#b45309" : "var(--success)", marginBottom: 12 }}>
-          Checked {result.checked} listing{result.checked === 1 ? "" : "s"} —{" "}
-          {result.flagged === 0
-            ? "every apply link responded normally."
-            : `${result.flagged} worth a look. Open ${result.flagged === 1 ? "it" : "them"} before unpublishing — some careers sites answer automated checks with a 404 even when the page is live.`}
-        </p>
-      )}
-
-      {flaggedCount > 0 && (
-        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--text-muted)", cursor: "pointer" }}>
-          <input type="checkbox" checked={flaggedOnly} onChange={e => setFlaggedOnly(e.target.checked)} />
-          Show flagged links only
-        </label>
-      )}
-
-      <AdminTable columns={["Title", "Company", "Category", "Status", "Apply link", "Clicks", "Posted", "Actions"]}>
-        {filtered.length === 0 ? (
-          <tr><td colSpan={8} style={{ padding: "24px 16px", textAlign: "center", fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-subtle)" }}>
-            {flaggedOnly ? "No flagged apply links." : `No jobs match "${query}"`}
-          </td></tr>
-        ) : filtered.map(j => (
-          <AdminTr key={j.id}>
-            <AdminTd>
-              <div style={{ fontWeight: 600, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{j.title}</div>
-            </AdminTd>
-            <AdminTd subtle>
-              {j.companyDisplay}
-              {j.isCurated && <span style={{ marginLeft: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--accent)", background: "var(--accent-soft)", borderRadius: 4, padding: "1px 5px" }}>CURATED</span>}
-            </AdminTd>
-            <AdminTd subtle>{j.category.name}</AdminTd>
-            <AdminTd><StatusBadge status={j.status} /></AdminTd>
-            <AdminTd><LinkBadge job={j} /></AdminTd>
-            <AdminTd mono right>{j._count.applyClicks}</AdminTd>
-            <AdminTd subtle mono>
-              {j.postedAt ? new Date(j.postedAt).toLocaleDateString("en-GB") : "—"}
-            </AdminTd>
-            <AdminTd>
-              <RowActions actions={[
-                ...(j.status === "ACTIVE"
-                  ? [{ label: "Unpublish", endpoint: `/api/admin/jobs/${j.id}`, method: "PATCH" as const, body: { status: "PAUSED" } }]
-                  : j.status === "PAUSED"
-                  ? [{ label: "Publish",   endpoint: `/api/admin/jobs/${j.id}`, method: "PATCH" as const, body: { status: "ACTIVE" } }]
-                  : []
-                ),
-                { label: "Delete", endpoint: `/api/admin/jobs/${j.id}`, method: "DELETE" as const, confirm: `Delete "${j.title}"?`, destructive: true },
-              ]} />
-              <Link href={`/admin/jobs/${j.id}/edit`} style={{ display: "inline-block", marginTop: 4, fontSize: 11, color: "var(--text-subtle)", textDecoration: "none" }}>Edit</Link>
-            </AdminTd>
-          </AdminTr>
-        ))}
-      </AdminTable>
-    </>
-  );
+  function exportCsv() {
+    const rows = [["Title", "Company", "Category", "Status", "Apply clicks", "Posted", "Expires"], ...filtered.map(j => [j.title, j.companyDisplay, j.category.name, j.status, j._count.applyClicks, j.postedAt ?? "", j.expiresAt ?? ""])];
+    const blob = new Blob(["\uFEFF" + rows.map(row => row.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "cyprustech-jobs.csv"; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  return <section className="adm-panel adm-management">
+    <div className="adm-tabs" aria-label="Filter jobs by status">{["ALL", "ACTIVE", "DRAFT", "PAUSED", "EXPIRED", "CLOSED"].map(s => <button key={s} type="button" aria-pressed={s === status} onClick={() => { setStatus(s); setPage(1); }}>{s === "ALL" ? "All listings" : s.charAt(0) + s.slice(1).toLowerCase()}<span>{s === "ALL" ? jobs.length : jobs.filter(j => j.status === s).length}</span></button>)}</div>
+    <div className="adm-toolbar"><AdminSearchInput placeholder="Search title or company…" value={query} onChange={v => { setQuery(v); setPage(1); }} /><div className="adm-toolbar-actions"><select aria-label="Filter by category" className="adm-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}><option value="">All categories</option>{categories.map(name => <option key={name}>{name}</option>)}</select><select aria-label="Sort listings" className="adm-select" value={sort} onChange={e => { setSort(e.target.value); setPage(1); }}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="clicks">Most apply clicks</option><option value="title">Title A–Z</option></select><button type="button" className="adm-button" disabled={!filtered.length} onClick={exportCsv}><Download size={15} /> Export</button></div></div>
+    <div className="adm-filter-row"><div><label><input type="checkbox" checked={flaggedOnly} onChange={e => { setFlaggedOnly(e.target.checked); setPage(1); }} /> Links to review</label><label><input type="checkbox" checked={expiringOnly} onChange={e => { setExpiringOnly(e.target.checked); setPage(1); }} /> Expiring in 7 days</label>{hasFilters && <button type="button" className="adm-text-button" onClick={reset}>Clear filters</button>}</div><button className="adm-text-button" type="button" onClick={runCheck} disabled={checking}>{checking ? <Loader2 size={14} className="adm-spin" /> : <RefreshCw size={14} />}{checking ? "Checking links…" : "Check apply links"}</button></div>
+    {message && <div className={`adm-notice ${message.error ? "is-error" : ""}`} role={message.error ? "alert" : "status"}>{message.text}</div>}
+    <AdminTable columns={["Job listing", "Status", "Apply link", "Clicks", "Posted / expires", "Actions"]}>
+      {visible.length ? visible.map(j => <AdminTr key={j.id}><AdminTd><Link href={`/admin/jobs/${j.id}/edit`} className="adm-job-name">{j.title}</Link><span className="adm-cell-subtitle">{j.companyDisplay} · {j.category.name}</span>{j.isCurated && <span className="adm-curated">Curated</span>}</AdminTd><AdminTd><StatusBadge status={j.status} /></AdminTd><AdminTd><LinkBadge job={j} referenceTime={referenceTime} />{j.applyUrl && /^https?:\/\//i.test(j.applyUrl) && <a href={j.applyUrl} target="_blank" rel="noopener noreferrer" className="adm-cell-subtitle adm-text-link">Open link <ArrowUpRight size={12} /></a>}</AdminTd><AdminTd mono>{j._count.applyClicks}</AdminTd><AdminTd subtle><span className="adm-nowrap">{j.postedAt ? new Date(j.postedAt).toLocaleDateString("en-GB", { timeZone: "UTC" }) : "Not published"}</span><small className="adm-cell-subtitle">{j.expiresAt ? `Ends ${new Date(j.expiresAt).toLocaleDateString("en-GB", { timeZone: "UTC" })}` : "No expiry set"}</small></AdminTd><AdminTd><div className="adm-job-actions"><Link href={`/admin/jobs/${j.id}/edit`} className="adm-edit-link">Edit listing</Link><RowActions actions={[
+        ...(j.status === "ACTIVE" ? [{ label: "Unpublish", endpoint: `/api/admin/jobs/${j.id}`, method: "PATCH" as const, body: { status: "PAUSED" }, confirm: `Unpublish "${j.title}"? It will be hidden from the public job board.` }] : j.status === "PAUSED" ? [{ label: "Publish", endpoint: `/api/admin/jobs/${j.id}`, method: "PATCH" as const, body: { status: "ACTIVE" }, confirm: `Publish "${j.title}" for 30 days?` }] : []),
+        { label: "Delete", endpoint: `/api/admin/jobs/${j.id}`, method: "DELETE", confirm: `Permanently delete "${j.title}" and its tracked clicks? This cannot be undone.`, destructive: true },
+      ]} /></div></AdminTd></AdminTr>) : <tr><td colSpan={6}><EmptyState title={hasFilters ? "No listings match these filters" : "No job listings yet"} description={hasFilters ? "Try another search or clear your filters." : "Create your first listing to get started."} action={hasFilters ? <button type="button" className="adm-button" onClick={reset}>Clear filters</button> : <Link href="/admin/jobs/new" className="adm-button">Add a job</Link>} /></td></tr>}
+    </AdminTable><Pagination total={filtered.length} page={currentPage} onChange={setPage} />
+  </section>;
 }

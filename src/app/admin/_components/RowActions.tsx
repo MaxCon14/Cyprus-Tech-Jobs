@@ -1,54 +1,23 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-interface Action {
-  label: string;
-  endpoint: string;
-  method?: "DELETE" | "PATCH";
-  body?: Record<string, unknown>;
-  confirm?: string;
-  destructive?: boolean;
-}
-
+import { useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
+interface Action { label: string; endpoint: string; method?: "DELETE" | "PATCH"; body?: Record<string, unknown>; confirm?: string; destructive?: boolean; }
 export function RowActions({ actions }: { actions: Action[] }) {
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
-
+  const lock = useRef(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   async function run(action: Action) {
-    if (action.confirm && !confirm(action.confirm)) return;
-    setBusy(true);
+    if (lock.current || (action.confirm && !window.confirm(action.confirm))) return;
+    lock.current = true; setBusy(action.label); setMessage(null);
     try {
-      await fetch(action.endpoint, {
-        method: action.method ?? "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: action.body ? JSON.stringify(action.body) : undefined,
-      });
-      router.refresh();
-    } finally {
-      setBusy(false);
-    }
+      const response = await fetch(action.endpoint, { method: action.method ?? "PATCH", headers: { "Content-Type": "application/json" }, body: action.body ? JSON.stringify(action.body) : undefined });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || "This change could not be saved. Please try again.");
+      setMessage({ text: "Saved", error: false }); router.refresh();
+    } catch (error) { setMessage({ text: error instanceof Error ? error.message : "Connection failed. Please try again.", error: true }); }
+    finally { lock.current = false; setBusy(null); }
   }
-
-  return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-      {actions.map(a => (
-        <button
-          key={a.label}
-          onClick={() => run(a)}
-          disabled={busy}
-          style={{
-            padding: "4px 10px", borderRadius: 5, border: "1px solid var(--border)",
-            background: a.destructive ? "#fef2f2" : "var(--surface)",
-            color: a.destructive ? "#ef4444" : "var(--text-muted)",
-            fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 500,
-            cursor: busy ? "not-allowed" : "pointer",
-            opacity: busy ? 0.6 : 1,
-          }}
-        >
-          {a.label}
-        </button>
-      ))}
-    </div>
-  );
+  return <div><div className="adm-row-actions">{actions.map(action => <button key={action.label} type="button" disabled={busy !== null} className={action.destructive ? "is-destructive" : ""} onClick={() => run(action)}>{busy === action.label && <Loader2 size={12} className="adm-spin" />}{action.label}</button>)}</div>{message && <p className={`adm-action-message ${message.error ? "is-error" : ""}`} role={message.error ? "alert" : "status"}>{message.text}</p>}</div>;
 }

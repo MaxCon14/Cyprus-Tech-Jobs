@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { PageHeading } from "../_components/AdminUI";
 import { UsersTableClient } from "../_components/UsersTableClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminUsersPage() {
-  const [employers, { data: candidates }] = await Promise.all([
+export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
+  const { type } = await searchParams;
+  const [employers, { data: candidates, error: candidateError }] = await Promise.all([
     prisma.employer.findMany({
       orderBy: { createdAt: "desc" },
       include: { company: { select: { name: true } } },
@@ -31,14 +33,9 @@ export default async function AdminUsersPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Users</h1>
-        <p className="body-s" style={{ color: "var(--text-subtle)" }}>
-          {employers.length} employers · {candidates?.length ?? 0} candidates
-        </p>
-      </div>
-
-      <UsersTableClient
+      <PageHeading eyebrow="Your community" title="People" description="Manage employer and candidate accounts in one place." />
+      {candidateError && <div className="adm-notice is-error" role="alert">Candidate accounts could not be loaded. Refresh to try again.</div>}
+      <UsersTableClient key={type} initialType={type === "candidates" ? "candidates" : "employers"}
         employers={employerData}
         candidates={(candidates ?? []).map(c => ({
           id: c.id,

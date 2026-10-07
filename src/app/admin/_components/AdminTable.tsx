@@ -1,74 +1,12 @@
 import type { ReactNode } from "react";
-
 export function AdminTable({ columns, children }: { columns: string[]; children: ReactNode }) {
-  return (
-    <div style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
-      {/* Columns don't reflow on a phone-width screen — scope the scroll to
-          the table itself so the row stays reachable instead of getting
-          clipped by the wrapper's rounded-corner `overflow: hidden`. */}
-      <div className="admin-table-scroll">
-        <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-sans)", fontSize: 13 }}>
-          <thead>
-            <tr style={{ background: "var(--bg-muted)" }}>
-              {columns.map(col => (
-                <th key={col} style={{
-                  textAlign: "left", padding: "10px 14px", fontWeight: 600,
-                  color: "var(--text-subtle)", fontSize: 10, letterSpacing: "0.06em",
-                  whiteSpace: "nowrap",
-                }}>
-                  {col.toUpperCase()}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>{children}</tbody>
-        </table>
-      </div>
-    </div>
-  );
+  return <div className="adm-table-wrap"><div className="admin-table-scroll" role="region" aria-label="Management table" tabIndex={0}><table className="adm-table"><thead><tr>{columns.map(col => <th scope="col" key={col}>{col}</th>)}</tr></thead><tbody>{children}</tbody></table></div></div>;
 }
-
-export function AdminTr({ children }: { children: ReactNode }) {
-  return <tr style={{ borderTop: "1px solid var(--border)" }}>{children}</tr>;
+export function AdminTr({ children }: { children: ReactNode }) { return <tr>{children}</tr>; }
+export function AdminTd({ children, subtle, mono, right }: { children: ReactNode; subtle?: boolean; mono?: boolean; right?: boolean }) {
+  return <td className={`${subtle ? "adm-muted" : ""} ${mono ? "adm-tabular" : ""}`} style={{ textAlign: right ? "right" : undefined }}>{children}</td>;
 }
-
-export function AdminTd({ children, subtle, mono, right }: {
-  children: ReactNode; subtle?: boolean; mono?: boolean; right?: boolean;
-}) {
-  return (
-    <td style={{
-      padding: "10px 14px", verticalAlign: "middle",
-      color: subtle ? "var(--text-subtle)" : "var(--text)",
-      fontFamily: mono ? "var(--font-mono)" : undefined,
-      fontSize: mono ? 12 : undefined,
-      textAlign: right ? "right" : undefined,
-    }}>
-      {children}
-    </td>
-  );
-}
-
 export function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { color: string; bg: string }> = {
-    ACTIVE:      { color: "var(--success)", bg: "var(--success-bg, #f0fdf4)" },
-    DRAFT:       { color: "var(--text-subtle)", bg: "var(--bg-muted)" },
-    EXPIRED:     { color: "var(--warning)", bg: "var(--warning-bg)" },
-    PAUSED:      { color: "var(--info)", bg: "var(--info-bg, #eff6ff)" },
-    CLOSED:      { color: "#ef4444", bg: "#fef2f2" },
-    LIVE:        { color: "var(--success)", bg: "var(--success-bg, #f0fdf4)" },
-    BLOCKED:     { color: "#ef4444", bg: "#fef2f2" },
-    VERIFIED:    { color: "var(--success)", bg: "var(--success-bg, #f0fdf4)" },
-    UNVERIFIED:  { color: "var(--text-subtle)", bg: "var(--bg-muted)" },
-    FEATURED:    { color: "var(--accent)", bg: "var(--accent-soft)" },
-  };
-  const s = map[status] ?? { color: "var(--text-subtle)", bg: "var(--bg-muted)" };
-  return (
-    <span style={{
-      display: "inline-block", fontFamily: "var(--font-mono)", fontSize: 10,
-      fontWeight: 700, padding: "2px 7px", borderRadius: 4,
-      color: s.color, background: s.bg,
-    }}>
-      {status}
-    </span>
-  );
+  const tone = ["ACTIVE", "LIVE", "VERIFIED"].includes(status) ? "success" : ["EXPIRED", "UNVERIFIED"].includes(status) ? "warning" : ["BLOCKED", "CLOSED"].includes(status) ? "danger" : status === "PAUSED" ? "info" : status === "FEATURED" ? "accent" : "neutral";
+  return <span className={`adm-badge adm-badge-${tone}`}><span />{status === "—" ? "Standard" : status.charAt(0) + status.slice(1).toLowerCase().replaceAll("_", " ")}</span>;
 }

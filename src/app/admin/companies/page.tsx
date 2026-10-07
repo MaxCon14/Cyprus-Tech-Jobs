@@ -1,3 +1,4 @@
+import { PageHeading } from "../_components/AdminUI";
 import { prisma } from "@/lib/prisma";
 import { CompaniesTableClient } from "../_components/CompaniesTableClient";
 
@@ -11,9 +12,7 @@ export default async function AdminCompaniesPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Companies</h1>
-      </div>
+      <PageHeading eyebrow="Employer directory" title="Companies" description="Review company profiles, verify employers, and manage featured partners." />
 
       <CompaniesTableClient
         companies={companies.map(c => ({

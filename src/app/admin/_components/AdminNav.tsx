@@ -1,125 +1,72 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, BriefcaseBusiness, Users, Building2, Tags, ChartNoAxesCombined, FileText, ArrowUpRight, LogOut, Menu, X, Plus } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const supabase = createSupabaseBrowserClient();
-
-const NAV = [
-  { href: "/admin/dashboard",  label: "Dashboard",         icon: "◈" },
-  { href: "/admin/jobs",       label: "Jobs",               icon: "◻" },
-  { href: "/admin/users",      label: "Users",              icon: "◎" },
-  { href: "/admin/companies",  label: "Companies",          icon: "⬡" },
-  { href: "/admin/taxonomy",   label: "Categories & Tags",  icon: "◈" },
-  { href: "/admin/analytics",  label: "Analytics",          icon: "△" },
-  { href: "/admin/blog",       label: "Blog",               icon: "▤" },
+const groups = [
+  { label: "Workspace", items: [
+    { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
+    { href: "/admin/jobs", label: "Job listings", icon: BriefcaseBusiness },
+    { href: "/admin/users", label: "People", icon: Users },
+    { href: "/admin/companies", label: "Companies", icon: Building2 },
+  ] },
+  { label: "Insights & content", items: [
+    { href: "/admin/analytics", label: "Analytics", icon: ChartNoAxesCombined },
+    { href: "/admin/blog", label: "Blog posts", icon: FileText },
+    { href: "/admin/taxonomy", label: "Categories & tags", icon: Tags },
+  ] },
 ];
-
-export default function AdminNav() {
+export default function AdminNav({ email }: { email: string }) {
   const pathname = usePathname();
-  const router   = useRouter();
-  const [signingOut, setSigningOut] = useState(false);
-
-  /* Below 768px the nav in globals.css becomes an off-canvas drawer that this
-     state opens/closes; above 768px `.admin-nav`/`.is-open` are inert and
-     `open` never affects anything (the CSS never applies), so no separate
-     desktop/mobile branch is needed here. */
+  const router = useRouter();
   const [open, setOpen] = useState(false);
-
-  // Close the drawer whenever the route changes — otherwise it stays open
-  // over the new page after tapping a link.
-  useEffect(() => { setOpen(false); }, [pathname]);
-
-  /* Straight to /admin/login rather than the homepage: signing out of the
-     admin panel means you want back in, not out to the public site. */
-  async function handleSignOut() {
-    if (signingOut) return;
-    setSigningOut(true);
-    await supabase.auth.signOut();
-    router.push("/admin/login");
-    router.refresh();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const nav = useRef<HTMLElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    nav.current?.querySelector<HTMLElement>("a")?.focus();
+    const media = window.matchMedia("(min-width: 769px)");
+    const onResize = () => { if (media.matches) setOpen(false); };
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") { setOpen(false); toggle.current?.focus(); }
+      if (event.key !== "Tab") return;
+      const elements = [toggle.current, ...Array.from(nav.current?.querySelectorAll<HTMLElement>("a, button:not(:disabled)") ?? [])].filter(Boolean) as HTMLElement[];
+      const first = elements[0], last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    }
+    document.addEventListener("keydown", onKey);
+    media.addEventListener("change", onResize);
+    return () => { document.body.style.overflow = oldOverflow; document.removeEventListener("keydown", onKey); media.removeEventListener("change", onResize); };
+  }, [open]);
+  async function signOut() {
+    setBusy(true); setError("");
+    try {
+      const { error } = await createSupabaseBrowserClient().auth.signOut();
+      if (error) throw error;
+      router.push("/admin/login"); router.refresh();
+    } catch { setError("Could not sign out. Please try again."); setBusy(false); }
   }
-
-  return (
-    <>
-      <button
-        type="button"
-        className="admin-nav-toggle"
-        aria-label={open ? "Close menu" : "Open menu"}
-        aria-expanded={open}
-        onClick={() => setOpen(v => !v)}
-      >
-        {open ? <X size={18} /> : <Menu size={18} />}
-      </button>
-
-      <div
-        className={`admin-nav-backdrop${open ? " is-open" : ""}`}
-        onClick={() => setOpen(false)}
-      />
-
-      {/* Width/position/height live in the .admin-nav CSS class, not here —
-          an inline style would out-specificity the mobile media query below
-          768px and the drawer would never actually narrow or slide in. */}
-      <nav className={`admin-nav${open ? " is-open" : ""}`} style={{
-        flexShrink: 0, minHeight: "100vh",
-        background: "var(--surface)", borderRight: "1px solid var(--border)",
-        display: "flex", flexDirection: "column",
-        overflowY: "auto",
-      }}>
-        {/* Brand */}
-        <div style={{ padding: "20px 20px 16px" }}>
-          <div className="mono-s" style={{ color: "var(--text-subtle)", fontSize: 10, letterSpacing: "0.12em", marginBottom: 4 }}>ADMIN PANEL</div>
-          <div style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14 }}>CyprusTech.Careers</div>
-        </div>
-
-        <div style={{ width: "100%", height: 1, background: "var(--border)", marginBottom: 8 }} />
-
-        {/* Links */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2, padding: "8px 10px" }}>
-          {NAV.map(({ href, label, icon }) => {
-            const active = pathname === href || (href !== "/admin/dashboard" && pathname.startsWith(href));
-            return (
-              <Link key={href} href={href} style={{
-                display: "flex", alignItems: "center", gap: 10, padding: "8px 12px",
-                borderRadius: 7, textDecoration: "none", fontSize: 13,
-                fontFamily: "var(--font-sans)", fontWeight: active ? 600 : 400,
-                background: active ? "var(--accent-soft)" : "transparent",
-                color: active ? "var(--accent)" : "var(--text-muted)",
-                transition: "background 120ms, color 120ms",
-              }}>
-                <span style={{ fontSize: 14, fontFamily: "var(--font-mono)", opacity: 0.7 }}>{icon}</span>
-                {label}
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Footer */}
-        <div style={{ padding: "14px 20px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 12 }}>
-          <Link href="/" className="mono-s" style={{ color: "var(--text-subtle)", textDecoration: "none", fontSize: 11 }}>
-            ← Back to site
-          </Link>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            disabled={signingOut}
-            style={{
-              display: "flex", alignItems: "center", gap: 8, width: "100%",
-              padding: "8px 12px", marginLeft: -12,
-              background: "none", border: "none", borderRadius: 7,
-              cursor: signingOut ? "default" : "pointer",
-              fontFamily: "var(--font-sans)", fontSize: 13,
-              color: signingOut ? "var(--text-subtle)" : "var(--text-muted)",
-              transition: "background 120ms, color 120ms",
-            }}
-          >
-            <LogOut size={14} />
-            {signingOut ? "Signing out…" : "Sign out"}
-          </button>
-        </div>
-      </nav>
-    </>
-  );
+  return <>
+    <button ref={toggle} className="adm-menu-toggle" type="button" aria-controls="admin-navigation" aria-expanded={open} aria-label={open ? "Close navigation" : "Open navigation"} onClick={() => setOpen(!open)}>{open ? <X size={20} /> : <Menu size={20} />}</button>
+    {open && <div className="adm-backdrop" onClick={() => { setOpen(false); toggle.current?.focus(); }} />}
+    <nav ref={nav} id="admin-navigation" aria-label="Admin navigation" className={`adm-sidebar ${open ? "is-open" : ""}`}>
+      <Link href="/admin/dashboard" className="adm-brand" onClick={() => setOpen(false)}><span className="adm-brand-mark">c<span>t</span></span><span>CyprusTech<span className="adm-brand-sub">CAREERS / ADMIN</span></span></Link>
+      <div className="adm-workspace"><span className="adm-workspace-dot" /><div>Platform workspace<small>Administrator access</small></div></div>
+      <div className="adm-nav-groups">{groups.map(group => <div key={group.label} className="adm-nav-group"><p>{group.label}</p>{group.items.map(({ href, label, icon: Icon }) => {
+        const active = pathname === href || pathname.startsWith(href + "/");
+        return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={`adm-nav-link ${active ? "is-active" : ""}`} onClick={() => setOpen(false)}><Icon size={18} strokeWidth={1.7} /><span>{label}</span>{active && <span className="adm-active-dot" />}</Link>;
+      })}</div>)}</div>
+      <div className="adm-sidebar-bottom"><div className="adm-sidebar-callout"><span>Build the next opportunity.</span><p>Connect great people with their next role in Cyprus.</p><Link href="/admin/jobs/new" onClick={() => setOpen(false)}><Plus size={15} /> Add a job</Link></div>
+      <Link className="adm-site-link" href="/" target="_blank" rel="noreferrer">View public website <ArrowUpRight size={15} /></Link>
+      <div className="adm-account"><span className="adm-avatar">{email.slice(0, 1).toUpperCase()}</span><div><strong>Administrator</strong><small title={email}>{email}</small></div><button type="button" title="Sign out" aria-label="Sign out" disabled={busy} onClick={signOut}><LogOut size={17} /></button></div>
+      {error && <p role="alert" className="adm-sidebar-error">{error}</p>}</div>
+    </nav>
+  </>;
 }

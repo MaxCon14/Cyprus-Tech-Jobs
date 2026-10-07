@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AdminTable, AdminTr, AdminTd, StatusBadge } from "./AdminTable";
 import { RowActions } from "./RowActions";
 import { AdminSearchInput } from "./AdminSearchInput";
+import { Pagination, PAGE_SIZE } from "./Pagination";
 
 interface Company {
   id: string; name: string; website: string | null;
@@ -15,26 +16,26 @@ interface Props { companies: Company[] }
 
 export function CompaniesTableClient({ companies }: Props) {
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
-  const filtered = query
+  const matched = query
     ? companies.filter(c =>
         c.name.toLowerCase().includes(query.toLowerCase()) ||
         (c.website ?? "").toLowerCase().includes(query.toLowerCase())
       )
     : companies;
 
+  const results = matched.filter(c => filter === "all" || (filter === "verified" && c.verified) || (filter === "unverified" && !c.verified) || (filter === "featured" && c.featured));
+  const currentPage = Math.min(page, Math.max(1, Math.ceil(results.length / PAGE_SIZE)));
+  const filtered = results.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   return (
-    <>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-        <p className="body-s" style={{ color: "var(--text-subtle)", margin: 0 }}>
-          {filtered.length}{query ? ` of ${companies.length}` : ""} company profiles
-        </p>
-        <AdminSearchInput placeholder="Name or website…" value={query} onChange={setQuery} />
-      </div>
-
+    <section className="adm-panel adm-management">
+      <div className="adm-tabs" aria-label="Filter companies">{["all", "verified", "unverified", "featured"].map(f => <button type="button" key={f} aria-pressed={filter === f} onClick={() => { setFilter(f); setPage(1); }}>{f === "all" ? "All companies" : f.charAt(0).toUpperCase() + f.slice(1)}</button>)}</div>
+      <div className="adm-toolbar"><AdminSearchInput placeholder="Search company or website…" value={query} onChange={v => { setQuery(v); setPage(1); }} /><span className="adm-muted">{results.length} company profiles</span></div>
       <AdminTable columns={["Name", "City", "Size", "Active jobs", "Verified", "Featured", "Actions"]}>
         {filtered.length === 0 ? (
-          <tr><td colSpan={7} style={{ padding: "24px 16px", textAlign: "center", fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-subtle)" }}>No companies match "{query}"</td></tr>
+          <tr><td colSpan={7} style={{ padding: "24px 16px", textAlign: "center", fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--text-subtle)" }}>No companies found. Try a different search or filter.</td></tr>
         ) : filtered.map(c => (
           <AdminTr key={c.id}>
             <AdminTd>
@@ -60,6 +61,7 @@ export function CompaniesTableClient({ companies }: Props) {
           </AdminTr>
         ))}
       </AdminTable>
-    </>
+      <Pagination total={results.length} page={currentPage} onChange={setPage} />
+    </section>
   );
 }

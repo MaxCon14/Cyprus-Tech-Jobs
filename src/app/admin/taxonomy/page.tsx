@@ -1,5 +1,13 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { PageHeading } from "../_components/AdminUI";
+
+async function request(url: string, options?: RequestInit) {
+  const res = await fetch(url, options);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "The request could not be completed.");
+  return data;
+}
 
 interface Category {
   id: string;
@@ -85,9 +93,10 @@ function CategorySection({ items, reload }: { items: Category[]; reload: () => v
   const parents = items.filter(c => !c.parentId);
 
   async function add() {
-    if (!newName.trim()) return;
+    if (busy || !newName.trim()) return;
     setBusy(true);
     setError("");
+    try {
     const res = await fetch("/api/admin/categories", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
@@ -100,17 +109,20 @@ function CategorySection({ items, reload }: { items: Category[]; reload: () => v
     }
     setNewName("");
     reload();
+    } catch { setError("Connection failed. Please try again."); } finally { setBusy(false); }
   }
 
   async function del(cat: Category) {
     if (!confirm(`Delete "${cat.name}"?`)) return;
     setError("");
+    try {
     const res = await fetch(`/api/admin/categories/${cat.id}`, { method: "DELETE" });
     if (!res.ok) {
       setError((await res.json().catch(() => ({}))).error ?? "Could not delete that category.");
       return;
     }
     reload();
+    } catch { setError("Connection failed. Please try again."); } finally { setBusy(false); }
   }
 
   return (
@@ -120,6 +132,7 @@ function CategorySection({ items, reload }: { items: Category[]; reload: () => v
           value={newName}
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === "Enter" && add()}
+          aria-label="New category name"
           placeholder="New category name…"
           style={inputStyle}
         />
@@ -179,32 +192,32 @@ function TagSection({ items, reload }: { items: Tag[]; reload: () => void }) {
   const [newName, setNewName] = useState("");
   const [busy,    setBusy]    = useState(false);
 
+  const [error, setError] = useState("");
   async function add() {
-    if (!newName.trim()) return;
-    setBusy(true);
-    await fetch("/api/admin/tags", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ name: newName.trim() }),
-    });
-    setNewName("");
-    setBusy(false);
-    reload();
+    if (busy || !newName.trim()) return;
+    setBusy(true); setError("");
+    try {
+      await request("/api/admin/tags", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: newName.trim() }) });
+      setNewName(""); reload();
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not add tag."); }
+    finally { setBusy(false); }
   }
-
   async function del(tag: Tag) {
     if (!confirm(`Delete "${tag.name}"?`)) return;
-    await fetch(`/api/admin/tags/${tag.id}`, { method: "DELETE" });
-    reload();
+    setError("");
+    try { await request(`/api/admin/tags/${tag.id}`, { method: "DELETE" }); reload(); }
+    catch (e) { setError(e instanceof Error ? e.message : "Could not delete tag."); }
   }
 
   return (
     <Panel title="Tags" count={items.length}>
+      {error && <ErrorNote message={error} />}
       <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
         <input
           value={newName}
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === "Enter" && add()}
+          aria-label="New tag name"
           placeholder="New tag name…"
           style={inputStyle}
         />
@@ -236,14 +249,18 @@ export default function AdminTaxonomyPage() {
   const [tags,       setTags]       = useState<Tag[]>([]);
   const [loading,    setLoading]    = useState(true);
 
+  const [error, setError] = useState("");
+
   /* Both lists are fetched here on the client, so a write has to re-fetch them.
      This used to call router.refresh(), which re-renders the server component
      and leaves client-fetched state exactly as it was — added categories only
      appeared after a manual reload. */
   const load = useCallback(async () => {
+    setError("");
+    try {
     const [catRes, tagRes] = await Promise.all([
-      fetch("/api/admin/categories").then(r => r.json()),
-      fetch("/api/admin/tags").then(r => r.json()),
+      request("/api/admin/categories"),
+      request("/api/admin/tags"),
     ]);
     setCategories(catRes.map((c: {
       id: string; name: string; slug: string; parentId: string | null;
@@ -257,7 +274,8 @@ export default function AdminTaxonomyPage() {
       childCount: c._count?.children ?? 0,
     })));
     setTags(tagRes);
-    setLoading(false);
+    } catch { setError("Could not load categories and tags. Please retry."); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -266,10 +284,8 @@ export default function AdminTaxonomyPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontFamily: "var(--font-sans)", fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Categories &amp; Tags</h1>
-        <p className="body-s" style={{ color: "var(--text-subtle)" }}>Manage the taxonomy used to organise job listings</p>
-      </div>
+      <PageHeading eyebrow="Content settings" title="Categories & tags" description="Organize listings so people can find the right opportunities." />
+      {error && <div className="adm-notice" role="alert">{error} <button onClick={load}>Retry</button></div>}
       <div className="admin-grid-2" style={{ gap: 24 }}>
         <CategorySection items={categories} reload={load} />
         <TagSection      items={tags}       reload={load} />
