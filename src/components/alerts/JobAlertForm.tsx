@@ -20,6 +20,10 @@ interface Props {
 type Step = "idle" | "loading" | "done" | "error";
 
 export function JobAlertForm({ categories = [], defaultCategorySlug, companyName, companyId }: Props) {
+  const [city, setCity] = useState("");
+  const [remoteType, setRemoteType] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [requiresConfirmation, setRequiresConfirmation] = useState(false);
   const [email,        setEmail]        = useState("");
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const [isEmployer,   setIsEmployer]   = useState(false);
@@ -61,6 +65,7 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
       return;
     }
 
+    if (!consent) { setErr("Please agree to receive job alerts."); return; }
     setStep("loading");
     try {
       const res = await fetch("/api/candidates/alert", {
@@ -68,6 +73,7 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({
           email:          effectiveEmail,
+          city, remoteType, consent,
           categoryId:     category || null,
           companyId:      companyId  || null,
           alertFrequency: freq,
@@ -79,6 +85,8 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
         throw new Error(data.error ?? "Something went wrong.");
       }
 
+      const result = await res.json();
+      setRequiresConfirmation(result.requiresConfirmation === true);
       setStep("done");
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Something went wrong. Please try again.");
@@ -93,8 +101,8 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
           <Check size={14} style={{ color: "var(--accent)" }} />
         </div>
         <div>
-          <p className="body-s" style={{ fontWeight: 600, marginBottom: 2 }}>You&apos;re subscribed!</p>
-          <p className="body-s" style={{ color: "var(--text-muted)" }}>We&apos;ll email you when matching jobs are posted.</p>
+          <p className="body-s" style={{ fontWeight: 600, marginBottom: 2 }}>{requiresConfirmation ? "Check your inbox" : "You’re subscribed!"}</p>
+          <p className="body-s" style={{ color: "var(--text-muted)" }}>{requiresConfirmation ? "If confirmation is needed, we’ll email you a link. Open it to activate your alerts." : "We’ll email you when matching jobs are posted."}</p>
         </div>
       </div>
     );
@@ -113,6 +121,7 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
         <input
           className="input"
           type="email"
+          aria-label="Email address for job alerts"
           placeholder="your@email.com"
           value={email}
           onChange={e => { setEmail(e.target.value); setErr(""); }}
@@ -139,12 +148,29 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
         />
       )}
 
+      <label className="body-s">Location
+        <select className="input" value={city} onChange={e => setCity(e.target.value)}>
+          <option value="">All locations</option>
+          {["Limassol", "Nicosia", "Larnaca", "Paphos", "Famagusta"].map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </label>
+      <label className="body-s">Work arrangement
+        <select className="input" value={remoteType} onChange={e => setRemoteType(e.target.value)}>
+          <option value="">Any arrangement</option>
+          <option value="REMOTE">Remote</option><option value="HYBRID">Hybrid</option><option value="ON_SITE">On-site</option>
+        </select>
+      </label>
+      <label className="body-s" style={{ display: "flex", alignItems: "start", gap: 8 }}>
+        <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} />
+        <span>I agree to receive matching job alerts by email. I can unsubscribe anytime. <a href="/privacy">Privacy policy</a></span>
+      </label>
       {/* Frequency toggle */}
       <div style={{ display: "flex", gap: 8 }}>
         {(["DAILY", "WEEKLY"] as const).map(f => (
           <button
             key={f}
             type="button"
+            aria-pressed={freq === f}
             onClick={() => setFreq(f)}
             className={`btn btn-sm${freq === f ? " btn-primary" : " btn-outline"}`}
             style={{ flex: 1, justifyContent: "center" }}

@@ -17,7 +17,6 @@ const DISALLOW = [
   "/employers/dashboard",
   "/candidates/dashboard",
   "/dashboard",
-  "/_next/",
 ];
 
 /* AI crawlers we deliberately welcome (GEO): the answer engines and their
@@ -39,7 +38,7 @@ const AI_CRAWLERS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
+  const base = "https://cyprustech.careers";
 
   return {
     rules: [

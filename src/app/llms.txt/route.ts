@@ -6,7 +6,7 @@ import { getCategoriesWithCount } from "@/lib/queries";
  * Regenerated hourly so the job counts stay current. */
 export const revalidate = 3600;
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
+const BASE = "https://cyprustech.careers";
 
 const CITIES = [
   { name: "Limassol", slug: "limassol" },
@@ -63,7 +63,6 @@ export async function GET() {
 ## Browse jobs
 
 - [All tech jobs in Cyprus](${BASE}/jobs): the full, filterable listing of every active role.
-- [Companies hiring in Cyprus](${BASE}/companies): tech employers with open roles and company profiles.
 - [Cyprus tech salary guide](${BASE}/salary-guide): salary benchmarks by role and seniority.
 - [Post a job](${BASE}/post-a-job): for employers hiring tech talent in Cyprus.
 - [FAQ](${BASE}/faq): how the platform works for job seekers and employers.

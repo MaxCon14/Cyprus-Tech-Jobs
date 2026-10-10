@@ -1,3 +1,4 @@
+import { COMPANY_PROFILES_PUBLIC } from "@/lib/features";
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -28,6 +29,7 @@ function prettyHost(url: string): string {
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
+  if (!COMPANY_PROFILES_PUBLIC) return { robots: { index: false, follow: true } };
   const { slug } = await params;
 
   let company: Awaited<ReturnType<typeof getCompanyBySlug>> = null;
@@ -64,6 +66,7 @@ export async function generateMetadata(
 export default async function CompanyProfilePage(
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  if (!COMPANY_PROFILES_PUBLIC) notFound();
   const { slug } = await params;
 
   let company: Awaited<ReturnType<typeof getCompanyBySlug>> = null;

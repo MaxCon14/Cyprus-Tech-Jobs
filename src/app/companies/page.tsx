@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { COMPANY_PROFILES_PUBLIC } from "@/lib/features";
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -7,6 +9,7 @@ import { CompanyCard } from "@/components/companies/CompanyCard";
 import { buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   title: "Tech Companies Hiring in Cyprus — CyprusTech.Careers",
   description:
     "Browse the tech companies hiring in Cyprus. See their team size, location, tech stack and current open roles.",
@@ -20,6 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CompaniesPage() {
+  if (!COMPANY_PROFILES_PUBLIC) notFound();
   /* Directory members only — companies with a registered employer account.
      Curated listings never create a Company row, so admin-listed roles cannot
      surface a profile here by construction. */

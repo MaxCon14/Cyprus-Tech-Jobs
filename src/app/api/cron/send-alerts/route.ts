@@ -1,3 +1,4 @@
+import { activeJobWhere } from "@/lib/job-visibility";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authoriseCron } from "@/lib/cron-auth";
@@ -7,7 +8,7 @@ import type { Prisma } from "@prisma/client";
 export const dynamic = "force-dynamic";
 
 const DAILY_THRESHOLD  = 23 * 60 * 60 * 1000;
-const WEEKLY_THRESHOLD = 6  * 24 * 60 * 60 * 1000;
+const WEEKLY_THRESHOLD = 7  * 24 * 60 * 60 * 1000;
 
 export async function GET(req: NextRequest) {
   const denied = authoriseCron(req);
@@ -38,17 +39,17 @@ export async function GET(req: NextRequest) {
   let skipped = 0;
 
   for (const alert of alerts) {
-    const sinceDate  = alert.lastSentAt ?? new Date(0);
+    const sinceDate  = alert.lastSentAt ?? alert.createdAt;
     const companyName = alert.companyId ? (companyMap[alert.companyId] ?? null) : null;
 
     const where: Prisma.JobWhereInput = {
-      status:    "ACTIVE",
-      createdAt: { gt: sinceDate },
+      ...activeJobWhere(now),
+      postedAt: { gt: sinceDate, lte: now },
     };
 
-    if (alert.categoryId)      where.category      = { slug: alert.categoryId };
+    if (alert.categoryId)      where.category      = { OR: [{ slug: alert.categoryId }, { parent: { slug: alert.categoryId } }] };
     if (alert.remoteType)      where.remoteType     = alert.remoteType;
-    if (alert.city)            where.city           = alert.city;
+    if (alert.city)            where.city           = { contains: alert.city, mode: "insensitive" };
     if (alert.experienceLevel) where.experienceLevel = alert.experienceLevel;
     if (alert.salaryMin)       where.salaryMin       = { gte: alert.salaryMin };
     if (alert.companyId)       where.companyId       = alert.companyId;
@@ -63,11 +64,11 @@ export async function GET(req: NextRequest) {
         salaryMin:          true,
         salaryMax:          true,
         salaryCurrency:     true,
+        salaryDisclosed:    true,
         curatedCompanyName: true,
         company: { select: { name: true } },
       },
-      orderBy: { createdAt: "desc" },
-      take: 10,
+      orderBy: { postedAt: "desc" },
     });
 
     if (jobs.length === 0) { skipped++; continue; }
@@ -83,8 +84,8 @@ export async function GET(req: NextRequest) {
         companyName:    j.company?.name ?? j.curatedCompanyName ?? "",
         city:           j.city,
         remoteType:     j.remoteType,
-        salaryMin:      j.salaryMin,
-        salaryMax:      j.salaryMax,
+        salaryMin:      j.salaryDisclosed ? j.salaryMin : null,
+        salaryMax:      j.salaryDisclosed ? j.salaryMax : null,
         salaryCurrency: j.salaryCurrency ?? "EUR",
       })),
       firstName:   alert.firstName,
@@ -93,12 +94,13 @@ export async function GET(req: NextRequest) {
     });
 
     try {
-      await getResend().emails.send({
+      const { error } = await getResend().emails.send({
         from:    `${FROM_NAME} <${FROM_EMAIL}>`,
         to:      alert.email,
         subject,
         html:    emailHtml,
-      });
+      }, { idempotencyKey: `job-alert/${alert.id}/${sinceDate.toISOString()}` });
+      if (error) throw new Error(error.message);
 
       await prisma.jobAlert.update({
         where: { id: alert.id },
@@ -107,7 +109,7 @@ export async function GET(req: NextRequest) {
 
       sent++;
     } catch (err) {
-      console.error("[send-alerts] failed for", alert.email, err);
+      console.error("[send-alerts] delivery failed", { alertId: alert.id, message: err instanceof Error ? err.message : "Unknown error" });
     }
   }
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
-import { getJobs, getCompanies, getCategoriesWithCount } from "@/lib/queries";
+import { getJobs, getCategoriesWithCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import {
   Search, MapPin, Bell, UserPlus, Zap,
@@ -22,20 +22,20 @@ export const metadata: Metadata = {
   // root layout's own segment, and a template only decorates *child* segments.
   // (Verified live: /jobs gets the "| CyprusTech.Careers" suffix, the homepage
   // does not.) So unlike every child page, the brand has to be added here.
-  title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
+  title: "Tech & IT Jobs in Cyprus | CyprusTech.Careers",
   description: "Find tech jobs in Cyprus, with pay shown wherever the employer publishes it. Browse IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote — everything you need to work in Cyprus tech.",
   alternates: { canonical: "https://cyprustech.careers" },
   openGraph: {
     // OpenGraph/Twitter titles don't go through the layout template, so they
     // carry the brand explicitly.
-    title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
+    title: "Tech & IT Jobs in Cyprus | CyprusTech.Careers",
     description: "Find tech jobs in Cyprus, with pay shown wherever the employer publishes it. IT, software, DevOps, design, data and product roles in Limassol, Nicosia, Larnaca and remote.",
     url: "https://cyprustech.careers",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tech Jobs in Cyprus with Salaries | CyprusTech.Careers",
+    title: "Tech & IT Jobs in Cyprus | CyprusTech.Careers",
     description: "Find tech jobs in Cyprus — IT, software, DevOps, design, data and product roles, with pay shown wherever the employer publishes it.",
   },
 };
@@ -43,37 +43,37 @@ export const metadata: Metadata = {
 /* ── FAQ data ── */
 const FAQS = [
   {
-    q: "What tech jobs are available in Cyprus?",
-    a: "Cyprus has a thriving tech scene with hundreds of open roles across software engineering, frontend and backend development, DevOps, UI/UX design, data engineering, product management, cybersecurity, and QA. Key sectors include fintech, forex trading, gaming, and a growing startup ecosystem. CyprusTech.Careers lists active roles across all of these, with pay shown wherever the employer publishes it.",
+    "q": "What tech jobs can I find in Cyprus?",
+    "a": "Browse curated roles in software engineering, IT, design, data, DevOps, product and related fields. Use the job category and location filters to see current vacancies."
   },
   {
-    q: "What is the average salary for software engineers in Cyprus?",
-    a: "Software engineers in Cyprus earn between €35,000–€120,000 annually depending on level and specialisation. Junior developers typically earn €30,000–€50,000, mid-level engineers €50,000–€80,000, and senior engineers €75,000–€120,000+. Limassol commands the highest salaries, particularly at fintech companies. Where an employer publishes a range, it is shown upfront on the listing rather than hidden until interview.",
+    "q": "Are salaries included in every job listing?",
+    "a": "Salary information appears when the employer has disclosed it. Listings without a published range are marked undisclosed; we do not estimate an employer's offer."
   },
   {
-    q: "Which cities in Cyprus have the most tech jobs?",
-    a: "Limassol is the tech capital of Cyprus, home to the majority of fintech and forex companies — accounting for around 68% of all tech roles. Nicosia has a strong gaming and public-sector tech cluster. Larnaca and Paphos have smaller but growing tech scenes. Many companies also offer fully remote roles open to candidates anywhere in Cyprus.",
+    "q": "How can I find jobs in Limassol, Nicosia or Larnaca?",
+    "a": "Choose a city in the search filters or browse the city pages linked below. You can also filter by job category, experience level and employment type."
   },
   {
-    q: "Can foreigners work in tech in Cyprus?",
-    a: "Yes. Cyprus is an EU member state, so EU/EEA citizens can work freely without a work permit. Non-EU nationals can apply for a fast-track residency and work permit — the process typically takes 2–3 months. Major tech employers regularly sponsor international hires and often include relocation packages covering flights and initial accommodation.",
+    "q": "Can I find remote tech jobs in Cyprus?",
+    "a": "Use the Remote filter for roles listed as fully remote and Hybrid for roles that combine office and remote work. Check each employer's location and eligibility requirements before applying."
   },
   {
-    q: "What are the top tech companies hiring in Cyprus?",
-    a: "Cyprus has a strong concentration of fintech, forex, and gaming companies — particularly in Limassol and Nicosia — alongside a fast-growing startup scene with venture-backed companies across SaaS, payments, and crypto. Browse live listings on CyprusTech.Careers to see which employers are actively hiring.",
+    "q": "How do I apply for a curated job?",
+    "a": "Open the listing and follow its application instructions. Curated listings usually take you to the employer's careers site or application provider, where the employer handles your application."
   },
   {
-    q: "Do Cyprus tech companies offer remote work?",
-    a: "Around 34% of tech roles in Cyprus offer remote or hybrid working. Fully remote roles are most common at product and SaaS companies, while fintech and gaming firms typically prefer on-site or hybrid arrangements. You can filter jobs by Remote, Hybrid, or On-site on our jobs page.",
+    "q": "Do I need an account to browse jobs?",
+    "a": "You can browse jobs and follow external application links without an account. A free candidate account lets you save preferences and use candidate features."
   },
   {
-    q: "How do I find a software developer job in Cyprus?",
-    a: "Create a free candidate profile on CyprusTech.Careers, set your preferred categories and salary range, and receive daily or weekly alerts for matching roles. Where an employer publishes a salary, it is on the listing — so there are no surprises. You can also browse by category (Frontend, Backend, DevOps, etc.) or filter by city to narrow your search.",
+    "q": "Who publishes the listings?",
+    "a": "CyprusTech.Careers currently curates technology vacancies from employer sources. A curated listing does not imply that the employer is a platform partner."
   },
   {
-    q: "What is the cost of living in Cyprus compared to salaries?",
-    a: "Cyprus offers a strong quality of life relative to tech salaries. Rent for a modern 2-bedroom apartment in Limassol ranges from €1,200–€2,000/month. Groceries and dining are moderately priced. Combined with a flat 35% income tax rate above €60K and the non-domicile tax regime for new residents, many international tech workers find Cyprus very financially attractive.",
-  },
+    "q": "Can employers post their own vacancies?",
+    "a": "Employers can create an account and use the Post a Job page to publish and manage vacancies. Public company profiles have not launched yet."
+  }
 ];
 
 /* ── Category icons (line icons, not emoji — emoji render as the OS's own
@@ -110,13 +110,11 @@ const CATEGORY_ICONS: Record<string, typeof Code2> = {
 
 export default async function HomePage() {
   let jobs: Awaited<ReturnType<typeof getJobs>> = [];
-  let companies: Awaited<ReturnType<typeof getCompanies>> = [];
   let categories: Awaited<ReturnType<typeof getCategoriesWithCount>> = [];
 
   try {
-    [jobs, companies, categories] = await Promise.all([
+    [jobs, categories] = await Promise.all([
       getJobs({ take: 5 }),
-      getCompanies({ featured: true }),
       getCategoriesWithCount(),
     ]);
   } catch (err) { console.error("[home] DB error:", err); }
@@ -135,7 +133,7 @@ export default async function HomePage() {
   // The "Browse by category" grid — every top-level category, in the same order
   // and under the same names as the nav and the /jobs filter panel.
   // categories[0] is the synthetic "All jobs" row, which is not a category.
-  const categoryGrid = categories.slice(1);
+  const categoryGrid = categories.slice(1).filter(c => c.count > 0);
 
   return (
     <>
@@ -162,14 +160,14 @@ export default async function HomePage() {
 
           <p className="body-l" style={{ color: "var(--text-muted)", maxWidth: 560, marginBottom: 40 }}>
             Curated tech jobs at the best companies in Limassol, Nicosia, Larnaca, and remote.
-            Salaries included. No recruiter spam.
+            Pay shown when employers disclose it. Apply directly to the roles that fit.
           </p>
 
           {/* Search */}
           <form action="/jobs" method="GET" className="hero-search" style={{ maxWidth: 640, marginBottom: 40 }}>
             <div style={{ position: "relative", flex: "1 1 200px" }}>
               <Search size={16} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)" }} />
-              <input className="input" type="text" name="search" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
+              <input className="input" type="text" name="search" aria-label="Search jobs by title, company, or keyword" placeholder="Job title, company, or keyword…" style={{ paddingLeft: 38 }} />
             </div>
             <div style={{ flex: "0 0 170px" }}>
               <Select
@@ -192,8 +190,8 @@ export default async function HomePage() {
           <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
             {[
               [String(totalJobs),               "active jobs"],
-              [String(companies.length) + "+",  "companies hiring"],
-              ["€45K—€120K",                    "typical salary range"],
+              ["Curated",                       "technology roles"],
+              ["Free",                          "for job seekers"],
             ].map(([val, label]) => (
               <div key={label}>
                 <div className="mono-l" style={{ color: "var(--accent)", display: "block", marginBottom: 2 }}>{val}</div>
@@ -227,7 +225,7 @@ export default async function HomePage() {
                 icon: <Bell size={22} style={{ color: "var(--accent)" }} />,
                 step: "02",
                 title: "Get matched roles in your inbox",
-                desc: "Receive daily or weekly alerts for jobs that match your profile. Salaries always included.",
+                desc: "Receive daily or weekly alerts for jobs that match your profile. Salary information included when disclosed.",
               },
               {
                 icon: <Zap size={22} style={{ color: "var(--accent)" }} />,
@@ -300,19 +298,19 @@ export default async function HomePage() {
               <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
                 <h3 className="h3" style={{ marginBottom: 8 }}>Hiring in Cyprus?</h3>
                 <p className="body-s" style={{ color: "var(--text-muted)", marginBottom: 16 }}>
-                  Reach thousands of tech professionals actively looking for roles in Cyprus.
+                  Reach people looking for technology roles in Cyprus.
                 </p>
                 <Link href="/post-a-job" className="btn btn-primary" style={{ width: "100%", justifyContent: "center" }}>Post a job</Link>
               </div>
 
               {/* Market snapshot */}
               <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
-                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>MARKET SNAPSHOT</div>
+                <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 16 }}>FIND YOUR NEXT ROLE</div>
                 {[
-                  ["Most in demand", "Frontend, Backend"],
-                  ["Top location",   "Limassol (68%)"],
-                  ["Avg. senior salary", "€75,000"],
-                  ["Remote roles",   "34%"],
+                  ["Live vacancies", String(totalJobs)],
+                  ["Coverage", "Cyprus"],
+                  ["Salary details", "When disclosed"],
+                  ["Work options", "On-site, hybrid, remote"],
                 ].map(([label, value]) => (
                   <div key={label} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--border)" }}>
                     <span className="body-s" style={{ color: "var(--text-muted)" }}>{label}</span>
@@ -450,13 +448,12 @@ export default async function HomePage() {
               <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 10 }}>FOR EMPLOYERS</div>
               <h2 className="h1" style={{ marginBottom: 8 }}>Hiring tech talent in Cyprus?</h2>
               <p className="body" style={{ color: "var(--text-muted)", maxWidth: 480 }}>
-                Post a job and reach thousands of vetted candidates actively looking for roles in Cyprus.
-                Listings go live in under 30 minutes.
+                Post your role for people searching for technology jobs in Cyprus.
+                Create an employer account to manage your listings and applications.
               </p>
             </div>
             <div className="btn-group-mobile">
               <Link href="/post-a-job" className="btn btn-accent btn-lg">Post a job</Link>
-              <Link href="/companies" className="btn btn-outline btn-lg">View companies</Link>
             </div>
           </div>
         </div>

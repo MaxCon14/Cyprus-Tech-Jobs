@@ -1,3 +1,4 @@
+import { isActiveJob, isPublicJob } from "@/lib/job-visibility";
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -20,14 +21,14 @@ import type { Metadata } from "next";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
+const BASE_URL = "https://cyprustech.careers";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
-  if (!job) return {};
-  const isActive = job.status === "ACTIVE";
-  const suffix   = job.status === "PAUSED" ? " (Paused)" : job.status !== "ACTIVE" ? " (Closed)" : "";
+  if (!job || !isPublicJob(job)) return { robots: { index: false, follow: true } };
+  const isActive = isActiveJob(job);
+  const suffix   = job.status === "PAUSED" ? " (Paused)" : !isActive ? " (Closed)" : "";
   const companyName = job.company?.name ?? job.curatedCompanyName ?? "";
   const title    = `${job.title} at ${companyName}${suffix}`;
   const salaryStr = job.salaryDisclosed ? (formatSalary(job.salaryMin, job.salaryMax) ?? "") : "Salary undisclosed";
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
     },
     // Non-active jobs: tell Google to stop indexing and remove from Jobs results
-    ...(!isActive && { robots: { index: false, follow: false } }),
+    ...(!isActive && { robots: { index: false, follow: true } }),
   };
 }
 
@@ -66,6 +67,8 @@ export default async function JobDetailPage({ params }: Props) {
     if (previous) permanentRedirect(`/jobs/${previous}`);
     notFound();
   }
+
+  if (!isPublicJob(job)) notFound();
 
   const similarRaw  = await getSimilarJobs(job.id, job.categoryId, 3);
   const similar     = similarRaw.map(serialiseJob);
@@ -118,7 +121,7 @@ export default async function JobDetailPage({ params }: Props) {
   const descIsHtml = job.description.trimStart().startsWith("<");
   const safeDesc   = descIsHtml ? sanitizeJobHtml(job.description) : "";
   const descBlocks = descIsHtml ? [] : job.description.split("\n\n");
-  const isActive   = job.status === "ACTIVE";
+  const isActive   = isActiveJob(job);
   const isPaused   = job.status === "PAUSED";
 
   const breadcrumbSchema = buildBreadcrumbSchema([

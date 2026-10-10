@@ -66,7 +66,7 @@ export function FollowCompanyButton({ companyId, companyName }: Props) {
     await fetch("/api/candidates/alert", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ email: userEmail, companyId, alertFrequency: freq }),
+      body:    JSON.stringify({ email: userEmail, companyId, consent: true, alertFrequency: freq }),
     });
     setFollowState("following");
     setBusy(false);

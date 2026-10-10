@@ -1,140 +1,108 @@
+import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { ExperienceLevel, RemoteType } from "@prisma/client";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { allowRequest, clientIp, tooManyRequests } from "@/lib/rate-limit";
+import { getResend, FROM_EMAIL, FROM_NAME } from "@/lib/resend";
+import type { RemoteType } from "@prisma/client";
+
+const BASE = "https://cyprustech.careers";
+const rule = { name: "job-alert-subscribe", limit: 5, windowSeconds: 3600 };
+
+async function sessionEmail() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.email?.toLowerCase() ?? null;
+}
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const email     = searchParams.get("email")?.trim().toLowerCase() ?? "";
-  const companyId = searchParams.get("companyId") ?? null;
-
-  if (!email) {
-    return NextResponse.json({ error: "email is required" }, { status: 400 });
-  }
-
+  const email = await sessionEmail();
+  if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const params = req.nextUrl.searchParams;
+  if (params.get("email")?.toLowerCase() !== email) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const alert = await prisma.jobAlert.findFirst({
-    where: {
-      email,
-      companyId: companyId ?? null,
-    },
+    where: { email, companyId: params.get("companyId") || null, confirmed: true },
     select: { alertFrequency: true },
   });
-
-  return NextResponse.json({
-    subscribed:     !!alert,
-    alertFrequency: alert?.alertFrequency ?? null,
-  });
+  return NextResponse.json({ subscribed: !!alert, alertFrequency: alert?.alertFrequency ?? null });
 }
 
 export async function POST(req: NextRequest) {
+  if (!await allowRequest(clientIp(req), rule)) return tooManyRequests(rule, "Please try again later.");
   let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "Valid email is required." }, { status: 422 });
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || body.consent !== true) {
+    return NextResponse.json({ error: "Enter a valid email and agree to receive job alerts." }, { status: 422 });
   }
-
-  // Employers must not subscribe to job alerts
-  const employer = await prisma.employer.findUnique({ where: { email }, select: { id: true } });
-  if (employer) {
-    return NextResponse.json({ error: "Employers cannot subscribe to job alerts." }, { status: 403 });
+  const categoryId = typeof body.categoryId === "string" && body.categoryId ? body.categoryId : null;
+  const companyId = typeof body.companyId === "string" && body.companyId ? body.companyId : null;
+  const city = typeof body.city === "string" && body.city ? body.city : null;
+  const remoteType = typeof body.remoteType === "string" && body.remoteType ? body.remoteType as RemoteType : null;
+  if ((remoteType && !["REMOTE", "HYBRID", "ON_SITE"].includes(remoteType)) ||
+      (city && !["Limassol", "Nicosia", "Larnaca", "Paphos", "Famagusta"].includes(city)) ||
+      !["DAILY", "WEEKLY"].includes(String(body.alertFrequency))) {
+    return NextResponse.json({ error: "Choose valid alert preferences." }, { status: 422 });
   }
-
-  const categoryId      = typeof body.categoryId === "string" ? body.categoryId : null;
-  const companyId       = typeof body.companyId  === "string" ? body.companyId  : null;
-  const remoteType      = typeof body.remoteType === "string" ? (body.remoteType as RemoteType) : null;
-  const city            = typeof body.city === "string" && body.city ? body.city : null;
-  const firstName       = typeof body.firstName === "string" ? body.firstName.trim() : null;
-  const experienceLevel =
-    typeof body.experienceLevel === "string" ? (body.experienceLevel as ExperienceLevel) : null;
-  const salaryMin       = typeof body.salaryMin === "number" ? body.salaryMin : null;
-  const alertFrequency  = body.alertFrequency === "DAILY" ? "DAILY" : "WEEKLY";
-
+  const owner = await sessionEmail();
+  const confirmed = owner === email;
   try {
-    // findFirst + update/create instead of upsert because PostgreSQL treats
-    // NULL != NULL in unique constraints, making the compound upsert unreliable
-    // when categoryId / companyId / remoteType are null.
-    const existing = await prisma.jobAlert.findFirst({
-      where: {
-        email,
-        categoryId: categoryId ?? null,
-        companyId:  companyId  ?? null,
-        remoteType: remoteType ?? null,
-      },
+    if (categoryId && !await prisma.category.findUnique({ where: { slug: categoryId }, select: { id: true } })) {
+      return NextResponse.json({ error: "Choose a valid category." }, { status: 422 });
+    }
+    if (companyId && !await prisma.company.findUnique({ where: { id: companyId }, select: { id: true } })) {
+      return NextResponse.json({ error: "Company unavailable." }, { status: 422 });
+    }
+    const alert = await prisma.$transaction(async tx => {
+      // Serialize nullable-key subscriptions, for which SQL UNIQUE permits duplicates.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${email}))::text`;
+      const existing = await tx.jobAlert.findFirst({ where: { email, categoryId, companyId, remoteType, city } });
+      if (existing) {
+        // Only an authenticated owner may change an existing subscription.
+        if (!confirmed) {
+          if (!existing.confirmed && Date.now() - existing.createdAt.getTime() > 7 * 86400000) {
+            return tx.jobAlert.update({ where: { id: existing.id }, data: { token: randomUUID(), createdAt: new Date() } });
+          }
+          return existing;
+        }
+        return tx.jobAlert.update({ where: { id: existing.id }, data: { alertFrequency: String(body.alertFrequency), confirmed: true } });
+      }
+      return tx.jobAlert.create({ data: {
+        email, categoryId, companyId, city, remoteType,
+        alertFrequency: String(body.alertFrequency), confirmed,
+      } });
     });
-
-    const alert = existing
-      ? await prisma.jobAlert.update({
-          where: { id: existing.id },
-          data:  { alertFrequency, confirmed: true },
-        })
-      : await prisma.jobAlert.create({
-          data: {
-            email,
-            firstName,
-            categoryId,
-            companyId,
-            remoteType,
-            city,
-            experienceLevel,
-            salaryMin,
-            alertFrequency,
-            confirmed: true,
-          },
-        });
-
-    return NextResponse.json({ alertId: alert.id }, { status: 201 });
-  } catch (err) {
-    console.error("[candidates/alert POST]", err);
-    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
+    if (!confirmed && !alert.confirmed) {
+      const link = `${BASE}/alerts/confirm?token=${encodeURIComponent(alert.token)}`;
+      const { error } = await getResend().emails.send({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: email,
+        subject: "Confirm your Cyprus tech job alerts",
+        text: `You requested job alerts from CyprusTech.Careers. Confirm your subscription: ${link}\nIf you did not request this, ignore this email. No job alerts will be sent until you confirm.`,
+      }, { idempotencyKey: `confirm-alert/${alert.id}/${Math.floor(Date.now() / 3600000)}` });
+      if (error) throw new Error("Confirmation delivery failed");
+    }
+    return NextResponse.json({ requiresConfirmation: !confirmed }, { status: 201 });
+  } catch {
+    console.error("[job-alert] subscription could not be completed");
+    return NextResponse.json({ error: "We could not complete your request. Please try again." }, { status: 503 });
   }
 }
 
 export async function DELETE(req: NextRequest) {
+  const email = await sessionEmail();
+  if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   let body: Record<string, unknown>;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-
-  // ID-based delete (from dashboard — no email required, auth verified server-side)
   if (typeof body.alertId === "string" && body.alertId) {
-    const { createSupabaseServerClient } = await import("@/lib/supabase/server");
-    const supabase = await createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    try {
-      await prisma.jobAlert.deleteMany({
-        where: { id: body.alertId, email: user.email.toLowerCase() },
-      });
-      return NextResponse.json({ ok: true });
-    } catch (err) {
-      console.error("[candidates/alert DELETE by id]", err);
-      return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
-    }
+    await prisma.jobAlert.deleteMany({ where: { id: body.alertId, email } });
+  } else {
+    if (body.email !== email) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    await prisma.jobAlert.deleteMany({ where: { email, companyId: typeof body.companyId === "string" ? body.companyId : null } });
   }
-
-  // Email-based delete (from FollowCompanyButton — no session required)
-  const email     = typeof body.email     === "string" ? body.email.trim().toLowerCase() : "";
-  const companyId = typeof body.companyId === "string" ? body.companyId : null;
-
-  if (!email) {
-    return NextResponse.json({ error: "email or alertId is required." }, { status: 422 });
-  }
-
-  try {
-    await prisma.jobAlert.deleteMany({
-      where: { email, companyId: companyId ?? null },
-    });
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("[candidates/alert DELETE]", err);
-    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
-  }
+  return NextResponse.json({ ok: true });
 }

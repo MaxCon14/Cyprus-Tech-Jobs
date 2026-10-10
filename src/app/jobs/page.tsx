@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount, getJobCount } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
@@ -8,9 +9,9 @@ import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "./FilterBar";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: "Tech Jobs in Cyprus — Browse All Roles",
-  description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary. Salaries always shown upfront.",
+  description: "Browse all tech jobs in Cyprus. Filter by category, location, employment type, and salary. Pay shown when disclosed by the employer.",
   alternates: { canonical: "https://cyprustech.careers/jobs" },
   openGraph: {
     title: "Tech Jobs in Cyprus — Browse All Roles",
@@ -24,6 +25,19 @@ export const metadata: Metadata = {
     description: "Browse all tech jobs in Cyprus. Filter by category, location, and salary.",
   },
 };
+
+export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
+  const params = await searchParams;
+  const filtered = ["category", "type", "employment", "skill", "city", "level", "search", "salary"].some(key => Boolean(params[key as keyof typeof params]));
+  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const canonical = `https://cyprustech.careers/jobs${!filtered && page > 1 ? `?page=${page}` : ""}`;
+  return {
+    ...baseMetadata,
+    title: page > 1 ? `Tech Jobs in Cyprus — Page ${page}` : baseMetadata.title,
+    alternates: { canonical },
+    ...(filtered && { robots: { index: false, follow: true } }),
+  };
+}
 
 const PAGE_SIZE = 20;
 
@@ -45,18 +59,19 @@ type SearchParams = Promise<{
 }>;
 
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
-  const params = await searchParams;
+  const rawParams = await searchParams;
+  const params = Object.fromEntries(Object.entries(rawParams).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])) as Awaited<SearchParams>;
   const { category, type, employment, city, level, skill, search } = params;
   const salary  = params.salary ? parseInt(params.salary) : undefined;
   const pageNum = Math.max(1, parseInt(params.page ?? "1") || 1);
 
   const filters = {
     categorySlug:    category,
-    remoteType:      type,
-    employmentType:  employment,
+    remoteType:      ["REMOTE", "HYBRID", "ON_SITE"].includes(type ?? "") ? type : city === "Remote" ? "REMOTE" : undefined,
+    employmentType:  ["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "FREELANCE"].includes(employment ?? "") ? employment : undefined,
     skill,
     city:            city && city !== "Remote" ? city : undefined,
-    experienceLevel: level,
+    experienceLevel: ["JUNIOR", "MID", "SENIOR", "LEAD", "EXECUTIVE"].includes(level ?? "") ? level : undefined,
     search:          search?.trim() || undefined,
     salary,
   };
@@ -72,6 +87,8 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
       getCategoriesWithCount(),
     ]);
   } catch (err) { console.error("[jobs] DB error:", err); }
+
+  if (pageNum > 1 && jobs.length === 0) notFound();
 
   const serialisedJobs = jobs.map(serialiseJob);
   const showFrom       = filteredTotal === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1;
@@ -144,13 +161,15 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
         </div>
         <h1 className="display-m" style={{ marginBottom: 8 }}>{pageTitle}</h1>
         <p className="body" style={{ color: "var(--text-muted)" }}>
-          Curated roles at the best tech companies — salaries included, no recruiter noise.
+          Curated technology roles in Cyprus, with salary details when the employer discloses them.
         </p>
       </div>
 
       {/* Full-width keyword search */}
       <form action="/jobs" method="GET" style={{ marginBottom: 28 }}>
         {category      && <input type="hidden" name="category" value={category} />}
+        {employment    && <input type="hidden" name="employment" value={employment} />}
+        {skill         && <input type="hidden" name="skill" value={skill} />}
         {type          && <input type="hidden" name="type"     value={type} />}
         {city          && <input type="hidden" name="city"     value={city} />}
         {level         && <input type="hidden" name="level"    value={level} />}
@@ -162,7 +181,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
             type="text"
             name="search"
             defaultValue={search ?? ""}
-            placeholder="Search by title, company, or keyword…"
+            aria-label="Search jobs" placeholder="Search by title, company, or keyword…"
             style={{ paddingLeft: 40, paddingBlock: 12, fontSize: 15 }}
           />
         </div>

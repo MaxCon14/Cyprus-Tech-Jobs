@@ -1,3 +1,4 @@
+import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
@@ -50,9 +51,9 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
     if (appRows) {
       const jobMap = Object.fromEntries(jobs.map(j => [j.id, j]));
 
-      const candidateIds = [...new Set((appRows as any[]).map((a: any) => a.candidateId).filter(Boolean))];
-      let candidateMap: Record<string, any> = {};
-      let positionsMap: Record<string, any[]> = {};
+      const candidateIds = [...new Set(appRows.map(a => a.candidateId as string).filter(Boolean))];
+      let candidateMap: Record<string, CandidateRow> = {};
+      const positionsMap: Record<string, PositionRow[]> = {};
       if (candidateIds.length > 0) {
         const [{ data: candidates }, { data: positions }] = await Promise.all([
           supabaseAdmin
@@ -66,17 +67,17 @@ export default async function EmployerDashboard({ searchParams }: { searchParams
             .order("startDate", { ascending: false }),
         ]);
         if (candidates) {
-          candidateMap = Object.fromEntries((candidates as any[]).map((c: any) => [c.id, c]));
+          candidateMap = Object.fromEntries((candidates as CandidateRow[]).map(c => [c.id, c]));
         }
         if (positions) {
-          for (const p of positions as any[]) {
+          for (const p of positions as PositionRow[]) {
             if (!positionsMap[p.candidateId]) positionsMap[p.candidateId] = [];
             positionsMap[p.candidateId].push(p);
           }
         }
       }
 
-      applications = (appRows as any[]).map(a => {
+      applications = appRows.map(a => {
         const candidate = candidateMap[a.candidateId];
         return {
           ...a,

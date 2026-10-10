@@ -32,6 +32,7 @@ interface JobSchemaInput {
   city: string | null;
   remoteType: string;
   employmentType: string;
+  salaryDisclosed: boolean;
   salaryMin: number | null;
   salaryMax: number | null;
   salaryCurrency: string;
@@ -48,26 +49,14 @@ interface JobSchemaInput {
   applyUrl?: string | null;
 }
 
-/* Google matches a JobPosting's hiringOrganization to a real company using
-   `sameAs` and `logo`, and shows the logo in the Google for Jobs card. Both
-   used to come only from a `Company` row — which curated listings do not have,
-   so every curated job (all of them, today) shipped an organisation with a
-   bare name and nothing to tie it to the actual employer.
-
-   For a curated listing the apply URL is the employer's own careers page, so
-   its origin is their site. That is an inference rather than a field someone
-   typed, which is why it is only used when there is no Company website to
-   prefer. */
+// A recruiting platform's origin is not the employer's identity.
 function organizationSameAs(job: JobSchemaInput): string | undefined {
   const site = job.company?.website?.trim();
-  if (site) return site.startsWith("http") ? site : `https://${site}`;
-
-  if (!job.applyUrl) return undefined;
+  if (!site) return undefined;
   try {
-    return new URL(job.applyUrl).origin;
-  } catch {
-    return undefined;
-  }
+    const url = new URL(/^https?:\/\//i.test(site) ? site : `https://${site}`);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : undefined;
+  } catch { return undefined; }
 }
 
 function stripHtml(html: string): string {
@@ -125,7 +114,7 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
     schema["validThrough"] = job.expiresAt.toISOString();
   }
 
-  if (job.salaryMin || job.salaryMax) {
+  if (job.salaryDisclosed && (job.salaryMin || job.salaryMax)) {
     schema["baseSalary"] = {
       "@type": "MonetaryAmount",
       "currency": job.salaryCurrency || "EUR",
@@ -218,7 +207,7 @@ export function buildWebSiteSchema() {
     "@type": "WebSite",
     "url": BASE_URL,
     "name": "CyprusTech.Careers",
-    "description": "Tech jobs in Cyprus — curated listings with salaries",
+    "description": "Curated technology and IT jobs in Cyprus",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {

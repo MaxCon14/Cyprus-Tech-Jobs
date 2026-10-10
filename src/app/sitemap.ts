@@ -1,9 +1,10 @@
+import { activeJobWhere } from "@/lib/job-visibility";
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { getAllPosts } from "@/lib/blog";
-import { getCompanySlugs, getJobCount } from "@/lib/queries";
+import { getJobCount } from "@/lib/queries";
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
+const BASE = "https://cyprustech.careers";
 
 /* Without this the sitemap is prerendered once at build and then frozen until
    the next deploy — every query below runs during `next build`. That was
@@ -14,16 +15,15 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
 export const revalidate = 3600;
 
 const STATIC: MetadataRoute.Sitemap = [
-  { url: BASE,                         lastModified: new Date(), changeFrequency: "daily",   priority: 1.0 },
-  { url: `${BASE}/jobs`,               lastModified: new Date(), changeFrequency: "hourly",  priority: 0.9 },
-{ url: `${BASE}/salary-guide`,       lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-  { url: `${BASE}/post-a-job`,         lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-  { url: `${BASE}/faq`,                lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-  { url: `${BASE}/blog`,               lastModified: new Date(), changeFrequency: "weekly",  priority: 0.6 },
-  { url: `${BASE}/companies`,          lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
-  { url: `${BASE}/privacy`,            lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
-  { url: `${BASE}/terms`,              lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
-  { url: `${BASE}/cookies`,            lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
+  { url: BASE,                         changeFrequency: "daily",   priority: 1.0 },
+  { url: `${BASE}/jobs`,               changeFrequency: "hourly",  priority: 0.9 },
+{ url: `${BASE}/salary-guide`,       changeFrequency: "monthly", priority: 0.7 },
+  { url: `${BASE}/post-a-job`,         changeFrequency: "monthly", priority: 0.7 },
+  { url: `${BASE}/faq`,                changeFrequency: "monthly", priority: 0.6 },
+  { url: `${BASE}/blog`,               changeFrequency: "weekly",  priority: 0.6 },
+  { url: `${BASE}/privacy`,            changeFrequency: "yearly",  priority: 0.3 },
+  { url: `${BASE}/terms`,              changeFrequency: "yearly",  priority: 0.3 },
+  { url: `${BASE}/cookies`,            changeFrequency: "yearly",  priority: 0.3 },
 ];
 
 /* City and job-type landing pages used to sit in STATIC above, submitted
@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let jobEntries: MetadataRoute.Sitemap = [];
   try {
     const jobs = await prisma.job.findMany({
-      where:  { status: "ACTIVE" },
+      where: { ...activeJobWhere() },
       select: { slug: true, postedAt: true, updatedAt: true },
       orderBy: { postedAt: "desc" },
     });
@@ -78,15 +78,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const categories = await prisma.category.findMany({
       where: {
         OR: [
-          { jobs:     { some: { status: "ACTIVE" } } },
-          { children: { some: { jobs: { some: { status: "ACTIVE" } } } } },
+          { jobs:     { some: { ...activeJobWhere() } } },
+          { children: { some: { jobs: { some: { ...activeJobWhere() } } } } },
         ],
       },
       select: { slug: true },
     });
     categoryEntries = categories.map(c => ({
       url:             `${BASE}/jobs/category/${c.slug}`,
-      lastModified:    new Date(),
       changeFrequency: "daily" as const,
       priority:        0.7,
     }));
@@ -106,7 +105,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((_, i) => counts[i] > 0)
       .map(p => ({
         url:             `${BASE}/${p.path}`,
-        lastModified:    new Date(),
         changeFrequency: "daily" as const,
         priority:        p.priority,
       }));
@@ -128,20 +126,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] blog query failed:", err);
   }
 
-  /* ── Company profiles ── */
-  let companyEntries: MetadataRoute.Sitemap = [];
-  try {
-    const companies = await getCompanySlugs();
-    companyEntries = companies.map(c => ({
-      url:             `${BASE}/companies/${c.slug}`,
-      lastModified:    c.updatedAt ?? new Date(),
-      changeFrequency: "weekly" as const,
-      priority:        0.6,
-    }));
-  } catch (err) {
-    console.error("[sitemap] companies query failed:", err);
-  }
-
   /* ── Role × city landing pages ──
      Only the combinations that actually have a live job are submitted —
      publishing empty "X jobs in Y" pages to Google is thin content and hurts.
@@ -150,7 +134,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let roleCityEntries: MetadataRoute.Sitemap = [];
   try {
     const jobs = await prisma.job.findMany({
-      where:  { status: "ACTIVE" },
+      where:  { ...activeJobWhere() },
       select: {
         city:       true,
         remoteType: true,
@@ -169,7 +153,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     roleCityEntries = [...combos].map(c => ({
       url:             `${BASE}/jobs/category/${c}`,
-      lastModified:    new Date(),
       changeFrequency: "daily" as const,
       priority:        0.7,
     }));
@@ -177,5 +160,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] role×city query failed:", err);
   }
 
-  return [...STATIC, ...landingEntries, ...categoryEntries, ...jobEntries, ...companyEntries, ...roleCityEntries, ...blogEntries];
+  return [...STATIC, ...landingEntries, ...categoryEntries, ...jobEntries, ...roleCityEntries, ...blogEntries];
 }
