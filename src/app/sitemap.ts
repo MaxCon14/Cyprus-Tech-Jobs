@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let jobEntries: MetadataRoute.Sitemap = [];
   try {
     const jobs = await prisma.job.findMany({
-      where:  { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+      where:  { status: "ACTIVE", AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }], AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] },
       select: { slug: true, postedAt: true, updatedAt: true },
       orderBy: { postedAt: "desc" },
     });
@@ -77,8 +77,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const categories = await prisma.category.findMany({
       where: {
         OR: [
-          { jobs:     { some: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } },
-          { children: { some: { jobs: { some: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } } } },
+          { jobs:     { some: { status: "ACTIVE", AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] } } },
+          { children: { some: { jobs: { some: { status: "ACTIVE", AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] } } } } },
         ],
       },
       select: { slug: true },
@@ -135,7 +135,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let roleCityEntries: MetadataRoute.Sitemap = [];
   try {
     const jobs = await prisma.job.findMany({
-      where:  { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
+      where:  { status: "ACTIVE", AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] },
       select: {
         city:       true,
         remoteType: true,
