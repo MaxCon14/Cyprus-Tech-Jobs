@@ -36,7 +36,7 @@ export async function getJobs({
 } = {}) {
   return prisma.job.findMany({
     where: {
-      status: "ACTIVE",
+      status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       // Match jobs assigned directly to this category OR to any of its children
       ...(categorySlug && {
         category: { OR: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] },
@@ -119,7 +119,7 @@ export async function getJobSlugRedirect(slug: string): Promise<string | null> {
 
 export async function getFeaturedJobs(take = 5) {
   return prisma.job.findMany({
-    where: { status: "ACTIVE", featured: true },
+    where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], featured: true },
     include: { company: true, category: true, tags: { include: { tag: true } } },
     orderBy: { postedAt: "desc" },
     take,
@@ -147,7 +147,7 @@ export async function getJobCount({
 } = {}) {
   return prisma.job.count({
     where: {
-      status: "ACTIVE",
+      status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
       ...(categorySlug    && {
         category: { OR: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] },
       }),
@@ -174,7 +174,7 @@ export async function getJobCount({
 
 export async function getSimilarJobs(jobId: string, categoryId: string, take = 3) {
   return prisma.job.findMany({
-    where: { status: "ACTIVE", categoryId, id: { not: jobId } },
+    where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], categoryId, id: { not: jobId } },
     include: { company: true, category: true, tags: { include: { tag: true } } },
     orderBy: { postedAt: "desc" },
     take,
@@ -224,7 +224,7 @@ export async function getMatchingJobsForCandidate({
 
   for (const extra of steps) {
     const jobs = await prisma.job.findMany({
-      where:   { status: "ACTIVE", ...extra },
+      where:   { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], ...extra },
       include: { company: true, category: true, tags: { include: { tag: true } } },
       orderBy: [{ featured: "desc" }, { postedAt: "desc" }],
       take,
@@ -271,7 +271,7 @@ export async function getCompanies(
       ...(featured !== undefined && { featured }),
       ...(withAccount && { employers: { some: {} } }),
     },
-    include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
+    include: { _count: { select: { jobs: { where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } } } },
     orderBy: [{ featured: "desc" }, { name: "asc" }],
   });
 }
@@ -283,7 +283,7 @@ export async function getCompanySlugs() {
   // have no active jobs) out of the sitemap. Previously this returned any
   // company that had an employer, empty profiles included.
   return prisma.company.findMany({
-    where:  { jobs: { some: { status: "ACTIVE" } } },
+    where:  { jobs: { some: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } },
     select: { slug: true, updatedAt: true },
   });
 }
@@ -293,11 +293,11 @@ export async function getCompanyBySlug(slug: string) {
     where:   { slug },
     include: {
       jobs: {
-        where:   { status: "ACTIVE" },
+        where:   { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
         include: { category: true, tags: { include: { tag: true } } },
         orderBy: [{ featured: "desc" }, { postedAt: "desc" }],
       },
-      _count: { select: { jobs: { where: { status: "ACTIVE" } } } },
+      _count: { select: { jobs: { where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } } },
     },
   });
 }
@@ -355,9 +355,9 @@ export async function getCategoriesWithCount() {
     prisma.category.findMany({
       where:   { parentId: null },
       include: {
-        _count:   { select: { jobs: { where: { status: "ACTIVE" } } } },
+        _count:   { select: { jobs: { where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } } },
         children: {
-          include: { _count: { select: { jobs: { where: { status: "ACTIVE" } } } } },
+          include: { _count: { select: { jobs: { where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] } } } } },
           orderBy: { name: "asc" },
         },
       },
