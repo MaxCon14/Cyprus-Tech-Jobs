@@ -1,3 +1,4 @@
+import { isActiveJob } from "@/lib/job-visibility";
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -38,13 +39,13 @@ export async function POST(req: NextRequest) {
 
   const job = await prisma.job.findUnique({
     where:  { id: jobId },
-    select: { id: true, status: true, applyType: true, coverLetter: true },
+    select: { id: true, status: true, expiresAt: true, applyType: true, coverLetter: true },
   });
 
   if (!job) {
     return NextResponse.json({ error: "Job not found." }, { status: 404 });
   }
-  if (job.status !== "ACTIVE") {
+  if (!isActiveJob(job)) {
     return NextResponse.json({ error: "This job is no longer accepting applications." }, { status: 409 });
   }
   if (job.applyType !== "IN_APP") {

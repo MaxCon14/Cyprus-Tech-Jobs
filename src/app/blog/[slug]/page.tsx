@@ -155,7 +155,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div style={{ border: "1px solid var(--border)", borderRadius: 12, padding: 24, background: "var(--surface)" }}>
             <div className="caption" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>HIRE IN CYPRUS</div>
             <p className="body-s" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 16 }}>
-              Post your role on CyprusTech.Careers and reach thousands of tech professionals. Listings go live in minutes, with verified salary ranges.
+              Post a technology role for people searching for work in Cyprus. Include clear responsibilities, location, application instructions, and pay where available.
             </p>
             <Link href="/post-a-job" className="btn btn-accent" style={{ width: "100%", justifyContent: "center" }}>
               Post a job
@@ -205,7 +205,7 @@ export default async function BlogPostPage({ params }: Props) {
       }}>
         <div>
           <h2 className="h2" style={{ marginBottom: 6 }}>Ready to hire in Cyprus?</h2>
-          <p className="body" style={{ color: "var(--text-muted)" }}>Post your role with a verified salary range and get in front of Cyprus's best tech talent.</p>
+          <p className="body" style={{ color: "var(--text-muted)" }}>Share your role, the skills you need, and what candidates can expect.</p>
         </div>
         <Link href="/post-a-job" className="btn btn-accent btn-lg" style={{ flexShrink: 0 }}>
           Post a job

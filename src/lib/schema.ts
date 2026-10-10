@@ -1,3 +1,5 @@
+import { sanitizeJobHtml } from "./sanitize";
+
 const BASE_URL = "https://cyprustech.careers";
 
 const EMPLOYMENT_TYPE: Record<string, string> = {
@@ -47,6 +49,8 @@ interface JobSchemaInput {
   curatedCompanyName?: string | null;
   curatedCompanyLogoUrl?: string | null;
   applyUrl?: string | null;
+  /** Include only geographic eligibility explicitly confirmed by the employer. */
+  applicantCountries?: string[];
 }
 
 // A recruiting platform's origin is not the employer's identity.
@@ -59,21 +63,21 @@ function organizationSameAs(job: JobSchemaInput): string | undefined {
   } catch { return undefined; }
 }
 
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, " ").replace(/\s{2,}/g, " ").trim();
-}
-
 export function buildJobPostingSchema(job: JobSchemaInput) {
   const isRemote  = job.remoteType === "REMOTE";
-  const plainDesc = job.description.trimStart().startsWith("<")
-    ? stripHtml(job.description)
-    : job.description;
+  const applicantCountries = job.applicantCountries?.filter(country => country.trim()) ?? [];
+  // The current listing model does not record remote eligibility. Keep these
+  // pages searchable, but do not invent a country to obtain Google Jobs eligibility.
+  if (isRemote && applicantCountries.length === 0) return null;
+  const description = job.description.trimStart().startsWith("<")
+    ? sanitizeJobHtml(job.description)
+    : `<p>${job.description.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}</p>`;
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org/",
     "@type": "JobPosting",
     "title": job.title,
-    "description": plainDesc,
+    "description": description,
     "url": `${BASE_URL}/jobs/${job.slug}`,
     "directApply": false,
     "identifier": {
@@ -92,7 +96,7 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
         "logo": job.company?.logoUrl ?? job.curatedCompanyLogoUrl,
       }),
     },
-    "jobLocation": {
+    ...(!isRemote && { "jobLocation": {
       "@type": "Place",
       "address": {
         "@type": "PostalAddress",
@@ -100,13 +104,13 @@ export function buildJobPostingSchema(job: JobSchemaInput) {
         ...(job.city && CITY_TO_REGION[job.city] && { "addressRegion": CITY_TO_REGION[job.city] }),
         "addressCountry": "CY",
       },
-    },
+    } }),
     // TELECOMMUTE is for fully remote roles only. Hybrid roles keep their
     // physical jobLocation and no jobLocationType — marking them TELECOMMUTE
     // surfaces them in searches for remote work they don't qualify for.
     ...(isRemote && {
       "jobLocationType": "TELECOMMUTE",
-      "applicantLocationRequirements": { "@type": "Country", "name": "Cyprus" },
+      "applicantLocationRequirements": applicantCountries.map(name => ({ "@type": "Country", name })),
     }),
   };
 

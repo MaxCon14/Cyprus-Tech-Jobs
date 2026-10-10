@@ -96,7 +96,7 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
 
   if (step === "done") {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: "var(--surface-alt, #f9fafb)", border: "1px solid var(--border)", borderRadius: 8 }}>
+      <div role="status" style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: "var(--surface-alt, #f9fafb)", border: "1px solid var(--border)", borderRadius: 8 }}>
         <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--accent-soft)", display: "grid", placeItems: "center", flexShrink: 0 }}>
           <Check size={14} style={{ color: "var(--accent)" }} />
         </div>
@@ -181,7 +181,7 @@ export function JobAlertForm({ categories = [], defaultCategorySlug, companyName
       </div>
 
       {err && (
-        <p className="body-s" style={{ color: "var(--error, #ef4444)", margin: 0 }}>{err}</p>
+        <p role="alert" className="body-s" style={{ color: "var(--error, #ef4444)", margin: 0 }}>{err}</p>
       )}
 
       <button

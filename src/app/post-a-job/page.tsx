@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -7,19 +8,19 @@ import { TECH_STACK_OPTIONS } from "@/lib/onboarding-types";
 import { PostJobForm } from "./PostJobForm";
 
 export const metadata: Metadata = {
-  title: "Post a Tech Job in Cyprus — Reach 10,000+ Candidates",
-  description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live instantly. No recruiter fees — direct applications only.",
+  title: "Post a Tech Job in Cyprus",
+  description: "Publish your technology role on CyprusTech.Careers. Describe the role, choose an application method, and manage your listing from your employer dashboard.",
   alternates: { canonical: "https://cyprustech.careers/post-a-job" },
   openGraph: {
-    title: "Post a Tech Job in Cyprus — Reach 10,000+ Candidates",
-    description: "Post a tech job in Cyprus and reach thousands of active candidates. Listings go live instantly.",
+    title: "Post a Tech Job in Cyprus",
+    description: "Publish technology roles for people searching for jobs in Cyprus.",
     url: "https://cyprustech.careers/post-a-job",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Post a Tech Job in Cyprus",
-    description: "Reach thousands of active tech candidates in Cyprus. Listings go live instantly.",
+    description: "Share a technology role with people searching for work in Cyprus.",
   },
 };
 
@@ -28,7 +29,40 @@ export default async function PostAJobPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user?.email) {
-    redirect("/login");
+    return (
+      <div className="page-container" style={{ paddingBlock: "clamp(36px, 5vw, 56px)" }}>
+        <div style={{ maxWidth: 760, marginBottom: 40 }}>
+          <div className="mono-s" style={{ color: "var(--text-subtle)", marginBottom: 12 }}>HIRE IN CYPRUS</div>
+          <h1 className="display-m" style={{ marginBottom: 16 }}>Put your tech role in front of people looking for work in Cyprus</h1>
+          <p className="body-l" style={{ color: "var(--text-muted)", marginBottom: 24 }}>
+            CyprusTech.Careers brings curated technology vacancies together in one place.
+            Create an employer account to publish and manage your own listings.
+          </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <Link href="/employers/onboarding" className="btn btn-accent btn-lg">Create employer account</Link>
+            <Link href="/login" className="btn btn-outline btn-lg">Sign in</Link>
+          </div>
+        </div>
+        <div className="grid-stats" style={{ marginBottom: 40 }}>
+          {[
+            ["Describe your role", "Add responsibilities, required skills, location, work arrangement, and salary when available."],
+            ["Choose how people apply", "Direct candidates to your application website, email, or the supported in-app application flow."],
+            ["Manage your listings", "Use your employer dashboard to review your jobs and keep their availability up to date."],
+          ].map(([heading, text]) => (
+            <div key={heading} style={{ border: "1px solid var(--border)", borderRadius: 12, background: "var(--surface)", padding: 24 }}>
+              <h2 className="h3" style={{ marginBottom: 12 }}>{heading}</h2>
+              <p className="body-s" style={{ color: "var(--text-muted)" }}>{text}</p>
+            </div>
+          ))}
+        </div>
+        <h2 className="h2" style={{ marginBottom: 12 }}>Prepare a useful listing</h2>
+        <p className="body" style={{ color: "var(--text-muted)", maxWidth: 760 }}>
+          Be specific about the work, essential skills, office expectations, and application process.
+          Disclose a pay range where possible so candidates can assess the opportunity before applying.
+          Your account provides access to the available posting options and credits.
+        </p>
+      </div>
+    );
   }
 
   /* Categories come from the database, not from placeholder-data. The

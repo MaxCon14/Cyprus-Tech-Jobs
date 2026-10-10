@@ -17,14 +17,23 @@ let captured;
 let authenticated = false;
 let created = 0;
 let sent = 0;
+let sendError = null;
+let alertUpdates = 0;
+let matchedJobs = [];
+let dueAlerts = [];
+let applicationJob;
+let applicationWrites = 0;
 const prisma = {
   job: {
-    findMany: async options => { captured = options; return []; },
+    findUnique: async () => applicationJob,
+    findMany: async options => { captured = options; return matchedJobs; },
     count: async options => { captured = options; return 0; },
   },
   category: { findUnique: async () => ({ id: "category" }) },
   company: { findUnique: async () => ({ id: "company" }) },
   jobAlert: {
+    findMany: async () => dueAlerts,
+    update: async () => {alertUpdates++; return {};},
     findFirst: async () => null,
     create: async ({data}) => { created++; return { ...data, id: "alert", token: "test-token-123456789", createdAt: new Date() }; },
     deleteMany: async () => { throw new Error("Unauthenticated delete reached database"); },
@@ -35,10 +44,16 @@ const prisma = {
 const originalLoad = Module._load;
 Module._load = function (request, parent, isMain) {
   if (request === "./prisma" || request === "@/lib/prisma") return { prisma };
+  if (request === "@/lib/cron-auth") return {authoriseCron:()=>null};
+  if (request === "@/lib/supabase/admin") return {supabaseAdmin:{from:()=>({
+    select(){return this;},eq(){return this;},
+    single:async()=>({data:{id:"candidate",email:"candidate@example.test"}}),
+    upsert:async()=>{applicationWrites++;return {error:null};},
+  })}};
   if (request === "next/cache") return { unstable_cache: fn => fn };
   if (request === "@/lib/supabase/server") return { createSupabaseServerClient: async () => ({ auth: { getUser: async () => ({data:{user:authenticated ? {email:"candidate@example.test"} : null}}) } }) };
-  if (request === "@/lib/rate-limit") return {allowRequest:async()=>true,clientIp:()=> "test",tooManyRequests:()=>{}};
-  if (request === "@/lib/resend") return {getResend:()=>({emails:{send:async()=>{sent++;return {data:{id:"test"},error:null}}}}),FROM_EMAIL:"test@example.test",FROM_NAME:"Test"};
+  if (request === "@/lib/rate-limit") return {enforceIpLimit:async()=>null,allowRequest:async()=>true,clientIp:()=> "test",tooManyRequests:()=>{}};
+  if (request === "@/lib/resend") return {getResend:()=>({emails:{send:async()=>{sent++;return {data:{id:"test"},error:sendError}}}}),buildAlertEmail:()=>"<p>Test digest</p>",FROM_EMAIL:"test@example.test",FROM_NAME:"Test"};
   if (request.startsWith("@/")) request = path.join(root, "src", request.slice(2));
   return originalLoad.call(this, request, parent, isMain);
 };
@@ -100,4 +115,47 @@ test("guest subscriptions require consent, persist unconfirmed, and request conf
   response=await route.POST(new Request("https://example.test/api/candidates/alert",{method:"POST",body:JSON.stringify({...data,consent:true})}));
   assert.equal(response.status,201);assert.equal(created,1);assert.equal(sent,1);
   assert.equal((await response.json()).requiresConfirmation,true);
+});
+
+test("job descriptions preserve safe HTML and remote eligibility is never guessed",()=>{
+  const schema = buildJobPostingSchema({...job,description:"<p>Build systems.</p><ul><li>Review code</li></ul><script>bad()</script>"});
+  assert.equal(schema.description,"<p>Build systems.</p><ul><li>Review code</li></ul>");
+  assert.equal(buildJobPostingSchema({...job,remoteType:"REMOTE"}),null);
+  const remote = buildJobPostingSchema({...job,remoteType:"REMOTE",applicantCountries:["Cyprus","Greece"]});
+  assert.equal(remote.jobLocation,undefined);
+  assert.equal(remote.jobLocationType,"TELECOMMUTE");
+  assert.deepEqual(remote.applicantLocationRequirements,[{"@type":"Country",name:"Cyprus"},{"@type":"Country",name:"Greece"}]);
+});
+
+test("both application routes reject elapsed expiry before writing an application",async()=>{
+  applicationJob = {id:"job",status:"ACTIVE",expiresAt:new Date(Date.now()-1000),applyType:"IN_APP",coverLetter:"OPTIONAL"};
+  authenticated = true;
+  for (const file of ["applications/guest","candidates/applications"]) {
+    const route = require("../src/app/api/"+file+"/route.ts");
+    const response = await route.POST(new Request("https://example.test/api/"+file,{method:"POST",body:JSON.stringify({jobId:"job",email:"guest@example.test",firstName:"Test",cvUrl:"https://example.test/cv.pdf"})}));
+    assert.equal(response.status,409);
+  }
+  assert.equal(applicationWrites,0);
+  authenticated = false;
+});
+
+test("alert delivery failure does not advance its cursor; successful delivery does",async()=>{
+  const route = require("../src/app/api/cron/send-alerts/route.ts");
+  const createdAt = new Date("2026-10-01T00:00:00Z");
+  dueAlerts = [{id:"alert",email:"candidate@example.test",token:"token",createdAt,lastSentAt:null,categoryId:"engineering",city:"Limassol",remoteType:"HYBRID",companyId:null,alertFrequency:"WEEKLY",confirmed:true}];
+  matchedJobs = [{...job,company:null}];
+  sendError = {message:"Test delivery failure"};
+  const before = alertUpdates;
+  let response = await route.GET(new Request("https://example.test/api/cron/send-alerts"));
+  assert.equal((await response.json()).sent,0);
+  assert.equal(alertUpdates,before);
+  assert.equal(captured.where.status,"ACTIVE");
+  assert.equal(captured.where.postedAt.gt,createdAt);
+  assert.equal(captured.where.AND[0].OR[0].expiresAt,null);
+  assert.equal(captured.where.category.OR[1].parent.slug,"engineering");
+  sendError = null;
+  response = await route.GET(new Request("https://example.test/api/cron/send-alerts"));
+  assert.equal((await response.json()).sent,1);
+  assert.equal(alertUpdates,before+1);
+  dueAlerts=[];matchedJobs=[];
 });

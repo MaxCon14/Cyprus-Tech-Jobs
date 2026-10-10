@@ -27,15 +27,15 @@ const baseMetadata: Metadata = {
 };
 
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
-  const params = await searchParams;
+  const params = normaliseParams(await searchParams);
   const filtered = ["category", "type", "employment", "skill", "city", "level", "search", "salary"].some(key => Boolean(params[key as keyof typeof params]));
-  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const page = Math.max(1, parsePage(params.page) || 1);
   const canonical = `https://cyprustech.careers/jobs${!filtered && page > 1 ? `?page=${page}` : ""}`;
   return {
     ...baseMetadata,
     title: page > 1 ? `Tech Jobs in Cyprus — Page ${page}` : baseMetadata.title,
     alternates: { canonical },
-    ...(filtered && { robots: { index: false, follow: true } }),
+    ...((filtered || parsePage(params.page) === null) && { robots: { index: false, follow: true } }),
   };
 }
 
@@ -58,12 +58,24 @@ type SearchParams = Promise<{
   page?: string;
 }>;
 
+function normaliseParams(params: Awaited<SearchParams>): Awaited<SearchParams> {
+  return Object.fromEntries(Object.entries(params).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value]));
+}
+
+function parsePage(value?: string): number | null {
+  if (!value) return 1;
+  if (!/^[1-9]\d*$/.test(value)) return null;
+  const page = Number(value);
+  return Number.isSafeInteger(page) && page <= Math.floor(2147483647 / PAGE_SIZE) ? page : null;
+}
+
 export default async function JobsPage({ searchParams }: { searchParams: SearchParams }) {
-  const rawParams = await searchParams;
-  const params = Object.fromEntries(Object.entries(rawParams).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])) as Awaited<SearchParams>;
+  const params = normaliseParams(await searchParams);
   const { category, type, employment, city, level, skill, search } = params;
-  const salary  = params.salary ? parseInt(params.salary) : undefined;
-  const pageNum = Math.max(1, parseInt(params.page ?? "1") || 1);
+  const requestedSalary = Number(params.salary);
+  const salary = Number.isSafeInteger(requestedSalary) && requestedSalary > 0 && requestedSalary <= 2147483647 ? requestedSalary : undefined;
+  const pageNum = parsePage(params.page);
+  if (pageNum === null) notFound();
 
   const filters = {
     categorySlug:    category,

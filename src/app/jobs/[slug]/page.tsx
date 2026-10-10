@@ -123,6 +123,7 @@ export default async function JobDetailPage({ params }: Props) {
   const descBlocks = descIsHtml ? [] : job.description.split("\n\n");
   const isActive   = isActiveJob(job);
   const isPaused   = job.status === "PAUSED";
+  const jobSchema = isActive && companyName ? buildJobPostingSchema(job) : null;
 
   const breadcrumbSchema = buildBreadcrumbSchema([
     { name: "Jobs", path: "/jobs" },
@@ -136,10 +137,10 @@ export default async function JobDetailPage({ params }: Props) {
           "URL" — so EMAIL and IN_APP listings emitted no markup at all and
           could never reach Google for Jobs. The real requirement is a named
           hiringOrganization, since Google rejects the posting without one. */}
-      {isActive && companyName && (
+      {jobSchema && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: jsonLd(buildJobPostingSchema(job)) }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(jobSchema) }}
         />
       )}
       <script
