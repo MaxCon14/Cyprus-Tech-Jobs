@@ -155,21 +155,26 @@ export function ApplyButton({
 }: Props) {
 
   if (applyType !== "IN_APP") {
-    function handleClick() {
-      recordApply(jobId);
-      if (applyEmail && !applyUrl) {
-        window.location.href = `mailto:${applyEmail}`;
-      } else if (applyUrl) {
-        window.open(ensureAbsoluteUrl(applyUrl), "_blank", "noopener,noreferrer");
-      }
-    }
+    const destination = applyUrl ? ensureAbsoluteUrl(applyUrl) : applyEmail ? `mailto:${applyEmail}` : null;
+    const external = Boolean(applyUrl);
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <button onClick={handleClick} className="btn btn-accent btn-lg" style={{ width: "100%", justifyContent: "center" }}>
-          Apply for this role
-        </button>
+        {destination ? (
+          <a
+            href={destination}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
+            onClick={() => recordApply(jobId)}
+            className="btn btn-accent btn-lg"
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            {external ? "Apply on employer website" : "Apply by email"}
+          </a>
+        ) : (
+          <button disabled className="btn btn-outline btn-lg">Application link unavailable</button>
+        )}
         <p className="mono-s" style={{ color: "var(--text-subtle)" }}>
-          APPLIES TO {companyName.toUpperCase()} DIRECTLY
+          {external ? "OPENS THE EMPLOYER’S APPLICATION PAGE IN A NEW TAB" : `CONTACTS ${companyName.toUpperCase()} DIRECTLY`}
         </p>
       </div>
     );
