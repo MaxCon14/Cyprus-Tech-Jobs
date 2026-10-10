@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let jobEntries: MetadataRoute.Sitemap = [];
   try {
     const jobs = await prisma.job.findMany({
-      where:  { status: "ACTIVE", AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }], AND: [{ OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] },
+      where: { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
       select: { slug: true, postedAt: true, updatedAt: true },
       orderBy: { postedAt: "desc" },
     });
