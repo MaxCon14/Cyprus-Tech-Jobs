@@ -1,3 +1,4 @@
+import { COMPANY_PROFILES_PUBLIC } from "@/lib/features";
 import { isActiveJob, isPublicJob } from "@/lib/job-visibility";
 export const dynamic = "force-dynamic";
 
@@ -351,7 +352,7 @@ export default async function JobDetailPage({ params }: Props) {
           </div>
 
           {/* Company snippet — only for real employer-linked companies */}
-          {!job.isCurated && job.company?.slug && (
+          {COMPANY_PROFILES_PUBLIC && !job.isCurated && job.company?.slug && (
             <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 24, background: "var(--surface)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 6, background: "var(--black)", color: "var(--white)", display: "grid", placeItems: "center", fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, flexShrink: 0, overflow: "hidden" }}>

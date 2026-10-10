@@ -1,3 +1,4 @@
+import { activeJobWhere, isActiveJob } from "@/lib/job-visibility";
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
@@ -9,7 +10,7 @@ import { getMatchingJobsForCandidate } from "@/lib/queries";
 import type { CandidateRow, PositionRow } from "@/lib/candidate-types";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My dashboard — CyprusTech.Careers" };
+export const metadata: Metadata = { title: "My dashboard — CyprusTech.Careers", robots: { index: false, follow: false } };
 
 // ─── Completion ───────────────────────────────────────────────────────────────
 
@@ -69,18 +70,13 @@ export default async function CandidateDashboardPage() {
 
   let savedJobs: { id: string; slug: string; title: string; city: string | null; remoteType: string; companyName: string }[] = [];
   if (savedJobIds.length > 0) {
-    const { data: jobRows } = await supabaseAdmin
-      .from("jobs")
-      .select("id, slug, title, city, remoteType, company:companies(name)")
-      .in("id", savedJobIds)
-      .eq("status", "ACTIVE");
-    savedJobs = (jobRows ?? []).map((j: { id: string; slug: string; title: string; city: string | null; remoteType: string; company: { name: string }[] }) => ({
-      id: j.id,
-      slug: j.slug,
-      title: j.title,
-      city: j.city,
-      remoteType: j.remoteType,
-      companyName: Array.isArray(j.company) ? (j.company[0]?.name ?? "") : "",
+    const jobRows = await prisma.job.findMany({
+      where: { ...activeJobWhere(), id: { in: savedJobIds } },
+      select: { id: true, slug: true, title: true, city: true, remoteType: true, curatedCompanyName: true, company: { select: { name: true } } },
+    });
+    savedJobs = jobRows.map(j => ({
+      id: j.id, slug: j.slug, title: j.title, city: j.city, remoteType: j.remoteType,
+      companyName: j.company?.name ?? j.curatedCompanyName ?? "",
     }));
   }
 
@@ -92,17 +88,14 @@ export default async function CandidateDashboardPage() {
   type AppliedJob = { id: string; slug: string; title: string; city: string | null; companyName: string; appliedAt: string; status: string };
   let appliedJobs: AppliedJob[] = [];
   if (appliedJobIds.length > 0) {
-    const { data: jobRows } = await supabaseAdmin
-      .from("jobs")
-      .select("id, slug, title, city, status, company:companies(name)")
-      .in("id", appliedJobIds);
-    appliedJobs = (jobRows ?? []).map((j: { id: string; slug: string; title: string; city: string | null; status: string; company: { name: string }[] }) => ({
-      id: j.id,
-      slug: j.slug,
-      title: j.title,
-      city: j.city,
-      status: j.status,
-      companyName: Array.isArray(j.company) ? (j.company[0]?.name ?? "") : "",
+    const jobRows = await prisma.job.findMany({
+      where: { id: { in: appliedJobIds } },
+      select: { id: true, slug: true, title: true, city: true, status: true, expiresAt: true, curatedCompanyName: true, company: { select: { name: true } } },
+    });
+    appliedJobs = jobRows.map(j => ({
+      id: j.id, slug: j.slug, title: j.title, city: j.city,
+      status: j.status === "ACTIVE" && !isActiveJob(j) ? "EXPIRED" : j.status,
+      companyName: j.company?.name ?? j.curatedCompanyName ?? "",
       appliedAt: appliedAtMap[j.id] ?? "",
     }));
     // Restore chronological order from the applied_jobs query
