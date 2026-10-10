@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { getAllPosts } from "@/lib/blog";
-import { getCompanySlugs, getJobCount } from "@/lib/queries";
+import { getJobCount } from "@/lib/queries";
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? "https://cyprustech.careers";
 
@@ -20,7 +20,6 @@ const STATIC: MetadataRoute.Sitemap = [
   { url: `${BASE}/post-a-job`,         lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   { url: `${BASE}/faq`,                lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
   { url: `${BASE}/blog`,               lastModified: new Date(), changeFrequency: "weekly",  priority: 0.6 },
-  { url: `${BASE}/companies`,          lastModified: new Date(), changeFrequency: "daily",   priority: 0.7 },
   { url: `${BASE}/privacy`,            lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
   { url: `${BASE}/terms`,              lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
   { url: `${BASE}/cookies`,            lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
@@ -53,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let jobEntries: MetadataRoute.Sitemap = [];
   try {
     const jobs = await prisma.job.findMany({
-      where:  { status: "ACTIVE" },
+      where:  { status: "ACTIVE", OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] },
       select: { slug: true, postedAt: true, updatedAt: true },
       orderBy: { postedAt: "desc" },
     });
@@ -128,20 +127,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] blog query failed:", err);
   }
 
-  /* ── Company profiles ── */
-  let companyEntries: MetadataRoute.Sitemap = [];
-  try {
-    const companies = await getCompanySlugs();
-    companyEntries = companies.map(c => ({
-      url:             `${BASE}/companies/${c.slug}`,
-      lastModified:    c.updatedAt ?? new Date(),
-      changeFrequency: "weekly" as const,
-      priority:        0.6,
-    }));
-  } catch (err) {
-    console.error("[sitemap] companies query failed:", err);
-  }
-
   /* ── Role × city landing pages ──
      Only the combinations that actually have a live job are submitted —
      publishing empty "X jobs in Y" pages to Google is thin content and hurts.
@@ -177,5 +162,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] role×city query failed:", err);
   }
 
-  return [...STATIC, ...landingEntries, ...categoryEntries, ...jobEntries, ...companyEntries, ...roleCityEntries, ...blogEntries];
+  return [...STATIC, ...landingEntries, ...categoryEntries, ...jobEntries, ...roleCityEntries, ...blogEntries];
 }
