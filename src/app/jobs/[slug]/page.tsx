@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
   if (!job) return {};
-  const isActive = job.status === "ACTIVE";
+  const isActive = job.status === "ACTIVE" && (!job.expiresAt || new Date(job.expiresAt) > new Date());
   const suffix   = job.status === "PAUSED" ? " (Paused)" : job.status !== "ACTIVE" ? " (Closed)" : "";
   const companyName = job.company?.name ?? job.curatedCompanyName ?? "";
   const title    = `${job.title} at ${companyName}${suffix}`;
@@ -118,7 +118,7 @@ export default async function JobDetailPage({ params }: Props) {
   const descIsHtml = job.description.trimStart().startsWith("<");
   const safeDesc   = descIsHtml ? sanitizeJobHtml(job.description) : "";
   const descBlocks = descIsHtml ? [] : job.description.split("\n\n");
-  const isActive   = job.status === "ACTIVE";
+  const isActive   = job.status === "ACTIVE" && (!job.expiresAt || new Date(job.expiresAt) > new Date());
   const isPaused   = job.status === "PAUSED";
 
   const breadcrumbSchema = buildBreadcrumbSchema([
