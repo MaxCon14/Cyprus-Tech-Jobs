@@ -1,0 +1,43 @@
+# Learning tool and provider marks
+
+Static SVG assets from Simple Icons (https://github.com/simple-icons/simple-icons), fetched 2026-10-11. Current catalog plus v11 for Microsoft marks. No icon package is shipped in the app. Marks identify resource providers and tools.
+
+- google: Google — https://partnermarketinghub.withgoogle.com
+- googlesheets: Google Sheets — https://sheets.google.com
+- microsoft: Microsoft — https://developer.microsoft.com
+- excel: Microsoft Excel — https://developer.microsoft.com/en-us/fluentui#/styles/web/colors/products
+- powerbi: Power BI — https://docs.microsoft.com/en-us/power-platform/guidance/icons
+- datacamp: DataCamp — https://www.datacamp.com
+- coursera: Coursera — https://about.coursera.org/press
+- mdn: MDN Web Docs — https://github.com/mdn/yari/blob/77e6cda02f7013219e9da27a00b9424085e60fdb/client/src/assets/mdn-logo.svg
+- github: GitHub — https://github.com/logos
+- figma: Figma — https://www.figma.com/using-the-figma-brand/
+- postgresql: PostgreSQL — https://wiki.postgresql.org/wiki/Logo
+- python: Python — https://www.python.org/community/logos/
+- pandas: pandas — https://pandas.pydata.org/about/citing.html
+- numpy: NumPy — https://numpy.org/press-kit/
+- scikitlearn: scikit-learn — https://github.com/scikit-learn/scikit-learn/blob/c5ef2e985c13119001aa697e446ebb3dbcb326e5/doc/logos/scikit-learn-logo.svg
+- kaggle: Kaggle — https://www.kaggle.com/brand-guidelines
+- react: React — https://github.com/facebook/create-react-app/blob/282c03f9525fdf8061ffa1ec50dce89296d916bd/test/fixtures/relative-paths/src/logo.svg
+- typescript: TypeScript — https://www.typescriptlang.org/branding
+- javascript: JavaScript — https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg
+- node: Node.js — https://nodejs.org/en/about/branding
+- docker: Docker — https://www.docker.com/company/newsroom/media-resources
+- git: Git — https://git-scm.com/community/logos
+- ubuntu: Ubuntu — https://design.ubuntu.com/resources
+- wireshark: Wireshark — https://gitlab.com/wanduow/wireshark/-/blob/cd5539b0f76975474869984a9d2f0fce29d5c21e/image/wsicon.svg
+- tryhackme: TryHackMe — https://tryhackme.com
+- owasp: OWASP — https://github.com/OWASP/www-event-2020-07-virtual/blob/eefbef6c1afdd1dee2af11e7f44ad005b25ad48c/assets/images/logo.svg
+- portswigger: PortSwigger — https://portswigger.net
+- cisco: Cisco — https://www.cisco.com
+- streamlit: Streamlit — https://www.streamlit.io/brand
+- express: Express — https://github.com/openjs-foundation/artwork/blob/3816245ebbf4707bdafde748350ac8476b6b5b62/projects/express/express-icon-black.svg
+- redis: Redis — https://redis.io/brand-guidelines
+- opentelemetry: OpenTelemetry — https://cncf-branding.netlify.app/projects/opentelemetry/
+- openapi: OpenAPI Initiative — https://www.openapis.org/faq/style-guide
+- material: Material Design — https://m3.material.io
+- frontendmentor: Frontend Mentor — https://www.frontendmentor.io
+- vercel: Vercel — https://vercel.com/geist/brands
+- odin: The Odin Project — https://www.theodinproject.com
+- html: HTML5 — https://www.w3.org/html/logo/
+- css: CSS — https://github.com/CSS-Next/logo.css/blob/bacc20878227204b283c68a6b935f8279e06b0cd/css.svg
