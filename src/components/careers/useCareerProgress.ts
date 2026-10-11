@@ -66,7 +66,7 @@ export function useCareerProgress(slug:string) {
    const res=await fetch("/api/careers/"+slug+"/progress",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({import:local()})});
    if(!res.ok)throw Error("Could not import browser progress. Please retry.");
    const data=await res.json();if(ticket===generation.current){setProgress(data.progress);localStorage.removeItem(key);setHasLocal(false);setNotice("Browser progress added to your account.");}
-  }catch(e){setError(e instanceof Error?e.message:"Import failed.");}
+  }catch(e){if(ticket===generation.current)setError(e instanceof Error?e.message:"Import failed.");}
   finally{lock.current=false;setBusy(false);}
  }
  return {progress,userId,ready,busy,error,notice,hasLocal,change,importLocal,retry:load};

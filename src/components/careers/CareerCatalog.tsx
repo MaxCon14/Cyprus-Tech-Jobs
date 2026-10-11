@@ -12,8 +12,8 @@ export function CareerCatalog({careers}:{careers:CareerSummary[]}) {
  return <div>
   <div className="cl-filters">
    <label className="cl-search"><span className="sr-only">Search careers or skills</span><Search size={18} aria-hidden="true"/><input type="search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search a career or skill…"/></label>
-   <label><span>Category</span><select value={category} onChange={e=>setCategory(e.target.value)}><option>All categories</option>{categories.map(x=><option key={x}>{x}</option>)}</select></label>
-   <label><span>Starting level</span><select value={difficulty} onChange={e=>setDifficulty(e.target.value)}><option>All levels</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></label>
+   <label><span>Category</span><select aria-label="Category" value={category} onChange={e=>setCategory(e.target.value)}><option>All categories</option>{categories.map(x=><option key={x}>{x}</option>)}</select></label>
+   <label><span>Starting level</span><select aria-label="Starting level" value={difficulty} onChange={e=>setDifficulty(e.target.value)}><option>All levels</option><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></label>
   </div>
   <div className="cl-result-row"><p role="status">{filtered.length} {filtered.length===1?"career path":"career paths"} to explore</p><Link href="/careers/saved">My learning <ArrowUpRight size={15}/></Link></div>
   <div className="cl-card-grid">{filtered.map((c,i)=>{
