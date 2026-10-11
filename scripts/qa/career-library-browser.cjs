@@ -23,6 +23,13 @@ const {default:AxeBuilder} = require(require('node:path').join(process.env.CAREE
  await page.getByRole('button',{name:'Clear filters',exact:true}).click();
  assert.equal(await page.locator('.cl-career-card').count(),6);
  console.log('PASS catalogue search, combined filters and empty state');
+ for(const theme of ['light','dark']){
+  await page.evaluate(t=>document.documentElement.setAttribute('data-theme',t),theme);
+  const results=await new AxeBuilder({page}).include('.cl').withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
+  assert.equal(results.violations.filter(v=>['serious','critical'].includes(v.impact)).length,0,'Catalogue '+theme+': '+JSON.stringify(results.violations));
+ }
+ await page.evaluate(()=>document.documentElement.setAttribute('data-theme','light'));
+ console.log('PASS catalogue light/dark accessibility');
  await page.screenshot({path:'/tmp/career-catalog-desktop.png',fullPage:true});
  const slugs=['data-analyst','frontend-developer','ux-ui-designer','cybersecurity-analyst','data-scientist','backend-developer'];
  for(const slug of slugs){
@@ -109,6 +116,11 @@ const {default:AxeBuilder} = require(require('node:path').join(process.env.CAREE
  const axe=await new AxeBuilder({page}).include('.cl').withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
  fs.writeFileSync('/tmp/career-axe.json',JSON.stringify(axe.violations,null,2));
  assert.equal(axe.violations.filter(v=>v.impact==='serious'||v.impact==='critical').length,0,JSON.stringify(axe.violations.map(v=>({id:v.id,impact:v.impact}))));
+ await page.evaluate(()=>document.documentElement.setAttribute('data-theme','dark'));
+ const darkAxe=await new AxeBuilder({page}).include('.cl').withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
+ assert.equal(darkAxe.violations.filter(v=>['serious','critical'].includes(v.impact)).length,0,'Roadmap dark: '+JSON.stringify(darkAxe.violations));
+ await page.evaluate(()=>document.documentElement.setAttribute('data-theme','light'));
+ console.log('PASS roadmap light/dark accessibility');
  await page.screenshot({path:'/tmp/career-roadmap-desktop.png',fullPage:true});
  for(const width of [360,390,768,1024,1440]){
   await page.setViewportSize({width,height:900});
