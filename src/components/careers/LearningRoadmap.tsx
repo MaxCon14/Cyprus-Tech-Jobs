@@ -18,20 +18,20 @@ type SectionId=typeof sections[number]["id"];
 export function LearningRoadmap({career,jobs}:{career:Career;jobs:React.ReactNode}){
  const p=useCareerProgress(career.slug);
  const [active,setActive]=useState<SectionId>("roadmap");
+ const [navigation,setNavigation]=useState<{target:string;sequence:number}|null>(null);
+ useEffect(()=>{if(!navigation)return;const el=document.getElementById(navigation.target);if(el instanceof HTMLDetailsElement)el.open=true;el?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});},[navigation]);
  const completed=career.stages.filter(s=>p.progress.stages.includes(s.id)).length;
  const readiness=career.readiness.filter(r=>p.progress.readiness.includes(r.id)).length;
  const percentage=Math.round(completed/career.stages.length*100);
  const next=career.stages.find(s=>!p.progress.stages.includes(s.id));
  const disabled=!p.ready||p.busy;
- function revealStage(id:string){
-  setActive("roadmap");history.replaceState(null,"","#"+id);
-  requestAnimationFrame(()=>{const el=document.getElementById(id) as HTMLDetailsElement|null;if(el){el.open=true;el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});}});
- }
+ function moveTo(target:string){setNavigation(previous=>({target,sequence:(previous?.sequence??0)+1}));}
+ function revealStage(id:string){setActive("roadmap");history.replaceState(history.state,"","#"+id);moveTo(id);}
  useEffect(()=>{
-  function fromHash(){const id=location.hash.slice(1);const section=sections.find(s=>s.id===id);if(section){setActive(section.id);requestAnimationFrame(()=>document.getElementById(section.id)?.scrollIntoView({block:"start"}));}else if(career.stages.some(s=>s.id===id)){setActive("roadmap");requestAnimationFrame(()=>{const el=document.getElementById(id) as HTMLDetailsElement|null;if(el)el.open=true;});}}
+  function fromHash(){const id=location.hash.slice(1);const section=sections.find(s=>s.id===id);if(section){setActive(section.id);setNavigation(previous=>({target:id,sequence:(previous?.sequence??0)+1}));}else if(career.stages.some(s=>s.id===id)){setActive("roadmap");setNavigation(previous=>({target:id,sequence:(previous?.sequence??0)+1}));}}
   fromHash();window.addEventListener("hashchange",fromHash);return()=>window.removeEventListener("hashchange",fromHash);
  },[career.stages]);
- function select(id:SectionId){setActive(id);history.replaceState(null,"","#"+id);requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}));}
+ function select(id:SectionId){setActive(id);history.replaceState(history.state,"","#"+id);moveTo(id);}
  function tabKey(event:KeyboardEvent<HTMLButtonElement>,index:number){
   let target:number;
   if(event.key==="ArrowDown"||event.key==="ArrowRight")target=(index+1)%sections.length;

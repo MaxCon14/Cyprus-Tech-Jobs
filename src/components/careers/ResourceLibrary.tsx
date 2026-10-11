@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
+import { ArrowUpRight, ArrowRight, BookOpen } from "lucide-react";
 import type { Career, Resource } from "@/lib/careers/types";
 import { ProviderMark } from "./CareerVisuals";
 export function ResourceCard({resource:r,compact=false}:{resource:Resource;compact?:boolean}){
@@ -8,7 +8,7 @@ export function ResourceCard({resource:r,compact=false}:{resource:Resource;compa
   <div className="cl-resource-identity"><ProviderMark provider={r.provider}/><div><p className="cl-resource-provider">{r.provider}</p><span className="cl-resource-format">{r.type} · {r.difficulty}</span></div><span className={"cl-access "+(r.access==="Free"?"is-free":r.access==="Paid"?"is-paid":"is-freemium")}>{r.access}</span></div>
   <h4><a href={r.url} target="_blank" rel="noopener noreferrer">{r.name}<ArrowUpRight size={16} aria-hidden="true"/><span className="sr-only"> (external resource, opens in a new tab)</span></a></h4>
   <p>{r.description}</p>{r.duration&&<small>Provider estimate: {r.duration}</small>}
-  {!compact&&<div className="cl-resource-action"><span>Learn with {r.provider}</span><ArrowUpRight size={17} aria-hidden="true"/></div>}
+  {!compact&&<a className="cl-resource-action" href={r.url} target="_blank" rel="noopener noreferrer" aria-label={"Open "+r.name+" on "+r.provider+" (opens in a new tab)"}>Open resource<ArrowUpRight size={17} aria-hidden="true"/></a>}
  </article>;
 }
 type FilterProps={label:string;value:string;options:string[];onChange:(value:string)=>void};
@@ -17,7 +17,7 @@ export function ResourceLibrary({career,onChooseStage}:{career:Career;onChooseSt
  const [access,setAccess]=useState("All access"),[level,setLevel]=useState("All levels"),[type,setType]=useState("All types");
  const rows=career.resources.filter(r=>(access==="All access"||r.access===access)&&(level==="All levels"||r.difficulty===level)&&(type==="All types"||r.type===type));
  return <>
-  <div className="cl-resource-guide"><ProviderMark provider="Google"/><div><strong>You don&apos;t need to take every course.</strong><p>Choose a resource for your current stage. Start with free material, then add a course if you need more structure.</p></div></div>
+  <div className="cl-resource-guide"><span className="cl-section-symbol"><BookOpen size={23} aria-hidden="true"/></span><div><strong>You don&apos;t need to take every course.</strong><p>Choose a resource for your current stage. Start with free material, then add a course if you need more structure.</p></div></div>
   <div className="cl-filters cl-resource-filters"><Filter label="Access" value={access} onChange={setAccess} options={["All access","Free","Freemium","Paid"]}/><Filter label="Difficulty" value={level} onChange={setLevel} options={["All levels","Beginner","Intermediate","Advanced"]}/><Filter label="Resource type" value={type} onChange={setType} options={["All types","Course","Tutorial","Documentation","Practice","Certification"]}/></div>
   <p className="cl-note" role="status">{rows.length} curated resources. Learning access is labelled below; software, cloud usage or exams can have separate costs.</p>
   <div className="cl-resource-grid">{rows.map(r=>{
