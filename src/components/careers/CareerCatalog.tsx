@@ -22,7 +22,7 @@ export function CareerCatalog({careers}:{careers:CareerSummary[]}) {
     <div className="cl-card-top"><span className="cl-eyebrow">{c.category}</span><span className="cl-card-icon"><Icon size={24} strokeWidth={1.6}/></span></div>
     <span className="cl-card-number" aria-hidden="true">{String(i+1).padStart(2,"0")}</span><h3>{c.title}</h3><p>{c.description}</p>
     <div className="cl-tags">{c.skills.slice(0,4).map(s=><span key={s}>{s}</span>)}</div>
-    <div className="cl-card-meta"><span>{c.difficulty==="Beginner"?"Beginner friendly":"Intermediate start"}</span><span>{c.duration}</span></div>
+    <div className="cl-card-meta"><span>{c.difficulty==="Beginner"?"Beginner friendly":c.difficulty+" start"}</span><span>{c.duration}</span></div>
     <div className="cl-card-footer"><span>{c.stageCount} stages · {c.resourceCount} resources</span><strong>Explore roadmap <ArrowUpRight size={17}/></strong></div>
    </Link>;
   })}</div>

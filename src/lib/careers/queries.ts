@@ -19,7 +19,7 @@ export async function readCareers(admin = false): Promise<CareerSummary[]> {
   return tx.$queryRaw<CareerSummary[]>`SELECT c.slug,c.title,c.category,c.difficulty,c.duration,c.weekly_hours AS "weeklyHours",c.description,c.published,c.updated_at::text AS "updatedAt",
    COALESCE((SELECT array_agg(skill_name ORDER BY position) FROM career_library.career_skills WHERE career_slug=c.slug),'{}') AS skills,
    (SELECT count(*)::int FROM career_library.stages WHERE career_slug=c.slug) AS "stageCount",
-   (SELECT count(DISTINCT sr.resource_id)::int FROM career_library.stage_resources sr JOIN career_library.stages s ON s.id=sr.stage_id WHERE s.career_slug=c.slug) AS "resourceCount"
+   (SELECT count(*)::int FROM (SELECT sr.resource_id FROM career_library.stage_resources sr JOIN career_library.stages s ON s.id=sr.stage_id WHERE s.career_slug=c.slug UNION SELECT p.starter_resource_id FROM career_library.projects p WHERE p.career_slug=c.slug) used_resources) AS "resourceCount"
    FROM career_library.careers c ORDER BY c.title`;
  });
 }
