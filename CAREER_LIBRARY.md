@@ -41,6 +41,8 @@ Additive `career_library` schema; existing public tables were not modified. Thes
 - Content QA validates all six seeds, counts and rejection of unsafe URLs, duplicate IDs and unknown resource references.
 - Provider HTTP verification: 88/90 links returned HTTP 200. DataCamp and OpenIntro block automated requests (403/406); their exact official learning pages were confirmed separately.
 
+Final browser regression passed on commit 5a1cb942 (preview deployment dpl_7pA9WBtd73MNca57mCdg29JpEtUr), including actual HTTP 404s, all five widths (360/390/768/1024/1440), sitemap, unauthorized admin, CSRF and existing-route smoke checks with no browser exceptions. Both catalog and roadmap passed light/dark axe checks with zero serious or critical findings. Desktop and mobile screenshots were visually inspected.
+
 Browser test coverage includes all six pages, search/combined filters/empty states, native roadmap expansion, projects, guest persistence, resource filtering, safe external links, SEO, sitemap, unauthorized API access, CSRF, 404s, responsive widths and existing homepage/jobs/city/blog routes. The account UI contract uses mocked responses; SQL checks use the real database.
 
 ## Review limits
@@ -59,3 +61,41 @@ npm install --prefix /tmp/career-qa playwright@1.58.2 @axe-core/playwright@4.11.
 CAREER_QA_NODE_MODULES=/tmp/career-qa/node_modules QA_PREVIEW_URL='protected-preview-share-url' node scripts/qa/career-library-browser.cjs
 ```
 Run `supabase/tests/career_library_rls.sql` with an administrative connection in a test transaction; its inserts are rolled back.
+
+## Exact changed-file inventory
+
+- `CAREER_LIBRARY.md`
+- `content/careers/careers.json`
+- `content/careers/resources.json`
+- `scripts/qa/career-library-browser.cjs`
+- `scripts/qa/career-library-content.cjs`
+- `src/app/admin/_components/AdminNav.tsx`
+- `src/app/admin/careers/CareerEditor.tsx`
+- `src/app/admin/careers/[slug]/page.tsx`
+- `src/app/admin/careers/editor.css`
+- `src/app/admin/careers/new/page.tsx`
+- `src/app/admin/careers/page.tsx`
+- `src/app/api/admin/careers/route.ts`
+- `src/app/api/careers/[slug]/progress/route.ts`
+- `src/app/careers/[slug]/page.tsx`
+- `src/app/careers/careers.css`
+- `src/app/careers/error.tsx`
+- `src/app/careers/layout.tsx`
+- `src/app/careers/not-found.tsx`
+- `src/app/careers/page.tsx`
+- `src/app/careers/saved/loading.tsx`
+- `src/app/careers/saved/page.tsx`
+- `src/app/sitemap.ts`
+- `src/components/careers/CareerCatalog.tsx`
+- `src/components/careers/LearningRoadmap.tsx`
+- `src/components/careers/ResourceLibrary.tsx`
+- `src/components/careers/useCareerProgress.ts`
+- `src/components/layout/Nav.tsx`
+- `src/lib/careers/queries.ts`
+- `src/lib/careers/types.ts`
+- `src/lib/careers/validation.ts`
+- `supabase/migrations/20261011123837_career_library.sql`
+- `supabase/migrations/20261011125458_career_library_documents.sql`
+- `supabase/migrations/20261011134137_career_project_resources.sql`
+- `supabase/seed-careers.sql`
+- `supabase/tests/career_library_rls.sql`

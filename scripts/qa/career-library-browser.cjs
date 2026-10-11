@@ -35,6 +35,7 @@ const {default:AxeBuilder} = require(require('node:path').join(process.env.CAREE
  for(const slug of slugs){
   await page.goto(base+'/careers/'+slug,{waitUntil:'load'});
   await page.waitForFunction(()=>{const x=document.querySelector('.cl-milestone input');return x&&!x.disabled;});
+  if(await page.getByRole('button',{name:'Reject',exact:true}).isVisible())await page.getByRole('button',{name:'Reject',exact:true}).click();
   assert.equal(await page.locator('h1:visible').count(),1);
   assert.ok(await page.locator('.cl-stage:visible').count()>=7);
   assert.equal(await page.locator('.cl-project:visible').count(),4);
