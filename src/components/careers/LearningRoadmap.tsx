@@ -19,7 +19,7 @@ export function LearningRoadmap({career,jobs}:{career:Career;jobs:React.ReactNod
  const p=useCareerProgress(career.slug);
  const [active,setActive]=useState<SectionId>("roadmap");
  const [navigation,setNavigation]=useState<{target:string;sequence:number}|null>(null);
- useEffect(()=>{if(!navigation)return;const el=document.getElementById(navigation.target);if(el instanceof HTMLDetailsElement)el.open=true;el?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});},[navigation]);
+ useEffect(()=>{if(!navigation)return;const el=document.getElementById(navigation.target);if(el instanceof HTMLDetailsElement)el.open=true;el?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth",block:"start"});},[navigation]);
  const completed=career.stages.filter(s=>p.progress.stages.includes(s.id)).length;
  const readiness=career.readiness.filter(r=>p.progress.readiness.includes(r.id)).length;
  const percentage=Math.round(completed/career.stages.length*100);
