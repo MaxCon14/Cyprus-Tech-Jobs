@@ -1,3 +1,4 @@
+import { CityLinks } from "@/components/jobs/CityLinks";
 import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getJobCount } from "@/lib/queries";
@@ -309,6 +310,8 @@ export async function CategoryPage({ category, searchParams }: Props) {
             <FaqAccordion faqs={faqs.map(f => ({ q: f.question, a: f.answer }))} />
           </div>
         </div>
+
+        <CityLinks />
 
         {/* SEO internal links — browse this category by city */}
         <div style={{ marginTop: 40, paddingTop: 32, borderTop: "1px solid var(--border)" }}>

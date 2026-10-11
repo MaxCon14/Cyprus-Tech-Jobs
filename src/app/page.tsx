@@ -1,3 +1,4 @@
+import { CityLinks } from "@/components/jobs/CityLinks";
 import Link from "next/link";
 import { JobCard } from "@/components/jobs/JobCard";
 import { getJobs, getCategoriesWithCount } from "@/lib/queries";
@@ -11,7 +12,7 @@ import {
 } from "lucide-react";
 import { Select } from "@/components/ui/Select";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
-import { buildWebSiteSchema, buildFAQSchema, jsonLd } from "@/lib/schema";
+import { buildFAQSchema, jsonLd } from "@/lib/schema";
 import { JobAlertForm } from "@/components/alerts/JobAlertForm";
 import type { Metadata } from "next";
 export const revalidate = 300;
@@ -137,10 +138,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd(buildWebSiteSchema()) }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(buildFAQSchema(FAQS.map(f => ({ question: f.q, answer: f.a })))) }}
@@ -422,6 +419,8 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="page-container"><CityLinks /></section>
 
       {/* ── FAQ ── */}
       <section style={{ padding: "clamp(48px, 7vw, 80px) 0", borderBottom: "1px solid var(--border)", background: "var(--bg-alt)" }}>

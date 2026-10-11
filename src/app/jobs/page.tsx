@@ -1,3 +1,4 @@
+import { CityLinks } from "@/components/jobs/CityLinks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JobCard } from "@/components/jobs/JobCard";
@@ -270,6 +271,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
               ) : <div />}
             </div>
           )}
+          <CityLinks />
         </div>
       </div>
     </div>

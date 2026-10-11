@@ -10,6 +10,7 @@ import { serialiseJob } from "@/lib/serialise";
 import { JobCard } from "@/components/jobs/JobCard";
 import { CompanyLogoImg } from "@/components/jobs/CompanyLogoImg";
 import { buildOrganizationSchema, buildBreadcrumbSchema, jsonLd } from "@/lib/schema";
+import { CORE_CITIES } from "@/lib/city-guides";
 
 const BASE = "https://cyprustech.careers";
 
@@ -88,6 +89,7 @@ export default async function CompanyProfilePage(
   };
   const jobs = company.jobs.map(j => serialiseJob({ ...j, company: parent }));
   const initial = company.name.charAt(0).toUpperCase();
+  const cityGuide = CORE_CITIES.find(c => company.city?.toLowerCase().includes(c.slug));
 
   return (
     <>
@@ -140,7 +142,7 @@ export default async function CompanyProfilePage(
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "center" }}>
                 {company.city && (
                   <span className="body-s" style={{ color: "var(--text-muted)", display: "inline-flex", alignItems: "center", gap: 5 }}>
-                    <MapPin size={13} /> {company.city}
+                    <MapPin size={13} /> {cityGuide ? <Link href={`/jobs/${cityGuide.slug}`}>{company.city} tech jobs</Link> : company.city}
                   </span>
                 )}
                 {company.size && (

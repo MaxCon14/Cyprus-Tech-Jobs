@@ -12,6 +12,7 @@ import { CookieNotice } from "@/components/layout/CookieNotice";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { GoogleAnalyticsPageview } from "@/components/analytics/GoogleAnalyticsPageview";
 import { getNavCategories } from "@/lib/queries";
+import { buildPublisherSchema, buildWebSiteSchema, jsonLd } from "@/lib/schema";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -72,6 +73,8 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://cdn.simpleicons.org" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen flex flex-col antialiased" style={{ background: "var(--bg)", color: "var(--text)" }}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(buildPublisherSchema()) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(buildWebSiteSchema()) }} />
         <Providers>
           <Nav categories={navCategories} />
           <main className="flex-1">{children}</main>

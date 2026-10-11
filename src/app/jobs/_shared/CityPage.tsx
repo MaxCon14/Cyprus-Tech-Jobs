@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { JobCard } from "@/components/jobs/JobCard";
-import { getJobs, getJobCount, getCategoriesWithCount } from "@/lib/queries";
+import { getJobs, getJobCount, getCategoriesWithCount, getCityOverview } from "@/lib/queries";
 import { serialiseJob } from "@/lib/serialise";
 import { X, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { FilterBar } from "../FilterBar";
 import { FaqAccordion } from "@/components/home/FaqAccordion";
 import { CITIES } from "@/lib/placeholder-data";
 import { EMPLOYMENT_LABELS, WORK_TYPE_LABELS } from "@/lib/taxonomy";
-import { buildFAQSchema, jsonLd } from "@/lib/schema";
+import { jsonLd } from "@/lib/schema";
+import { CITY_GUIDES, type CitySlug } from "@/lib/city-guides";
+import { normaliseCityParams } from "./city-seo";
 
 const PAGE_SIZE = 20;
 const BASE_URL  = "https://cyprustech.careers";
@@ -39,10 +42,13 @@ interface Props {
 
 export async function CityPage({ config, searchParams }: Props) {
   const { displayName, slug, city, isRemote, description } = config;
+  searchParams = normaliseCityParams(searchParams);
+  const guide = CITY_GUIDES[slug as CitySlug];
 
   const { category, type, employment, level, skill, search } = searchParams;
   const salary  = searchParams.salary ? parseInt(searchParams.salary) : undefined;
   const pageNum = Math.max(1, parseInt(searchParams.page ?? "1") || 1);
+  if (pageNum > 100000) notFound();
 
   /* Base city/remote filter + user-selected filters */
   const filters = {
@@ -59,17 +65,14 @@ export async function CityPage({ config, searchParams }: Props) {
     ...(skill ? { skill } : {}),
   };
 
-  let jobs:       Awaited<ReturnType<typeof getJobs>> = [];
-  let total     = 0;
-  let categories: Awaited<ReturnType<typeof getCategoriesWithCount>> = [];
-
-  try {
-    [jobs, total, categories] = await Promise.all([
+  // Let transient query failures reach the error boundary; never publish a false zero-job page.
+  const [jobs, total, categories, overview] = await Promise.all([
       getJobs({ ...filters, take: PAGE_SIZE, skip: (pageNum - 1) * PAGE_SIZE }),
       getJobCount(filters),
       getCategoriesWithCount(),
+      getCityOverview(city, !!isRemote),
     ]);
-  } catch (err) { console.error(`[city-jobs/${slug}] DB error:`, err); }
+  if (pageNum > 1 && (pageNum - 1) * PAGE_SIZE >= total) notFound();
 
   const serialisedJobs = jobs.map(serialiseJob);
   const showFrom = total === 0 ? 0 : (pageNum - 1) * PAGE_SIZE + 1;
@@ -117,6 +120,8 @@ export async function CityPage({ config, searchParams }: Props) {
     const up = new URLSearchParams();
     if (search          ) up.set("search",   search);
     if (category        ) up.set("category", category);
+    if (employment      ) up.set("employment", employment);
+    if (skill           ) up.set("skill", skill);
     if (!isRemote && type) up.set("type",    type);
     if (level           ) up.set("level",    level);
     if (searchParams.salary) up.set("salary", searchParams.salary);
@@ -140,6 +145,8 @@ export async function CityPage({ config, searchParams }: Props) {
   const itemListSchema = serialisedJobs.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "ItemList",
+    "@id": `${BASE_URL}${pageUrl(pageNum)}#jobs`,
+    "numberOfItems": serialisedJobs.length,
     "itemListElement": serialisedJobs.map((j, i) => ({
       "@type": "ListItem",
       "position": (pageNum - 1) * PAGE_SIZE + i + 1,
@@ -148,16 +155,25 @@ export async function CityPage({ config, searchParams }: Props) {
     })),
   } : null;
 
-  /* City-specific FAQ — unique content per page (name + live count) and FAQ schema. */
+  const collectionSchema = {
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    "@id": `${BASE_URL}${pageUrl(pageNum)}#collection`, url: `${BASE_URL}${pageUrl(pageNum)}`,
+    name: `Tech Jobs in ${displayName}${pageNum > 1 ? ` — Page ${pageNum}` : ""}`,
+    description, inLanguage: "en",
+    isPartOf: { "@id": `${BASE_URL}/#website` },
+    publisher: { "@id": `${BASE_URL}/#organization` },
+    ...(city && { about: { "@type": "Place", name: city, address: { "@type": "PostalAddress", addressLocality: city, addressCountry: "CY" } } }),
+    ...(itemListSchema && { mainEntity: { "@id": itemListSchema["@id"] } }),
+  };
+
+  // Useful visible answers; no FAQ rich-result claim for a job board.
   const cityFaqs = [
     { question: `How many tech jobs are available in ${displayName}?`,
-      answer: `There ${total === 1 ? "is" : "are"} currently ${total} active tech job${total === 1 ? "" : "s"} in ${displayName} on CyprusTech.Careers, updated daily — spanning software engineering, DevOps, design, data and product. Pay is shown wherever the employer publishes it.` },
-    { question: `What salary can I expect for tech jobs in ${displayName}?`,
-      answer: `Tech salaries in ${displayName} typically range from about €35,000 for junior roles to €120,000+ for senior and lead positions, with fintech and forex companies paying at the top of the range. Every listing on CyprusTech.Careers shows the salary up front.` },
-    { question: `Are there remote tech jobs in ${displayName}?`,
-      answer: `Yes — many companies hiring in ${displayName} offer remote or hybrid arrangements. Use the work-type filter or browse the remote jobs page to see roles you can do from anywhere in Cyprus.` },
+      answer: `There ${overview.count === 1 ? "is" : "are"} currently ${overview.count} active, unexpired listing${overview.count === 1 ? "" : "s"} ${isRemote ? "for remote work" : `assigned to ${displayName}`} on CyprusTech.Careers. This is this board's count, not a total for the whole local market. Filters narrow the results separately.` },
+    { question: `Do the listings include salary information?`,
+      answer: "Pay is shown when the employer publishes it; other listings are marked undisclosed. Ask about gross base salary, bonus and benefits before comparing offers. A city-wide salary estimate should not be treated as the salary for a specific vacancy." },
+    ...(guide ? [{ question: guide.question, answer: guide.answer }] : [{ question: "Can I work remotely from any country?", answer: "Remote does not necessarily mean worldwide. Check each vacancy's permitted location, time zone and office attendance requirements with the employer." }]),
   ];
-  const faqSchema = buildFAQSchema(cityFaqs);
 
   return (
     <>
@@ -168,7 +184,7 @@ export async function CityPage({ config, searchParams }: Props) {
       {itemListSchema && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(itemListSchema) }} />
       )}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(collectionSchema) }} />
 
       <div className="page-container" style={{ paddingBlock: "clamp(24px, 4vw, 40px)" }}>
 
@@ -187,7 +203,7 @@ export async function CityPage({ config, searchParams }: Props) {
         <div style={{ marginBottom: 28 }}>
           <div className="mono-s" style={{ color: "var(--text-subtle)", letterSpacing: "0.1em", marginBottom: 12, display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ width: 20, height: 1, background: "var(--accent)", display: "inline-block" }} />
-            {total} JOBS · UPDATED DAILY
+            {overview.count} ACTIVE LISTINGS{overview.latestPostedAt ? ` · LATEST POST ${overview.latestPostedAt.toLocaleDateString("en-GB", { timeZone: "Asia/Nicosia", day: "numeric", month: "short", year: "numeric" })}` : ""}
           </div>
           <h1 className="display-m" style={{ marginBottom: 12 }}>
             Tech Jobs in {displayName}
@@ -202,6 +218,8 @@ export async function CityPage({ config, searchParams }: Props) {
           {category          && <input type="hidden" name="category" value={category} />}
           {!isRemote && type && <input type="hidden" name="type"     value={type} />}
           {level             && <input type="hidden" name="level"    value={level} />}
+          {employment        && <input type="hidden" name="employment" value={employment} />}
+          {skill             && <input type="hidden" name="skill" value={skill} />}
           {searchParams.salary && <input type="hidden" name="salary" value={searchParams.salary} />}
           <div style={{ position: "relative", maxWidth: 600 }}>
             <Search size={15} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-subtle)", pointerEvents: "none" }} />
@@ -211,6 +229,7 @@ export async function CityPage({ config, searchParams }: Props) {
               name="search"
               defaultValue={search ?? ""}
               placeholder="Search by title, company, or keyword…"
+              aria-label={`Search jobs in ${displayName}`}
               style={{ paddingLeft: 40, paddingBlock: 12, fontSize: 15 }}
             />
           </div>
@@ -301,7 +320,26 @@ export async function CityPage({ config, searchParams }: Props) {
               </div>
             )}
 
-            {/* City FAQ — content depth + FAQ schema above */}
+            {pageNum === 1 && guide && <section style={{ marginTop: 40, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
+              <h2 className="h2" style={{ marginBottom: 16 }}>{guide.heading}</h2>
+              {guide.paragraphs.map(paragraph => <p key={paragraph} className="body" style={{ color: "var(--text-muted)", marginBottom: 14 }}>{paragraph}</p>)}
+              <p className="body-s"><Link href="/salary-guide">Compare the Cyprus salary guide</Link> · <Link href="/get-started">Create a profile and set job alerts</Link></p>
+            </section>}
+
+            {pageNum === 1 && <section style={{ marginTop: 32 }}>
+              <h2 className="h3" style={{ marginBottom: 14 }}>Current hiring in {displayName}</h2>
+              <p className="body" style={{ color: "var(--text-muted)", marginBottom: 14 }}>
+                {overview.count ? `${overview.count} active listing${overview.count === 1 ? "" : "s"} from ${overview.employers.length} named employer${overview.employers.length === 1 ? "" : "s"}. Work arrangements: ${overview.onsite} on-site, ${overview.hybrid} hybrid and ${overview.remote} remote.` : "No active local listings are available on this board right now. Explore the city guide, other cities and remote jobs, or set up alerts for new vacancies."}
+              </p>
+              {overview.employers.length > 0 && <nav aria-label={`Employers hiring in ${displayName}`} style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                {overview.employers.map(employer => <Link key={employer} href={`${basePath}?search=${encodeURIComponent(employer)}`} className="chip">{employer} jobs in {displayName}</Link>)}
+              </nav>}
+              {overview.roles.length > 0 && <nav aria-label={`${displayName} jobs by category`} style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {overview.roles.map(role => <Link key={role.slug} href={`/jobs/category/${role.slug}/${slug}`} className="chip">{role.name} in {displayName} ({role.count})</Link>)}
+              </nav>}
+            </section>}
+
+            {/* Visible answers correspond to the whole city, independent of filters. */}
             <div style={{ marginTop: 48, paddingTop: 32, borderTop: "1px solid var(--border)" }}>
               <h2 className="h3" style={{ marginBottom: 16 }}>Tech jobs in {displayName} — FAQ</h2>
               <FaqAccordion faqs={cityFaqs.map(f => ({ q: f.question, a: f.answer }))} />

@@ -209,6 +209,8 @@ export function buildWebSiteSchema() {
   return {
     "@context": "https://schema.org/",
     "@type": "WebSite",
+    "@id": `${BASE_URL}/#website`,
+    "publisher": { "@id": `${BASE_URL}/#organization` },
     "url": BASE_URL,
     "name": "CyprusTech.Careers",
     "description": "Curated technology and IT jobs in Cyprus",
@@ -220,6 +222,16 @@ export function buildWebSiteSchema() {
       },
       "query-input": "required name=search_term_string",
     },
+  };
+}
+
+export function buildPublisherSchema() {
+  return {
+    "@context": "https://schema.org", "@type": "Organization",
+    "@id": `${BASE_URL}/#organization`, name: "CyprusTech.Careers", url: BASE_URL,
+    logo: `${BASE_URL}/icon.svg`,
+    description: "A job board for technology and IT careers in Cyprus",
+    areaServed: { "@type": "Country", name: "Cyprus" },
   };
 }
 

@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { getAllPosts } from "@/lib/blog";
 import { getJobCount } from "@/lib/queries";
+import { CORE_CITIES } from "@/lib/city-guides";
 
 const BASE = "https://cyprustech.careers";
 
@@ -15,6 +16,8 @@ const BASE = "https://cyprustech.careers";
 export const revalidate = 3600;
 
 const STATIC: MetadataRoute.Sitemap = [
+  // Editorial city guides remain useful and indexable between vacancies.
+  ...CORE_CITIES.map(city => ({ url: `${BASE}/jobs/${city.slug}`, changeFrequency: "daily" as const, priority: 0.8 })),
   { url: BASE,                         changeFrequency: "daily",   priority: 1.0 },
   { url: `${BASE}/jobs`,               changeFrequency: "hourly",  priority: 0.9 },
 { url: `${BASE}/salary-guide`,       changeFrequency: "monthly", priority: 0.7 },
@@ -26,17 +29,9 @@ const STATIC: MetadataRoute.Sitemap = [
   { url: `${BASE}/cookies`,            changeFrequency: "yearly",  priority: 0.3 },
 ];
 
-/* City and job-type landing pages used to sit in STATIC above, submitted
-   whether or not they had anything on them. They are conditional now for the
-   same reason as the role×city block below — an empty "<X> Jobs in Cyprus"
-   page is thin content, and Google reads the 200 as a soft 404. Each route's
-   generateMetadata applies noindex from the same count, so what is submitted
-   here and what is indexable never disagree. */
+/* Remote and job-type collections remain conditional; the four editorial
+   city guides above have durable value beyond their current vacancy counts. */
 const CITY_PAGES = [
-  { slug: "nicosia",  filter: { city: "Nicosia"  }, priority: 0.8 },
-  { slug: "limassol", filter: { city: "Limassol" }, priority: 0.8 },
-  { slug: "larnaca",  filter: { city: "Larnaca"  }, priority: 0.7 },
-  { slug: "paphos",   filter: { city: "Paphos"   }, priority: 0.7 },
   { slug: "remote",   filter: { remoteType: "REMOTE" }, priority: 0.8 },
 ];
 

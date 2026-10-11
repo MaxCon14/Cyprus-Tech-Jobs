@@ -1,9 +1,39 @@
 import { activeJobWhere } from "./job-visibility";
+import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { prisma } from "./prisma";
 import { CATEGORY_CACHE_TAG, type NavCategory } from "./taxonomy";
 
 // ─── Jobs ──────────────────────────────────────────────────────
+
+/** Compact, uncached across requests: counts and hiring claims reflect active, unexpired jobs. */
+export const getCityOverview = cache(async (city?: string, isRemote = false) => {
+  const jobs = await prisma.job.findMany({
+    where: { ...activeJobWhere(), ...(isRemote ? { remoteType: "REMOTE" } : { city: { contains: city ?? "", mode: "insensitive" } }) },
+    select: {
+      postedAt: true, remoteType: true, curatedCompanyName: true,
+      company: { select: { name: true } },
+      category: { select: { name: true, slug: true, parent: { select: { name: true, slug: true } } } },
+    },
+    orderBy: { postedAt: "desc" },
+  });
+  const roles = new Map<string, { name: string; slug: string; count: number }>();
+  const employers = new Set<string>();
+  for (const job of jobs) {
+    const employer = job.company?.name ?? job.curatedCompanyName;
+    if (employer) employers.add(employer);
+    const category = job.category?.parent ?? job.category;
+    if (category) roles.set(category.slug, { name: category.name, slug: category.slug, count: (roles.get(category.slug)?.count ?? 0) + 1 });
+  }
+  return {
+    count: jobs.length, latestPostedAt: jobs.find(j => j.postedAt)?.postedAt,
+    employers: [...employers].sort(),
+    roles: [...roles.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
+    hybrid: jobs.filter(j => j.remoteType === "HYBRID").length,
+    remote: jobs.filter(j => j.remoteType === "REMOTE").length,
+    onsite: jobs.filter(j => j.remoteType === "ON_SITE").length,
+  };
+});
 
 export async function getJobs({
   categorySlug,
