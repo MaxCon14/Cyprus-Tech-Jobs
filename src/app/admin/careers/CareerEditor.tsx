@@ -1,0 +1,70 @@
+"use client";
+import {useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
+import Link from "next/link";
+import type {Career,Resource,Stage,Project} from "@/lib/careers/types";
+const levels=["Beginner","Intermediate","Advanced"];
+function Field({label,value,onChange,multiline=false,required=true}:{label:string;value:string;onChange:(v:string)=>void;multiline?:boolean;required?:boolean}){
+ return <label className="ce-field"><span>{label}</span>{multiline?<textarea required={required} rows={4} value={value} onChange={e=>onChange(e.target.value)}/>:<input required={required} value={value} onChange={e=>onChange(e.target.value)}/>}</label>;
+}
+function ListField({label,value,onChange}:{label:string;value:string[];onChange:(v:string[])=>void}){
+ return <Field multiline label={label+" (one per line)"} value={value.join("\n")} onChange={v=>onChange(v.split("\n"))}/>;
+}
+function Select({label,value,options,onChange}:{label:string;value:string;options:string[];onChange:(v:string)=>void}){
+ return <label className="ce-field"><span>{label}</span><select value={value} onChange={e=>onChange(e.target.value)}>{options.map(o=><option key={o}>{o}</option>)}</select></label>;
+}
+const uid=()=>crypto.randomUUID();
+export function CareerEditor({initial,resourceOptions}:{initial:Career;resourceOptions:Resource[]}){
+ const [c,setC]=useState(initial),[busy,setBusy]=useState(false),[error,setError]=useState(""),[dirty,setDirty]=useState(false);
+ const router=useRouter();
+ useEffect(()=>{const warn=(e:BeforeUnloadEvent)=>{if(dirty){e.preventDefault();}};window.addEventListener("beforeunload",warn);return()=>window.removeEventListener("beforeunload",warn);},[dirty]);
+ const set=<K extends keyof Career>(key:K,value:Career[K])=>{setC(prev=>({...prev,[key]:value}));setDirty(true);};
+ const stage=(index:number,patch:Partial<Stage>)=>set("stages",c.stages.map((s,i)=>i===index?{...s,...patch}:s));
+ const project=(index:number,patch:Partial<Project>)=>set("projects",c.projects.map((p,i)=>i===index?{...p,...patch}:p));
+ const resource=(index:number,patch:Partial<Resource>)=>set("resources",c.resources.map((r,i)=>i===index?{...r,...patch,...(patch.url!==undefined?{verifiedAt:null}:{})}:r));
+ function move(index:number,direction:number){const a=[...c.stages];[a[index],a[index+direction]]=[a[index+direction],a[index]];set("stages",a);}
+ const clean=(a:string[])=>a.map(s=>s.trim()).filter(Boolean);
+ async function save(e:React.FormEvent){
+  e.preventDefault();setBusy(true);setError("");
+  const cleaned={...c,skills:clean(c.skills),entryTitles:clean(c.entryTitles),jobTerms:clean(c.jobTerms),stages:c.stages.map(s=>({...s,skills:clean(s.skills)})),projects:c.projects.map(p=>({...p,tools:clean(p.tools),requirements:clean(p.requirements),deliverables:clean(p.deliverables),skills:clean(p.skills)}))};
+  try{
+   const r=await fetch("/api/admin/careers",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({career:cleaned,expectedUpdatedAt:initial.updatedAt||null})});
+   const result=await r.json();if(!r.ok)throw Error(result.error);
+   setDirty(false);router.push("/admin/careers");router.refresh();
+  }catch(e){setError(e instanceof Error?e.message:"Could not save career.");}finally{setBusy(false);}
+ }
+ function addStage(){set("stages",[...c.stages,{id:uid(),position:c.stages.length+1,title:"",duration:"",difficulty:"Beginner",description:"",skills:[],exercise:"",milestone:"",resourceIds:[],tasks:[{id:uid(),position:1,label:""}]}]);}
+ function addProject(){set("projects",[...c.projects,{id:uid(),position:c.projects.length+1,title:"",duration:"",difficulty:"Beginner",overview:"",problem:"",tools:[],requirements:[],deliverables:[],skills:[],starterResourceId:c.resources[0]?.id??"",presentation:""}]);}
+ return <form onSubmit={save} className="ce-editor">
+  <div className="adm-page-heading"><div><p className="adm-eyebrow">Career Library</p><h1>{initial.slug?"Edit "+initial.title:"Create a career"}</h1><p className="adm-description">Manage the complete learning path. Existing item IDs stay stable to preserve learner progress.</p></div><div className="adm-heading-actions"><Link href="/admin/careers" className="adm-btn">Back to library</Link><button className="adm-btn adm-btn-primary" disabled={busy}>{busy?"Saving…":"Save career"}</button></div></div>
+  {error&&<p role="alert" className="ce-error">{error}</p>}
+  <nav aria-label="Editor sections" className="ce-nav">{["Overview","Stages","Resources","Projects","Readiness","SEO"].map(label=><a key={label} href={"#edit-"+label.toLowerCase()}>{label}</a>)}</nav>
+  <fieldset disabled={busy}><section id="edit-overview" className="adm-panel ce-section"><h2>Career overview</h2><div className="ce-grid">
+   <Field label="Career title" value={c.title} onChange={v=>set("title",v)}/><label className="ce-field"><span>URL slug {initial.slug?"(fixed after creation)":""}</span><input required readOnly={!!initial.slug} value={c.slug} pattern="[a-z0-9]+(-[a-z0-9]+)*" onChange={e=>set("slug",e.target.value)}/></label>
+   <Field label="Category" value={c.category} onChange={v=>set("category",v)}/><Select label="Starting level" value={c.difficulty} options={levels} onChange={v=>set("difficulty",v as Career["difficulty"])}/>
+   <Field label="Estimated learning time" value={c.duration} onChange={v=>set("duration",v)}/><Field label="Recommended weekly hours" value={c.weeklyHours} onChange={v=>set("weeklyHours",v)}/>
+   </div><Field multiline label="Card description" value={c.description} onChange={v=>set("description",v)}/><Field multiline label="What this role involves" value={c.overview} onChange={v=>set("overview",v)}/>
+   <div className="ce-grid"><ListField label="Key skills" value={c.skills} onChange={v=>set("skills",v)}/><ListField label="Entry-level titles" value={c.entryTitles} onChange={v=>set("entryTitles",v)}/><ListField label="Job title matching phrases" value={c.jobTerms} onChange={v=>set("jobTerms",v)}/></div>
+   <label className="ce-publish"><input type="checkbox" checked={c.published} onChange={e=>set("published",e.target.checked)}/> Publish this career for visitors</label>
+  </section>
+  <section id="edit-stages" className="adm-panel ce-section"><h2>Roadmap stages</h2><p>Reorder stages using the arrow buttons. Removing an item also removes its associated learning progress.</p>
+   {c.stages.map((s,i)=><details key={s.id} className="ce-item"><summary>Stage {i+1}: {s.title||"New stage"}</summary><div className="ce-item-body">
+    <div className="ce-actions"><button type="button" disabled={i===0} onClick={()=>move(i,-1)} aria-label={"Move stage "+(i+1)+" up"}>Move up ↑</button><button type="button" disabled={i===c.stages.length-1} onClick={()=>move(i,1)} aria-label={"Move stage "+(i+1)+" down"}>Move down ↓</button><button type="button" onClick={()=>{if(confirm("Remove this stage and its learner progress?"))set("stages",c.stages.filter(x=>x.id!==s.id));}}>Remove stage</button></div>
+    <div className="ce-grid"><Field label="Stage title" value={s.title} onChange={v=>stage(i,{title:v})}/><Field label="Estimated duration" value={s.duration} onChange={v=>stage(i,{duration:v})}/><Select label="Difficulty" value={s.difficulty} options={levels} onChange={v=>stage(i,{difficulty:v as Stage["difficulty"]})}/></div>
+    <Field multiline label="Stage explanation" value={s.description} onChange={v=>stage(i,{description:v})}/><ListField label="Skills to learn" value={s.skills} onChange={v=>stage(i,{skills:v})}/><Field multiline label="Practical exercise" value={s.exercise} onChange={v=>stage(i,{exercise:v})}/><Field multiline label="Measurable milestone" value={s.milestone} onChange={v=>stage(i,{milestone:v})}/>
+    <h3>Learning tasks</h3>{s.tasks.map((t,j)=><div className="ce-inline" key={t.id}><Field label={"Task "+(j+1)} value={t.label} onChange={v=>stage(i,{tasks:s.tasks.map(x=>x.id===t.id?{...x,label:v}:x)})}/><button type="button" onClick={()=>{if(confirm("Remove this task and its completion records?"))stage(i,{tasks:s.tasks.filter(x=>x.id!==t.id)});}}>Remove</button></div>)}
+    <button type="button" className="adm-btn" onClick={()=>stage(i,{tasks:[...s.tasks,{id:uid(),label:"",position:s.tasks.length+1}]})}>Add task</button>
+    <label className="ce-field"><span>Stage resources (select one or more)</span><select multiple value={s.resourceIds} onChange={e=>stage(i,{resourceIds:Array.from(e.target.selectedOptions,x=>x.value)})}>{c.resources.map(r=><option key={r.id} value={r.id}>{r.provider} — {r.name}</option>)}</select></label>
+   </div></details>)}<button type="button" className="adm-btn" onClick={addStage}>Add roadmap stage</button>
+  </section>
+  <section id="edit-resources" className="adm-panel ce-section"><h2>Learning resources</h2><p>Resource edits update that resource wherever it is used. Verify a new or changed URL before publishing; no automated requests are made from this editor.</p>
+   <label className="ce-field"><span>Add an existing resource</span><select value="" onChange={e=>{const r=resourceOptions.find(x=>x.id===e.target.value);if(r&&!c.resources.some(x=>x.id===r.id))set("resources",[...c.resources,r]);}}><option value="">Choose a resource…</option>{resourceOptions.filter(r=>!c.resources.some(x=>x.id===r.id)).map(r=><option key={r.id} value={r.id}>{r.provider} — {r.name}</option>)}</select></label>
+   {c.resources.map((r,i)=><details key={r.id} className="ce-item"><summary>{r.name||"New resource"} · {r.provider}</summary><div className="ce-item-body"><div className="ce-grid"><Field label="Resource name" value={r.name} onChange={v=>resource(i,{name:v})}/><Field label="Provider" value={r.provider} onChange={v=>resource(i,{provider:v})}/></div><Field label="Official HTTPS URL" value={r.url} onChange={v=>resource(i,{url:v})}/><Field multiline label="Description" value={r.description} onChange={v=>resource(i,{description:v})}/><div className="ce-grid"><Select label="Access" value={r.access} options={["Free","Freemium","Paid"]} onChange={v=>resource(i,{access:v as Resource["access"]})}/><Select label="Type" value={r.type} options={["Course","Tutorial","Documentation","Practice","Certification"]} onChange={v=>resource(i,{type:v as Resource["type"]})}/><Select label="Difficulty" value={r.difficulty} options={levels} onChange={v=>resource(i,{difficulty:v as Resource["difficulty"]})}/><Field required={false} label="Provider duration (only if verified)" value={r.duration??""} onChange={v=>resource(i,{duration:v||null})}/></div><a href={r.url||"#"} target="_blank" rel="noopener noreferrer">Open resource to verify ↗</a><label className="ce-field"><span>Last manually verified</span><input type="date" value={r.verifiedAt??""} onChange={e=>resource(i,{verifiedAt:e.target.value||null})}/></label><button type="button" onClick={()=>{if(c.stages.some(s=>s.resourceIds.includes(r.id))||c.projects.some(p=>p.starterResourceId===r.id)){setError("Unassign this resource from stages and projects before removing it.");return;}set("resources",c.resources.filter(x=>x.id!==r.id));}}>Remove from this editor</button></div></details>)}
+   <button type="button" className="adm-btn" onClick={()=>set("resources",[...c.resources,{id:uid(),name:"",provider:"",url:"",description:"",type:"Tutorial",access:"Free",difficulty:"Beginner",duration:null,verifiedAt:null}])}>Add new resource</button>
+  </section>
+  <section id="edit-projects" className="adm-panel ce-section"><h2>Portfolio projects</h2>{c.projects.map((p,i)=><details className="ce-item" key={p.id}><summary>Project {i+1}: {p.title||"New project"}</summary><div className="ce-item-body"><div className="ce-grid"><Field label="Project title" value={p.title} onChange={v=>project(i,{title:v})}/><Field label="Estimated project time" value={p.duration} onChange={v=>project(i,{duration:v})}/><Select label="Difficulty" value={p.difficulty} options={levels} onChange={v=>project(i,{difficulty:v as Project["difficulty"]})}/></div>{(["overview","problem","presentation"] as const).map(key=><Field key={key} multiline label={key} value={p[key]} onChange={v=>project(i,{[key]:v})}/>)}{(["tools","requirements","deliverables","skills"] as const).map(key=><ListField key={key} label={key} value={p[key]} onChange={v=>project(i,{[key]:v})}/>)}<label className="ce-field"><span>Starter resource</span><select value={p.starterResourceId} onChange={e=>project(i,{starterResourceId:e.target.value})}><option value="">Choose a starter…</option>{c.resources.map(r=><option value={r.id} key={r.id}>{r.name}</option>)}</select></label><button type="button" onClick={()=>{if(confirm("Remove this project?"))set("projects",c.projects.filter(x=>x.id!==p.id));}}>Remove project</button></div></details>)}<button type="button" className="adm-btn" onClick={addProject}>Add portfolio project</button></section>
+  <section id="edit-readiness" className="adm-panel ce-section"><h2>Job-readiness checklist</h2>{c.readiness.map((r,i)=><div className="ce-inline" key={r.id}><Field label={"Readiness item "+(i+1)} value={r.label} onChange={v=>set("readiness",c.readiness.map(x=>x.id===r.id?{...x,label:v}:x))}/><button type="button" onClick={()=>{if(confirm("Remove this checklist item and its completion records?"))set("readiness",c.readiness.filter(x=>x.id!==r.id));}}>Remove</button></div>)}<button type="button" className="adm-btn" onClick={()=>set("readiness",[...c.readiness,{id:uid(),label:"",position:c.readiness.length+1}])}>Add readiness item</button></section>
+  <section id="edit-seo" className="adm-panel ce-section"><h2>Search and sharing</h2><Field label="SEO title" value={c.seoTitle} onChange={v=>set("seoTitle",v)}/><Field multiline label="Meta description" value={c.seoDescription} onChange={v=>set("seoDescription",v)}/><p>Canonical address: https://cyprustech.careers/careers/{c.slug||"your-slug"}</p>{initial.slug&&<Link href={"/careers/"+c.slug} target="_blank" rel="noopener noreferrer">Open published preview ↗</Link>}</section>
+  </fieldset><div className="ce-save"><button disabled={busy} className="adm-btn adm-btn-primary">{busy?"Saving…":"Save career"}</button><span role="status">{dirty?"Unsaved changes":""}</span></div>
+ </form>;
+}

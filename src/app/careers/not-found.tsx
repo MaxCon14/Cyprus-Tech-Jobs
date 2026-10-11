@@ -1,0 +1,1 @@
+import Link from "next/link";export default function NotFound(){return <div className="cl-container cl-empty"><h1>Career path not found.</h1><p>This path may be unpublished or its address may have changed.</p><Link href="/careers" className="btn btn-primary">Explore published paths</Link></div>;}

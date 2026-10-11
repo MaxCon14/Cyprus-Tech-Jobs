@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({reset}:{reset:()=>void}){return <div className="cl-container cl-empty" role="alert"><h2>The Career Library is temporarily unavailable.</h2><p>Please try again in a moment.</p><button className="btn btn-primary" onClick={reset}>Try again</button></div>;}

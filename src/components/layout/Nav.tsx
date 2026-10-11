@@ -31,6 +31,7 @@ const CITIES = [
 ];
 
 const staticLinks = [
+  { href: "/careers", label: "Career Library" },
   { href: "/salary-guide", label: "Salary guide" },
 ];
 
