@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="cl-container cl-empty" role="status"><p className="cl-eyebrow">Career Library</p><h2>Loading your next chapter…</h2></div>;}

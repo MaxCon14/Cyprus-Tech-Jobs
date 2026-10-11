@@ -1,0 +1,3433 @@
+[
+  {
+    "slug": "data-analyst",
+    "title": "Data Analyst",
+    "category": "Data & Analytics",
+    "difficulty": "Beginner",
+    "duration": "6–9 months",
+    "weeklyHours": "8–10 hours",
+    "description": "Turn messy data into clear answers that help teams make better business decisions.",
+    "overview": "Data analysts collect, clean and investigate information, define reliable metrics and explain what the numbers mean. The work includes stakeholder questions, spreadsheet checks, SQL queries and dashboards—not simply making charts. A junior analyst needs to communicate limitations as clearly as findings.",
+    "entryTitles": [
+      "Junior Data Analyst",
+      "Reporting Analyst",
+      "Junior BI Analyst",
+      "Marketing Data Analyst"
+    ],
+    "jobTerms": [
+      "data analyst",
+      "bi analyst",
+      "business intelligence analyst",
+      "reporting analyst",
+      "marketing analyst"
+    ],
+    "skills": [
+      "Excel",
+      "Google Sheets",
+      "SQL",
+      "Power BI",
+      "Python",
+      "Pandas",
+      "Jupyter"
+    ],
+    "stages": [
+      {
+        "title": "Data Literacy and Spreadsheets",
+        "duration": "4–5 weeks",
+        "description": "Start with a business question, the unit of observation and the meaning of each column. Learn to distinguish a metric from a useful decision. Spreadsheet fundamentals are valuable even in teams that use code: they let you inspect source data, reconcile totals and communicate a first answer quickly.",
+        "skills": [
+          "Data types",
+          "Formulas",
+          "PivotTables",
+          "Data quality",
+          "Metric definitions"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-1-task-1",
+            "label": "Clean a sales sheet and document missing values",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-1-task-2",
+            "label": "Build a PivotTable showing revenue by month and category",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-1-task-3",
+            "label": "Reconcile totals and write definitions for revenue and average order value",
+            "position": 3
+          }
+        ],
+        "exercise": "Clean a sales sheet and document missing values",
+        "milestone": "Deliver a clean workbook, data dictionary and a one-page sales summary.",
+        "resourceIds": [
+          "sheets",
+          "excel",
+          "powerbisamples"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-analyst-stage-1",
+        "position": 1
+      },
+      {
+        "title": "SQL and Relational Databases",
+        "duration": "5–6 weeks",
+        "description": "Learn how rows relate across tables before writing large queries. Practise filtering, joins, grouping, subqueries and window functions. Pay particular attention to duplicate rows after joins and to NULL values: both can quietly change a business result. Use a small local database to make the queries reproducible.",
+        "skills": [
+          "SELECT and WHERE",
+          "JOINs",
+          "GROUP BY",
+          "CTEs",
+          "Window functions",
+          "NULL handling"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-2-task-1",
+            "label": "Create customers, orders and order_items tables",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-2-task-2",
+            "label": "Write queries for monthly sales and repeat customers",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-2-task-3",
+            "label": "Compare INNER and LEFT JOIN totals and explain any difference",
+            "position": 3
+          }
+        ],
+        "exercise": "Create customers, orders and order_items tables",
+        "milestone": "Publish at least 12 annotated queries with expected outputs and checks.",
+        "resourceIds": [
+          "sql",
+          "sqlpractice"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-analyst-stage-2",
+        "position": 2
+      },
+      {
+        "title": "Statistics and Analytical Thinking",
+        "duration": "4–5 weeks",
+        "description": "Understand variation before drawing conclusions. Study averages, distributions, sampling bias, confidence intervals and hypothesis tests. Distinguish correlation from causation, and ask whether a result is practically useful as well as statistically noticeable. Learn to describe uncertainty to someone who has no statistical background.",
+        "skills": [
+          "Descriptive statistics",
+          "Probability",
+          "Sampling",
+          "Confidence intervals",
+          "Experiment design"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-3-task-1",
+            "label": "Compare mean and median for a skewed dataset",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-3-task-2",
+            "label": "Simulate sampling variation and explain a confidence interval",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-3-task-3",
+            "label": "Critique a proposed A/B test for bias and confounding",
+            "position": 3
+          }
+        ],
+        "exercise": "Compare mean and median for a skewed dataset",
+        "milestone": "Write a short analysis that separates evidence, assumptions and uncertainty.",
+        "resourceIds": [
+          "stats",
+          "openstats"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-analyst-stage-3",
+        "position": 3
+      },
+      {
+        "title": "Power BI and Data Visualisation",
+        "duration": "5–6 weeks",
+        "description": "Build a dashboard around decisions rather than a collection of visuals. Use Power Query for transformations, a star schema for modelling and DAX measures for consistent calculations. Choose clear chart types, accessible colours and concise annotations. Power BI Desktop requires Windows; use an available Windows environment for hands-on work.",
+        "skills": [
+          "Power Query",
+          "Star schemas",
+          "DAX measures",
+          "Filter context",
+          "Dashboard design"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-4-task-1",
+            "label": "Transform an official sample dataset in Power Query",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-4-task-2",
+            "label": "Create date and dimension tables with tested relationships",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-4-task-3",
+            "label": "Build an accessible report and reconcile its measures with SQL",
+            "position": 3
+          }
+        ],
+        "exercise": "Transform an official sample dataset in Power Query",
+        "milestone": "Present a three-page report with a clear business recommendation.",
+        "resourceIds": [
+          "powerbi",
+          "dax",
+          "powerbisamples"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-analyst-stage-4",
+        "position": 4
+      },
+      {
+        "title": "Python for Data Analysis",
+        "duration": "5–6 weeks",
+        "description": "Use Python when cleaning, exploration or repeated reporting becomes cumbersome in a spreadsheet. Learn functions and files, then pandas for missing values, dates, merges and grouped summaries. Keep notebooks readable, separate input data from outputs and record package versions so another analyst can reproduce the work.",
+        "skills": [
+          "Python functions",
+          "Pandas",
+          "Jupyter notebooks",
+          "Data cleaning",
+          "Reproducibility"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-5-task-1",
+            "label": "Load CSV files and normalise dates and column types",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-5-task-2",
+            "label": "Merge tables with explicit key and row-count checks",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-5-task-3",
+            "label": "Export a cleaned dataset and a documented analysis notebook",
+            "position": 3
+          }
+        ],
+        "exercise": "Load CSV files and normalise dates and column types",
+        "milestone": "Reproduce an earlier SQL result with pandas and explain discrepancies.",
+        "resourceIds": [
+          "python",
+          "pandas",
+          "kagglepandas",
+          "datacamp"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-analyst-stage-5",
+        "position": 5
+      },
+      {
+        "title": "Portfolio and Real-World Projects",
+        "duration": "5–6 weeks",
+        "description": "Select projects that show different analytical decisions: reporting, retention and evaluating performance. For each, state the business problem, data provenance, quality checks and limitations. A repository should explain how to reproduce the result and include a readable summary for a hiring manager, not only screenshots.",
+        "skills": [
+          "Business framing",
+          "Data provenance",
+          "Quality assurance",
+          "Storytelling",
+          "Portfolio documentation"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-6-task-1",
+            "label": "Complete two of the portfolio briefs below",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-6-task-2",
+            "label": "Publish source notes, queries and a reproducible notebook",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-6-task-3",
+            "label": "Write an executive summary with actions and limitations",
+            "position": 3
+          }
+        ],
+        "exercise": "Complete two of the portfolio briefs below",
+        "milestone": "Publish two detailed projects and a third smaller analysis.",
+        "resourceIds": [
+          "github",
+          "portfolio",
+          "powerbisamples"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-analyst-stage-6",
+        "position": 6
+      },
+      {
+        "title": "Job Applications and Interview Preparation",
+        "duration": "3–4 weeks",
+        "description": "Translate your work into evidence of the skills requested in actual Cyprus vacancies. Practise SQL aloud, explain a dashboard without reading it and discuss a time your assumptions changed. Apply to analyst and reporting roles with a tailored CV; some business analyst roles focus on processes rather than data, so check the description.",
+        "skills": [
+          "SQL interviews",
+          "Portfolio walkthroughs",
+          "CV tailoring",
+          "Stakeholder communication"
+        ],
+        "tasks": [
+          {
+            "id": "data-analyst-stage-7-task-1",
+            "label": "Map your evidence to five real job descriptions",
+            "position": 1
+          },
+          {
+            "id": "data-analyst-stage-7-task-2",
+            "label": "Practise a timed join and aggregation exercise",
+            "position": 2
+          },
+          {
+            "id": "data-analyst-stage-7-task-3",
+            "label": "Record a five-minute explanation of a project and revise it",
+            "position": 3
+          }
+        ],
+        "exercise": "Map your evidence to five real job descriptions",
+        "milestone": "Prepare a tailored CV, portfolio links and interview examples.",
+        "resourceIds": [
+          "googledata",
+          "portfolio"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-analyst-stage-7",
+        "position": 7
+      }
+    ],
+    "readiness": [
+      {
+        "id": "data-analyst-ready-1",
+        "label": "I can clean and validate a spreadsheet without losing source data.",
+        "position": 1
+      },
+      {
+        "id": "data-analyst-ready-2",
+        "label": "I can join tables and explain why the row count changed.",
+        "position": 2
+      },
+      {
+        "id": "data-analyst-ready-3",
+        "label": "I can write grouped and windowed SQL queries.",
+        "position": 3
+      },
+      {
+        "id": "data-analyst-ready-4",
+        "label": "I can explain sampling bias and uncertainty.",
+        "position": 4
+      },
+      {
+        "id": "data-analyst-ready-5",
+        "label": "I can build and validate a Power BI data model.",
+        "position": 5
+      },
+      {
+        "id": "data-analyst-ready-6",
+        "label": "I can clean and summarise data with pandas.",
+        "position": 6
+      },
+      {
+        "id": "data-analyst-ready-7",
+        "label": "I have two documented analyses with business recommendations.",
+        "position": 7
+      },
+      {
+        "id": "data-analyst-ready-8",
+        "label": "I can explain findings clearly and practise SQL interviews.",
+        "position": 8
+      }
+    ],
+    "projects": [
+      {
+        "title": "Ecommerce Sales Dashboard",
+        "difficulty": "Beginner",
+        "duration": "2–3 weeks",
+        "overview": "Build a report for a retail manager who needs to understand sales trends and product performance.",
+        "problem": "The manager cannot tell whether revenue growth comes from more customers or larger orders.",
+        "tools": [
+          "SQL",
+          "Power BI",
+          "Excel"
+        ],
+        "requirements": [
+          "Use official sample data and document its licence",
+          "Define revenue, order count and average order value",
+          "Clean dates and check duplicate transactions",
+          "Model dimensions and write validated measures",
+          "Build summary, product and customer views"
+        ],
+        "deliverables": [
+          "Data dictionary",
+          "SQL checks",
+          "Dashboard file or screenshots",
+          "One-page recommendation"
+        ],
+        "skills": [
+          "Data cleaning",
+          "Data modelling",
+          "DAX",
+          "Business storytelling"
+        ],
+        "starterResourceId": "powerbisamples",
+        "presentation": "Show the business question first, then the dashboard, three findings and limitations.",
+        "id": "data-analyst-project-1",
+        "position": 1
+      },
+      {
+        "title": "Customer Retention Analysis",
+        "difficulty": "Intermediate",
+        "duration": "2–3 weeks",
+        "overview": "Compare repeat purchasing behaviour across customer cohorts.",
+        "problem": "An ecommerce team wants to understand when new customers stop returning.",
+        "tools": [
+          "SQL",
+          "Python",
+          "Pandas"
+        ],
+        "requirements": [
+          "Use synthetic customer and order data with a documented generator",
+          "Define acquisition month and repeat purchase",
+          "Create a cohort table excluding incomplete periods",
+          "Compare segments without making causal claims",
+          "Propose a retention experiment with success measures"
+        ],
+        "deliverables": [
+          "Cohort SQL",
+          "Heatmap",
+          "Metric definitions",
+          "Experiment proposal"
+        ],
+        "skills": [
+          "SQL windows",
+          "Cohort analysis",
+          "Data validation",
+          "Communication"
+        ],
+        "starterResourceId": "sql",
+        "presentation": "Present the cohort definitions and observation window before discussing retention.",
+        "id": "data-analyst-project-2",
+        "position": 2
+      },
+      {
+        "title": "Marketing Campaign Performance Analysis",
+        "difficulty": "Intermediate",
+        "duration": "2 weeks",
+        "overview": "Evaluate acquisition campaigns using consistent funnel metrics.",
+        "problem": "A team is spending on traffic without understanding conversion quality.",
+        "tools": [
+          "Google Sheets",
+          "SQL",
+          "Power BI"
+        ],
+        "requirements": [
+          "Create a labelled synthetic campaign dataset",
+          "Define clicks, leads, conversions and attributed revenue",
+          "Calculate rates with correct denominators",
+          "Compare cost per acquisition and missing tracking",
+          "Recommend a budget test while noting attribution limits"
+        ],
+        "deliverables": [
+          "Clean dataset",
+          "Funnel dashboard",
+          "Quality checks",
+          "Two-page analysis"
+        ],
+        "skills": [
+          "Funnel analysis",
+          "Ratio metrics",
+          "Attribution awareness",
+          "Recommendations"
+        ],
+        "starterResourceId": "sheets",
+        "presentation": "Explain which results support a decision and which need an experiment.",
+        "id": "data-analyst-project-3",
+        "position": 3
+      },
+      {
+        "title": "Cyprus Technology Jobs Analysis",
+        "difficulty": "Intermediate",
+        "duration": "2–3 weeks",
+        "overview": "Analyse a small, permitted snapshot of Cyprus technology vacancies.",
+        "problem": "A career changer wants to understand recurring skills and locations.",
+        "tools": [
+          "Python",
+          "Pandas",
+          "SQL"
+        ],
+        "requirements": [
+          "Use a manually compiled or permission-based sample of public listings",
+          "Record collection date, titles and locations; omit personal data",
+          "Standardise skill labels without changing original text",
+          "Count unique listings and inspect ambiguous categories",
+          "Explain sample coverage and avoid salary claims without disclosed data"
+        ],
+        "deliverables": [
+          "Anonymised sample",
+          "Cleaning notebook",
+          "Skills and location charts",
+          "Methods note"
+        ],
+        "skills": [
+          "Text cleaning",
+          "Descriptive analysis",
+          "Data ethics",
+          "Local market research"
+        ],
+        "starterResourceId": "pandas",
+        "presentation": "Show collection method, sampling limits and how a learner could use the findings.",
+        "id": "data-analyst-project-4",
+        "position": 4
+      }
+    ],
+    "published": true,
+    "seoTitle": "How to Become a Data Analyst in Cyprus | Career Roadmap & Free Resources",
+    "seoDescription": "Learn Data Analyst skills with a structured roadmap, curated free and paid resources, four practical projects and relevant technology jobs in Cyprus."
+  },
+  {
+    "slug": "frontend-developer",
+    "title": "Frontend Developer",
+    "category": "Software Development",
+    "difficulty": "Beginner",
+    "duration": "6–12 months",
+    "weeklyHours": "8–12 hours",
+    "description": "Build accessible, responsive interfaces that people can use confidently on any device.",
+    "overview": "Frontend developers turn product designs into browser interfaces. They manage state, connect APIs, handle errors and test interactions across devices. The strongest early portfolio demonstrates HTML and CSS fundamentals alongside React, with careful accessibility and reliable loading and empty states.",
+    "entryTitles": [
+      "Junior Frontend Developer",
+      "Junior React Developer",
+      "Web Developer"
+    ],
+    "jobTerms": [
+      "frontend",
+      "front-end",
+      "react developer",
+      "web developer"
+    ],
+    "skills": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Git",
+      "APIs"
+    ],
+    "stages": [
+      {
+        "title": "How the Web Works",
+        "duration": "2–3 weeks",
+        "description": "Understand the path from a URL to a rendered page: DNS, HTTP, server responses and browser parsing. Set up an editor and use developer tools to inspect markup and network requests. This foundation makes later debugging easier because you can identify whether a problem belongs to the browser, network or server.",
+        "skills": [
+          "HTTP basics",
+          "Browser tools",
+          "Files and URLs"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-1-task-1",
+            "label": "Inspect a page's network waterfall",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-1-task-2",
+            "label": "Create a local HTML file and serve it",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-1-task-3",
+            "label": "Explain a request and response in plain language",
+            "position": 3
+          }
+        ],
+        "exercise": "Inspect a page's network waterfall",
+        "milestone": "Draw and explain the lifecycle of a browser request.",
+        "resourceIds": [
+          "mdnstart",
+          "odin"
+        ],
+        "difficulty": "Beginner",
+        "id": "frontend-developer-stage-1",
+        "position": 1
+      },
+      {
+        "title": "HTML and Semantic Structure",
+        "duration": "3–4 weeks",
+        "description": "Use HTML to describe meaning, not just positioning. Learn headings, landmarks, lists, links, images and forms. A good document works before CSS or JavaScript is added. Practise labels, validation messages and meaningful alternative text so assistive technology can understand the same information as a visual user.",
+        "skills": [
+          "Semantic HTML",
+          "Forms",
+          "Landmarks",
+          "Content structure"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-2-task-1",
+            "label": "Build a multi-page information site",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-2-task-2",
+            "label": "Add correctly labelled forms and input types",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-2-task-3",
+            "label": "Check heading order and keyboard navigation",
+            "position": 3
+          }
+        ],
+        "exercise": "Build a multi-page information site",
+        "milestone": "Publish a semantic page with a usable form and no styling dependencies.",
+        "resourceIds": [
+          "mdnhtml",
+          "a11y"
+        ],
+        "difficulty": "Beginner",
+        "id": "frontend-developer-stage-2",
+        "position": 2
+      },
+      {
+        "title": "CSS, Layouts and Responsive Design",
+        "duration": "4–6 weeks",
+        "description": "Master the box model, cascade, flexbox and grid before using utility classes by habit. Design for content and varying viewport widths. Practise type scales, spacing and fluid layouts. Avoid fixing broken layouts with arbitrary heights; make long labels, images and zoomed text work naturally.",
+        "skills": [
+          "Cascade",
+          "Flexbox",
+          "Grid",
+          "Responsive typography"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-3-task-1",
+            "label": "Recreate a business page with grid and flexbox",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-3-task-2",
+            "label": "Test layouts at 360, 768 and 1440 pixels",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-3-task-3",
+            "label": "Check long content and 200% text zoom",
+            "position": 3
+          }
+        ],
+        "exercise": "Recreate a business page with grid and flexbox",
+        "milestone": "Ship a responsive website with documented layout decisions.",
+        "resourceIds": [
+          "mdncss",
+          "mdnlayout",
+          "frontendmentor"
+        ],
+        "difficulty": "Beginner",
+        "id": "frontend-developer-stage-3",
+        "position": 3
+      },
+      {
+        "title": "JavaScript Fundamentals",
+        "duration": "5–7 weeks",
+        "description": "Learn values, functions, objects, arrays and control flow, then use events to connect logic to the page. Practise asynchronous code and error handling. Understand immutable updates and browser storage. Build something small without a framework so React later feels like a tool for organising familiar ideas.",
+        "skills": [
+          "Functions",
+          "Objects and arrays",
+          "DOM events",
+          "Promises",
+          "Local storage"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-4-task-1",
+            "label": "Build a searchable list without React",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-4-task-2",
+            "label": "Validate a form and show useful errors",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-4-task-3",
+            "label": "Save and restore a preference locally",
+            "position": 3
+          }
+        ],
+        "exercise": "Build a searchable list without React",
+        "milestone": "Deliver an interactive app with accessible controls and handled failures.",
+        "resourceIds": [
+          "mdnjs",
+          "odin"
+        ],
+        "difficulty": "Beginner",
+        "id": "frontend-developer-stage-4",
+        "position": 4
+      },
+      {
+        "title": "Git, GitHub and Development Tools",
+        "duration": "2–3 weeks",
+        "description": "Use small commits, descriptive branches and readable pull requests. Learn how to inspect changes, resolve conflicts and restore an accidental edit. Add package scripts and understand lockfiles. Collaboration habits matter as much as command memorisation because other people need to review and maintain your work.",
+        "skills": [
+          "Git commits",
+          "Branches",
+          "Pull requests",
+          "Package scripts"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-5-task-1",
+            "label": "Create a repository with a clear README",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-5-task-2",
+            "label": "Make and review a feature pull request",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-5-task-3",
+            "label": "Resolve a practice merge conflict",
+            "position": 3
+          }
+        ],
+        "exercise": "Create a repository with a clear README",
+        "milestone": "Show a repository history with reviewed, focused changes.",
+        "resourceIds": [
+          "gitbook",
+          "github"
+        ],
+        "difficulty": "Beginner",
+        "id": "frontend-developer-stage-5",
+        "position": 5
+      },
+      {
+        "title": "React and Component-Based Development",
+        "duration": "5–7 weeks",
+        "description": "Model the interface as components with explicit inputs and state. Learn controlled forms, derived data and component identity. Use effects for synchronising with external systems, not for calculations that belong in rendering. Keep state ownership clear and avoid duplicating information in several components.",
+        "skills": [
+          "Components",
+          "Props",
+          "State",
+          "Hooks",
+          "Forms"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-6-task-1",
+            "label": "Build reusable list and filter components",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-6-task-2",
+            "label": "Add controlled forms and validation",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-6-task-3",
+            "label": "Explain which state belongs in each component",
+            "position": 3
+          }
+        ],
+        "exercise": "Build reusable list and filter components",
+        "milestone": "Rebuild your JavaScript app in React with predictable state updates.",
+        "resourceIds": [
+          "react",
+          "fullstack"
+        ],
+        "difficulty": "Intermediate",
+        "id": "frontend-developer-stage-6",
+        "position": 6
+      },
+      {
+        "title": "APIs, TypeScript and State Management",
+        "duration": "4–6 weeks",
+        "description": "Connect to a real API and model its responses with TypeScript. Design loading, success, empty and failure states before writing fetch logic. Learn cancellation, stale responses and URL-based filters. Start with React state and add a state library only when a specific problem warrants it.",
+        "skills": [
+          "Type narrowing",
+          "API contracts",
+          "Async state",
+          "URL parameters"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-7-task-1",
+            "label": "Type an API response and validate unknown input",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-7-task-2",
+            "label": "Handle slow, failed and empty requests",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-7-task-3",
+            "label": "Make filters shareable through URL parameters",
+            "position": 3
+          }
+        ],
+        "exercise": "Type an API response and validate unknown input",
+        "milestone": "Deliver an API dashboard that handles network failure gracefully.",
+        "resourceIds": [
+          "typescript",
+          "fetch",
+          "fullstack"
+        ],
+        "difficulty": "Intermediate",
+        "id": "frontend-developer-stage-7",
+        "position": 7
+      },
+      {
+        "title": "Accessibility, Testing and Performance",
+        "duration": "4–6 weeks",
+        "description": "Test the behaviours that matter to a user, including keyboard interaction and error recovery. Check focus order, labels and status announcements. Measure loading and rendering before optimising. Automated checks help, but manual keyboard testing and a real device reveal problems that a linter cannot.",
+        "skills": [
+          "Keyboard access",
+          "Browser tests",
+          "Performance measurement"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-8-task-1",
+            "label": "Write browser tests for search and form submission",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-8-task-2",
+            "label": "Complete a keyboard-only walkthrough",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-8-task-3",
+            "label": "Measure load performance and fix one evidenced issue",
+            "position": 3
+          }
+        ],
+        "exercise": "Write browser tests for search and form submission",
+        "milestone": "Publish test results and an accessibility review with resolved findings.",
+        "resourceIds": [
+          "a11y",
+          "playwright",
+          "performance",
+          "wcag"
+        ],
+        "difficulty": "Intermediate",
+        "id": "frontend-developer-stage-8",
+        "position": 8
+      },
+      {
+        "title": "Portfolio and Deployment",
+        "duration": "4–6 weeks",
+        "description": "Make two projects usable online and easy to run locally. Document the problem, your choices, trade-offs and testing. Keep secrets out of repositories and use preview environments for changes. Hiring teams should be able to try the project and understand what you built without a guided call.",
+        "skills": [
+          "Deployment",
+          "Documentation",
+          "Environment configuration"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-9-task-1",
+            "label": "Deploy two projects with working public links",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-9-task-2",
+            "label": "Write setup steps and known limitations",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-9-task-3",
+            "label": "Check mobile layouts and production error states",
+            "position": 3
+          }
+        ],
+        "exercise": "Deploy two projects with working public links",
+        "milestone": "Publish two maintained demos with repositories and concise case notes.",
+        "resourceIds": [
+          "verceldeploy",
+          "portfolio",
+          "frontendmentor"
+        ],
+        "difficulty": "Intermediate",
+        "id": "frontend-developer-stage-9",
+        "position": 9
+      },
+      {
+        "title": "Technical Interviews and Job Applications",
+        "duration": "3–4 weeks",
+        "description": "Practise explaining browser behaviour, component state and implementation trade-offs. Work through small coding exercises while speaking clearly. Use real job descriptions to identify gaps, and tailor your application around evidence rather than a long list of tools. Review take-home scope before spending days on a task.",
+        "skills": [
+          "Code walkthroughs",
+          "Debugging",
+          "Application tailoring"
+        ],
+        "tasks": [
+          {
+            "id": "frontend-developer-stage-10-task-1",
+            "label": "Explain one component's data flow aloud",
+            "position": 1
+          },
+          {
+            "id": "frontend-developer-stage-10-task-2",
+            "label": "Solve an unfamiliar JavaScript exercise with tests",
+            "position": 2
+          },
+          {
+            "id": "frontend-developer-stage-10-task-3",
+            "label": "Match portfolio evidence to five Cyprus vacancies",
+            "position": 3
+          }
+        ],
+        "exercise": "Explain one component's data flow aloud",
+        "milestone": "Prepare a concise CV and two confident project walkthroughs.",
+        "resourceIds": [
+          "mdnjs",
+          "portfolio"
+        ],
+        "difficulty": "Beginner",
+        "id": "frontend-developer-stage-10",
+        "position": 10
+      }
+    ],
+    "readiness": [
+      {
+        "id": "frontend-developer-ready-1",
+        "label": "I can structure a page with semantic HTML and labelled forms.",
+        "position": 1
+      },
+      {
+        "id": "frontend-developer-ready-2",
+        "label": "I can build responsive layouts with CSS grid and flexbox.",
+        "position": 2
+      },
+      {
+        "id": "frontend-developer-ready-3",
+        "label": "I can explain asynchronous JavaScript and handle errors.",
+        "position": 3
+      },
+      {
+        "id": "frontend-developer-ready-4",
+        "label": "I can use Git branches and pull requests.",
+        "position": 4
+      },
+      {
+        "id": "frontend-developer-ready-5",
+        "label": "I can build React components with clear state ownership.",
+        "position": 5
+      },
+      {
+        "id": "frontend-developer-ready-6",
+        "label": "I can type API data and model loading, empty and error states.",
+        "position": 6
+      },
+      {
+        "id": "frontend-developer-ready-7",
+        "label": "I can test keyboard interactions and core browser journeys.",
+        "position": 7
+      },
+      {
+        "id": "frontend-developer-ready-8",
+        "label": "I have two deployed projects with readable repositories.",
+        "position": 8
+      }
+    ],
+    "projects": [
+      {
+        "title": "Responsive Business Website",
+        "difficulty": "Beginner",
+        "duration": "2 weeks",
+        "overview": "Build a small business site from a written brief.",
+        "problem": "Visitors need to understand the service and contact the business from a phone.",
+        "tools": [
+          "HTML",
+          "CSS",
+          "JavaScript"
+        ],
+        "requirements": [
+          "Create semantic home, services and contact pages",
+          "Use fluid layouts and accessible navigation",
+          "Validate the contact form without pretending to send messages",
+          "Optimise images and test keyboard use",
+          "Deploy and document browser support"
+        ],
+        "deliverables": [
+          "Live demo",
+          "Repository",
+          "Responsive screenshots",
+          "Accessibility notes"
+        ],
+        "skills": [
+          "Semantic HTML",
+          "Responsive CSS",
+          "Forms",
+          "Performance"
+        ],
+        "starterResourceId": "odin",
+        "presentation": "Show the brief, design constraints and evidence from mobile and keyboard testing.",
+        "id": "frontend-developer-project-1",
+        "position": 1
+      },
+      {
+        "title": "Interactive Web Application",
+        "difficulty": "Beginner",
+        "duration": "2–3 weeks",
+        "overview": "Create a personal learning planner with tasks and filters.",
+        "problem": "Learners lose track of study tasks across several resources.",
+        "tools": [
+          "React",
+          "TypeScript",
+          "Local storage"
+        ],
+        "requirements": [
+          "Define task, category and completion data",
+          "Add create, edit, delete and filter actions",
+          "Persist data and handle invalid saved content",
+          "Provide empty and validation states",
+          "Test a complete create-to-complete journey"
+        ],
+        "deliverables": [
+          "Working app",
+          "Data model",
+          "Tests",
+          "Setup guide"
+        ],
+        "skills": [
+          "React state",
+          "TypeScript",
+          "Persistence",
+          "Error handling"
+        ],
+        "starterResourceId": "react",
+        "presentation": "Demonstrate a real workflow and explain state ownership.",
+        "id": "frontend-developer-project-2",
+        "position": 2
+      },
+      {
+        "title": "API-Powered Product Dashboard",
+        "difficulty": "Intermediate",
+        "duration": "3 weeks",
+        "overview": "Build a dashboard from a public product or test API.",
+        "problem": "Users need to find products and understand availability without waiting through broken screens.",
+        "tools": [
+          "React",
+          "TypeScript",
+          "Fetch",
+          "Playwright"
+        ],
+        "requirements": [
+          "Choose an API whose terms allow this use",
+          "Add search, filters and pagination",
+          "Handle request cancellation and failed responses",
+          "Build accessible details and skeleton states",
+          "Test slow network, empty results and API failure"
+        ],
+        "deliverables": [
+          "Live demo",
+          "API documentation",
+          "Browser tests",
+          "Failure-state screenshots"
+        ],
+        "skills": [
+          "API integration",
+          "Async state",
+          "Testing",
+          "Accessibility"
+        ],
+        "starterResourceId": "fetch",
+        "presentation": "Show success and failure flows alongside the typed API contract.",
+        "id": "frontend-developer-project-3",
+        "position": 3
+      },
+      {
+        "title": "Accessible Job Search Interface",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Build a job search interface using labelled synthetic vacancies.",
+        "problem": "Job seekers need clear filters that remain usable with a keyboard and on small screens.",
+        "tools": [
+          "React",
+          "TypeScript",
+          "CSS",
+          "Playwright"
+        ],
+        "requirements": [
+          "Create synthetic listings and identify them clearly",
+          "Store search and filters in the URL",
+          "Add result counts and clear-all controls",
+          "Build keyboard-friendly cards and pagination",
+          "Check focus, screen-reader labels and text zoom"
+        ],
+        "deliverables": [
+          "Demo",
+          "Synthetic dataset",
+          "Accessibility audit",
+          "Test suite"
+        ],
+        "skills": [
+          "URL state",
+          "Accessible search",
+          "Responsive design",
+          "Browser testing"
+        ],
+        "starterResourceId": "wcag",
+        "presentation": "Walk through finding a role with keyboard-only interaction.",
+        "id": "frontend-developer-project-4",
+        "position": 4
+      }
+    ],
+    "published": true,
+    "seoTitle": "How to Become a Frontend Developer in Cyprus | Career Roadmap & Free Resources",
+    "seoDescription": "Learn Frontend Developer skills with a structured roadmap, curated free and paid resources, four practical projects and relevant technology jobs in Cyprus."
+  },
+  {
+    "slug": "ux-ui-designer",
+    "title": "UX/UI Designer",
+    "category": "Design & Product",
+    "difficulty": "Beginner",
+    "duration": "4–9 months",
+    "weeklyHours": "8–10 hours",
+    "description": "Understand people's needs and turn them into useful, clear and thoughtfully designed products.",
+    "overview": "UX/UI designers investigate problems, organise information, prototype interactions and refine visual interfaces. The role involves research, collaboration and testing as well as Figma. A junior designer should explain why a design changed and distinguish observed evidence from personal preference.",
+    "entryTitles": [
+      "Junior UX Designer",
+      "Junior UI Designer",
+      "Junior Product Designer"
+    ],
+    "jobTerms": [
+      "ux designer",
+      "ui designer",
+      "ux/ui",
+      "product designer",
+      "ui/ux"
+    ],
+    "skills": [
+      "Figma",
+      "FigJam",
+      "User Research",
+      "Prototyping",
+      "Design Systems",
+      "Accessibility"
+    ],
+    "stages": [
+      {
+        "title": "UX/UI Fundamentals",
+        "duration": "2–3 weeks",
+        "description": "Understand the difference between user goals, business constraints and interface polish. Learn common design activities and when each is useful. Start with a specific problem rather than an invented persona or a favourite visual style. Explore how designers work with product managers and engineers.",
+        "skills": [
+          "UX principles",
+          "Design process",
+          "Problem framing"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-1-task-1",
+            "label": "Describe a frustrating task you have observed",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-1-task-2",
+            "label": "Separate user needs from proposed features",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-1-task-3",
+            "label": "Audit the task against basic usability principles",
+            "position": 3
+          }
+        ],
+        "exercise": "Describe a frustrating task you have observed",
+        "milestone": "Write a one-page problem brief with assumptions clearly labelled.",
+        "resourceIds": [
+          "uxbasics",
+          "googleux"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-1",
+        "position": 1
+      },
+      {
+        "title": "User Research and Problem Discovery",
+        "duration": "3–4 weeks",
+        "description": "Plan research around a question you cannot yet answer. Use interviews and observation to understand recent behaviour, then group evidence without overstating patterns from a small sample. Obtain consent and remove identifying information from shared notes. Distinguish what a person says they prefer from what they can actually do.",
+        "skills": [
+          "Interview planning",
+          "Consent",
+          "Observation",
+          "Synthesis"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-2-task-1",
+            "label": "Write a research plan and non-leading questions",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-2-task-2",
+            "label": "Interview consenting participants about recent behaviour",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-2-task-3",
+            "label": "Summarise themes and identify unanswered questions",
+            "position": 3
+          }
+        ],
+        "exercise": "Write a research plan and non-leading questions",
+        "milestone": "Produce an anonymised research summary with traceable evidence.",
+        "resourceIds": [
+          "uxresearch",
+          "interviews"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-2",
+        "position": 2
+      },
+      {
+        "title": "Information Architecture and User Flows",
+        "duration": "2–3 weeks",
+        "description": "Organise information so users can predict where to find it. Map a core task from entry to outcome, including alternate and failure paths. Use card sorting or a simple navigation test when structure is uncertain. A sitemap is useful only if it supports a real user goal.",
+        "skills": [
+          "Navigation",
+          "Sitemaps",
+          "Task flows",
+          "Journey maps"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-3-task-1",
+            "label": "Inventory content and group it by user need",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-3-task-2",
+            "label": "Map a main task and its error paths",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-3-task-3",
+            "label": "Test whether participants can find key information",
+            "position": 3
+          }
+        ],
+        "exercise": "Inventory content and group it by user need",
+        "milestone": "Deliver a sitemap and flow with rationale and research links.",
+        "resourceIds": [
+          "ia",
+          "flows"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-3",
+        "position": 3
+      },
+      {
+        "title": "Wireframing and Interaction Design",
+        "duration": "3–4 weeks",
+        "description": "Explore several ways to solve the same task before polishing one. Use low-fidelity screens to compare sequence, feedback and decision points. Design empty, loading, error and success states. Consider what happens when the user goes back, abandons a step or supplies unexpected information.",
+        "skills": [
+          "Wireframes",
+          "Interaction states",
+          "Progressive disclosure"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-4-task-1",
+            "label": "Sketch three alternative task flows",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-4-task-2",
+            "label": "Wireframe success and failure states",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-4-task-3",
+            "label": "Review the flow with an engineer or peer",
+            "position": 3
+          }
+        ],
+        "exercise": "Sketch three alternative task flows",
+        "milestone": "Create a complete low-fidelity flow with annotated behaviour.",
+        "resourceIds": [
+          "wireframes",
+          "figma"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-4",
+        "position": 4
+      },
+      {
+        "title": "Visual Design and Typography",
+        "duration": "3–4 weeks",
+        "description": "Build hierarchy through type, spacing and contrast. Learn a restrained type scale, content-aligned grids and reusable colour roles. Check readability and long labels, not only a perfect sample screen. Visual decisions should support the task and the brand rather than follow a trend without a reason.",
+        "skills": [
+          "Type scales",
+          "Hierarchy",
+          "Colour roles",
+          "Grids"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-5-task-1",
+            "label": "Create a consistent type and spacing scale",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-5-task-2",
+            "label": "Design mobile and desktop versions of a task",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-5-task-3",
+            "label": "Check contrast and long-content cases",
+            "position": 3
+          }
+        ],
+        "exercise": "Create a consistent type and spacing scale",
+        "milestone": "Produce polished screens with a documented visual system.",
+        "resourceIds": [
+          "visual",
+          "materialtype"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-5",
+        "position": 5
+      },
+      {
+        "title": "Figma and Interactive Prototyping",
+        "duration": "3–4 weeks",
+        "description": "Use frames, auto layout and reusable components to make the design resilient. Build a prototype that lets a participant complete a task without coaching. Choose interaction detail that answers the research question; a simple clickable flow often gives better evidence than a complicated animation.",
+        "skills": [
+          "Auto layout",
+          "Components",
+          "Interactive prototypes"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-6-task-1",
+            "label": "Build resizable screens using auto layout",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-6-task-2",
+            "label": "Connect the complete task in a prototype",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-6-task-3",
+            "label": "Prepare realistic test content and a task script",
+            "position": 3
+          }
+        ],
+        "exercise": "Build resizable screens using auto layout",
+        "milestone": "Share a prototype that supports an unassisted usability session.",
+        "resourceIds": [
+          "figma",
+          "figmaproto"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-6",
+        "position": 6
+      },
+      {
+        "title": "Design Systems and Accessibility",
+        "duration": "3–4 weeks",
+        "description": "Create reusable rules for components and their states. Document behaviour, keyboard expectations, contrast and usage guidance so engineering can implement the intent. Treat accessibility as a design constraint throughout the flow. A Figma component library is one part of a design system, not the whole system.",
+        "skills": [
+          "Tokens",
+          "Component variants",
+          "Accessibility",
+          "Handoff"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-7-task-1",
+            "label": "Define semantic colour and spacing tokens",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-7-task-2",
+            "label": "Design button, field and navigation states",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-7-task-3",
+            "label": "Document keyboard behaviour and WCAG considerations",
+            "position": 3
+          }
+        ],
+        "exercise": "Define semantic colour and spacing tokens",
+        "milestone": "Publish a small component library with usage and accessibility notes.",
+        "resourceIds": [
+          "figmacomponents",
+          "wcag"
+        ],
+        "difficulty": "Intermediate",
+        "id": "ux-ui-designer-stage-7",
+        "position": 7
+      },
+      {
+        "title": "Usability Testing and Iteration",
+        "duration": "2–3 weeks",
+        "description": "Observe participants attempting realistic tasks. Avoid explaining the interface during the test. Record completion, errors and qualitative evidence, then prioritise findings by severity and frequency. Retest changed interactions when possible. Do not claim that a small study proves a universal preference.",
+        "skills": [
+          "Task design",
+          "Moderation",
+          "Issue prioritisation",
+          "Iteration"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-8-task-1",
+            "label": "Run consent-based task sessions",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-8-task-2",
+            "label": "Log observations separately from interpretations",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-8-task-3",
+            "label": "Revise high-priority issues and explain each change",
+            "position": 3
+          }
+        ],
+        "exercise": "Run consent-based task sessions",
+        "milestone": "Show before-and-after designs linked to specific observations.",
+        "resourceIds": [
+          "usability",
+          "uxresearch"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-8",
+        "position": 8
+      },
+      {
+        "title": "Portfolio Case Studies",
+        "duration": "3–4 weeks",
+        "description": "Tell the story of your decisions, role and constraints. Show enough artefacts to support the reasoning without filling a case study with every workshop. Include what did not work and what you would test next. Label concept projects and simulated outcomes honestly; do not invent business impact.",
+        "skills": [
+          "Case-study writing",
+          "Evidence",
+          "Reflection"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-9-task-1",
+            "label": "Write two case studies with clear problem framing",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-9-task-2",
+            "label": "Show research-driven design changes",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-9-task-3",
+            "label": "Remove private data and unsupported outcome claims",
+            "position": 3
+          }
+        ],
+        "exercise": "Write two case studies with clear problem framing",
+        "milestone": "Publish two concise case studies and an accessible portfolio.",
+        "resourceIds": [
+          "uxportfolio",
+          "portfolio"
+        ],
+        "difficulty": "Intermediate",
+        "id": "ux-ui-designer-stage-9",
+        "position": 9
+      },
+      {
+        "title": "Design Interviews and Job Applications",
+        "duration": "2–3 weeks",
+        "description": "Practise a short walkthrough that connects the problem, evidence, alternatives and final design. Prepare examples of collaboration and disagreement. For a whiteboard exercise, clarify the user and constraints before sketching. Tailor applications to the actual role: UI, UX and product positions often emphasise different skills.",
+        "skills": [
+          "Portfolio presentation",
+          "Design critique",
+          "Collaboration"
+        ],
+        "tasks": [
+          {
+            "id": "ux-ui-designer-stage-10-task-1",
+            "label": "Present a case study in ten minutes",
+            "position": 1
+          },
+          {
+            "id": "ux-ui-designer-stage-10-task-2",
+            "label": "Practise a problem-framing exercise",
+            "position": 2
+          },
+          {
+            "id": "ux-ui-designer-stage-10-task-3",
+            "label": "Map your work to five relevant job descriptions",
+            "position": 3
+          }
+        ],
+        "exercise": "Present a case study in ten minutes",
+        "milestone": "Prepare a tailored CV and a clear portfolio presentation.",
+        "resourceIds": [
+          "uxcareers",
+          "uxportfolio"
+        ],
+        "difficulty": "Beginner",
+        "id": "ux-ui-designer-stage-10",
+        "position": 10
+      }
+    ],
+    "readiness": [
+      {
+        "id": "ux-ui-designer-ready-1",
+        "label": "I can frame a user problem without jumping to a solution.",
+        "position": 1
+      },
+      {
+        "id": "ux-ui-designer-ready-2",
+        "label": "I can plan ethical, non-leading research.",
+        "position": 2
+      },
+      {
+        "id": "ux-ui-designer-ready-3",
+        "label": "I can turn evidence into task flows and information architecture.",
+        "position": 3
+      },
+      {
+        "id": "ux-ui-designer-ready-4",
+        "label": "I can design loading, error, empty and success states.",
+        "position": 4
+      },
+      {
+        "id": "ux-ui-designer-ready-5",
+        "label": "I can use Figma auto layout, components and prototypes.",
+        "position": 5
+      },
+      {
+        "id": "ux-ui-designer-ready-6",
+        "label": "I can document accessible component behaviour.",
+        "position": 6
+      },
+      {
+        "id": "ux-ui-designer-ready-7",
+        "label": "I can run usability tests and justify design iterations.",
+        "position": 7
+      },
+      {
+        "id": "ux-ui-designer-ready-8",
+        "label": "I have two honest, evidence-led case studies and can present them.",
+        "position": 8
+      }
+    ],
+    "projects": [
+      {
+        "title": "Mobile App UX Case Study",
+        "difficulty": "Beginner",
+        "duration": "3–4 weeks",
+        "overview": "Design a mobile appointment-booking flow for a local service.",
+        "problem": "Customers cannot quickly compare available appointments and understand cancellation rules.",
+        "tools": [
+          "Figma",
+          "FigJam"
+        ],
+        "requirements": [
+          "Recruit consenting participants and explore current booking behaviour",
+          "Define a task flow with rescheduling and cancellation",
+          "Sketch alternatives before high-fidelity design",
+          "Prototype realistic availability and error states",
+          "Run task tests and document revisions"
+        ],
+        "deliverables": [
+          "Research summary",
+          "Task flow",
+          "Clickable prototype",
+          "Case study"
+        ],
+        "skills": [
+          "Research",
+          "Interaction design",
+          "Prototyping",
+          "Usability testing"
+        ],
+        "starterResourceId": "usability",
+        "presentation": "Present the problem and two evidence-led changes; label it a concept project.",
+        "id": "ux-ui-designer-project-1",
+        "position": 1
+      },
+      {
+        "title": "Website Usability Redesign",
+        "difficulty": "Intermediate",
+        "duration": "3 weeks",
+        "overview": "Improve a specific task on a publicly viewable website without claiming affiliation.",
+        "problem": "Visitors struggle to find an essential service or piece of information.",
+        "tools": [
+          "Figma",
+          "Browser tools",
+          "FigJam"
+        ],
+        "requirements": [
+          "Select a task and record the original flow",
+          "Conduct an expert review and consent-based tests",
+          "Prioritise issues and redesign only the affected journey",
+          "Check mobile, contrast and content hierarchy",
+          "Test the revised prototype using comparable tasks"
+        ],
+        "deliverables": [
+          "Issue log",
+          "Before-and-after flow",
+          "Prototype",
+          "Methods and limitations"
+        ],
+        "skills": [
+          "Usability evaluation",
+          "Visual hierarchy",
+          "Prioritisation",
+          "Responsive design"
+        ],
+        "starterResourceId": "uxresearch",
+        "presentation": "Show observed problems, the revision and what a further study would need to confirm.",
+        "id": "ux-ui-designer-project-2",
+        "position": 2
+      },
+      {
+        "title": "Design System and Component Library",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Create a small design system for a job search product.",
+        "problem": "Screens use inconsistent form controls and give engineers unclear interaction guidance.",
+        "tools": [
+          "Figma",
+          "Documentation"
+        ],
+        "requirements": [
+          "Define semantic tokens and a type scale",
+          "Build buttons, inputs, cards and navigation variants",
+          "Include focus, disabled, error and selected states",
+          "Document content rules and accessible behaviour",
+          "Apply components to two responsive screens"
+        ],
+        "deliverables": [
+          "Component library",
+          "Token sheet",
+          "Usage guide",
+          "Example screens"
+        ],
+        "skills": [
+          "Design systems",
+          "Accessibility",
+          "Consistency",
+          "Handoff"
+        ],
+        "starterResourceId": "figmacomponents",
+        "presentation": "Demonstrate component decisions and show how a screen stays consistent when content changes.",
+        "id": "ux-ui-designer-project-3",
+        "position": 3
+      },
+      {
+        "title": "End-to-End Product Design Case Study",
+        "difficulty": "Intermediate",
+        "duration": "4–6 weeks",
+        "overview": "Explore how career changers choose and organise learning resources.",
+        "problem": "Learners face too many resources and cannot decide what to do next.",
+        "tools": [
+          "Figma",
+          "FigJam",
+          "Research notes"
+        ],
+        "requirements": [
+          "Interview consenting learners and define one core problem",
+          "Prioritise needs with explicit assumptions",
+          "Create information architecture and alternative flows",
+          "Prototype resource discovery and learning progress",
+          "Test, iterate and document future validation"
+        ],
+        "deliverables": [
+          "Research plan",
+          "Prioritised findings",
+          "Prototype",
+          "Complete case study"
+        ],
+        "skills": [
+          "Problem discovery",
+          "Product thinking",
+          "Prototyping",
+          "Iteration"
+        ],
+        "starterResourceId": "googleux",
+        "presentation": "Explain your scope, evidence, trade-offs and learning; avoid invented conversion claims.",
+        "id": "ux-ui-designer-project-4",
+        "position": 4
+      }
+    ],
+    "published": true,
+    "seoTitle": "How to Become a UX/UI Designer in Cyprus | Career Roadmap & Free Resources",
+    "seoDescription": "Learn UX/UI Designer skills with a structured roadmap, curated free and paid resources, four practical projects and relevant technology jobs in Cyprus."
+  },
+  {
+    "slug": "cybersecurity-analyst",
+    "title": "Cybersecurity Analyst",
+    "category": "Cybersecurity",
+    "difficulty": "Beginner",
+    "duration": "8–15 months",
+    "weeklyHours": "8–12 hours",
+    "description": "Investigate security signals, understand risk and help teams respond to incidents.",
+    "overview": "Security analysts review telemetry, triage alerts, investigate unusual activity and document response decisions. Strong foundations in operating systems and networking are essential. This path focuses on defensive work and authorised labs; completing it can support junior SOC applications, but some roles expect prior IT support or networking experience.",
+    "entryTitles": [
+      "Junior SOC Analyst",
+      "Security Operations Analyst",
+      "Junior Security Analyst"
+    ],
+    "jobTerms": [
+      "soc analyst",
+      "security analyst",
+      "cybersecurity analyst",
+      "cyber security analyst",
+      "security operations"
+    ],
+    "skills": [
+      "Linux",
+      "Networking",
+      "Wireshark",
+      "SIEM",
+      "Security Logs",
+      "OWASP",
+      "Python"
+    ],
+    "stages": [
+      {
+        "title": "Computer and Operating System Fundamentals",
+        "duration": "4–6 weeks",
+        "description": "Learn how processes, files, permissions and services behave on Windows and Linux. Security alerts become meaningful when you understand normal system activity. Set up an isolated practice machine, document its configuration and learn how to restore it. Start with administration tasks before experimenting with security tools.",
+        "skills": [
+          "Processes",
+          "Filesystems",
+          "Permissions",
+          "Virtual machines",
+          "Event logs"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-1-task-1",
+            "label": "Create an isolated lab and document scope",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-1-task-2",
+            "label": "Compare processes and permissions on Windows and Linux",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-1-task-3",
+            "label": "Find and explain normal system events",
+            "position": 3
+          }
+        ],
+        "exercise": "Create an isolated lab and document scope",
+        "milestone": "Produce a lab inventory and a short normal-activity baseline.",
+        "resourceIds": [
+          "cisco",
+          "tryhackme"
+        ],
+        "difficulty": "Beginner",
+        "id": "cybersecurity-analyst-stage-1",
+        "position": 1
+      },
+      {
+        "title": "Networking Fundamentals",
+        "duration": "5–7 weeks",
+        "description": "Understand IP addresses, subnets, DNS, TCP, UDP and TLS. Trace a normal browser connection and learn what is visible in a packet capture. Encrypted traffic does not reveal everything, so describe the limits of your evidence. Capture only your own lab traffic or traffic you are explicitly authorised to inspect.",
+        "skills": [
+          "TCP/IP",
+          "DNS",
+          "Subnets",
+          "Ports",
+          "TLS"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-2-task-1",
+            "label": "Explain addressing and DNS in your lab",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-2-task-2",
+            "label": "Capture your own test web request",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-2-task-3",
+            "label": "Identify a connection's endpoints and protocol",
+            "position": 3
+          }
+        ],
+        "exercise": "Explain addressing and DNS in your lab",
+        "milestone": "Annotate a small authorised packet capture and explain its limitations.",
+        "resourceIds": [
+          "network",
+          "cisco",
+          "wireshark"
+        ],
+        "difficulty": "Beginner",
+        "id": "cybersecurity-analyst-stage-2",
+        "position": 2
+      },
+      {
+        "title": "Linux and Command Line",
+        "duration": "4–5 weeks",
+        "description": "Use Linux confidently for investigating files, services and logs. Practise navigation, permissions, pipes and text filtering in a disposable lab. Learn basic scripting and record each command's purpose. Avoid copying commands you cannot explain, particularly those that change permissions or delete files.",
+        "skills": [
+          "Shell navigation",
+          "Permissions",
+          "Processes",
+          "Log filtering",
+          "Python basics"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-3-task-1",
+            "label": "Navigate and search a lab filesystem",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-3-task-2",
+            "label": "Inspect services and filter sample logs",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-3-task-3",
+            "label": "Write a Python script that summarises synthetic log events",
+            "position": 3
+          }
+        ],
+        "exercise": "Navigate and search a lab filesystem",
+        "milestone": "Publish a safe log-analysis script and a documented command reference.",
+        "resourceIds": [
+          "linux",
+          "python"
+        ],
+        "difficulty": "Beginner",
+        "id": "cybersecurity-analyst-stage-3",
+        "position": 3
+      },
+      {
+        "title": "Cybersecurity Foundations",
+        "duration": "4–6 weeks",
+        "description": "Study confidentiality, integrity, availability and risk, then connect them to concrete controls. Understand authentication, least privilege, patching and common web risks. Distinguish a vulnerability from an exploit and an alert from a confirmed incident. Build a vocabulary that helps you communicate with both engineers and managers.",
+        "skills": [
+          "Risk",
+          "Threats and vulnerabilities",
+          "Least privilege",
+          "Web risks"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-4-task-1",
+            "label": "Write a threat and control inventory for your lab",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-4-task-2",
+            "label": "Explain three common web risk categories",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-4-task-3",
+            "label": "Compare likelihood, impact and residual risk",
+            "position": 3
+          }
+        ],
+        "exercise": "Write a threat and control inventory for your lab",
+        "milestone": "Deliver a simple risk register with evidence-based control recommendations.",
+        "resourceIds": [
+          "owasp",
+          "securityplus"
+        ],
+        "difficulty": "Beginner",
+        "id": "cybersecurity-analyst-stage-4",
+        "position": 4
+      },
+      {
+        "title": "Security Monitoring and SIEM",
+        "duration": "5–7 weeks",
+        "description": "Learn how endpoint and network events become searchable telemetry. In a local Wazuh lab, ingest test logs and create a small detection rule. Explore Sentinel and KQL through documentation without assuming cloud usage is free. Understand alert quality, false positives and the need to preserve evidence.",
+        "skills": [
+          "Log ingestion",
+          "SIEM",
+          "Detection rules",
+          "KQL",
+          "Alert triage"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-5-task-1",
+            "label": "Ingest lab events into a local monitoring platform",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-5-task-2",
+            "label": "Write queries for failed authentication bursts",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-5-task-3",
+            "label": "Create and test a detection rule using synthetic events",
+            "position": 3
+          }
+        ],
+        "exercise": "Ingest lab events into a local monitoring platform",
+        "milestone": "Document a working detection with sample events and known false positives.",
+        "resourceIds": [
+          "wazuh",
+          "sentinel",
+          "kql"
+        ],
+        "difficulty": "Intermediate",
+        "id": "cybersecurity-analyst-stage-5",
+        "position": 5
+      },
+      {
+        "title": "Threat Detection and Incident Response",
+        "duration": "5–7 weeks",
+        "description": "Use structured hypotheses to investigate an alert. Build a timeline, distinguish confirmed facts from unknowns and map observed behaviours to ATT&CK when useful. Learn escalation and containment principles. In a real workplace, response actions require authority; in this path, practise decisions with tabletop scenarios and lab evidence.",
+        "skills": [
+          "Investigation timelines",
+          "ATT&CK",
+          "Evidence",
+          "Escalation",
+          "Response plans"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-6-task-1",
+            "label": "Triage a synthetic alert and record confidence",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-6-task-2",
+            "label": "Build a timeline from supplied sample logs",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-6-task-3",
+            "label": "Write containment options for a tabletop scenario",
+            "position": 3
+          }
+        ],
+        "exercise": "Triage a synthetic alert and record confidence",
+        "milestone": "Produce an incident report with evidence, uncertainty and recommended next actions.",
+        "resourceIds": [
+          "mitre",
+          "nistir",
+          "wireshark"
+        ],
+        "difficulty": "Intermediate",
+        "id": "cybersecurity-analyst-stage-6",
+        "position": 6
+      },
+      {
+        "title": "Vulnerability Management",
+        "duration": "4–6 weeks",
+        "description": "Learn how teams identify, validate and prioritise vulnerabilities. Severity scores help but do not replace asset context, exposure and business impact. Study remediation, retesting and exception handling. Use training applications in your own isolated lab; never scan an external service without explicit permission.",
+        "skills": [
+          "CVE interpretation",
+          "Risk prioritisation",
+          "Remediation",
+          "Retesting"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-7-task-1",
+            "label": "Review vulnerability records relevant to a lab asset",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-7-task-2",
+            "label": "Complete an authorised academy lab",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-7-task-3",
+            "label": "Write a prioritised remediation and retest plan",
+            "position": 3
+          }
+        ],
+        "exercise": "Review vulnerability records relevant to a lab asset",
+        "milestone": "Deliver a scoped lab assessment with evidence and practical fixes.",
+        "resourceIds": [
+          "cve",
+          "portswigger",
+          "juice"
+        ],
+        "difficulty": "Intermediate",
+        "id": "cybersecurity-analyst-stage-7",
+        "position": 7
+      },
+      {
+        "title": "Security Labs and Practical Projects",
+        "duration": "5–7 weeks",
+        "description": "Bring networking, logs and response together in documented projects. Maintain an explicit authorisation and isolation statement for every lab. Show normal activity, detection evidence and investigation reasoning, not only screenshots of a tool. Remove credentials and identifiers before publishing artefacts.",
+        "skills": [
+          "Lab design",
+          "Detection validation",
+          "Reporting",
+          "Evidence handling"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-8-task-1",
+            "label": "Complete two of the defensive project briefs",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-8-task-2",
+            "label": "Document lab scope and synthetic data sources",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-8-task-3",
+            "label": "Publish sanitised reports and reproducible setup steps",
+            "position": 3
+          }
+        ],
+        "exercise": "Complete two of the defensive project briefs",
+        "milestone": "Publish two defensive projects with tested detections and clear limitations.",
+        "resourceIds": [
+          "tryhackme",
+          "wazuh",
+          "github",
+          "portfolio"
+        ],
+        "difficulty": "Intermediate",
+        "id": "cybersecurity-analyst-stage-8",
+        "position": 8
+      },
+      {
+        "title": "Certifications and Career Preparation",
+        "duration": "3–5 weeks",
+        "description": "Compare actual junior SOC and security job requirements before buying an exam. Security+ is one optional foundation credential; it does not replace hands-on evidence or guarantee a job. Practise triage scenarios and explain when you would escalate. Consider IT support or networking roles as valid entry routes when employers require experience.",
+        "skills": [
+          "Certification planning",
+          "SOC interviews",
+          "CV tailoring",
+          "Career routes"
+        ],
+        "tasks": [
+          {
+            "id": "cybersecurity-analyst-stage-9-task-1",
+            "label": "Compare five real vacancies and their requirements",
+            "position": 1
+          },
+          {
+            "id": "cybersecurity-analyst-stage-9-task-2",
+            "label": "Explain a triage scenario without overstating certainty",
+            "position": 2
+          },
+          {
+            "id": "cybersecurity-analyst-stage-9-task-3",
+            "label": "Decide whether an optional exam addresses a specific gap",
+            "position": 3
+          }
+        ],
+        "exercise": "Compare five real vacancies and their requirements",
+        "milestone": "Prepare a CV, lab portfolio and a realistic application plan.",
+        "resourceIds": [
+          "securityplus",
+          "portfolio"
+        ],
+        "difficulty": "Beginner",
+        "id": "cybersecurity-analyst-stage-9",
+        "position": 9
+      }
+    ],
+    "readiness": [
+      {
+        "id": "cybersecurity-analyst-ready-1",
+        "label": "I can explain operating system permissions and services.",
+        "position": 1
+      },
+      {
+        "id": "cybersecurity-analyst-ready-2",
+        "label": "I can explain DNS, TCP/IP and a basic packet capture.",
+        "position": 2
+      },
+      {
+        "id": "cybersecurity-analyst-ready-3",
+        "label": "I can filter logs and use Linux safely.",
+        "position": 3
+      },
+      {
+        "id": "cybersecurity-analyst-ready-4",
+        "label": "I can distinguish a vulnerability, alert and incident.",
+        "position": 4
+      },
+      {
+        "id": "cybersecurity-analyst-ready-5",
+        "label": "I can ingest lab logs and test a detection rule.",
+        "position": 5
+      },
+      {
+        "id": "cybersecurity-analyst-ready-6",
+        "label": "I can build an evidence-based incident timeline.",
+        "position": 6
+      },
+      {
+        "id": "cybersecurity-analyst-ready-7",
+        "label": "I can prioritise remediation by exposure and impact.",
+        "position": 7
+      },
+      {
+        "id": "cybersecurity-analyst-ready-8",
+        "label": "I have two authorised defensive lab projects and can discuss escalation.",
+        "position": 8
+      }
+    ],
+    "projects": [
+      {
+        "title": "Home Security Lab",
+        "difficulty": "Beginner",
+        "duration": "3 weeks",
+        "overview": "Create an isolated environment for practising defensive monitoring.",
+        "problem": "You need a safe, repeatable place to learn normal system activity and alerts.",
+        "tools": [
+          "Virtual machines",
+          "Linux",
+          "Wazuh"
+        ],
+        "requirements": [
+          "Define ownership, authorisation and isolated network boundaries",
+          "Configure one monitored endpoint and snapshots",
+          "Collect normal login and process events",
+          "Generate harmless test events and verify ingestion",
+          "Document restore steps and remove secrets"
+        ],
+        "deliverables": [
+          "Network diagram",
+          "Configuration guide",
+          "Baseline log sample",
+          "Restoration procedure"
+        ],
+        "skills": [
+          "Operating systems",
+          "Networking",
+          "Log ingestion",
+          "Safe lab practices"
+        ],
+        "starterResourceId": "wazuh",
+        "presentation": "Explain the lab boundary and demonstrate a harmless test alert.",
+        "id": "cybersecurity-analyst-project-1",
+        "position": 1
+      },
+      {
+        "title": "Network Traffic Analysis",
+        "difficulty": "Intermediate",
+        "duration": "2 weeks",
+        "overview": "Investigate an authorised packet capture from your lab.",
+        "problem": "An analyst needs to distinguish normal DNS and web traffic from an unexplained connection.",
+        "tools": [
+          "Wireshark",
+          "Lab endpoints"
+        ],
+        "requirements": [
+          "Record capture scope and consent",
+          "Capture only your own test network traffic",
+          "Identify endpoints, protocols and timing",
+          "Write hypotheses and test them against packet evidence",
+          "Explain what encryption prevents you from observing"
+        ],
+        "deliverables": [
+          "Sanitised capture",
+          "Annotated screenshots",
+          "Investigation notes",
+          "Limitations"
+        ],
+        "skills": [
+          "Protocol analysis",
+          "Hypothesis testing",
+          "Evidence handling"
+        ],
+        "starterResourceId": "wireshark",
+        "presentation": "Present the question, evidence and uncertainty without calling every unusual packet an attack.",
+        "id": "cybersecurity-analyst-project-2",
+        "position": 2
+      },
+      {
+        "title": "Vulnerability Assessment in an Authorised Lab",
+        "difficulty": "Intermediate",
+        "duration": "3 weeks",
+        "overview": "Assess a deliberately vulnerable training application in an isolated environment.",
+        "problem": "A team needs actionable remediation advice rather than a list of severity labels.",
+        "tools": [
+          "OWASP Juice Shop",
+          "PortSwigger Academy",
+          "Report template"
+        ],
+        "requirements": [
+          "Document authorisation and local-only lab scope",
+          "Study a small set of relevant risk categories",
+          "Complete provider-guided training exercises only",
+          "Record impact and remediation options",
+          "Retest the lab finding where supported"
+        ],
+        "deliverables": [
+          "Scope statement",
+          "Finding report",
+          "Prioritisation table",
+          "Retest notes"
+        ],
+        "skills": [
+          "Web risk understanding",
+          "Risk communication",
+          "Remediation"
+        ],
+        "starterResourceId": "juice",
+        "presentation": "Show the lab context, impact, practical fix and retest evidence; omit real targets.",
+        "id": "cybersecurity-analyst-project-3",
+        "position": 3
+      },
+      {
+        "title": "Security Incident Investigation",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Investigate synthetic authentication and endpoint events.",
+        "problem": "A SOC needs to decide whether an alert warrants escalation.",
+        "tools": [
+          "Wazuh",
+          "Python",
+          "MITRE ATT&CK"
+        ],
+        "requirements": [
+          "Generate or use clearly labelled synthetic logs",
+          "Write a detection hypothesis and triage query",
+          "Build a timeline and separate facts from assumptions",
+          "Propose containment options in a tabletop exercise",
+          "Write an executive summary and technical appendix"
+        ],
+        "deliverables": [
+          "Detection query",
+          "Timeline",
+          "Incident report",
+          "Lessons learned"
+        ],
+        "skills": [
+          "SIEM querying",
+          "Incident triage",
+          "Evidence",
+          "Communication"
+        ],
+        "starterResourceId": "nistir",
+        "presentation": "Explain confidence, missing evidence and escalation decisions.",
+        "id": "cybersecurity-analyst-project-4",
+        "position": 4
+      }
+    ],
+    "published": true,
+    "seoTitle": "How to Become a Cybersecurity Analyst in Cyprus | Career Roadmap & Free Resources",
+    "seoDescription": "Learn Cybersecurity Analyst skills with a structured roadmap, curated free and paid resources, four practical projects and relevant technology jobs in Cyprus."
+  },
+  {
+    "slug": "data-scientist",
+    "title": "Data Scientist",
+    "category": "Data & Analytics",
+    "difficulty": "Intermediate",
+    "duration": "9–18 months",
+    "weeklyHours": "10–12 hours",
+    "description": "Use statistics and machine learning to test hypotheses and build useful predictive systems.",
+    "overview": "Data scientists translate a business question into an analytical or predictive approach, prepare data, evaluate models and explain uncertainty. The title varies widely: some jobs emphasise experimentation, others production machine learning. This path assumes comfort with basic maths; stronger statistics and programming foundations may take additional time.",
+    "entryTitles": [
+      "Junior Data Scientist",
+      "Graduate Data Scientist",
+      "Junior Machine Learning Analyst"
+    ],
+    "jobTerms": [
+      "data scientist",
+      "machine learning analyst",
+      "machine learning scientist"
+    ],
+    "skills": [
+      "Python",
+      "Pandas",
+      "NumPy",
+      "Scikit-learn",
+      "SQL",
+      "Matplotlib",
+      "Jupyter"
+    ],
+    "stages": [
+      {
+        "title": "Python Programming",
+        "duration": "5–7 weeks",
+        "description": "Learn programming fundamentals and practise writing readable functions. Understand collections, file handling, exceptions and simple tests. Keep analysis code organised rather than accumulating one long notebook. Work through exercises until you can explain an unfamiliar snippet and debug a small program independently.",
+        "skills": [
+          "Functions",
+          "Collections",
+          "Exceptions",
+          "Files",
+          "Testing basics"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-1-task-1",
+            "label": "Write reusable functions for a small dataset",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-1-task-2",
+            "label": "Handle missing files and invalid input",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-1-task-3",
+            "label": "Create a reproducible notebook environment",
+            "position": 3
+          }
+        ],
+        "exercise": "Write reusable functions for a small dataset",
+        "milestone": "Publish a small tested data utility and an explanatory notebook.",
+        "resourceIds": [
+          "python",
+          "kagglepython"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-scientist-stage-1",
+        "position": 1
+      },
+      {
+        "title": "Data Manipulation and Cleaning",
+        "duration": "5–7 weeks",
+        "description": "Use pandas and NumPy to inspect, combine and reshape data. Explore missingness before filling values: the reason data is absent can matter. Track units, keys and date conventions. Keep source data immutable and log transformations so cleaning decisions can be reviewed and repeated.",
+        "skills": [
+          "Pandas",
+          "NumPy",
+          "Missing values",
+          "Joins",
+          "Data validation"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-2-task-1",
+            "label": "Inspect types and missingness in a public dataset",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-2-task-2",
+            "label": "Create explicit validation checks for keys and ranges",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-2-task-3",
+            "label": "Build a reproducible cleaning pipeline",
+            "position": 3
+          }
+        ],
+        "exercise": "Inspect types and missingness in a public dataset",
+        "milestone": "Deliver clean data, a data dictionary and documented quality checks.",
+        "resourceIds": [
+          "pandas",
+          "kagglepandas",
+          "numpy"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-scientist-stage-2",
+        "position": 2
+      },
+      {
+        "title": "Statistics and Probability",
+        "duration": "6–8 weeks",
+        "description": "Build a foundation in distributions, expectation, sampling and inference. Understand assumptions behind tests and the difference between predictive usefulness and causal claims. Practise explaining uncertainty without hiding behind a p-value. Basic linear algebra and calculus are useful extensions for understanding model behaviour.",
+        "skills": [
+          "Probability",
+          "Sampling",
+          "Inference",
+          "Linear algebra foundations"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-3-task-1",
+            "label": "Simulate distributions and sampling error",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-3-task-2",
+            "label": "Estimate uncertainty for a meaningful statistic",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-3-task-3",
+            "label": "Explain why an observational pattern does not prove causation",
+            "position": 3
+          }
+        ],
+        "exercise": "Simulate distributions and sampling error",
+        "milestone": "Write a statistical investigation with assumptions and limitations.",
+        "resourceIds": [
+          "stats",
+          "openstats"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-scientist-stage-3",
+        "position": 3
+      },
+      {
+        "title": "Exploratory Data Analysis",
+        "duration": "4–6 weeks",
+        "description": "Investigate distributions, relationships and anomalies before choosing a model. Keep exploratory questions separate from confirmatory claims. Use clear plots with labels, units and sensible scales. Check whether apparent patterns arise from missing data or collection methods. Summarise what the analysis changes about your original problem.",
+        "skills": [
+          "Visualisation",
+          "Distributions",
+          "Outliers",
+          "Data provenance"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-4-task-1",
+            "label": "Create univariate and grouped plots",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-4-task-2",
+            "label": "Investigate an anomaly using raw records",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-4-task-3",
+            "label": "Write a summary of findings and unanswered questions",
+            "position": 3
+          }
+        ],
+        "exercise": "Create univariate and grouped plots",
+        "milestone": "Publish an EDA notebook with actionable questions and data caveats.",
+        "resourceIds": [
+          "matplotlib",
+          "kagglevisual",
+          "uci"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-scientist-stage-4",
+        "position": 4
+      },
+      {
+        "title": "SQL and Data Collection",
+        "duration": "4–6 weeks",
+        "description": "Use SQL to build a reliable analytical dataset from related tables. Understand aggregation grain and time windows so predictors represent information available at prediction time. Learn permission and privacy constraints on collecting data. Practise incremental queries and document how each feature is constructed.",
+        "skills": [
+          "SQL joins",
+          "Aggregation grain",
+          "Time windows",
+          "Collection ethics"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-5-task-1",
+            "label": "Build a dataset from related synthetic tables",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-5-task-2",
+            "label": "Check row counts and duplicate keys",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-5-task-3",
+            "label": "Document a feature's source and availability time",
+            "position": 3
+          }
+        ],
+        "exercise": "Build a dataset from related synthetic tables",
+        "milestone": "Deliver reproducible SQL and a feature provenance table.",
+        "resourceIds": [
+          "sql",
+          "kagglesql"
+        ],
+        "difficulty": "Beginner",
+        "id": "data-scientist-stage-5",
+        "position": 5
+      },
+      {
+        "title": "Machine Learning Fundamentals",
+        "duration": "6–8 weeks",
+        "description": "Begin with a simple baseline and a measurable business objective. Study regression, classification and basic tree models. Use pipelines for preprocessing and fitting. Separate training data from evaluation data before learning transformations. A complex model is useful only if it improves a valid comparison.",
+        "skills": [
+          "Baselines",
+          "Regression",
+          "Classification",
+          "Preprocessing",
+          "Pipelines"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-6-task-1",
+            "label": "Define a baseline and an evaluation objective",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-6-task-2",
+            "label": "Train linear and tree-based models",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-6-task-3",
+            "label": "Fit preprocessing only inside training folds",
+            "position": 3
+          }
+        ],
+        "exercise": "Define a baseline and an evaluation objective",
+        "milestone": "Compare a simple baseline with two justified models.",
+        "resourceIds": [
+          "sklearn",
+          "kaggleml"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-scientist-stage-6",
+        "position": 6
+      },
+      {
+        "title": "Model Evaluation and Validation",
+        "duration": "5–7 weeks",
+        "description": "Choose splits that reflect deployment: random, grouped or time-based depending on the problem. Learn cross-validation, leakage, class imbalance and metric trade-offs. Tune on validation data and reserve a final holdout. Report uncertainty and segment performance, not only one impressive aggregate score.",
+        "skills": [
+          "Cross-validation",
+          "Leakage",
+          "Imbalance",
+          "Metrics",
+          "Holdouts"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-7-task-1",
+            "label": "Audit features for target leakage",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-7-task-2",
+            "label": "Compare metrics and business error costs",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-7-task-3",
+            "label": "Evaluate on a held-out set and inspect subgroup errors",
+            "position": 3
+          }
+        ],
+        "exercise": "Audit features for target leakage",
+        "milestone": "Produce an evaluation report with honest limits and a justified metric.",
+        "resourceIds": [
+          "validation",
+          "metrics"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-scientist-stage-7",
+        "position": 7
+      },
+      {
+        "title": "Feature Engineering and Applied Projects",
+        "duration": "5–7 weeks",
+        "description": "Construct features from domain understanding and test them against a validated baseline. Use ablation experiments to see which changes matter. Record experiment settings and avoid repeatedly tuning to the test set. Work on a churn or forecasting brief where the data timeline and decisions are explicit.",
+        "skills": [
+          "Feature construction",
+          "Ablation",
+          "Experiment tracking",
+          "Domain reasoning"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-8-task-1",
+            "label": "Create and justify three candidate features",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-8-task-2",
+            "label": "Measure each feature group's effect using validation",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-8-task-3",
+            "label": "Document an experiment that did not improve the model",
+            "position": 3
+          }
+        ],
+        "exercise": "Create and justify three candidate features",
+        "milestone": "Publish an applied project with reproducible experiments.",
+        "resourceIds": [
+          "kagglefeature",
+          "sklearn"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-scientist-stage-8",
+        "position": 8
+      },
+      {
+        "title": "Model Deployment Fundamentals",
+        "duration": "4–6 weeks",
+        "description": "Package preprocessing and prediction together in a small demonstration. Define input validation, limitations and a monitoring plan. Understand model persistence risks: never load an untrusted model file. A demo is not a production service, so document the gap and avoid treating predictions as authoritative decisions.",
+        "skills": [
+          "Model packaging",
+          "Input validation",
+          "Demo deployment",
+          "Monitoring plans"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-9-task-1",
+            "label": "Save a trusted model and its dependency versions",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-9-task-2",
+            "label": "Build a small Streamlit demonstration",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-9-task-3",
+            "label": "Describe drift, failure handling and retraining triggers",
+            "position": 3
+          }
+        ],
+        "exercise": "Save a trusted model and its dependency versions",
+        "milestone": "Deliver a reproducible model demo with a model card.",
+        "resourceIds": [
+          "persistence",
+          "streamlit",
+          "docker"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-scientist-stage-9",
+        "position": 9
+      },
+      {
+        "title": "Portfolio and Career Preparation",
+        "duration": "4–6 weeks",
+        "description": "Show the full reasoning chain from business question to evaluation and limitations. Include projects with a clear baseline, valid split and error analysis. Practise explaining why a model should or should not be deployed. Review the maths, coding and communication expectations in actual vacancies before applying.",
+        "skills": [
+          "Model cards",
+          "Portfolio writing",
+          "Statistics interviews",
+          "Business communication"
+        ],
+        "tasks": [
+          {
+            "id": "data-scientist-stage-10-task-1",
+            "label": "Publish two complete projects and a smaller EDA",
+            "position": 1
+          },
+          {
+            "id": "data-scientist-stage-10-task-2",
+            "label": "Prepare a five-minute model evaluation walkthrough",
+            "position": 2
+          },
+          {
+            "id": "data-scientist-stage-10-task-3",
+            "label": "Map your evidence to real junior or graduate roles",
+            "position": 3
+          }
+        ],
+        "exercise": "Publish two complete projects and a smaller EDA",
+        "milestone": "Publish a portfolio and application plan supported by concrete evidence.",
+        "resourceIds": [
+          "github",
+          "portfolio",
+          "datacamp"
+        ],
+        "difficulty": "Intermediate",
+        "id": "data-scientist-stage-10",
+        "position": 10
+      }
+    ],
+    "readiness": [
+      {
+        "id": "data-scientist-ready-1",
+        "label": "I can write reusable Python and validate data with pandas.",
+        "position": 1
+      },
+      {
+        "id": "data-scientist-ready-2",
+        "label": "I can explain probability, sampling and statistical assumptions.",
+        "position": 2
+      },
+      {
+        "id": "data-scientist-ready-3",
+        "label": "I can explore data and document provenance.",
+        "position": 3
+      },
+      {
+        "id": "data-scientist-ready-4",
+        "label": "I can build an analytical dataset with SQL.",
+        "position": 4
+      },
+      {
+        "id": "data-scientist-ready-5",
+        "label": "I can establish a baseline and use preprocessing pipelines.",
+        "position": 5
+      },
+      {
+        "id": "data-scientist-ready-6",
+        "label": "I can choose valid splits and detect leakage.",
+        "position": 6
+      },
+      {
+        "id": "data-scientist-ready-7",
+        "label": "I can justify metrics and analyse errors and subgroup performance.",
+        "position": 7
+      },
+      {
+        "id": "data-scientist-ready-8",
+        "label": "I have two reproducible projects with honest model limitations.",
+        "position": 8
+      }
+    ],
+    "projects": [
+      {
+        "title": "Exploratory Data Analysis",
+        "difficulty": "Beginner",
+        "duration": "2–3 weeks",
+        "overview": "Investigate a documented public dataset before proposing a model.",
+        "problem": "A team needs to know whether the data can answer a useful question.",
+        "tools": [
+          "Python",
+          "Pandas",
+          "Matplotlib",
+          "Jupyter"
+        ],
+        "requirements": [
+          "Choose a UCI dataset and review licence and provenance",
+          "Define three questions and inspect data quality",
+          "Explore distributions and grouped relationships",
+          "Investigate missingness and outliers",
+          "Write a summary that avoids causal overclaims"
+        ],
+        "deliverables": [
+          "EDA notebook",
+          "Data dictionary",
+          "Plots",
+          "Methods summary"
+        ],
+        "skills": [
+          "Cleaning",
+          "Visualisation",
+          "Statistical reasoning",
+          "Communication"
+        ],
+        "starterResourceId": "uci",
+        "presentation": "Show how exploration changed the question and which claims the sample cannot support.",
+        "id": "data-scientist-project-1",
+        "position": 1
+      },
+      {
+        "title": "Customer Churn Prediction",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Predict a defined churn event using information available before the event.",
+        "problem": "A subscription team wants to prioritise retention outreach.",
+        "tools": [
+          "Python",
+          "Pandas",
+          "Scikit-learn"
+        ],
+        "requirements": [
+          "Use a permitted public or labelled synthetic dataset",
+          "Define churn, prediction time and eligible customers",
+          "Split by time or customer as appropriate",
+          "Compare a baseline, linear model and tree model",
+          "Evaluate precision, recall and outreach costs"
+        ],
+        "deliverables": [
+          "Training pipeline",
+          "Validation report",
+          "Error analysis",
+          "Model card"
+        ],
+        "skills": [
+          "Classification",
+          "Leakage prevention",
+          "Metrics",
+          "Business framing"
+        ],
+        "starterResourceId": "sklearn",
+        "presentation": "Explain the intervention context and the cost of false positives and missed customers.",
+        "id": "data-scientist-project-2",
+        "position": 2
+      },
+      {
+        "title": "Demand Forecasting",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Forecast short-term demand from a documented time series.",
+        "problem": "An operations team needs a forecast for staffing or stock planning.",
+        "tools": [
+          "Python",
+          "Pandas",
+          "Scikit-learn",
+          "Matplotlib"
+        ],
+        "requirements": [
+          "Choose a permitted time series and record its cadence",
+          "Create chronological training and validation windows",
+          "Compare seasonal naive and learned baselines",
+          "Construct lag features using only earlier observations",
+          "Report errors by horizon and propose monitoring"
+        ],
+        "deliverables": [
+          "Backtest notebook",
+          "Baseline comparison",
+          "Forecast plots",
+          "Monitoring proposal"
+        ],
+        "skills": [
+          "Time-based validation",
+          "Feature engineering",
+          "Forecast evaluation"
+        ],
+        "starterResourceId": "validation",
+        "presentation": "Show backtest windows, baseline results and where the forecast fails.",
+        "id": "data-scientist-project-3",
+        "position": 3
+      },
+      {
+        "title": "End-to-End Machine Learning Project",
+        "difficulty": "Intermediate",
+        "duration": "4–6 weeks",
+        "overview": "Turn a small predictive model into an explainable demonstration.",
+        "problem": "Reviewers need to reproduce a prediction and understand its limits.",
+        "tools": [
+          "Python",
+          "Scikit-learn",
+          "Streamlit",
+          "Git"
+        ],
+        "requirements": [
+          "Choose a low-stakes public dataset and define the use case",
+          "Build a reproducible preprocessing and training pipeline",
+          "Evaluate on a reserved holdout and write a model card",
+          "Validate inputs in a demo and handle unsupported values",
+          "Document setup, dependencies and a monitoring plan"
+        ],
+        "deliverables": [
+          "Repository",
+          "Demo",
+          "Model card",
+          "Evaluation report",
+          "Setup guide"
+        ],
+        "skills": [
+          "Reproducibility",
+          "Model evaluation",
+          "Deployment fundamentals",
+          "Documentation"
+        ],
+        "starterResourceId": "streamlit",
+        "presentation": "Demonstrate normal and invalid inputs, then explain why the demo is not a production system.",
+        "id": "data-scientist-project-4",
+        "position": 4
+      }
+    ],
+    "published": true,
+    "seoTitle": "How to Become a Data Scientist in Cyprus | Career Roadmap & Free Resources",
+    "seoDescription": "Learn Data Scientist skills with a structured roadmap, curated free and paid resources, four practical projects and relevant technology jobs in Cyprus."
+  },
+  {
+    "slug": "backend-developer",
+    "title": "Backend Developer",
+    "category": "Software Development",
+    "difficulty": "Beginner",
+    "duration": "6–12 months",
+    "weeklyHours": "8–12 hours",
+    "description": "Build the APIs, data models and reliable services that power a product behind the interface.",
+    "overview": "Backend developers model data, implement business rules, secure access and keep services observable and reliable. This roadmap uses Node.js, TypeScript and PostgreSQL as one coherent stack. Python, Java, C# and other stacks are also valid; the transferable skills are contracts, data integrity, security, testing and operational judgement.",
+    "entryTitles": [
+      "Junior Backend Developer",
+      "Junior Node.js Developer",
+      "Junior Software Engineer"
+    ],
+    "jobTerms": [
+      "backend",
+      "back-end",
+      "node.js developer",
+      "nodejs developer"
+    ],
+    "skills": [
+      "Node.js",
+      "TypeScript",
+      "PostgreSQL",
+      "REST APIs",
+      "Git",
+      "Docker"
+    ],
+    "stages": [
+      {
+        "title": "Programming Fundamentals",
+        "duration": "4–6 weeks",
+        "description": "Learn JavaScript values, functions, collections and control flow before building a server. Practise modelling small problems and handling invalid input. Understand asynchronous code and the difference between a resolved promise and a successful operation. Prefer readable functions over clever one-liners.",
+        "skills": [
+          "Functions",
+          "Objects",
+          "Promises",
+          "Error handling"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-1-task-1",
+            "label": "Write a small command-line data processor",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-1-task-2",
+            "label": "Validate input and handle missing files",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-1-task-3",
+            "label": "Add assertions for normal and invalid cases",
+            "position": 3
+          }
+        ],
+        "exercise": "Write a small command-line data processor",
+        "milestone": "Deliver a readable program with repeatable checks.",
+        "resourceIds": [
+          "mdnjs",
+          "node"
+        ],
+        "difficulty": "Beginner",
+        "id": "backend-developer-stage-1",
+        "position": 1
+      },
+      {
+        "title": "Git and Development Workflow",
+        "duration": "2–3 weeks",
+        "description": "Use commits, branches and pull requests to make changes reviewable. Understand lockfiles, package scripts and configuration. Keep secrets outside version control and learn how to inspect a diff before committing. Practise resolving a conflict in a disposable repository.",
+        "skills": [
+          "Git",
+          "Review workflow",
+          "Package scripts",
+          "Configuration"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-2-task-1",
+            "label": "Create a repository with setup instructions",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-2-task-2",
+            "label": "Make a feature branch and review its diff",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-2-task-3",
+            "label": "Resolve a practice conflict",
+            "position": 3
+          }
+        ],
+        "exercise": "Create a repository with setup instructions",
+        "milestone": "Show a clean repository with a documented development workflow.",
+        "resourceIds": [
+          "gitbook",
+          "github"
+        ],
+        "difficulty": "Beginner",
+        "id": "backend-developer-stage-2",
+        "position": 2
+      },
+      {
+        "title": "HTTP, APIs and Web Architecture",
+        "duration": "3–4 weeks",
+        "description": "Understand methods, status codes, headers and resource-oriented API design. Define request and response contracts before implementation. Use consistent pagination and errors. Learn idempotency and why retrying a request can duplicate a side effect unless the service is designed to handle it.",
+        "skills": [
+          "HTTP",
+          "REST",
+          "API contracts",
+          "Idempotency",
+          "Pagination"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-3-task-1",
+            "label": "Design an API contract for a small product",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-3-task-2",
+            "label": "Specify validation and error responses",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-3-task-3",
+            "label": "Explain safe retry behaviour for each endpoint",
+            "position": 3
+          }
+        ],
+        "exercise": "Design an API contract for a small product",
+        "milestone": "Publish a small OpenAPI specification with example requests.",
+        "resourceIds": [
+          "http",
+          "openapi"
+        ],
+        "difficulty": "Beginner",
+        "id": "backend-developer-stage-3",
+        "position": 3
+      },
+      {
+        "title": "Node.js and TypeScript",
+        "duration": "4–6 weeks",
+        "description": "Build a small HTTP service and type its internal data. Understand the event loop, asynchronous I/O and runtime validation: TypeScript does not validate external JSON. Organise routes, business logic and persistence so each can be tested independently. Start with a small framework and avoid premature abstractions.",
+        "skills": [
+          "Node.js",
+          "TypeScript",
+          "Routes",
+          "Runtime validation",
+          "Async I/O"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-4-task-1",
+            "label": "Create an Express service with typed handlers",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-4-task-2",
+            "label": "Validate unknown request bodies",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-4-task-3",
+            "label": "Separate business logic from route code",
+            "position": 3
+          }
+        ],
+        "exercise": "Create an Express service with typed handlers",
+        "milestone": "Deliver an API with consistent errors and typed internal contracts.",
+        "resourceIds": [
+          "node",
+          "typescript",
+          "express"
+        ],
+        "difficulty": "Beginner",
+        "id": "backend-developer-stage-4",
+        "position": 4
+      },
+      {
+        "title": "Relational Databases and SQL",
+        "duration": "5–6 weeks",
+        "description": "Model entities, relationships and constraints in PostgreSQL. Learn transactions, indexes and query plans. Database constraints protect integrity when two requests arrive at once, so do not rely only on application checks. Use migrations and test them on a fresh disposable database.",
+        "skills": [
+          "SQL",
+          "Foreign keys",
+          "Constraints",
+          "Transactions",
+          "Indexes"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-5-task-1",
+            "label": "Design a normalised schema with ownership fields",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-5-task-2",
+            "label": "Write migrations and seed synthetic data",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-5-task-3",
+            "label": "Inspect a query plan and test a transaction",
+            "position": 3
+          }
+        ],
+        "exercise": "Design a normalised schema with ownership fields",
+        "milestone": "Publish a database-backed API with reproducible migrations.",
+        "resourceIds": [
+          "sql",
+          "postgres",
+          "explain"
+        ],
+        "difficulty": "Intermediate",
+        "id": "backend-developer-stage-5",
+        "position": 5
+      },
+      {
+        "title": "Authentication and Application Security",
+        "duration": "4–6 weeks",
+        "description": "Integrate an established authentication solution rather than designing your own cryptography. Separate identity from permission, and check object ownership on every protected operation. Validate input, protect secrets and use least privilege. Practise tests where one user tries to access another user's record.",
+        "skills": [
+          "Authentication",
+          "Authorization",
+          "Ownership",
+          "Input validation",
+          "Least privilege"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-6-task-1",
+            "label": "Integrate a maintained authentication provider",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-6-task-2",
+            "label": "Enforce ownership on read and write routes",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-6-task-3",
+            "label": "Test cross-user access and invalid input",
+            "position": 3
+          }
+        ],
+        "exercise": "Integrate a maintained authentication provider",
+        "milestone": "Deliver a protected API with explicit permission tests.",
+        "resourceIds": [
+          "authcheat",
+          "authz",
+          "expresssecurity"
+        ],
+        "difficulty": "Intermediate",
+        "id": "backend-developer-stage-6",
+        "position": 6
+      },
+      {
+        "title": "Testing and Error Handling",
+        "duration": "4–5 weeks",
+        "description": "Test business rules, database interactions and HTTP contracts. Use a disposable test database and cover failure cases, not only happy paths. Keep public errors safe while recording enough diagnostic information on the server. Define what a caller can retry and what needs correction.",
+        "skills": [
+          "Unit tests",
+          "Integration tests",
+          "API tests",
+          "Safe errors"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-7-task-1",
+            "label": "Test a business rule and a database constraint",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-7-task-2",
+            "label": "Test unauthenticated and forbidden requests",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-7-task-3",
+            "label": "Add structured error handling without leaking secrets",
+            "position": 3
+          }
+        ],
+        "exercise": "Test a business rule and a database constraint",
+        "milestone": "Publish tests that cover critical success and failure paths.",
+        "resourceIds": [
+          "nodetest",
+          "fullstack"
+        ],
+        "difficulty": "Intermediate",
+        "id": "backend-developer-stage-7",
+        "position": 7
+      },
+      {
+        "title": "Caching, Background Jobs and Performance",
+        "duration": "4–6 weeks",
+        "description": "Measure slow operations before adding caching or queues. Learn expiration, invalidation, retries and idempotent workers. A job may be delivered more than once, so side effects need protection. Keep an uncached source of truth and document what happens when Redis or a worker is unavailable.",
+        "skills": [
+          "Caching",
+          "Queues",
+          "Retries",
+          "Idempotency",
+          "Performance"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-8-task-1",
+            "label": "Measure one slow query and inspect its plan",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-8-task-2",
+            "label": "Add a cache with explicit invalidation rules",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-8-task-3",
+            "label": "Create a worker that safely handles duplicate jobs",
+            "position": 3
+          }
+        ],
+        "exercise": "Measure one slow query and inspect its plan",
+        "milestone": "Demonstrate a queued workflow with failure recovery.",
+        "resourceIds": [
+          "redis",
+          "bullmq",
+          "explain"
+        ],
+        "difficulty": "Intermediate",
+        "id": "backend-developer-stage-8",
+        "position": 8
+      },
+      {
+        "title": "Deployment, Monitoring and DevOps Fundamentals",
+        "duration": "4–6 weeks",
+        "description": "Package the service, run migrations safely and expose health checks. Learn structured logs, basic tracing and graceful shutdown. Keep configuration outside the image and distinguish development from production settings. Document deployment and rollback so another engineer can operate the service.",
+        "skills": [
+          "Docker",
+          "Health checks",
+          "Logs",
+          "Tracing",
+          "Deployment"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-9-task-1",
+            "label": "Containerise the service without embedding secrets",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-9-task-2",
+            "label": "Add readiness and health checks",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-9-task-3",
+            "label": "Trace a request and write deployment and rollback notes",
+            "position": 3
+          }
+        ],
+        "exercise": "Containerise the service without embedding secrets",
+        "milestone": "Deploy a test service with an operational runbook.",
+        "resourceIds": [
+          "docker",
+          "otel",
+          "verceldeploy"
+        ],
+        "difficulty": "Intermediate",
+        "id": "backend-developer-stage-9",
+        "position": 9
+      },
+      {
+        "title": "Portfolio and Technical Interviews",
+        "duration": "3–5 weeks",
+        "description": "Present a service's contract, data model and security decisions. Practise explaining concurrency, transactions and failure recovery with examples from your work. Tailor applications to the required stack while highlighting transferable engineering habits. Junior software roles may be broader than backend-only work.",
+        "skills": [
+          "System explanations",
+          "SQL interviews",
+          "Portfolio documentation"
+        ],
+        "tasks": [
+          {
+            "id": "backend-developer-stage-10-task-1",
+            "label": "Publish two complete backend project briefs",
+            "position": 1
+          },
+          {
+            "id": "backend-developer-stage-10-task-2",
+            "label": "Explain a permission failure and a transaction boundary",
+            "position": 2
+          },
+          {
+            "id": "backend-developer-stage-10-task-3",
+            "label": "Map project evidence to real junior vacancies",
+            "position": 3
+          }
+        ],
+        "exercise": "Publish two complete backend project briefs",
+        "milestone": "Prepare a CV and two clear service walkthroughs.",
+        "resourceIds": [
+          "portfolio",
+          "github"
+        ],
+        "difficulty": "Intermediate",
+        "id": "backend-developer-stage-10",
+        "position": 10
+      }
+    ],
+    "readiness": [
+      {
+        "id": "backend-developer-ready-1",
+        "label": "I can write readable asynchronous JavaScript and TypeScript.",
+        "position": 1
+      },
+      {
+        "id": "backend-developer-ready-2",
+        "label": "I can design and document HTTP request and response contracts.",
+        "position": 2
+      },
+      {
+        "id": "backend-developer-ready-3",
+        "label": "I can model relational data with constraints and migrations.",
+        "position": 3
+      },
+      {
+        "id": "backend-developer-ready-4",
+        "label": "I can enforce authentication and per-record authorization.",
+        "position": 4
+      },
+      {
+        "id": "backend-developer-ready-5",
+        "label": "I can test cross-user access and important failure paths.",
+        "position": 5
+      },
+      {
+        "id": "backend-developer-ready-6",
+        "label": "I can explain transaction boundaries and concurrent requests.",
+        "position": 6
+      },
+      {
+        "id": "backend-developer-ready-7",
+        "label": "I can build idempotent workers and explain cache invalidation.",
+        "position": 7
+      },
+      {
+        "id": "backend-developer-ready-8",
+        "label": "I have documented services with deployment and monitoring notes.",
+        "position": 8
+      }
+    ],
+    "projects": [
+      {
+        "title": "REST API with Authentication",
+        "difficulty": "Intermediate",
+        "duration": "3 weeks",
+        "overview": "Build an API for private learning notes using an established auth provider.",
+        "problem": "Users need to access and edit their own notes without exposing them to others.",
+        "tools": [
+          "Node.js",
+          "TypeScript",
+          "PostgreSQL",
+          "Auth provider"
+        ],
+        "requirements": [
+          "Define note endpoints and an OpenAPI contract",
+          "Integrate maintained authentication and verify server-side identity",
+          "Enforce ownership for every read and mutation",
+          "Validate input and return consistent errors",
+          "Test unauthenticated and cross-user requests"
+        ],
+        "deliverables": [
+          "API repository",
+          "OpenAPI document",
+          "Permission tests",
+          "Setup guide"
+        ],
+        "skills": [
+          "REST",
+          "Authentication",
+          "Authorization",
+          "Validation"
+        ],
+        "starterResourceId": "authz",
+        "presentation": "Demonstrate two users and show that cross-user access is denied.",
+        "id": "backend-developer-project-1",
+        "position": 1
+      },
+      {
+        "title": "Database-Driven Application",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Build a small booking service with constrained availability.",
+        "problem": "Two users may try to reserve the same slot at the same time.",
+        "tools": [
+          "Node.js",
+          "TypeScript",
+          "PostgreSQL"
+        ],
+        "requirements": [
+          "Model slots, bookings and owners with constraints",
+          "Write migrations and synthetic seed data",
+          "Use a transaction to prevent double booking",
+          "Add paginated endpoints and indexes justified by plans",
+          "Test concurrent requests and rollback behaviour"
+        ],
+        "deliverables": [
+          "Schema diagram",
+          "Migrations",
+          "API tests",
+          "Concurrency notes"
+        ],
+        "skills": [
+          "Data modelling",
+          "Transactions",
+          "Constraints",
+          "SQL"
+        ],
+        "starterResourceId": "postgres",
+        "presentation": "Explain how the database enforces the invariant under concurrency.",
+        "id": "backend-developer-project-2",
+        "position": 2
+      },
+      {
+        "title": "Background Job Processing System",
+        "difficulty": "Intermediate",
+        "duration": "3–4 weeks",
+        "overview": "Create a queued report-generation workflow using synthetic data.",
+        "problem": "Large reports must run asynchronously and recover from worker failure.",
+        "tools": [
+          "Node.js",
+          "TypeScript",
+          "BullMQ",
+          "Redis"
+        ],
+        "requirements": [
+          "Define report requests and job status transitions",
+          "Make worker side effects idempotent",
+          "Add bounded retries and failure visibility",
+          "Handle duplicate deliveries in integration tests",
+          "Document recovery and cleanup procedures"
+        ],
+        "deliverables": [
+          "Worker and API",
+          "Tests",
+          "Status endpoint",
+          "Recovery runbook"
+        ],
+        "skills": [
+          "Queues",
+          "Retries",
+          "Idempotency",
+          "Operational thinking"
+        ],
+        "starterResourceId": "bullmq",
+        "presentation": "Demonstrate a failed job, retry and duplicate delivery without duplicate output.",
+        "id": "backend-developer-project-3",
+        "position": 3
+      },
+      {
+        "title": "Production-Ready Backend Service",
+        "difficulty": "Intermediate",
+        "duration": "4–6 weeks",
+        "overview": "Prepare a portfolio service with the controls expected before a real deployment.",
+        "problem": "A team needs to operate an API safely and understand its health.",
+        "tools": [
+          "Node.js",
+          "TypeScript",
+          "PostgreSQL",
+          "Docker",
+          "OpenTelemetry"
+        ],
+        "requirements": [
+          "Document scope, contracts and remaining production risks",
+          "Add validated configuration, migrations and safe errors",
+          "Implement health checks, structured logs and request traces",
+          "Test core journeys, permissions and database failures",
+          "Write deployment, backup and rollback procedures"
+        ],
+        "deliverables": [
+          "Service repository",
+          "Container configuration",
+          "Tests",
+          "Operational runbook",
+          "Risk register"
+        ],
+        "skills": [
+          "Security",
+          "Testing",
+          "Observability",
+          "Deployment"
+        ],
+        "starterResourceId": "otel",
+        "presentation": "Present the release checklist and evidence; explain what still requires production validation.",
+        "id": "backend-developer-project-4",
+        "position": 4
+      }
+    ],
+    "published": true,
+    "seoTitle": "How to Become a Backend Developer in Cyprus | Career Roadmap & Free Resources",
+    "seoDescription": "Learn Backend Developer skills with a structured roadmap, curated free and paid resources, four practical projects and relevant technology jobs in Cyprus."
+  }
+]

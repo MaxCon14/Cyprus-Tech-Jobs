@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { getAllPosts } from "@/lib/blog";
 import { getJobCount } from "@/lib/queries";
+import { getCareers } from "@/lib/careers/queries";
 import { CORE_CITIES } from "@/lib/city-guides";
 
 const BASE = "https://cyprustech.careers";
@@ -155,5 +156,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("[sitemap] role×city query failed:", err);
   }
 
-  return [...STATIC, ...landingEntries, ...categoryEntries, ...jobEntries, ...roleCityEntries, ...blogEntries];
+  const careers = await getCareers().catch(error => { console.error("[sitemap] career library unavailable:",error); return []; });
+  const careerEntries: MetadataRoute.Sitemap = [{url: BASE+"/careers", changeFrequency:"monthly", priority:0.8}, ...careers.map(c=>({url:BASE+"/careers/"+c.slug,lastModified:new Date(c.updatedAt),changeFrequency:"monthly" as const,priority:0.8}))];
+  return [...careerEntries, ...STATIC, ...landingEntries, ...categoryEntries, ...jobEntries, ...roleCityEntries, ...blogEntries];
 }

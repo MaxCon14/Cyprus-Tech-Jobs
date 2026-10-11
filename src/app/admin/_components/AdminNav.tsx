@@ -15,6 +15,7 @@ const groups = [
   { label: "Insights & content", items: [
     { href: "/admin/analytics", label: "Analytics", icon: ChartNoAxesCombined },
     { href: "/admin/blog", label: "Blog posts", icon: FileText },
+    { href: "/admin/careers", label: "Career Library", icon: FileText },
     { href: "/admin/taxonomy", label: "Categories & tags", icon: Tags },
   ] },
 ];

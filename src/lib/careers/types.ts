@@ -1,0 +1,10 @@
+export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
+export type Resource = { id: string; name: string; provider: string; url: string; description: string; type: "Course" | "Tutorial" | "Documentation" | "Practice" | "Certification"; access: "Free" | "Freemium" | "Paid"; difficulty: Difficulty; duration: string | null; verifiedAt?: string | null };
+export type Task = { id: string; label: string; position: number };
+export type Stage = { id: string; position: number; title: string; duration: string; difficulty: Difficulty; description: string; skills: string[]; tasks: Task[]; exercise: string; milestone: string; resourceIds: string[] };
+export type Project = { id: string; position: number; title: string; difficulty: Difficulty; duration: string; overview: string; problem: string; tools: string[]; requirements: string[]; deliverables: string[]; skills: string[]; starterResourceId: string; presentation: string };
+export type CareerSummary = { slug: string; title: string; category: string; difficulty: Difficulty; duration: string; weeklyHours: string; description: string; skills: string[]; stageCount: number; resourceCount: number; published: boolean; updatedAt: string };
+export type Career = Omit<CareerSummary,"stageCount" | "resourceCount"> & { overview: string; entryTitles: string[]; jobTerms: string[]; seoTitle: string; seoDescription: string; stages: Stage[]; resources: Resource[]; projects: Project[]; readiness: Task[] };
+export type Progress = { saved: boolean; stages: string[]; tasks: string[]; readiness: string[] };
+export type ProgressKind = "saved" | "stage" | "task" | "readiness";
+export const emptyProgress = (): Progress => ({ saved: false, stages: [], tasks: [], readiness: [] });
