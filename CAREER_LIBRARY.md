@@ -62,11 +62,59 @@ CAREER_QA_NODE_MODULES=/tmp/career-qa/node_modules QA_PREVIEW_URL='protected-pre
 ```
 Run `supabase/tests/career_library_rls.sql` with an administrative connection in a test transaction; its inserts are rolled back.
 
+## Presentation revision following preview feedback
+
+The library now uses role colors, tool/provider SVG marks served locally, interest-based browsing, a career journey overview, and a prominent next-stage action. A keyboard-accessible section navigator shows one focused panel at a time. Resource cards have tinted identity headers, functional external actions and links back to the right roadmap stage. Project cards preview the brief and tools before expansion. Native stage/project expansion, learner progress, existing auth, admin content and SEO remain integrated. Desktop/mobile spacing, responsive section labels and post-render scroll targets reduce reading and navigation effort.
+
+No production release or database changes were needed for this presentation revision. Static logo files are traced to their catalog/provider sources in public/careers/logos/README.md; no runtime icon dependency was added.
+
+Redesign regression passed on preview commit 441f41d5: all six career paths, functional provider logo assets, focused panels, interest filters, stage return links, guest persistence, next-stage actions, keyboard tabs, mocked account import/failure/isolation, every panel at 360/390/768/1024/1440px, sitemap, API permissions, 404s and existing routes. All six surfaces (catalog, roadmap, resources, projects, readiness, jobs) passed light/dark axe checks with zero serious/critical findings. TypeScript and scoped lint passed; the preview production build succeeded.
+
 ## Exact changed-file inventory
 
 - `CAREER_LIBRARY.md`
 - `content/careers/careers.json`
 - `content/careers/resources.json`
+- `public/careers/logos/README.md`
+- `public/careers/logos/cisco.svg`
+- `public/careers/logos/coursera.svg`
+- `public/careers/logos/css.svg`
+- `public/careers/logos/datacamp.svg`
+- `public/careers/logos/docker.svg`
+- `public/careers/logos/excel.svg`
+- `public/careers/logos/express.svg`
+- `public/careers/logos/figma.svg`
+- `public/careers/logos/frontendmentor.svg`
+- `public/careers/logos/git.svg`
+- `public/careers/logos/github.svg`
+- `public/careers/logos/google.svg`
+- `public/careers/logos/googlesheets.svg`
+- `public/careers/logos/html.svg`
+- `public/careers/logos/javascript.svg`
+- `public/careers/logos/kaggle.svg`
+- `public/careers/logos/material.svg`
+- `public/careers/logos/mdn.svg`
+- `public/careers/logos/microsoft.svg`
+- `public/careers/logos/node.svg`
+- `public/careers/logos/numpy.svg`
+- `public/careers/logos/odin.svg`
+- `public/careers/logos/openapi.svg`
+- `public/careers/logos/opentelemetry.svg`
+- `public/careers/logos/owasp.svg`
+- `public/careers/logos/pandas.svg`
+- `public/careers/logos/portswigger.svg`
+- `public/careers/logos/postgresql.svg`
+- `public/careers/logos/powerbi.svg`
+- `public/careers/logos/python.svg`
+- `public/careers/logos/react.svg`
+- `public/careers/logos/redis.svg`
+- `public/careers/logos/scikitlearn.svg`
+- `public/careers/logos/streamlit.svg`
+- `public/careers/logos/tryhackme.svg`
+- `public/careers/logos/typescript.svg`
+- `public/careers/logos/ubuntu.svg`
+- `public/careers/logos/vercel.svg`
+- `public/careers/logos/wireshark.svg`
 - `scripts/qa/career-library-browser.cjs`
 - `scripts/qa/career-library-content.cjs`
 - `src/app/admin/_components/AdminNav.tsx`
@@ -87,6 +135,7 @@ Run `supabase/tests/career_library_rls.sql` with an administrative connection in
 - `src/app/careers/saved/page.tsx`
 - `src/app/sitemap.ts`
 - `src/components/careers/CareerCatalog.tsx`
+- `src/components/careers/CareerVisuals.tsx`
 - `src/components/careers/LearningRoadmap.tsx`
 - `src/components/careers/ResourceLibrary.tsx`
 - `src/components/careers/useCareerProgress.ts`
